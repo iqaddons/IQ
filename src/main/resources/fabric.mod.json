@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "iq",
+  "version": "${version}",
+  "name": "IQ - Hypixel Skyblock Addons",
+  "description": "IQ is a Hypixel SkyBlock mod made especially for Kuudra.",
+  "authors": [
+    "PeHenrii"
+  ],
+  "contact": {
+    "homepage": "https://github.com/pehenrii",
+    "sources": "https://github.com/pehenrii"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/iq/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.pehenrii.iq.IQMod"
+    ]
+  },
+  "mixins": [
+    "iq.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "java": ">=25",
+    "minecraft": "${minecraft_version}"
+  }
+}
