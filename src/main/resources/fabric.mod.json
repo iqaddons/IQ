@@ -2,16 +2,17 @@
   "schemaVersion": 1,
   "id": "iq",
   "version": "${version}",
-  "name": "IQ - Hypixel Skyblock Addons",
+  "name": "IQ",
   "description": "IQ is a Hypixel SkyBlock mod made especially for Kuudra.",
   "authors": [
-    "PeHenrii"
+    "PeHenrii",
+    "DarkJota"
   ],
   "contact": {
-    "homepage": "https://github.com/pehenrii",
-    "sources": "https://github.com/pehenrii"
+    "homepage": "https://github.com/pehenrii/IQ",
+    "sources": "https://github.com/pehenrii/IQ"
   },
-  "license": "All-Rights-Reserved",
+  "license": "MIT",
   "icon": "assets/iq/icon.png",
   "environment": "client",
   "entrypoints": {
