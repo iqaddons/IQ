@@ -21,12 +21,12 @@ loom {
 }
 
 repositories {
-    repositories {
-        maven {
-            name = "Team Resourceful Maven"
-            url = "https://maven.teamresourceful.com/repository/maven-public/"
-        }
+    maven {
+        name = "Team Resourceful Maven"
+        url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
+
+    maven { url = "https://maven.terraformersmc.com/releases" }
 }
 
 dependencies {
@@ -36,6 +36,7 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:3.9.1"
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     compileOnly "org.projectlombok:lombok:1.18.38"
     annotationProcessor "org.projectlombok:lombok:1.18.38"
