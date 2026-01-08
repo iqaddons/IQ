@@ -35,10 +35,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.11:3.11.2"
+    modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:3.9.1"
 
-    compileOnly "org.projectlombok:lombok:1.18.36"
-    annotationProcessor "org.projectlombok:lombok:1.18.36"
+    compileOnly "org.projectlombok:lombok:1.18.38"
+    annotationProcessor "org.projectlombok:lombok:1.18.38"
 }
 
 processResources {

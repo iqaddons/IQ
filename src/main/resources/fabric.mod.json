@@ -17,7 +17,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.pehenrii.iq.IQMod"
+      "net.iqaddons.mod.IQModClient"
     ]
   },
   "mixins": [
