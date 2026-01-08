@@ -2,6 +2,8 @@ package net.iqaddons.mod.state;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -39,6 +41,7 @@ public final class KuudraState {
         }
 
         log.info("Kuudra phase changed: {} -> {}", previous.getDisplayName(), phase.getDisplayName());
+        EventBus.post(new KuudraPhaseChangeEvent(previous, phase));
     }
 
     public static void setTier(KuudraTier tier) {
