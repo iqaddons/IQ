@@ -1,14 +1,12 @@
 package net.iqaddons.mod.config;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
-import net.minecraft.util.Util;
 
 import java.awt.*;
 
 @Config(
         value = "iqaddons",
         categories = {
-                Configuration.GeneralConfig.class,
                 Configuration.PhaseOneConfig.class,
                 Configuration.PhaseTwoConfig.class,
                 Configuration.PhaseThreeConfig.class,
@@ -19,120 +17,95 @@ import java.awt.*;
         title = "IQ Addons",
         description = "IQ is a Hypixel SkyBlock mod made especially for Kuudra.",
         links = {
-                @ConfigInfo.Link(value = "https://github.com/pehenrii/IQ", icon = "github", text = "Github"),
+                @ConfigInfo.Link(value = "https://github.com/pehenrii/IQ", icon = "code-2", text = "Github"),
                 @ConfigInfo.Link(value = "https://discord.gg/HdhXhCWcW9", icon = "discord", text = "Discord"),
         }
 )
+
 public class Configuration {
 
+    @ConfigButton(
+            title = "Open HUD Editor",
+            text = "Open"
+    )
+    @Comment("Open the HUD Editor to customize your HUD elements")
+    public static final Runnable hudEditor = () -> {
+    };
+
     @ConfigOption.Separator(
-            value = "IQ Addons - Your Best Kuudra Companion",
-            description = "Made by PeHenrii, darkjota and his gang."
+            value = "Kuudra"
+    )
+    @ConfigEntry(
+            id = "autoRequeue",
+            translation = "Auto Requeue"
+    )
+    @Comment("Automatically requeue a Kuudra run after boss death")
+    public static boolean autoRequeue = false;
+
+    @ConfigEntry(
+            id = "requeueDelay",
+            translation = "Requeue Delay"
+    )
+    @Comment("Delay in ticks before auto-requeue (5-50)")
+    @ConfigOption.Range(min = 5, max = 50)
+    @ConfigOption.Slider
+    public static int requeueDelay = 20;
+
+    @ConfigEntry(
+            id = "customSplits",
+            translation = "Custom Splits"
+    )
+    @Comment("Enable custom split timers")
+    public static boolean customSplits = true;
+
+    @ConfigEntry(
+            id = "teamHighlight",
+            translation = "Team Highlight"
+    )
+    @Comment("Highlight teammates and show freshers during the build phase")
+    public static boolean teamHighlight = true;
+
+    @ConfigEntry(
+            id = "manaDrainNotify",
+            translation = "Mana Drain Notify"
+    )
+    @Comment(" Send the amount of mana drained to party chat")
+    public static boolean manaDrainNotify = true;
+
+    @ConfigEntry(
+            id = "partyJoinSound",
+            translation = "Party Join Sound"
+    )
+    @Comment("Play a sound when a player joins your party")
+    public static boolean partyJoinSound = true;
+
+    @ConfigEntry(
+            id = "hideMobNametags",
+            translation = "Hide Mob Nametags"
+    )
+    @Comment("Prevent Kuudra mobs nametags from loading.")
+    public static boolean hideMobNametags = false;
+
+    @ConfigOption.Separator(
+            value = "Waypoints"
     )
 
-    @ConfigButton(
-            title = "GitHub",
-            text = "View on GitHub"
+    @ConfigEntry(
+            id = "renderWaypoints",
+            translation = "Render Waypoints"
     )
-    @Comment("Check for the latest releases on GitHub!")
-    public static final Runnable githubButton = () -> {
-        Util.getOperatingSystem().open("https://github.com/pehenrii/IQ/releases");
-    };
+    @Comment("Create waypoints from Patcher-formatted coordinates.")
+    public static boolean renderWaypoints = true;
 
-    @ConfigButton(
-            title = "Discord",
-            text = "Join Discord"
+
+    @ConfigEntry(
+            id = "waypointsDuration",
+            translation = "Waypoints Duration (seconds)"
     )
-    @Comment("Needs support? Join our Discord!")
-    public static final Runnable discordButton = () -> {
-        Util.getOperatingSystem().open("https://discord.gg/HdhXhCWcW9");
-    };
-
-    @Category(
-            value = "General"
-    )
-    public static class GeneralConfig {
-
-        @ConfigButton(
-                title = "Open HUD Editor",
-                text = "OPEN"
-        )
-        @Comment("Open the HUD Editor to customize your HUD elements")
-        public static final Runnable hudEditor = () -> {
-        };
-
-        @ConfigOption.Separator(
-                value = "Kuudra"
-        )
-        @ConfigEntry(
-                id = "autoRequeue",
-                translation = "Auto Requeue"
-        )
-        @Comment("Automatically requeue a Kuudra run after boss death")
-        public static boolean autoRequeue = false;
-
-        @ConfigEntry(
-                id = "requeueDelay",
-                translation = "Requeue Delay"
-        )
-        @Comment("Delay in ticks before auto-requeue (5-50)")
-        @ConfigOption.Range(min = 5, max = 50)
-        @ConfigOption.Slider
-        public static int requeueDelay = 20;
-
-        @ConfigEntry(
-                id = "customSplits",
-                translation = "Custom Splits"
-        )
-        @Comment("Enable custom split timers")
-        public static boolean customSplits = true;
-
-        @ConfigEntry(
-                id = "teamHighlight",
-                translation = "Team Highlight"
-        )
-        @Comment("Highlight teammates and show freshers during the build phase")
-        public static boolean teamHighlight = true;
-
-        @ConfigEntry(
-                id = "manaDrainNotify",
-                translation = "Mana Drain Notify"
-        )
-        @Comment(" Send the amount of mana drained to party chat")
-        public static boolean manaDrainNotify = true;
-
-        @ConfigEntry(
-                id = "renderWaypoints",
-                translation = "Render Waypoints"
-        )
-        @Comment("Create waypoints from Patcher-formatted coordinates.")
-        public static boolean renderWaypoints = true;
-
-
-        @ConfigEntry(
-                id = "waypointsDuration",
-                translation = "Waypoints Duration (seconds)"
-        )
-        @ConfigOption.Range(min = 1, max = 60)
-        @ConfigOption.Slider
-        @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
-        public static int waypointsDuration = 1;
-
-        @ConfigEntry(
-                id = "partyJoinSound",
-                translation = "Party Join Sound"
-        )
-        @Comment("Play a sound when a player joins your party")
-        public static boolean partyJoinSound = true;
-
-        @ConfigEntry(
-                id = "hideMobNametags",
-                translation = "Hide Mob Nametags"
-        )
-        @Comment("Prevent Kuudra mobs nametags from loading.")
-        public static boolean hideMobNametags = false;
-
-    }
+    @ConfigOption.Range(min = 1, max = 60)
+    @ConfigOption.Slider
+    @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
+    public static int waypointsDuration = 1;
 
     @Category(
             value = "Phase 1 - Supplies"
