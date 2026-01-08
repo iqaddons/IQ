@@ -1,6 +1,7 @@
 package net.iqaddons.mod.config;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.minecraft.util.Util;
 
 import java.awt.*;
 
@@ -23,6 +24,29 @@ import java.awt.*;
         }
 )
 public class Configuration {
+
+    @ConfigOption.Separator(
+            value = "IQ Addons - Your Best Kuudra Companion",
+            description = "Made by PeHenrii, darkjota and his gang."
+    )
+
+    @ConfigButton(
+            title = "GitHub",
+            text = "View on GitHub"
+    )
+    @Comment("Check for the latest releases on GitHub!")
+    public static final Runnable githubButton = () -> {
+        Util.getOperatingSystem().open("https://github.com/pehenrii/IQ/releases");
+    };
+
+    @ConfigButton(
+            title = "Discord",
+            text = "Join Discord"
+    )
+    @Comment("Needs support? Join our Discord!")
+    public static final Runnable discordButton = () -> {
+        Util.getOperatingSystem().open("https://discord.gg/HdhXhCWcW9");
+    };
 
     @Category(
             value = "General"
@@ -89,8 +113,9 @@ public class Configuration {
                 id = "waypointsDuration",
                 translation = "Waypoints Duration (seconds)"
         )
-        @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
         @ConfigOption.Range(min = 1, max = 60)
+        @ConfigOption.Slider
+        @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
         public static int waypointsDuration = 1;
 
         @ConfigEntry(
@@ -132,8 +157,9 @@ public class Configuration {
                 id = "supplyWaypointColor",
                 translation = "Supply Waypoint Color"
         )
-        @ConfigOption.Color()
-        public static String supplyWaypointColor = "#FFFF00";
+        @ConfigOption.Color(alpha = true)
+        @Comment("Change the color of the supply waypoints")
+        public static int supplyWaypointColor = new Color(0, 0, 0, 255).getRGB();
 
         @ConfigEntry(
                 id = "pearlWaypoints",
