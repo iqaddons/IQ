@@ -2,6 +2,8 @@ package net.iqaddons.mod.config;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
+import java.awt.*;
+
 @Config(
         value = "iqaddons",
         categories = {
@@ -35,6 +37,9 @@ public class Configuration {
         public static final Runnable hudEditor = () -> {
         };
 
+        @ConfigOption.Separator(
+                value = "Kuudra"
+        )
         @ConfigEntry(
                 id = "autoRequeue",
                 translation = "Auto Requeue"
@@ -46,8 +51,9 @@ public class Configuration {
                 id = "requeueDelay",
                 translation = "Requeue Delay"
         )
-        @ConfigOption.Range(min = 5, max = 50)
         @Comment("Delay in ticks before auto-requeue (5-50)")
+        @ConfigOption.Range(min = 5, max = 50)
+        @ConfigOption.Slider
         public static int requeueDelay = 20;
 
         @ConfigEntry(
@@ -223,8 +229,9 @@ public class Configuration {
                 id = "teamHighlightFreshColor",
                 translation = "Team Highlight Fresh Color"
         )
+        @ConfigOption.Color(alpha = true)
         @Comment("Use a different color for freshers teammates")
-        public static String teamHighlightFreshColor = "#FF00FF";
+        public static int highlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
     }
 
     @Category(
@@ -250,8 +257,9 @@ public class Configuration {
                 id = "kuudraHitboxColor",
                 translation = "Kuudra Hitbox Color"
         )
+        @ConfigOption.Color(alpha = true)
         @Comment("Change Kuudra's hitbox color to something more visible")
-        public static boolean kuudraHitboxColor = true;
+        public static int kuudraHitboxColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
 
         @ConfigEntry(
                 id = "blockUselessPerks",
