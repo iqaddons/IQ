@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
+import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
 import net.iqaddons.mod.tracking.KuudraTracker;
 import net.iqaddons.mod.tracking.SkyBlockTracker;
@@ -55,7 +56,8 @@ public class IQModClient implements ClientModInitializer {
         FeatureManager features = FeatureManager.get();
         features.register(
                 new PearlWaypointFeature(),
-                new SupplyWaypointsFeature()
+                new SupplyWaypointsFeature(),
+                new PileWaypointsFeature()
         );
 
         features.start();
