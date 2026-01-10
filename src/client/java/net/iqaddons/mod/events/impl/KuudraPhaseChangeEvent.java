@@ -1,11 +1,12 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.state.KuudraPhase;
+import net.iqaddons.mod.state.data.KuudraPhase;
 
 public record KuudraPhaseChangeEvent(
         KuudraPhase previousPhase,
-        KuudraPhase newPhase
+        KuudraPhase newPhase,
+        long phaseDurationMillis
 ) implements Event {
 
     public boolean isEnteringKuudra() {

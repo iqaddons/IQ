@@ -1,7 +1,9 @@
-package net.iqaddons.mod.state;
+package net.iqaddons.mod.state.data;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
@@ -17,14 +19,15 @@ public enum KuudraTier {
     private final String displayName;
     private final int level;
 
-    public static KuudraTier fromName(String name) {
-        if (name == null) return NONE;
-        String lower = name.toLowerCase();
-        for (KuudraTier tier : values()) {
+    public static @Nullable KuudraTier fromText(@NotNull String text) {
+        String lower = text.toLowerCase();
+        for (int i = values().length - 1; i >= 1; i--) {
+            KuudraTier tier = values()[i];
             if (lower.contains(tier.displayName.toLowerCase())) {
                 return tier;
             }
         }
-        return NONE;
+
+        return null;
     }
 }
