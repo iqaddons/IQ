@@ -8,6 +8,7 @@
     "ClientTickMixin",
     "EntityGlowMixin",
     "EntityMixin",
+    "HandledScreenMixin",
     "InGameHudMixin",
     "WorldRendererMixin"
   ],
