@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientTickMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void onTick(CallbackInfo ci) {
-        EventBus.post(new ClientTickEvent((MinecraftClient) (Object) this));
+    private void iq$onTick(CallbackInfo ci) {
+        EventBus.post(ClientTickEvent.create((MinecraftClient) (Object) this));
     }
 }
