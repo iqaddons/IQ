@@ -29,7 +29,7 @@ public record WorldRenderEvent(
     }
 
     public void drawText(Vec3d pos, Text text, float scale, boolean throughWalls, RenderColor color) {
-        WorldRenderUtils.drawText(consumer, camera, pos, text, scale, throughWalls, color);
+        WorldRenderUtils.drawText(matrices, consumer, camera, pos, text, scale, throughWalls, color);
     }
 
     public void drawBeam(Vec3d pos, int height, boolean throughWalls, RenderColor color) {

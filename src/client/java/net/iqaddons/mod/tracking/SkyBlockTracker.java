@@ -8,10 +8,6 @@ import net.iqaddons.mod.events.impl.SkyBlockStatusEvent;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Tracks whether the player is on Hypixel SkyBlock.
- * Single responsibility: SkyBlock detection only.
- */
 @Slf4j
 @Getter
 public final class SkyBlockTracker {
@@ -21,10 +17,8 @@ public final class SkyBlockTracker {
     private volatile boolean onSkyBlock = false;
     private volatile String currentArea = "";
 
-    private EventBus.Subscription<ClientTickEvent> tickSubscription;
-
     public void start() {
-        tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
+        EventBus.subscribe(ClientTickEvent.class, this::onTick);
         log.info("SkyBlockTracker started");
     }
 
@@ -64,13 +58,6 @@ public final class SkyBlockTracker {
             String previousArea = currentArea;
             currentArea = newArea;
             log.debug("Area: {} -> {}", previousArea, newArea);
-        }
-    }
-
-    public void stop() {
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
         }
     }
 }

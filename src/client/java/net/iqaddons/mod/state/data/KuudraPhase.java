@@ -13,14 +13,13 @@ import java.util.function.Predicate;
 public enum KuudraPhase {
 
     NONE("None", -1, msg -> false),
-    QUEUE("Queue", 0, msg -> msg.contains("[NPC] Elle: Talk with me to begin!")),
-    SUPPLIES("Supplies", 1, msg -> msg.contains("[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!")),
-    BUILD("Build", 2, msg -> msg.contains("[NPC] Elle: OMG! Great work collecting my supplies!")),
-    EATEN("Eaten", 3, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
-    STUN("Stun", 4, msg -> msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")),
-    DPS("DPS", 5, msg -> msg.contains("destroyed one of Kuudra's pods!")),
-    BOSS("Boss", 7, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
-    COMPLETED("Completed", 8, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
+    SUPPLIES("Supplies", 0, msg -> msg.contains("[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!")),
+    BUILD("Build", 1, msg -> msg.contains("[NPC] Elle: OMG! Great work collecting my supplies!")),
+    EATEN("Eaten", 2, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
+    STUN("Stun", 3, msg -> msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")),
+    DPS("DPS", 4, msg -> msg.contains("destroyed one of Kuudra's pods!")),
+    BOSS("Boss", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
+    COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
 
     private final String displayName;
     private final int order;
@@ -36,7 +35,7 @@ public enum KuudraPhase {
 
     public boolean canTransitionTo(@NotNull KuudraPhase target) {
         if (target == NONE) return true;
-        if (this == NONE && target == QUEUE) return true;
+        if (this == NONE && target == SUPPLIES) return true;
         if (target == next()) return true;
         if (target == COMPLETED) return true;
         return this == EATEN && target == STUN;
@@ -44,7 +43,7 @@ public enum KuudraPhase {
 
     public KuudraPhase next() {
         return switch (this) {
-            case QUEUE -> SUPPLIES;
+            case NONE -> SUPPLIES;
             case SUPPLIES -> BUILD;
             case BUILD -> EATEN;
             case EATEN -> STUN;

@@ -17,21 +17,18 @@ public final class KuudraTracker {
     private final KuudraStateManager stateManager;
     private final SkyBlockTracker skyBlockTracker;
 
-    private EventBus.Subscription<ChatReceivedEvent> chatSubscription;
-    private EventBus.Subscription<SkyBlockStatusEvent> statusSubscription;
-
     public KuudraTracker(@NotNull SkyBlockTracker skyBlockTracker) {
         this.skyBlockTracker = skyBlockTracker;
         this.stateManager = KuudraStateManager.get();
     }
 
     public void start() {
-        chatSubscription = EventBus.subscribe(
+        EventBus.subscribe(
                 ChatReceivedEvent.class,
                 this::onChat
         );
 
-        statusSubscription = EventBus.subscribe(
+        EventBus.subscribe(
                 SkyBlockStatusEvent.class,
                 this::onSkyBlockStatus
         );
@@ -45,8 +42,8 @@ public final class KuudraTracker {
 
         String message = event.getStrippedMessage();
 
-        detectPhaseFromMessage(message);
-        detectTierFromMessage(message);
+        KuudraPhase detected = KuudraPhase.fromMessage(message);
+        if (detected != null) stateManager.setPhase(detected);
     }
 
     private void onSkyBlockStatus(@NotNull SkyBlockStatusEvent event) {
@@ -55,34 +52,7 @@ public final class KuudraTracker {
         }
     }
 
-    private void detectPhaseFromMessage(@NotNull String message) {
-        KuudraPhase detected = KuudraPhase.fromMessage(message);
-        if (detected != null) {
-            stateManager.setPhase(detected);
-        }
-    }
-
-    private void detectTierFromMessage(@NotNull String message) {
-        if (!message.toUpperCase().contains("KUUDRA")) return;
-
-        KuudraTier detected = KuudraTier.fromText(message);
-        if (detected != null) {
-            stateManager.setTier(detected);
-        }
-    }
-
     private boolean isInKuudraArea() {
         return skyBlockTracker.isInArea(KUUDRA_AREA) || stateManager.isInKuudra();
-    }
-
-    public void stop() {
-        if (chatSubscription != null) {
-            chatSubscription.unsubscribe();
-            chatSubscription = null;
-        }
-        if (statusSubscription != null) {
-            statusSubscription.unsubscribe();
-            statusSubscription = null;
-        }
     }
 }

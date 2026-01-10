@@ -36,7 +36,7 @@ public class PearlWaypointFeature extends KuudraFeature {
                 "pearlWaypoints",
                 "Pearl Waypoints",
                 () -> Configuration.PhaseOneConfig.pearlWaypoints,
-                KuudraPhase.NONE
+                KuudraPhase.SUPPLIES
         );
 
         this.configLoader = new WaypointConfigLoader();
@@ -79,7 +79,6 @@ public class PearlWaypointFeature extends KuudraFeature {
     private void onRender(@NotNull WorldRenderEvent event) {
         WaypointArea area = areaDetection.getCurrentArea();
         if (area == null) return;
-
         for (PearlWaypoint waypoint : area.waypoints()) {
             if (!waypoint.shouldShow(missingPre)) continue;
 
@@ -100,17 +99,16 @@ public class PearlWaypointFeature extends KuudraFeature {
         );
 
         event.drawFilled(targetBox, true, waypoint.color());
-
         if (!waypoint.label().isEmpty()) {
             Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() - 1.5, target.getZ() - 0.5);
-            event.drawText(textPos, Text.literal(waypoint.label()), 0.75f, true, RenderColor.white);
+            event.drawText(textPos, Text.literal(waypoint.label()), 1.0f, true, RenderColor.white);
         }
 
         if (waypoint.hasStandBlock()) {
             Vec3d block = waypoint.standBlock();
             Box blockBox = new Box(
                     block.getX(), block.getY(), block.getZ(),
-                    block.getZ() + 1, block.getY() + 1, block.getZ() + 1
+                    block.getX() + 1, block.getY() + 1, block.getZ() + 1
             );
             event.drawOutline(blockBox, true, waypoint.color());
         }

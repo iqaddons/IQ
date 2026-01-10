@@ -14,7 +14,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.OptionalDouble;
@@ -63,28 +62,36 @@ public class WorldRenderUtils {
     }
 
     public static void drawText(
-            VertexConsumerProvider.Immediate consumer, @NotNull Camera camera,
-            @NotNull Vec3d pos, Text text, float scale, boolean throughWalls,
-            @NotNull RenderColor color
+            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
+            @NotNull Camera camera, @NotNull Vec3d pos, Text text,
+            float scale, boolean throughWalls, @NotNull RenderColor color
     ) {
-        var matrices = new Matrix4f();
+        matrices.push();
         Vec3d camPos = camera.getPos();
 
-        float textX = (float) (pos.getX() - camPos.getX());
-        float textY = (float) (pos.getY() - camPos.getY());
-        float textZ = (float) (pos.getZ() - camPos.getZ());
+        matrices.translate(
+                pos.x - camPos.x,
+                pos.y - camPos.y,
+                pos.z - camPos.z
+        );
 
-        matrices.translate(textX, textY, textZ);
-        matrices.rotate(camera.getRotation());
         matrices.scale(scale, -scale, scale);
-
         mc.textRenderer.draw(
-                text, -mc.textRenderer.getWidth(text) / 2f, 1.0f,
-                color.argb, true, matrices, consumer, throughWalls
+                text,
+                -mc.textRenderer.getWidth(text) / 2f,
+                0,
+                color.argb,
+                true,
+                matrices.peek().getPositionMatrix(),
+                consumer,
+                throughWalls
                         ? TextRenderer.TextLayerType.SEE_THROUGH
                         : TextRenderer.TextLayerType.NORMAL,
-                0, LightmapTextureManager.MAX_LIGHT_COORDINATE
+                0,
+                LightmapTextureManager.MAX_LIGHT_COORDINATE
         );
+        consumer.draw();
+        matrices.pop();
     }
 
     public static void drawBeam(
@@ -101,8 +108,8 @@ public class WorldRenderUtils {
     }
 
     public static void drawTracer(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            Camera camera, Vec3d pos, RenderColor color
+            @NotNull MatrixStack matrices, VertexConsumerProvider.@NotNull Immediate consumer,
+            @NotNull Camera camera, Vec3d pos, RenderColor color
     ) {
         Vec3d camPos = camera.getPos();
 
