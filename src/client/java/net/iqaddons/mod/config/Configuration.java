@@ -170,11 +170,11 @@ public class Configuration {
         public static boolean secondSupplyAlert = true;
 
         @ConfigEntry(
-                id = "supplyDropMessage",
-                translation = "Custom Supply Drop Message"
+                id = "supplyRecoverMessage",
+                translation = "Custom Supply Recover Message"
         )
-        @Comment("Send a custom message when dropping a supply")
-        public static boolean supplyDropMessage = true;
+        @Comment("Send a custom message when recover a supply")
+        public static boolean supplyRecoverMessage = true;
 
         @ConfigEntry(
                 id = "crateDisplay",

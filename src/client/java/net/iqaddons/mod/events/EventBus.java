@@ -46,7 +46,12 @@ public final class EventBus {
             return event;
         }
 
+        boolean isCancellable = event instanceof Cancellable;
         for (var subscription : subscriptions) {
+            if (isCancellable && ((Cancellable) event).isCancelled()) {
+                break;
+            }
+
             try {
                 ((Subscription<T>) subscription).handler().accept(event);
             } catch (Exception e) {

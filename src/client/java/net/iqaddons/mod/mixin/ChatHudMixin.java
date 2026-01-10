@@ -15,9 +15,13 @@ public class ChatHudMixin {
 
     @Inject(
             method = "addMessage(Lnet/minecraft/text/Text;)V",
-            at = @At("HEAD")
+            at = @At("HEAD"),
+            cancellable = true
     )
     private void onAddMessageSimple(@NotNull Text message, CallbackInfo ci) {
-        EventBus.post(new ChatReceivedEvent(message));
+        ChatReceivedEvent event = EventBus.post(new ChatReceivedEvent(message));
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
     }
 }
