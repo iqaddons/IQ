@@ -7,6 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
+import net.iqaddons.mod.features.kuudra.waypoints.PearlWaypointFeature;
 import net.iqaddons.mod.tracking.KuudraTracker;
 import net.iqaddons.mod.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
@@ -52,6 +53,7 @@ public class IQModClient implements ClientModInitializer {
     private void initializeFeatures() {
         FeatureManager features = FeatureManager.get();
         features.register(
+                new PearlWaypointFeature()
         );
 
         features.start();

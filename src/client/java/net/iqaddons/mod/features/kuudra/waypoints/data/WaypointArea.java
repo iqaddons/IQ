@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra.waypoints;
+package net.iqaddons.mod.features.kuudra.waypoints.data;
 
 import net.iqaddons.mod.utils.BoundingBox2D;
 import org.jetbrains.annotations.NotNull;

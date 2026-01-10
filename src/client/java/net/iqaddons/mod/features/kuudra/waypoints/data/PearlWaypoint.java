@@ -1,5 +1,6 @@
-package net.iqaddons.mod.features.kuudra.waypoints;
+package net.iqaddons.mod.features.kuudra.waypoints.data;
 
+import net.iqaddons.mod.utils.RenderColor;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -7,7 +8,7 @@ import java.awt.*;
 
 public record PearlWaypoint(
         @NotNull Vec3d target,
-        @NotNull Color color,
+        @NotNull RenderColor color,
         Vec3d standBlock,
         Integer preSupply,
         Integer hideForPre,

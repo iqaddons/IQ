@@ -3,9 +3,10 @@ package net.iqaddons.mod.loader;
 import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.loader.api.FabricLoader;
-import net.iqaddons.mod.features.kuudra.waypoints.PearlWaypoint;
-import net.iqaddons.mod.features.kuudra.waypoints.WaypointArea;
+import net.iqaddons.mod.features.kuudra.waypoints.data.PearlWaypoint;
+import net.iqaddons.mod.features.kuudra.waypoints.data.WaypointArea;
 import net.iqaddons.mod.utils.BoundingBox2D;
+import net.iqaddons.mod.utils.RenderColor;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -123,10 +124,11 @@ public class WaypointConfigLoader {
             );
 
             JsonArray rgb = obj.getAsJsonArray("rgb");
-            Color color = new Color(
+            RenderColor color = new RenderColor(
                     rgb.get(0).getAsInt(),
                     rgb.get(1).getAsInt(),
-                    rgb.get(2).getAsInt()
+                    rgb.get(2).getAsInt(),
+                    0xff
             );
 
             Vec3d standBlock = null;

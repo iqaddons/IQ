@@ -1,7 +1,7 @@
-package net.iqaddons.mod.utils.kuudra;
+package net.iqaddons.mod.features.kuudra.waypoints.area;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.features.kuudra.waypoints.WaypointArea;
+import net.iqaddons.mod.features.kuudra.waypoints.data.WaypointArea;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-public class AreaDetectionUtil {
+public class AreaDetection {
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
