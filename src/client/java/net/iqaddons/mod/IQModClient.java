@@ -1,14 +1,12 @@
 package net.iqaddons.mod;
 
-import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
-import com.teamresourceful.resourcefulconfig.api.types.ResourcefulConfig;
-import com.teamresourceful.resourcefulconfig.client.ConfigScreen;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.tracking.KuudraTracker;
 import net.iqaddons.mod.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
@@ -36,7 +34,7 @@ public class IQModClient implements ClientModInitializer {
         configurator.register(Configuration.class);
 
         initializeTrackers();
-
+        initializeFeatures();
         IQKeyBindings.register();
         registerCommand();
 
@@ -51,6 +49,14 @@ public class IQModClient implements ClientModInitializer {
         kuudraTracker.start();
     }
 
+    private void initializeFeatures() {
+        FeatureManager features = FeatureManager.get();
+        features.register(
+        );
+
+        features.start();
+    }
+
     private void registerCommand() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) ->
                 dispatcher.register(literal("iq").executes(source -> {
@@ -63,5 +69,4 @@ public class IQModClient implements ClientModInitializer {
     public static IQModClient get() {
         return instance;
     }
-
 }
