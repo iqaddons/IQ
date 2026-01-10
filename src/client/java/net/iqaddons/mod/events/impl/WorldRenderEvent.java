@@ -1,27 +1,49 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.utils.RenderColor;
+import net.iqaddons.mod.utils.WorldRenderUtils;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Matrix4f;
 
 public record WorldRenderEvent(
+        VertexConsumerProvider.Immediate consumer,
         MatrixStack matrices,
         Matrix4f projectionMatrix,
         Camera camera,
-        float tickDelta
+        RenderTickCounter tickCounter
 ) implements Event {
 
-    public double cameraX() {
-        return camera.getPos().x;
+    public void drawFilled(Box box, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawFilled(matrices, consumer, camera, box, throughWalls, color);
     }
 
-    public double cameraY() {
-        return camera.getPos().y;
+    public void drawOutline(Box box, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawOutline(matrices, consumer, camera, box, throughWalls, color);
     }
 
-    public double cameraZ() {
-        return camera.getPos().z;
+    public void drawText(Vec3d pos, Text text, float scale, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawText(consumer, camera, pos, text, scale, throughWalls, color);
+    }
+
+    public void drawBeam(Vec3d pos, int height, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawBeam(matrices, consumer, camera, pos, height, throughWalls, color);
+    }
+
+    public void drawFilledWithBeam(Box box, int height, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawFilled(matrices, consumer, camera, box, throughWalls, color);
+        Vec3d center = box.getCenter();
+        WorldRenderUtils.drawBeam(matrices, consumer, camera, center.add(0, box.maxY - center.getY(), 0), height, throughWalls, color);
+    }
+
+    public void drawTracer(Vec3d pos, RenderColor color) {
+        WorldRenderUtils.drawTracer(matrices, consumer, camera, pos, color);
     }
 }
 
