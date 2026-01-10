@@ -17,7 +17,7 @@ public class IQKeyBindings {
 
     public static void register() {
         openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "key.iq.openConfig",
+                "key.iq.open-config",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 KeyBinding.Category.create(Identifier.of("category.iq.keybinds"))
