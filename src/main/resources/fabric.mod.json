@@ -22,7 +22,7 @@
       "net.iqaddons.mod.IQModClient"
     ],
     "modmenu": [
-      "net.iqaddons.mod.ModMenuIntegration"
+      "net.iqaddons.mod.integration.ModMenuIntegration"
     ]
   },
   "mixins": [

@@ -1,8 +1,9 @@
-package net.iqaddons.mod;
+package net.iqaddons.mod.integration;
 
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
+import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.Configuration;
 
 public class ModMenuIntegration implements ModMenuApi {
