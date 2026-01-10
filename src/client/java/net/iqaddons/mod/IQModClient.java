@@ -7,6 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
+import net.iqaddons.mod.features.kuudra.BuildOverlayFeature;
 import net.iqaddons.mod.features.kuudra.CustomSupplyMessageFeature;
 import net.iqaddons.mod.features.kuudra.ElleHighlightFeature;
 import net.iqaddons.mod.features.kuudra.KuudraHitboxFeature;
@@ -79,7 +80,8 @@ public class IQModClient implements ClientModInitializer {
                 new KuudraDirectionAlertFeature(),
                 new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(),
-                new AlreadyPickingAlertFeature()
+                new AlreadyPickingAlertFeature(),
+                new BuildOverlayFeature()
         );
 
         features.start();
