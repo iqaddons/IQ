@@ -7,7 +7,6 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class HideMobNametagsFeature extends KuudraFeature {
@@ -42,19 +41,15 @@ public class HideMobNametagsFeature extends KuudraFeature {
             return;
         }
 
-        String name = event.getRenderState().displayName.getString();
+        var state = event.getRenderState();
+        if (state == null || state.displayName == null) {
+            return;
+        }
+
+        String name = state.displayName.getString();
         String stripped = name.replaceAll("§.", "");
         if (stripped.contains("[Lv")) {
             event.setCancelled(true);
         }
-    }
-
-    public static boolean shouldHideNametag(@NotNull String name) {
-        if (instance == null || !instance.isActive()) {
-            return false;
-        }
-
-        String stripped = name.replaceAll("§.", "");
-        return stripped.contains("[Lv");
     }
 }
