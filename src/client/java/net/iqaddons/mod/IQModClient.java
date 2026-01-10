@@ -38,8 +38,8 @@ public class IQModClient implements ClientModInitializer {
     }
 
     private void registerCommand() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, _) ->
-                dispatcher.register(literal("iq").executes(_ -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) ->
+                dispatcher.register(literal("iq").executes(source -> {
                     IQKeyBindings.openConfigScreen(mc);
                     return 1;
                 }))

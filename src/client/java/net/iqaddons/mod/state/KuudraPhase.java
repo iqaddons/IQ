@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public enum KuudraPhase {
 
-    NONE("None", -1, _ -> false),
+    NONE("None", -1, msg -> false),
     QUEUE("Queue", 0, msg -> msg.contains("[NPC] Elle: Talk with me to begin!")),
     SUPPLIES("Supplies", 1, msg -> msg.contains("[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!")),
     BUILD("Build", 2, msg -> msg.contains("[NPC] Elle: OMG! Great work collecting my supplies!")),
@@ -28,7 +28,7 @@ public enum KuudraPhase {
     }
 
     public boolean isInRun() {
-        return order >= 1 && order <= 4;
+        return order >= 1 && order <= 7;
     }
 
     public KuudraPhase next() {
