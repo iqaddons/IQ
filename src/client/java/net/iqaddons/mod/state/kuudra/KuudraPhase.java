@@ -21,6 +21,8 @@ public enum KuudraPhase {
     BOSS("Boss", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
     COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
 
+    public static final EnumSet<KuudraPhase> RUN_PHASES = EnumSet.of(SUPPLIES, BUILD, EATEN, STUN, DPS, BOSS);
+
     private final String displayName;
     private final int order;
     private final Predicate<String> trigger;
