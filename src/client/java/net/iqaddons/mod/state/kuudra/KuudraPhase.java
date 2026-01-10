@@ -1,4 +1,4 @@
-package net.iqaddons.mod.state.data;
+package net.iqaddons.mod.state.kuudra;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

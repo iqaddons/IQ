@@ -1,7 +1,7 @@
-package net.iqaddons.mod.features.kuudra.waypoints.area;
+package net.iqaddons.mod.features.kuudra.waypoints.pearl.area;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.features.kuudra.waypoints.data.WaypointArea;
+import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

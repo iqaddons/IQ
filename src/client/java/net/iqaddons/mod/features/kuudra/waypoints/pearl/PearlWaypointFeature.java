@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra.waypoints;
+package net.iqaddons.mod.features.kuudra.waypoints.pearl;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -7,11 +7,11 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.features.kuudra.waypoints.data.PearlWaypoint;
-import net.iqaddons.mod.features.kuudra.waypoints.data.WaypointArea;
+import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.PearlWaypoint;
+import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
 import net.iqaddons.mod.loader.WaypointConfigLoader;
-import net.iqaddons.mod.state.data.KuudraPhase;
-import net.iqaddons.mod.features.kuudra.waypoints.area.AreaDetection;
+import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.features.kuudra.waypoints.pearl.area.AreaDetection;
 import net.iqaddons.mod.utils.RenderColor;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;

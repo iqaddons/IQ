@@ -3,7 +3,7 @@ package net.iqaddons.mod.features;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
-import net.iqaddons.mod.state.data.KuudraPhase;
+import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;

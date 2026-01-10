@@ -1,7 +1,7 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.state.data.KuudraPhase;
+import net.iqaddons.mod.state.kuudra.KuudraPhase;
 
 public record KuudraPhaseChangeEvent(
         KuudraPhase previousPhase,
