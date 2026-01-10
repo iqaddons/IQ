@@ -9,6 +9,7 @@ import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.CustomSupplyMessageFeature;
 import net.iqaddons.mod.features.kuudra.ElleHighlightFeature;
+import net.iqaddons.mod.features.kuudra.KuudraHitboxFeature;
 import net.iqaddons.mod.features.kuudra.alerts.FreshAlertFeature;
 import net.iqaddons.mod.features.kuudra.alerts.KuudraDirectionAlertFeature;
 import net.iqaddons.mod.features.kuudra.alerts.NoPreAlertFeature;
@@ -78,7 +79,8 @@ public class IQModClient implements ClientModInitializer {
                 new CustomSupplyMessageFeature(),
                 new ElleHighlightFeature(),
                 new FreshAlertFeature(scheduler),
-                new KuudraDirectionAlertFeature()
+                new KuudraDirectionAlertFeature(),
+                new KuudraHitboxFeature()
         );
 
         features.start();
