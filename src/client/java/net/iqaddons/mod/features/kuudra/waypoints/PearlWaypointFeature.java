@@ -36,16 +36,18 @@ public class PearlWaypointFeature extends KuudraFeature {
                 "pearlWaypoints",
                 "Pearl Waypoints",
                 () -> Configuration.PhaseOneConfig.pearlWaypoints,
-                KuudraPhase.SUPPLIES
+                KuudraPhase.NONE
         );
 
         this.configLoader = new WaypointConfigLoader();
+        this.configLoader.load();
+
         this.areaDetection = new AreaDetection();
     }
 
     @Override
     protected void onKuudraActivate() {
-        List<WaypointArea> areas = configLoader.load();
+        List<WaypointArea> areas = configLoader.getCached();
         areaDetection.setAreas(areas);
 
         subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));

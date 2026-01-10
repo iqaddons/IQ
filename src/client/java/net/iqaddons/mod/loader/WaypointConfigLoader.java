@@ -11,7 +11,6 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,9 +23,9 @@ import java.util.Optional;
 @Slf4j
 public class WaypointConfigLoader {
 
-    private static final String CONFIG_DIR = "config/iq";
-    private static final String DEFAULT_RESOURCE = "/data/iq/pearl_waypoints.json";
-    private static final String CONFIG_FILE = "pearl_waypoints.json";
+    private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("iq");
+    private static final Path CONFIG_FILE = CONFIG_DIR.resolve("pearl_waypoints.json");
+    private static final String DEFAULT_RESOURCE = "/default-config/iq/pearl_waypoints.json";
 
     private volatile List<WaypointArea> cachedAreas = Collections.emptyList();
 
@@ -165,10 +164,13 @@ public class WaypointConfigLoader {
             Files.createDirectories(configPath.getParent());
 
             try (InputStream is = getClass().getResourceAsStream(DEFAULT_RESOURCE)) {
-                if (is != null) {
-                    Files.copy(is, configPath);
-                    log.info("Created default config at: {}", configPath);
+                if (is == null) {
+                    log.error("Default resource missing: {}", DEFAULT_RESOURCE);
+                    return;
                 }
+
+                Files.copy(is, configPath);
+                log.info("Created default config at: {}", configPath);
             }
         } catch (Exception e) {
             log.warn("Failed to save default config", e);

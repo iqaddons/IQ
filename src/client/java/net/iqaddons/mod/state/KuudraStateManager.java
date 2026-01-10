@@ -6,6 +6,9 @@ import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.data.KuudraPhase;
 import net.iqaddons.mod.state.data.KuudraRun;
 import net.iqaddons.mod.state.data.KuudraTier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -71,7 +74,6 @@ public final class KuudraStateManager {
 
     public boolean setPhase(@NotNull KuudraPhase newPhase) {
         if (currentPhase == newPhase) return false;
-
         if (!currentPhase.canTransitionTo(newPhase)) {
             log.warn("Invalid phase transition: {} -> {}", currentPhase, newPhase);
             return false;
@@ -91,7 +93,31 @@ public final class KuudraStateManager {
         log.info("Phase: {} -> {} ({}ms)", previous.getDisplayName(), newPhase.getDisplayName(), phaseDurationMs);
         EventBus.post(new KuudraPhaseChangeEvent(previous, newPhase, phaseDurationMs));
 
+        sendPhaseChangeMessage(previous, newPhase, phaseDurationMs);
+
         return true;
+    }
+
+    private void sendPhaseChangeMessage(@NotNull KuudraPhase previous, @NotNull KuudraPhase newPhase, long durationMs) {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) return;
+
+        String durationText = durationMs > 0 ? String.format(" (%.2fs)", durationMs / 1000.0) : "";
+
+        Text message = Text.literal("[IQ] ")
+                .formatted(Formatting.GOLD)
+                .append(Text.literal("Phase: ")
+                        .formatted(Formatting.GRAY))
+                .append(Text.literal(previous.getDisplayName())
+                        .formatted(Formatting.RED))
+                .append(Text.literal(" → ")
+                        .formatted(Formatting.GRAY))
+                .append(Text.literal(newPhase.getDisplayName())
+                        .formatted(Formatting.GREEN))
+                .append(Text.literal(durationText)
+                        .formatted(Formatting.YELLOW));
+
+        client.player.sendMessage(message, false);
     }
 
     public void setTier(@NotNull KuudraTier tier) {

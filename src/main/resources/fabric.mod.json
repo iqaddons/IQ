@@ -26,7 +26,11 @@
     ]
   },
   "mixins": [
-    "iq.mixins.json"
+    "iq.mixins.json",
+    {
+      "config": "iq.client.mixins.json",
+      "environment": "client"
+    }
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
