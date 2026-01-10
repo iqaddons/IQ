@@ -75,7 +75,9 @@ public class WorldRenderUtils {
                 pos.z - camPos.z
         );
 
+        matrices.multiply(camera.getRotation());
         matrices.scale(scale, -scale, scale);
+
         mc.textRenderer.draw(
                 text,
                 -mc.textRenderer.getWidth(text) / 2f,
@@ -90,6 +92,7 @@ public class WorldRenderUtils {
                 0,
                 LightmapTextureManager.MAX_LIGHT_COORDINATE
         );
+
         consumer.draw();
         matrices.pop();
     }
