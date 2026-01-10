@@ -9,8 +9,8 @@ public record PearlWaypoint(
         @NotNull Vec3d target,
         @NotNull Color color,
         Vec3d standBlock,
-        int preSupply,
-        int hideForPre,
+        Integer preSupply,
+        Integer hideForPre,
         float size,
         @NotNull String label
 ) {
@@ -18,11 +18,11 @@ public record PearlWaypoint(
     public static final float DEFAULT_SIZE = 0.4f;
 
     public boolean shouldShow(int missingPre) {
-        if (hideForPre != 0 && hideForPre == missingPre) {
+        if (hideForPre != null && hideForPre == missingPre) {
             return false;
         }
 
-        if (preSupply != 0 && missingPre > 0) {
+        if (preSupply != null && missingPre > 0) {
             return preSupply == missingPre;
         }
 
