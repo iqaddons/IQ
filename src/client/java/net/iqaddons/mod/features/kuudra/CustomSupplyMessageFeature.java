@@ -49,7 +49,7 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
         event.setCancelled(true);
 
         String supplyCount = matcher.group(2);
-        String formattedMessage = event.getMessage();
+        String formattedMessage = event.getStrippedMessage();
         String formattedPlayerName = extractFormattedPlayerName(formattedMessage);
 
         double timeSeconds = supplyState.getElapsedTimeSeconds();
