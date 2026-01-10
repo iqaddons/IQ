@@ -4,6 +4,7 @@
   "package": "net.iqaddons.mod.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "ArmorStandRendererMixin",
     "ChatHudMixin",
     "ClientTickMixin",
     "EntityGlowMixin",

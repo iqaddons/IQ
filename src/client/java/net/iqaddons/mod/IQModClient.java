@@ -80,7 +80,8 @@ public class IQModClient implements ClientModInitializer {
                 new AlreadyPickingAlertFeature(),
                 new BuildOverlayFeature(),
                 new KuudraHealthDisplayFeature(),
-                new BlockUselessPerksFeature()
+                new BlockUselessPerksFeature(),
+                new HideMobNametagsFeature()
         );
 
         features.start();
