@@ -5,19 +5,19 @@ import net.iqaddons.mod.state.data.KuudraPhase;
 
 public record KuudraPhaseChangeEvent(
         KuudraPhase previousPhase,
-        KuudraPhase newPhase,
+        KuudraPhase currentPhase,
         long phaseDurationMillis
 ) implements Event {
 
     public boolean isEnteringKuudra() {
-        return previousPhase == KuudraPhase.NONE && newPhase != KuudraPhase.NONE;
+        return previousPhase == KuudraPhase.NONE && currentPhase != KuudraPhase.NONE;
     }
 
     public boolean isExitingKuudra() {
-        return previousPhase != KuudraPhase.NONE && newPhase == KuudraPhase.NONE;
+        return previousPhase != KuudraPhase.NONE && currentPhase == KuudraPhase.NONE;
     }
 
     public boolean isRunCompleted() {
-        return newPhase == KuudraPhase.COMPLETED;
+        return currentPhase == KuudraPhase.COMPLETED;
     }
 }
