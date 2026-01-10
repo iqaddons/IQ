@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-version = project.mod_version
+version = "${project.mod_version}+mc${stonecutter.current.project}"
 group = project.maven_group
 
 base {
@@ -16,6 +16,7 @@ loom {
     mods {
         "iq" {
             sourceSet sourceSets.main
+            sourceSet sourceSets.client
         }
     }
 }
@@ -30,12 +31,12 @@ repositories {
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    minecraft "com.mojang:minecraft:${stonecutter.current.project}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:3.9.1"
+    modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:${project.resourcefulconfig_version}"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     compileOnly "org.projectlombok:lombok:1.18.38"
@@ -44,14 +45,16 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "minecraft_version", stonecutter.current.project
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
+        expand(
+                "version": project.mod_version,
+                "minecraft_version": stonecutter.current.project,
                 "loader_version": project.loader_version
+        )
     }
 }
 
@@ -74,6 +77,6 @@ java {
 
 jar {
     from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+        rename { "${it}_${project.name}" }
     }
 }
