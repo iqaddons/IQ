@@ -3,81 +3,77 @@ package net.iqaddons.mod.utils;
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.scoreboard.*;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public final class ScoreboardUtils {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final Pattern FORMATTING_PATTERN = Pattern.compile("§[0-9a-fk-or]");
+    private static final Pattern AREA_SYMBOL_PATTERN = Pattern.compile("[⏣ф]");
 
-    public static String getTitle() {
-        if (mc.world == null) return "";
-
-        Scoreboard scoreboard = mc.world.getScoreboard();
-        ScoreboardObjective sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
-
-        if (sidebar == null) return "";
-        return sidebar.getDisplayName().getString();
-    }
-
-    public static boolean hasTitle(String text) {
-        return stripFormatting(getTitle()).contains(text);
-    }
-
-    public static @NotNull List<String> getLines() {
-        if (mc.world == null) return Collections.emptyList();
-
-        Scoreboard scoreboard = mc.world.getScoreboard();
-        ScoreboardObjective sidebar = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR);
-
-        if (sidebar == null) return Collections.emptyList();
-
-        List<String> lines = new ArrayList<>();
-        for (ScoreboardEntry entry : scoreboard.getScoreboardEntries(sidebar)) {
-            Team team = scoreboard.getScoreHolderTeam(entry.owner());
-            String line;
-            if (team != null) {
-                line = team.getPrefix().getString() + team.getSuffix().getString();
-            } else {
-                line = entry.owner();
-            }
-            lines.add(line);
-        }
-
-        return lines;
-    }
-
-    public static String getLine(int index) {
-        List<String> lines = getLines();
-        if (index < 0 || index >= lines.size()) return "";
-        return lines.get(index);
-    }
-
-    public static String findLine(String containing) {
-        return getLines().stream()
-                .filter(line -> stripFormatting(line).contains(containing))
-                .findFirst()
+    public static @NotNull String getTitle() {
+        return getObjective()
+                .map(obj -> stripFormatting(obj.getDisplayName().getString()))
                 .orElse("");
     }
 
-    public static @NotNull String getArea() {
-        String areaLine = findLine("⏣");
-        if (areaLine.isEmpty()) {
-            areaLine = findLine("ф");
-        }
-        return stripFormatting(areaLine).replace("⏣", "").replace("ф", "").trim();
+    public static boolean hasTitle(@NotNull String text) {
+        return getTitle().contains(text);
     }
 
-    @Contract(pure = true)
+    public static @NotNull List<String> getLines() {
+        return getObjective()
+                .map(ScoreboardUtils::extractLines)
+                .orElse(Collections.emptyList());
+    }
+
+    public static @NotNull Optional<String> findLine(@NotNull String containing) {
+        return getLines().stream()
+                .filter(line -> stripFormatting(line).contains(containing))
+                .findFirst();
+    }
+
+    public static @NotNull String getArea() {
+        return findLine("⏣")
+                .or(() -> findLine("ф"))
+                .map(ScoreboardUtils::stripFormatting)
+                .map(line -> AREA_SYMBOL_PATTERN.matcher(line).replaceAll(""))
+                .map(String::trim)
+                .orElse("");
+    }
+
     public static @NotNull String stripFormatting(String text) {
-        if (text == null) return "";
-        return text.replaceAll("§[0-9a-fk-or]", "");
+        if (text == null || text.isEmpty()) return "";
+        return FORMATTING_PATTERN.matcher(text).replaceAll("");
+    }
+
+    private static Optional<ScoreboardObjective> getObjective() {
+        if (MC.world == null) return Optional.empty();
+
+        Scoreboard scoreboard = MC.world.getScoreboard();
+        return Optional.ofNullable(scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR));
+    }
+
+    private static List<String> extractLines(@NotNull ScoreboardObjective objective) {
+        Scoreboard scoreboard = MC.world.getScoreboard();
+
+        return scoreboard.getScoreboardEntries(objective).stream()
+                .map(entry -> buildLineText(scoreboard, entry))
+                .collect(Collectors.toList());
+    }
+
+    private static String buildLineText(@NotNull Scoreboard scoreboard, @NotNull ScoreboardEntry entry) {
+        Team team = scoreboard.getScoreHolderTeam(entry.owner());
+        if (team == null) {
+            return entry.owner();
+        }
+        return team.getPrefix().getString() + team.getSuffix().getString();
     }
 }
-
-

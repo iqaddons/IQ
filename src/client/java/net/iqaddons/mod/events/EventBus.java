@@ -61,6 +61,10 @@ public final class EventBus {
             Class<T> eventClass,
             Consumer<T> handler
     ) {
+
+        public void unsubscribe() {
+            EventBus.unsubscribe(this);
+        }
     }
 
 }
