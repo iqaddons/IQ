@@ -295,11 +295,5 @@ public class Configuration {
         @Comment("Track when any teammate deals Rend Damage")
         public static boolean rendDamageAlert = true;
 
-        @ConfigEntry(
-                id = "backboneAlert",
-                translation = "Backbone Alert"
-        )
-        @Comment("Player a sound when a backbone hits Kuudra")
-        public static boolean backboneAlert = true;
     }
 }

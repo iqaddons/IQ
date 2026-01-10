@@ -78,7 +78,8 @@ public class IQModClient implements ClientModInitializer {
                 new FreshAlertFeature(scheduler),
                 new KuudraDirectionAlertFeature(),
                 new KuudraHitboxFeature(),
-                new RendDamageAlertFeature()
+                new RendDamageAlertFeature(),
+                new AlreadyPickingAlertFeature()
         );
 
         features.start();
