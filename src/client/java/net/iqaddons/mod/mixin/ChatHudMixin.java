@@ -18,7 +18,7 @@ public class ChatHudMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void onAddMessageSimple(@NotNull Text message, CallbackInfo ci) {
+    private void iq$onAddMessageSimple(@NotNull Text message, CallbackInfo ci) {
         ChatReceivedEvent event = EventBus.post(new ChatReceivedEvent(message));
         if (event.isCancelled()) {
             ci.cancel();

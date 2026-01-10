@@ -1,4 +1,4 @@
-package net.iqaddons.mod.utils;
+package net.iqaddons.mod.utils.render;
 
 import net.minecraft.util.math.ColorHelper;
 

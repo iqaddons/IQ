@@ -6,7 +6,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.PearlWaypoint;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
 import net.iqaddons.mod.utils.BoundingBox2D;
-import net.iqaddons.mod.utils.RenderColor;
+import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;

@@ -6,6 +6,7 @@
   "client": [
     "ChatHudMixin",
     "ClientTickMixin",
+    "EntityMixin",
     "WorldRendererMixin"
   ],
   "injectors": {
@@ -13,5 +14,8 @@
   },
   "overwrites": {
     "requireAnnotations": true
-  }
+  },
+  "mixins": [
+    "EntityGlowMixin"
+  ]
 }

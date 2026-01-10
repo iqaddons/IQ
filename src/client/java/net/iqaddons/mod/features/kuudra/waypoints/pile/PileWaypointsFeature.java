@@ -11,7 +11,7 @@ import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.state.supply.PileLocation;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
-import net.iqaddons.mod.utils.RenderColor;
+import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;

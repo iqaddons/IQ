@@ -12,7 +12,7 @@ import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
 import net.iqaddons.mod.loader.WaypointConfigLoader;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.area.AreaDetection;
-import net.iqaddons.mod.utils.RenderColor;
+import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;

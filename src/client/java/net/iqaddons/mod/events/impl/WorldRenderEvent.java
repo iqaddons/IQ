@@ -1,8 +1,8 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.utils.RenderColor;
-import net.iqaddons.mod.utils.WorldRenderUtils;
+import net.iqaddons.mod.utils.render.RenderColor;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.VertexConsumerProvider;

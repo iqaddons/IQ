@@ -10,10 +10,9 @@ import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.state.supply.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
-import net.iqaddons.mod.utils.RenderColor;
+import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.entity.mob.GiantEntity;
 import net.minecraft.util.math.Box;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

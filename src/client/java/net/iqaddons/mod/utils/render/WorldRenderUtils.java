@@ -1,4 +1,4 @@
-package net.iqaddons.mod.utils;
+package net.iqaddons.mod.utils.render;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
