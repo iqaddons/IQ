@@ -10,10 +10,7 @@ import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.CustomSupplyMessageFeature;
 import net.iqaddons.mod.features.kuudra.ElleHighlightFeature;
 import net.iqaddons.mod.features.kuudra.KuudraHitboxFeature;
-import net.iqaddons.mod.features.kuudra.alerts.FreshAlertFeature;
-import net.iqaddons.mod.features.kuudra.alerts.KuudraDirectionAlertFeature;
-import net.iqaddons.mod.features.kuudra.alerts.NoPreAlertFeature;
-import net.iqaddons.mod.features.kuudra.alerts.SecondSupplyAlertFeature;
+import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
@@ -80,7 +77,8 @@ public class IQModClient implements ClientModInitializer {
                 new ElleHighlightFeature(),
                 new FreshAlertFeature(scheduler),
                 new KuudraDirectionAlertFeature(),
-                new KuudraHitboxFeature()
+                new KuudraHitboxFeature(),
+                new RendDamageAlertFeature()
         );
 
         features.start();
