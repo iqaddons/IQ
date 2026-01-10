@@ -238,7 +238,7 @@ public class Configuration {
         )
         @ConfigOption.Color(alpha = true)
         @Comment("Use a different color for freshers teammates")
-        public static int highlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+        public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
     }
 
     @Category(
