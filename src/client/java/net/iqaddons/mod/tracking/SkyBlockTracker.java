@@ -28,13 +28,6 @@ public final class SkyBlockTracker {
         log.info("SkyBlockTracker started");
     }
 
-    public void stop() {
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
-    }
-
     public boolean isInArea(@NotNull String areaName) {
         return currentArea.toLowerCase().contains(areaName.toLowerCase());
     }
@@ -71,6 +64,13 @@ public final class SkyBlockTracker {
             String previousArea = currentArea;
             currentArea = newArea;
             log.debug("Area: {} -> {}", previousArea, newArea);
+        }
+    }
+
+    public void stop() {
+        if (tickSubscription != null) {
+            tickSubscription.unsubscribe();
+            tickSubscription = null;
         }
     }
 }

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.tracking.KuudraTracker;
 import net.iqaddons.mod.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
 
@@ -25,6 +26,7 @@ public class IQModClient implements ClientModInitializer {
 
     private Configurator configurator;
     private SkyBlockTracker skyBlockTracker;
+    private KuudraTracker kuudraTracker;
 
     @Override
     public void onInitializeClient() {
@@ -44,6 +46,9 @@ public class IQModClient implements ClientModInitializer {
     private void initializeTrackers() {
         skyBlockTracker = new SkyBlockTracker();
         skyBlockTracker.start();
+
+        kuudraTracker = new KuudraTracker(skyBlockTracker);
+        kuudraTracker.start();
     }
 
     private void registerCommand() {
