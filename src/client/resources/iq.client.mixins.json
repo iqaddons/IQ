@@ -8,6 +8,7 @@
     "ClientTickMixin",
     "EntityGlowMixin",
     "EntityMixin",
+    "InGameHudMixin",
     "WorldRendererMixin"
   ],
   "injectors": {

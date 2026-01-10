@@ -7,10 +7,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
-import net.iqaddons.mod.features.kuudra.BuildOverlayFeature;
-import net.iqaddons.mod.features.kuudra.CustomSupplyMessageFeature;
-import net.iqaddons.mod.features.kuudra.ElleHighlightFeature;
-import net.iqaddons.mod.features.kuudra.KuudraHitboxFeature;
+import net.iqaddons.mod.features.kuudra.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
@@ -81,7 +78,8 @@ public class IQModClient implements ClientModInitializer {
                 new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(),
-                new BuildOverlayFeature()
+                new BuildOverlayFeature(),
+                new KuudraHealthDisplayFeature()
         );
 
         features.start();
