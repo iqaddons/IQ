@@ -7,12 +7,17 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
+import net.iqaddons.mod.features.kuudra.alerts.NoPreAlertFeature;
+import net.iqaddons.mod.features.kuudra.alerts.SecondSupplyAlertFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
 import net.iqaddons.mod.tracking.KuudraTracker;
 import net.iqaddons.mod.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
@@ -28,6 +33,12 @@ public class IQModClient implements ClientModInitializer {
     private Configurator configurator;
     private SkyBlockTracker skyBlockTracker;
     private KuudraTracker kuudraTracker;
+
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "IQ-Mod-Scheduler");
+        t.setDaemon(true);
+        return t;
+    });
 
     @Override
     public void onInitializeClient() {
@@ -57,7 +68,9 @@ public class IQModClient implements ClientModInitializer {
         features.register(
                 new PearlWaypointFeature(),
                 new SupplyWaypointsFeature(),
-                new PileWaypointsFeature()
+                new PileWaypointsFeature(),
+                new NoPreAlertFeature(scheduler),
+                new SecondSupplyAlertFeature(scheduler)
         );
 
         features.start();
