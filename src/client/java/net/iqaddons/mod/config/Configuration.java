@@ -218,6 +218,14 @@ public class Configuration {
         public static boolean elleHighlight = true;
 
         @ConfigEntry(
+                id = "elleHighlightColor",
+                translation = "Elle Highlight Color"
+        )
+        @ConfigOption.Color(alpha = true)
+        @Comment("Change the color of the Elle highlight")
+        public static int elleHighlightColor = new Color(0, 0, 0, 255).getRGB();
+
+        @ConfigEntry(
                 id = "freshMessage",
                 translation = "Fresh Message"
         )

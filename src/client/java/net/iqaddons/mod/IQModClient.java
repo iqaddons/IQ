@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.CustomSupplyMessageFeature;
+import net.iqaddons.mod.features.kuudra.ElleHighlightFeature;
 import net.iqaddons.mod.features.kuudra.alerts.NoPreAlertFeature;
 import net.iqaddons.mod.features.kuudra.alerts.SecondSupplyAlertFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
@@ -72,7 +73,8 @@ public class IQModClient implements ClientModInitializer {
                 new PileWaypointsFeature(),
                 new NoPreAlertFeature(scheduler),
                 new SecondSupplyAlertFeature(scheduler),
-                new CustomSupplyMessageFeature()
+                new CustomSupplyMessageFeature(),
+                new ElleHighlightFeature()
         );
 
         features.start();
