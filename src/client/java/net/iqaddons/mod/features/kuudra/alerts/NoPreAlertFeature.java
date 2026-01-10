@@ -8,7 +8,7 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.state.supply.PreSpot;
-import net.iqaddons.mod.utils.ChatUtil;
+import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +67,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         boolean detected = supplyState.tryDetectPreSpot(playerPos);
 
         if (!detected) {
-            mc.execute(() -> ChatUtil.ERROR.sendMessage("Could not determine your pre spot (too far away?)"));
+            mc.execute(() -> MessageUtil.ERROR.sendMessage("Could not determine your pre spot (too far away?)"));
         }
     }
 
@@ -77,13 +77,13 @@ public class NoPreAlertFeature extends KuudraFeature {
 
         boolean hasPre = supplyState.hasPreSupply();
         if (!hasPre) {
-            mc.execute(() -> ChatUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!"));
+            mc.execute(() -> MessageUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!"));
             return;
         }
 
         Boolean hasSecondary = supplyState.hasSecondarySupply();
         if (hasSecondary != null && !hasSecondary && preSpot.getSecondaryName() != null) {
-            mc.execute(() -> ChatUtil.PARTY.sendMessage("No " + preSpot.getSecondaryName() + "!"));
+            mc.execute(() -> MessageUtil.PARTY.sendMessage("No " + preSpot.getSecondaryName() + "!"));
         }
     }
 }

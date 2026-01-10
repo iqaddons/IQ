@@ -7,7 +7,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
-public enum ChatUtil {
+public enum MessageUtil {
 
     SUCCESS("§a"),
     INFO("§7"),
@@ -20,7 +20,7 @@ public enum ChatUtil {
 
     private final String color;
 
-    ChatUtil() {
+    MessageUtil() {
         this.color = "";
     }
 
@@ -41,5 +41,24 @@ public enum ChatUtil {
         if (player != null) {
             player.sendMessage(Text.literal(message.replace('&', '§')), false);
         }
+    }
+
+    public static void showTitle(
+            @NotNull String title,
+            String subtitle,
+            int fadeIn,
+            int stay,
+            int fadeOut
+    ) {
+        if (mc.inGameHud == null) return;
+
+        Text titleText = Text.literal(title.replace('&', '§'));
+        Text subtitleText = subtitle != null && !subtitle.isEmpty()
+                ? Text.literal(subtitle.replace('&', '§'))
+                : Text.empty();
+
+        mc.inGameHud.setTitle(titleText);
+        mc.inGameHud.setSubtitle(subtitleText);
+        mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
     }
 }

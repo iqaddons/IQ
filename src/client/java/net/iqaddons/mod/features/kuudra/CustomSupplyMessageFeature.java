@@ -7,7 +7,7 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.ChatUtil;
+import net.iqaddons.mod.utils.MessageUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +56,7 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
         String timeColor = getTimeColor(supplyState.getTimeTier());
         String formattedTime = String.format("%.2f", timeSeconds);
 
-        ChatUtil.sendFormattedMessage(String.format(
+        MessageUtil.sendFormattedMessage(String.format(
                 "%s §arecovered a supply in %s%ss §r§8(%s/6)",
                 formattedPlayerName,
                 timeColor,

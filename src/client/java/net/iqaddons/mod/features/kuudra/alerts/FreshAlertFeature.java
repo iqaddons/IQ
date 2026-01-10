@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.ChatUtil;
+import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.render.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
@@ -68,7 +68,7 @@ public class FreshAlertFeature extends KuudraFeature {
             if (player == null) return;
 
             int buildProgress = getBuildingProgress();
-            ChatUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(buildProgress));
+            MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(buildProgress));
 
             applyFreshGlow(player.getId(), player.getName().getString());
             log.debug("Fresh activated at {}% progress", buildProgress);

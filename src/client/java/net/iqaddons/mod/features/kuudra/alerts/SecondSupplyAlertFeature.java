@@ -9,7 +9,7 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.state.supply.SupplyPosition;
-import net.iqaddons.mod.utils.ChatUtil;
+import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +106,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         for (SupplyPosition supply : supplies) {
             String alert = getSecondSupplyAlert(supply);
             if (alert != null) {
-                mc.execute(() -> ChatUtil.PARTY.sendMessage(alert));
+                mc.execute(() -> MessageUtil.PARTY.sendMessage(alert));
                 return;
             }
         }
