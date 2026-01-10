@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Getter
 @RequiredArgsConstructor
-public class ChatReceivedEvent extends Event {
+public class ChatReceivedEvent implements Event {
 
     private final Text text;
     private final String message;

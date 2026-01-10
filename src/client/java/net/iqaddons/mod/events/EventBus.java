@@ -5,95 +5,62 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 @Slf4j
 @NoArgsConstructor
 public final class EventBus {
 
-    private static final Map<Class<?>, List<EventHandler>> HANDLERS = new ConcurrentHashMap<>();
-    private static final Set<Object> REGISTERED_LISTENERS = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Map<Class<? extends Event>, List<Subscription<?>>> SUBSCRIPTIONS = new ConcurrentHashMap<>();
 
-    public static void register(Object listener) {
-        if (listener == null || REGISTERED_LISTENERS.contains(listener)) {
-            return;
-        }
+    @NotNull
+    public static <T extends Event> Subscription<T> subscribe(
+            @NotNull Class<T> eventType,
+            @NotNull Consumer<T> handler
+    ) {
+        var subscription = new Subscription<>(eventType, handler);
+        SUBSCRIPTIONS.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>())
+                .add(subscription);
 
-        REGISTERED_LISTENERS.add(listener);
-        for (Method method : listener.getClass().getDeclaredMethods()) {
-            Subscribe annotation = method.getAnnotation(Subscribe.class);
-            if (annotation == null) continue;
-
-            if (method.getParameterCount() != 1) {
-                log.warn("@Subscribe method {} must have exactly one parameter", method.getName());
-                continue;
-            }
-
-            Class<?> eventType = method.getParameterTypes()[0];
-            if (!Event.class.isAssignableFrom(eventType)) {
-                log.warn("@Subscribe method {} parameter must extend Event", method.getName());
-                continue;
-            }
-
-            method.setAccessible(true);
-            EventHandler handler = new EventHandler(listener, method, annotation.priority());
-
-            HANDLERS.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>()).add(handler);
-            HANDLERS.get(eventType).sort(Comparator.comparingInt(EventHandler::priority).reversed());
-
-            log.debug("Registered handler: {}.{} for {}",
-                    listener.getClass().getSimpleName(), method.getName(), eventType.getSimpleName());
-        }
+        log.debug("Subscribed to event: {}", eventType.getSimpleName());
+        return subscription;
     }
 
-    public static void unregister(Object listener) {
-        if (listener == null || !REGISTERED_LISTENERS.remove(listener)) {
-            return;
+    public static void unsubscribe(@NotNull Subscription<?> subscription) {
+        var subscriptions = SUBSCRIPTIONS.get(subscription.eventClass);
+        if (subscriptions != null) {
+            subscriptions.remove(subscription);
+            log.debug("Unsubscribed from event: {}", subscription.eventClass.getSimpleName());
         }
-
-        HANDLERS.values().forEach(handlers ->
-                handlers.removeIf(h -> h.listener() == listener)
-        );
-
-        log.debug("Unregistered listener: {}", listener.getClass().getSimpleName());
     }
 
     @Contract("_ -> param1")
+    @SuppressWarnings("unchecked")
     public static <T extends Event> @NotNull T post(@NotNull T event) {
-        List<EventHandler> handlers = HANDLERS.get(event.getClass());
-        if (handlers == null || handlers.isEmpty()) {
+        var subscriptions = SUBSCRIPTIONS.get(event.getClass());
+        if (subscriptions == null || subscriptions.isEmpty()) {
             return event;
         }
 
-        for (EventHandler handler : handlers) {
+        for (var subscription : subscriptions) {
             try {
-                handler.invoke(event);
+                ((Subscription<T>) subscription).handler().accept(event);
             } catch (Exception e) {
-                log.error("Error invoking event handler {}.{}",
-                        handler.listener().getClass().getSimpleName(),
-                        handler.method().getName(), e);
+                log.error("Error while handling event: {}", event.getClass().getSimpleName(), e);
             }
         }
 
         return event;
     }
 
-    public static void clear() {
-        HANDLERS.clear();
-        REGISTERED_LISTENERS.clear();
-    }
-
-    private record EventHandler(
-            Object listener,
-            Method method,
-            int priority
+    public record Subscription<T extends Event>(
+            Class<T> eventClass,
+            Consumer<T> handler
     ) {
-
-        void invoke(Event event) throws Exception {
-            method.invoke(listener, event);
-        }
     }
+
 }

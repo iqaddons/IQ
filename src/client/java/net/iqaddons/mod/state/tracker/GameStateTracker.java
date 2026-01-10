@@ -28,7 +28,6 @@ public final class GameStateTracker {
     private static final int CHECK_INTERVAL = 20;
 
     public static void init() {
-        EventBus.register(new GameStateTracker());
         log.info("GameStateTracker initialized");
     }
 

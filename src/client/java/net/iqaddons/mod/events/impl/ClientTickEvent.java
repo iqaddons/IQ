@@ -1,23 +1,23 @@
 package net.iqaddons.mod.events.impl;
 
-import lombok.Getter;
 import net.iqaddons.mod.events.Event;
 import net.minecraft.client.MinecraftClient;
 
-@Getter
-public class ClientTickEvent extends Event {
+import java.util.concurrent.atomic.AtomicLong;
 
-    private static long tickCount = 0;
+public record ClientTickEvent(
+        MinecraftClient client,
+        long tickCount
+) implements Event {
 
-    private final MinecraftClient client;
+    private static final AtomicLong TICK_COUNTER = new AtomicLong(0);
 
-    public ClientTickEvent(MinecraftClient client) {
-        this.client = client;
-        tickCount++;
+    public static ClientTickEvent create(MinecraftClient client) {
+        return new ClientTickEvent(client, TICK_COUNTER.incrementAndGet());
     }
 
     public boolean isNthTick(int n) {
-        return tickCount % n == 0;
+        return n > 0 &&  tickCount % n == 0;
     }
 
     public boolean isInGame() {
