@@ -69,7 +69,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
 
         RenderColor color = RenderColor.fromArgb(Configuration.PhaseOneConfig.supplyWaypointColor);
         for (SupplyPosition supply : supplies) {
-            event.drawBeam(supply.getBeaconPosition(), BEACON_HEIGHT, true, color);
+            event.drawBeam(supply.getBeaconPosition(), BEACON_HEIGHT, color);
 
             Box crateBox = new Box(
                     supply.position().x,

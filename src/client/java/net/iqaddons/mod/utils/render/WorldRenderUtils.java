@@ -8,6 +8,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -98,21 +100,29 @@ public class WorldRenderUtils {
     }
 
     public static void drawBeam(
-            MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            Camera camera, Vec3d pos, int height, boolean throughWalls,
-            RenderColor color
+            @NotNull MatrixStack matrices, OrderedRenderCommandQueue queue,
+            @NotNull Vec3d pos, int height, @NotNull RenderColor color
     ) {
-        drawFilled(
-                matrices, consumer, camera,
-                Box.of(pos, 0.5, 0, 0.5)
-                        .stretch(0, height, 0),
-                throughWalls, color
+        matrices.push();
+
+        matrices.translate(pos.x, pos.y, pos.z);
+        matrices.translate(0.5F, 0.0F, 0.5F);
+
+        BeaconBlockEntityRenderer.renderBeam(
+                matrices, queue, BeaconBlockEntityRenderer.BEAM_TEXTURE,
+                1.0f, 0.0f,
+                0, height,
+                color.argb,
+                0.2f,
+                0.25f
         );
+
+        matrices.pop();
     }
 
     public static void drawTracer(
             @NotNull MatrixStack matrices, VertexConsumerProvider.@NotNull Immediate consumer,
-            @NotNull Camera camera, Vec3d pos, RenderColor color
+            @NotNull Camera camera, @NotNull Vec3d pos, @NotNull RenderColor color
     ) {
         Vec3d camPos = camera.getPos();
 

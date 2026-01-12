@@ -6,6 +6,7 @@ import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
@@ -14,6 +15,7 @@ import org.joml.Matrix4f;
 
 public record WorldRenderEvent(
         VertexConsumerProvider.Immediate consumer,
+        OrderedRenderCommandQueue commandQueue,
         MatrixStack matrices,
         Matrix4f projectionMatrix,
         Camera camera,
@@ -32,14 +34,14 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawText(matrices, consumer, camera, pos, text, scale, throughWalls, color);
     }
 
-    public void drawBeam(Vec3d pos, int height, boolean throughWalls, RenderColor color) {
-        WorldRenderUtils.drawBeam(matrices, consumer, camera, pos, height, throughWalls, color);
+    public void drawBeam(Vec3d pos, int height, RenderColor color) {
+        WorldRenderUtils.drawBeam(matrices, commandQueue, pos, height, color);
     }
 
     public void drawFilledWithBeam(Box box, int height, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawFilled(matrices, consumer, camera, box, throughWalls, color);
         Vec3d center = box.getCenter();
-        WorldRenderUtils.drawBeam(matrices, consumer, camera, center.add(0, box.maxY - center.getY(), 0), height, throughWalls, color);
+        WorldRenderUtils.drawBeam(matrices, commandQueue, center.add(0, box.maxY - center.getY(), 0), height, color);
     }
 
     public void drawTracer(Vec3d pos, RenderColor color) {

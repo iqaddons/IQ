@@ -119,7 +119,7 @@ public class BuildOverlayFeature extends KuudraFeature {
             RenderColor beaconColor = getColorForProgress(pile.progress);
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawBeam(beaconPos, 25, true, beaconColor);
+            event.drawBeam(beaconPos, 25, beaconColor);
 
             Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);
             event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, TEXT_COLOR);

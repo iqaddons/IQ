@@ -79,6 +79,7 @@ public class IQModClient implements ClientModInitializer {
                 new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(),
                 new BuildOverlayFeature(),
+                new ManaDrainAlertFeature(),
                 new KuudraHealthDisplayFeature(),
                 new BlockUselessPerksFeature(),
                 new HideMobNametagsFeature()
