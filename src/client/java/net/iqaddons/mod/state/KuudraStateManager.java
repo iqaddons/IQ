@@ -26,12 +26,6 @@ public final class KuudraStateManager {
     private Instant runStartTime;
     private final Map<KuudraPhase, Duration> phaseDurations = new EnumMap<>(KuudraPhase.class);
 
-    private KuudraStateManager() {}
-
-    public static KuudraStateManager get() {
-        return INSTANCE;
-    }
-
     public @NotNull KuudraPhase phase() {
         return currentPhase;
     }
@@ -125,6 +119,10 @@ public final class KuudraStateManager {
         Duration duration = Duration.between(phaseStartTime, Instant.now());
         phaseDurations.put(currentPhase, duration);
         return duration.toMillis();
+    }
+
+    public static KuudraStateManager get() {
+        return INSTANCE;
     }
 }
 

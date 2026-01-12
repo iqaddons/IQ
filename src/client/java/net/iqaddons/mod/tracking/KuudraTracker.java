@@ -40,7 +40,6 @@ public final class KuudraTracker {
         if (!isInKuudraArea()) return;
 
         String message = event.getStrippedMessage();
-
         KuudraPhase detected = KuudraPhase.fromMessage(message);
         if (detected != null) stateManager.setPhase(detected);
     }

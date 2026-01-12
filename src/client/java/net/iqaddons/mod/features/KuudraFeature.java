@@ -53,7 +53,7 @@ public abstract class KuudraFeature extends Feature {
     }
 
     private boolean shouldBeActiveForPhase(@NotNull KuudraPhase phase) {
-        return activePhases.contains(phase);
+        return stateManager.isInKuudra() && activePhases.contains(phase);
     }
 
     protected void onKuudraActivate() {}
