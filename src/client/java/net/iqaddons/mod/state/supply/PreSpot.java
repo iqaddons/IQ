@@ -3,6 +3,7 @@ package net.iqaddons.mod.state.supply;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,13 +60,20 @@ public enum PreSpot {
         return null;
     }
 
-    public static @Nullable PreSpot fromMissingPre(int missingPre) {
-        for (PreSpot spot : values()) {
-            if (spot.missingPreValue == missingPre) {
-                return spot;
-            }
-        }
-        return null;
+    @Contract(pure = true)
+    public static @Nullable PreSpot fromMessage(@NotNull String message) {
+        String normalized = message.toLowerCase().trim();
+
+        return switch (normalized) {
+            case "triangle", "tri" -> PreSpot.TRIANGLE;
+            case "x" -> PreSpot.X;
+            case "equals", "eq" -> PreSpot.EQUALS;
+            case "slash" -> PreSpot.SLASH;
+            case "shop" -> PreSpot.TRIANGLE;      // Shop is Triangle's secondary
+            case "x cannon" -> PreSpot.X;         // X Cannon is X's secondary
+            case "square" -> PreSpot.SLASH;       // Square is Slash's secondary
+            default -> null;
+        };
     }
 
     public boolean isPlayerNearby(@NotNull Vec3d playerPos) {

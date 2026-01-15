@@ -75,7 +75,6 @@ public class PileWaypointsFeature extends KuudraFeature {
         if (piles.isEmpty()) return;
 
         int missingPre = supplyState.getMissingPre();
-
         for (PileLocation pile : piles) {
             RenderColor color = pile.isNoPrePile(missingPre) ? NO_PRE_COLOR : NORMAL_COLOR;
             event.drawBeam(pile.position(), BEACON_HEIGHT, color);

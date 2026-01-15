@@ -1,6 +1,5 @@
 package net.iqaddons.mod.features.kuudra.waypoints.pearl;
 
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.EventBus;
@@ -10,6 +9,7 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.PearlWaypoint;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
 import net.iqaddons.mod.loader.WaypointConfigLoader;
+import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.area.AreaDetection;
 import net.iqaddons.mod.utils.render.RenderColor;
@@ -28,8 +28,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     private final WaypointConfigLoader configLoader;
     private final AreaDetection areaDetection;
 
-    @Setter
-    private int missingPre = 0;
+    private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     public PearlWaypointFeature() {
         super(
@@ -78,6 +77,8 @@ public class PearlWaypointFeature extends KuudraFeature {
     private void onRender(@NotNull WorldRenderEvent event) {
         WaypointArea area = areaDetection.getCurrentArea();
         if (area == null) return;
+
+        int missingPre = supplyState.getMissingPre();
         for (PearlWaypoint waypoint : area.waypoints()) {
             if (!waypoint.shouldShow(missingPre)) continue;
 
