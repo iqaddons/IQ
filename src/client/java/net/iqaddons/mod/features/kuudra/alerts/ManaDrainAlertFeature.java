@@ -29,7 +29,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
                 "manaDrainNotify",
                 "Mana Drain Notify",
                 () -> Configuration.manaDrainNotify,
-                KuudraPhase.RUN_PHASES.toArray(new KuudraPhase[KuudraPhase.values().length])
+                KuudraPhase.RUN_PHASES.toArray(new KuudraPhase[0])
         );
     }
 
@@ -63,18 +63,11 @@ public class ManaDrainAlertFeature extends KuudraFeature {
 
         int count = 0;
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player) {
-                continue;
-            }
+            if (player == mc.player) continue;
 
             double distance = mc.player.distanceTo(player);
-            if (distance > AFFECT_RADIUS) {
-                continue;
-            }
-
-            if (isRealPlayer(player)) {
-                count++;
-            }
+            if (distance > AFFECT_RADIUS) continue;
+            if (isRealPlayer(player)) count++;
         }
 
         return count;
