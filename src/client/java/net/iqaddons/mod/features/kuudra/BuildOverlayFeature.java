@@ -32,7 +32,6 @@ public class BuildOverlayFeature extends KuudraFeature {
     private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 255);
     private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 255);
 
-    private static final RenderColor TEXT_COLOR = RenderColor.fromHex(0xF0DC02);
     private final List<BuildPile> buildPiles = new CopyOnWriteArrayList<>();
 
     public BuildOverlayFeature() {
@@ -116,13 +115,13 @@ public class BuildOverlayFeature extends KuudraFeature {
 
     private void onRender(@NotNull WorldRenderEvent event) {
         for (BuildPile pile : buildPiles) {
-            RenderColor beaconColor = getColorForProgress(pile.progress);
+            var progressColor = getColorForProgress(pile.progress);
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawBeam(beaconPos, 25, beaconColor);
+            event.drawBeam(beaconPos, 25, progressColor);
 
             Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);
-            event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, TEXT_COLOR);
+            event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, progressColor);
         }
     }
 
