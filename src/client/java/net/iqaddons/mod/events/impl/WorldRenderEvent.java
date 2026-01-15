@@ -35,13 +35,13 @@ public record WorldRenderEvent(
     }
 
     public void drawBeam(Vec3d pos, int height, RenderColor color) {
-        WorldRenderUtils.drawBeam(matrices, commandQueue, pos, height, color);
+        WorldRenderUtils.drawBeam(matrices, commandQueue, camera, pos, height, color);
     }
 
     public void drawFilledWithBeam(Box box, int height, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawFilled(matrices, consumer, camera, box, throughWalls, color);
         Vec3d center = box.getCenter();
-        WorldRenderUtils.drawBeam(matrices, commandQueue, center.add(0, box.maxY - center.getY(), 0), height, color);
+        WorldRenderUtils.drawBeam(matrices, commandQueue, camera, center.add(0, box.maxY - center.getY(), 0), height, color);
     }
 
     public void drawTracer(Vec3d pos, RenderColor color) {

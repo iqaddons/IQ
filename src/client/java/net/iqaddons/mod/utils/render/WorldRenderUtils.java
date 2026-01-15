@@ -101,12 +101,16 @@ public class WorldRenderUtils {
 
     public static void drawBeam(
             @NotNull MatrixStack matrices, OrderedRenderCommandQueue queue,
-            @NotNull Vec3d pos, int height, @NotNull RenderColor color
+            @NotNull Camera camera, @NotNull Vec3d pos, int height, @NotNull RenderColor color
     ) {
         matrices.push();
 
-        matrices.translate(pos.x, pos.y, pos.z);
-        matrices.translate(0.5F, 0.0F, 0.5F);
+        Vec3d camPos = camera.getPos();
+        matrices.translate(
+                pos.x - camPos.x,
+                pos.y - camPos.y,
+                pos.z - camPos.z
+        );
 
         BeaconBlockEntityRenderer.renderBeam(
                 matrices, queue, BeaconBlockEntityRenderer.BEAM_TEXTURE,
