@@ -82,7 +82,8 @@ public class IQModClient implements ClientModInitializer {
                 new ManaDrainAlertFeature(),
                 new KuudraHealthDisplayFeature(),
                 new BlockUselessPerksFeature(),
-                new HideMobNametagsFeature()
+                new HideMobNametagsFeature(),
+                new TeamHighlightFeature()
         );
 
         features.start();

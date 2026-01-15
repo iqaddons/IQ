@@ -66,6 +66,14 @@ public class Configuration {
     public static boolean teamHighlight = true;
 
     @ConfigEntry(
+            id = "teamHighlightColor",
+            translation = "Team Hightlight Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Change the color of the teammate highlight")
+    public static int teamHighlightColor = new Color(255, 215, 0, 255).getRGB();
+
+    @ConfigEntry(
             id = "manaDrainNotify",
             translation = "Mana Drain Notify"
     )
@@ -85,6 +93,13 @@ public class Configuration {
     )
     @Comment("Prevent Kuudra mobs nametags from loading.")
     public static boolean hideMobNametags = false;
+
+    @ConfigEntry(
+            id = "fixFishingHook",
+            translation = "Fix Fishing Hook"
+    )
+    @Comment("Fix the fishing hook block when throw the rod.")
+    public static boolean fixFishingHook = true;
 
     @ConfigOption.Separator(
             value = "Waypoints"
