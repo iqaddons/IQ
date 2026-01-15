@@ -33,7 +33,7 @@ public class KuudraHealthDisplayFeature extends KuudraFeature {
     private static final int HP_DISPLAY_Y = 11;
     private static final double WORLD_TEXT_Y_OFFSET = 10.0;
 
-    private volatile @Nullable KuudraHealthDisplayFeature.KuudraHealthDat cachedHPData = null;
+    private volatile @Nullable KuudraHealthDisplayFeature.KuudraHealthData cachedHPData = null;
 
     public KuudraHealthDisplayFeature() {
         super(
@@ -81,17 +81,16 @@ public class KuudraHealthDisplayFeature extends KuudraFeature {
                 kuudra.getZ()
         );
 
-        cachedHPData = new KuudraHealthDat(currentHP, percentage, displayText, colorCode, worldPos);
+        cachedHPData = new KuudraHealthData(currentHP, percentage, displayText, colorCode, worldPos);
     }
 
     private void onHudRender(@NotNull HudRenderEvent event) {
-        KuudraHealthDat data = cachedHPData;
+        KuudraHealthData data = cachedHPData;
         if (data == null) return;
 
         TextRenderer textRenderer = MC.textRenderer;
         String text = "§l" + data.percentage + "%";
         int textWidth = textRenderer.getWidth(text);
-
         int x = event.centerX() - (textWidth / 2);
 
         event.drawContext().drawTextWithShadow(
@@ -104,7 +103,7 @@ public class KuudraHealthDisplayFeature extends KuudraFeature {
     }
 
     private void onWorldRender(@NotNull WorldRenderEvent event) {
-        KuudraHealthDat data = cachedHPData;
+        KuudraHealthData data = cachedHPData;
         if (data == null || data.worldPosition == null) return;
 
         String fullText = data.colorCode + data.displayText;
@@ -141,7 +140,7 @@ public class KuudraHealthDisplayFeature extends KuudraFeature {
         return "§4";
     }
 
-    private record KuudraHealthDat(
+    private record KuudraHealthData(
             float currentHP,
             float percentage,
             String displayText,

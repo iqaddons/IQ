@@ -70,7 +70,6 @@ public class PearlWaypointFeature extends KuudraFeature {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
-
         if (event.isNthTick(AREA_CHECK_INTERVAL)) {
             areaDetection.update();
         }
