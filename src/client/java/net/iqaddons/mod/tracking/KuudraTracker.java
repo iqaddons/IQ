@@ -41,7 +41,9 @@ public final class KuudraTracker {
 
         String message = event.getStrippedMessage();
         KuudraPhase detected = KuudraPhase.fromMessage(message);
-        if (detected != null) stateManager.setPhase(detected);
+        if (detected != null && detected != KuudraPhase.NONE) {
+            stateManager.setPhase(detected);
+        }
     }
 
     private void onSkyBlockStatus(@NotNull SkyBlockStatusEvent event) {

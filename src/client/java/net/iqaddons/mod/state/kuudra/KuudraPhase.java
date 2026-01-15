@@ -37,10 +37,8 @@ public enum KuudraPhase {
 
     public boolean canTransitionTo(@NotNull KuudraPhase target) {
         if (target == NONE) return true;
-        if (this == NONE && target == SUPPLIES) return true;
         if (target == next()) return true;
-        if (target == COMPLETED) return true;
-        return this == EATEN && target == STUN;
+        return target == COMPLETED;
     }
 
     public KuudraPhase next() {
