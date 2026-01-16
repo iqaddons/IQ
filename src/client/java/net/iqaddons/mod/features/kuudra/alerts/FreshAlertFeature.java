@@ -86,6 +86,7 @@ public class FreshAlertFeature extends KuudraFeature {
     private void onWorldRender(@NotNull WorldRenderEvent event) {
         if (freshPlayers.isEmpty()) return;
         if (mc.world == null) return;
+        if (!PhaseTwoConfig.freshTimers) return;
 
         long now = System.currentTimeMillis();
         for (Map.Entry<Integer, Long> entry : freshPlayers.entrySet()) {
@@ -125,7 +126,6 @@ public class FreshAlertFeature extends KuudraFeature {
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(buildProgress));
 
             applyFreshEffect(player.getId(), player.getName().getString());
-            log.info("Local Fresh at {}%", buildProgress);
             return;
         }
 
@@ -141,7 +141,6 @@ public class FreshAlertFeature extends KuudraFeature {
             findPlayerByName(playerName).ifPresentOrElse(
                     player -> {
                         applyFreshEffect(player.getId(), playerName);
-                        log.info("Party member {} activated Fresh", playerName);
                     },
                     () -> log.warn("Player '{}' not found in world", playerName)
             );
