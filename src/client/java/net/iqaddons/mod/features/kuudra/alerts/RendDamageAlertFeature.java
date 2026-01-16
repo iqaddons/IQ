@@ -74,7 +74,6 @@ public class RendDamageAlertFeature extends KuudraFeature {
         if (MC.player.getY() < ARENA_Y_THRESHOLD && !inBoss) {
             inBoss = true;
             bossStartTime = System.currentTimeMillis();
-            log.debug("Entered Phase 4 arena");
         }
 
         if (MC.player.getY() > IGNORE_Y_THRESHOLD) {
@@ -95,16 +94,17 @@ public class RendDamageAlertFeature extends KuudraFeature {
         }
 
         float damage = lastKuudraHealth - currentHealth;
+        log.info("Current Kuudra Health: {}, Last Health: {}, Damage: {}", currentHealth, lastKuudraHealth, damage);
         if (damage >= MIN_REND_DAMAGE) {
             float actualDamage = damage * DAMAGE_MULTIPLIER;
             String formattedDamage = formatHealth(actualDamage);
             String damageColor = getDamageColor(damage);
             double timeSinceStart = (System.currentTimeMillis() - bossStartTime) / 1000.0;
 
-            MessageUtil.INFO.sendMessage("Someone pulled for %s%s §rdamage at §a%.2fs§r."
+            MessageUtil.INFO.sendMessage("Someone pulled for %s%s §7damage at §a%.2fs§r."
                     .formatted(damageColor, formattedDamage, timeSinceStart)
             );
-            log.debug("Rend damage: {} ({})", formattedDamage, damage);
+            log.info("Rend damage: {} ({})", formattedDamage, damage);
         }
 
         lastKuudraHealth = currentHealth;

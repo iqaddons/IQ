@@ -73,24 +73,12 @@ public class EntityDetectorUtil {
 
     private static boolean isHoldingSkull(@NotNull GiantEntity giant) {
         ItemStack heldItem = giant.getMainHandStack();
-        if (heldItem.isEmpty()) {
-            return false;
-        }
+        if (heldItem.isEmpty()) return false;
 
-        if (heldItem.isOf(Items.PLAYER_HEAD)) {
-            return true;
-        }
-
-        return heldItem.isOf(Items.SKELETON_SKULL) ||
-                heldItem.isOf(Items.WITHER_SKELETON_SKULL) ||
-                heldItem.isOf(Items.ZOMBIE_HEAD) ||
-                heldItem.isOf(Items.CREEPER_HEAD) ||
-                heldItem.isOf(Items.PIGLIN_HEAD) ||
+        return heldItem.isOf(Items.PLAYER_HEAD) || heldItem.isOf(Items.SKELETON_SKULL) ||
+                heldItem.isOf(Items.WITHER_SKELETON_SKULL) || heldItem.isOf(Items.ZOMBIE_HEAD) ||
+                heldItem.isOf(Items.CREEPER_HEAD) || heldItem.isOf(Items.PIGLIN_HEAD) ||
                 heldItem.isOf(Items.DRAGON_HEAD);
-    }
-
-    public static @NotNull List<GiantEntity> getAllGiants() {
-        return getEntitiesOfType(GiantEntity.class);
     }
 
     public static @NotNull List<ArmorStandEntity> getAllArmorStands() {

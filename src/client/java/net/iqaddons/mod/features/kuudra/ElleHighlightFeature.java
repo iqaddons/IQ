@@ -38,7 +38,6 @@ public class ElleHighlightFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraDeactivate() {
-        // Remove glow from Elle when feature deactivates
         removeElleGlow();
         log.info("Elle Highlight (glow) deactivated");
     }
