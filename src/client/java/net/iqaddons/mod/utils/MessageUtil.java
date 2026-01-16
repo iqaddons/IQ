@@ -16,7 +16,7 @@ public enum MessageUtil {
     PARTY();
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
-    private static final String PREFIX = "§d[IQ] §r";
+    private static final String PREFIX = "§d§l[IQ] §r";
 
     private final String color;
 
@@ -39,7 +39,7 @@ public enum MessageUtil {
     public static void sendFormattedMessage(@NotNull String message) {
         ClientPlayerEntity player = mc.player;
         if (player != null) {
-            player.sendMessage(Text.literal(message.replace('&', '§')), false);
+            player.sendMessage(Text.literal(PREFIX + message.replace('&', '§')), false);
         }
     }
 
