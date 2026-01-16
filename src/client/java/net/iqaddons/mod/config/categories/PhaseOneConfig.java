@@ -76,10 +76,4 @@ public class PhaseOneConfig {
     @Comment("Send a custom message when recover a supply")
     public static boolean supplyRecoverMessage = true;
 
-    @ConfigEntry(
-            id = "crateDisplay",
-            translation = "Crate Display"
-    )
-    @Comment("Custom HUD showing crate pickups (W.I.P)")
-    public static boolean crateDisplay = true;
 }

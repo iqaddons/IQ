@@ -70,7 +70,7 @@ public class Configuration {
             id = "customSplits",
             translation = "Custom Splits"
     )
-    @Comment("Enable custom split timers (W.I.P)")
+    @Comment("Render a overlay with all the Kuudra phases times")
     public static boolean customSplits = true;
 
     @ConfigEntry(

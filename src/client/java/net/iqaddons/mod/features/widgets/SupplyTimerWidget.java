@@ -97,7 +97,7 @@ public class SupplyTimerWidget extends HudWidget {
         if (pickupHistory.isEmpty()) {
             long elapsed = supplyState.getElapsedTimeMillis();
             if (elapsed > 0) {
-                addLine(HudLine.of("§7Waiting... %.2f" + formatTime(elapsed)));
+                addLine(HudLine.of(String.format("§7Waiting... %.2f", (double) elapsed)));
             }
             markDimensionsDirty();
             return;
@@ -105,17 +105,13 @@ public class SupplyTimerWidget extends HudWidget {
 
         for (SupplyPickupEntry entry : pickupHistory) {
             addLine(HudLine.of(String.format(
-                    "§f%s §8(%d/6) %s%s",
+                    "§f%s §8(%d/6) %s%.2fs",
                     entry.playerName(), entry.supplyNumber(),
-                    entry.color, formatTime(entry.pickupAt())
+                    entry.color, (double) entry.pickupAt()
             )));
         }
 
         markDimensionsDirty();
-    }
-
-    private @NotNull String formatTime(long pickupAt) {
-        return String.format("%.2f", (double) pickupAt);
     }
 
     private record SupplyPickupEntry(
