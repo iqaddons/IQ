@@ -1,10 +1,10 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
@@ -30,12 +30,16 @@ public class FreshAlertFeature extends KuudraFeature {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final String FRESH_TOOLS_MESSAGE = "Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!";
-    private static final Pattern BUILDING_PROGRESS_PATTERN = Pattern.compile("Building Progress:\\s*(\\d+)%");
+    private static final Pattern PROTECT_ELLE_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
     private static final Pattern PARTY_FRESH_PATTERN = Pattern.compile("Party > (?:\\[[^]]+] )?(\\w+): FRESH!");
-    private static final int FRESH_DURATION_SECONDS = 10;
+
+    private static final int FRESH_DURATION_MS = 10_000; // 10 seconds
 
     private final ScheduledExecutorService scheduler;
     private final Map<Integer, Long> glowingPlayers = new ConcurrentHashMap<>();
+
+    private volatile long localFreshStartTime = 0;
+    private volatile boolean localFreshActive = false;
 
     public FreshAlertFeature(ScheduledExecutorService scheduler) {
         super(
@@ -51,6 +55,7 @@ public class FreshAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         subscribe(EventBus.subscribe(ChatReceivedEvent.class, this::onChat));
+        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
         log.info("Fresh Message activated");
     }
 
@@ -59,7 +64,36 @@ public class FreshAlertFeature extends KuudraFeature {
         glowingPlayers.keySet().forEach(EntityGlowUtil::removeGlowing);
         glowingPlayers.clear();
 
+        localFreshActive = false;
+        localFreshStartTime = 0;
+
+        clearFreshTitle();
+
         log.info("Fresh Message deactivated");
+    }
+
+    private void onTick(@NotNull ClientTickEvent event) {
+        if (!event.isInGame()) return;
+
+        if (localFreshActive) {
+            long elapsed = System.currentTimeMillis() - localFreshStartTime;
+            long remaining = FRESH_DURATION_MS - elapsed;
+
+            if (remaining <= 0) {
+                localFreshActive = false;
+                localFreshStartTime = 0;
+
+                clearFreshTitle();
+                log.debug("Fresh expired, cleared title");
+            } else if (PhaseTwoConfig.freshCountdown){
+                double remainingSeconds = remaining / 1000.0;
+                MessageUtil.showTitle(String.format("%s%.2fs",
+                                getCountdownColor(remainingSeconds),
+                                remainingSeconds
+                        ), "", 0, 5, 5
+                );
+            }
+        }
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
@@ -68,10 +102,11 @@ public class FreshAlertFeature extends KuudraFeature {
             ClientPlayerEntity player = mc.player;
             if (player == null) return;
 
-            int buildProgress = ScoreboardUtils.findLine("Building Progress")
-                    .map(this::extractProgress)
-                    .orElse(0);;
+            int buildProgress = getBuildingProgress();
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(buildProgress));
+
+            localFreshStartTime = System.currentTimeMillis();
+            localFreshActive = true;
 
             applyFreshGlow(player.getId(), player.getName().getString());
             log.debug("Fresh activated at {}% progress", buildProgress);
@@ -99,8 +134,8 @@ public class FreshAlertFeature extends KuudraFeature {
 
         scheduler.schedule(
                 () -> removeFreshGlow(entityId),
-                FRESH_DURATION_SECONDS,
-                TimeUnit.SECONDS
+                FRESH_DURATION_MS,
+                TimeUnit.MILLISECONDS
         );
     }
 
@@ -119,17 +154,40 @@ public class FreshAlertFeature extends KuudraFeature {
                 .findFirst();
     }
 
-    private int extractProgress(@NotNull String line) {
-        String stripped = ScoreboardUtils.stripFormatting(line);
-        Matcher matcher = BUILDING_PROGRESS_PATTERN.matcher(stripped);
+    private int getBuildingProgress() {
+        for (String line : ScoreboardUtils.getLines()) {
+            String stripped = ScoreboardUtils.stripFormatting(line);
 
-        if (matcher.find()) {
-            try {
-                return Integer.parseInt(matcher.group(1));
-            } catch (NumberFormatException e) {
-                log.warn("Failed to parse building progress: {}", stripped);
+            Matcher matcher = PROTECT_ELLE_PATTERN.matcher(stripped);
+            if (matcher.find()) {
+                try {
+                    int progress = Integer.parseInt(matcher.group(1));
+                    log.debug("Found build progress: {}% from line: {}", progress, stripped);
+                    return progress;
+                } catch (NumberFormatException e) {
+                    log.warn("Failed to parse progress from: {}", stripped);
+                }
             }
         }
+
+        log.warn("Could not find 'Protect Elle' on scoreboard");
         return 0;
+    }
+
+    private void clearFreshTitle() {
+        if (mc.inGameHud != null) {
+            mc.inGameHud.clearTitle();
+        }
+    }
+
+    @NotNull
+    private String getCountdownColor(double remainingSeconds) {
+        if (remainingSeconds > 6.0) {
+            return "§a§l";
+        } else if (remainingSeconds > 3.0) {
+            return "§e§l";
+        } else {
+            return "§c§l";
+        }
     }
 }
