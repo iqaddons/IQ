@@ -80,14 +80,14 @@ public class CustomSplitsWidget extends HudWidget {
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),
-                HudLine.of("§fSupplies §d22.45s"),
-                HudLine.of("§fBuild §914.32s"),
-                HudLine.of("§fEaten §a5.21s"),
-                HudLine.of("§fStun §d0.53s"),
-                HudLine.of("§fDPS §63.89s"),
-                HudLine.of("§fBoss §c5.12s"),
-                HudLine.of("§fOverall §a51.00s"),
-                HudLine.of("§fPace §953.50s")
+                HudLine.of("§fSupplies: §d22.45s"),
+                HudLine.of("§fBuild: §914.32s"),
+                HudLine.of("§fEaten: §a5.21s"),
+                HudLine.of("§fStun: §d0.53s"),
+                HudLine.of("§fDPS: §63.89s"),
+                HudLine.of("§fBoss: §c5.12s"),
+                HudLine.of("§fOverall: §a51.00s"),
+                HudLine.of("§fPace: §953.50s")
         ));
     }
 
@@ -174,12 +174,12 @@ public class CustomSplitsWidget extends HudWidget {
     }
 
     private void updateDisplay() {
-        updatePhaseLine(suppliesLine, "Supplies", KuudraPhase.SUPPLIES);
-        updatePhaseLine(buildLine, "Build", KuudraPhase.BUILD);
-        updatePhaseLine(eatenLine, "Eaten", KuudraPhase.EATEN);
-        updatePhaseLine(stunLine, "Stun", KuudraPhase.STUN);
-        updatePhaseLine(dpsLine, "DPS", KuudraPhase.DPS);
-        updatePhaseLine(bossLine, "Boss", KuudraPhase.BOSS);
+        updatePhaseLine(suppliesLine, "Supplies:", KuudraPhase.SUPPLIES);
+        updatePhaseLine(buildLine, "Build:", KuudraPhase.BUILD);
+        updatePhaseLine(eatenLine, "Eaten:", KuudraPhase.EATEN);
+        updatePhaseLine(stunLine, "Stun:", KuudraPhase.STUN);
+        updatePhaseLine(dpsLine, "DPS:", KuudraPhase.DPS);
+        updatePhaseLine(bossLine, "Boss:", KuudraPhase.BOSS);
 
         double overall = calculateOverall();
         double pace = calculatePace();
@@ -187,8 +187,8 @@ public class CustomSplitsWidget extends HudWidget {
         String overallColor = getSplitColor(overall, OVERALL_THRESHOLDS);
         String paceColor = getSplitColor(pace, OVERALL_THRESHOLDS);
 
-        overallLine.text(String.format("§fOverall %s%s", overallColor, formatTime(overall)));
-        paceLine.text(String.format("§fPace %s%s", paceColor, formatTime(pace)));
+        overallLine.text(String.format("§fOverall: %s%s", overallColor, formatTime(overall)));
+        paceLine.text(String.format("§fPace: %s%s", paceColor, formatTime(pace)));
 
         markDimensionsDirty();
     }
