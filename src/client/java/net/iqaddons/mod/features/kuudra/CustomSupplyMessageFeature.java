@@ -56,16 +56,13 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
         String supplyCount = matcher.group(2);
         String formattedMessage = TextFormatUtil.toLegacyString(event.getText());
         String formattedPlayerName = extractFormattedPlayerName(formattedMessage);
-
         double timeSeconds = supplyState.getElapsedTimeSeconds();
-        String timeColor = getTimeColor(supplyState.getTimeTier());
-        String formattedTime = String.format("%.2f", timeSeconds);
 
         MessageUtil.sendFormattedMessage(String.format(
                 "%s §arecovered a supply in %s%ss §r§8(%s/6)",
                 formattedPlayerName,
-                timeColor,
-                formattedTime,
+                supplyState.getTimeColor(),
+                String.format("%.2f", timeSeconds),
                 supplyCount
         ));
     }
@@ -79,15 +76,4 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
         return formattedMessage;
     }
 
-    @Contract(pure = true)
-    private @NotNull String getTimeColor(int tier) {
-        return switch (tier) {
-            case 0 -> "§f§l";
-            case 1 -> "§9§l";
-            case 2 -> "§a§l";
-            case 3 -> "§2§l";
-            case 4 -> "§e§l";
-            default -> "§c§l";
-        };
-    }
 }

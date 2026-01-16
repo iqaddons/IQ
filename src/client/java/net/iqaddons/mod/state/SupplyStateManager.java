@@ -125,7 +125,19 @@ public final class SupplyStateManager {
         return getElapsedTimeMillis() / 1000.0;
     }
 
-    public int getTimeTier() {
+    @Contract(pure = true)
+    public @NotNull String getTimeColor() {
+        return switch (getTimeTier()) {
+            case 0 -> "§f§l";
+            case 1 -> "§9§l";
+            case 2 -> "§a§l";
+            case 3 -> "§2§l";
+            case 4 -> "§e§l";
+            default -> "§c§l";
+        };
+    }
+
+    private int getTimeTier() {
         long time = getElapsedTimeMillis();
         if (time < 20000) return 0;
         if (time < 24000) return 1;
