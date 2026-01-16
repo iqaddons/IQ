@@ -87,14 +87,6 @@ public class FreshCountdownWidget extends HudWidget {
         if (!freshActive) return;
         if (!event.isNthTick(2)) return;
 
-        long elapsed = System.currentTimeMillis() - freshStartTime;
-        long remaining = FRESH_DURATION_MS - elapsed;
-
-        if (remaining <= 0) {
-            freshActive = false;
-            return;
-        }
-
         updateDisplay();
     }
 
@@ -112,15 +104,12 @@ public class FreshCountdownWidget extends HudWidget {
 
         countdownLine.text(String.format("%s%.1fs", color, remainingSeconds));
         markDimensionsDirty();
+        log.info("Fresh countdown updated: {}s remaining", String.format("%.1f", remainingSeconds));
     }
 
     private @NotNull String getCountdownColor(double remainingSeconds) {
-        if (remainingSeconds > 6.0) {
-            return "§a";
-        } else if (remainingSeconds > 3.0) {
-            return "§e";
-        } else {
-            return "§c";
-        }
+        if (remainingSeconds > 6.0) return "§a";
+        else if (remainingSeconds > 3.0) return "§e";
+        else return "§c";
     }
 }

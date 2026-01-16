@@ -97,7 +97,7 @@ public class SupplyTimerWidget extends HudWidget {
         if (pickupHistory.isEmpty()) {
             long elapsed = supplyState.getElapsedTimeMillis();
             if (elapsed > 0) {
-                addLine(HudLine.of("§7Waiting... §.2f" + formatTime(elapsed)));
+                addLine(HudLine.of("§7Waiting... %.2f" + formatTime(elapsed)));
             }
             markDimensionsDirty();
             return;

@@ -9,11 +9,13 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class IQCommand {
 
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
                 literal("iq")
                         .executes(ctx -> {
-                            IQKeyBindings.openConfigScreen(MinecraftClient.getInstance());
+                            mc.send(() -> IQKeyBindings.openConfigScreen(mc));
                             return 1;
                         })
         );
