@@ -106,7 +106,7 @@ public class KuudraHealthWidget extends HudWidget {
 
     private void updateDisplay() {
         String formattedHP = formatHealth(currentHP);
-        healthLine.text(String.format("§c❤ %s §8(§c%s§8)", formattedHP, percentage));
+        healthLine.text(String.format("§c❤ %s §8(§c%s.2f%%§8)", formattedHP, percentage));
 
         if (stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD) {
             float actualHP = currentHP * BOSS_MULTIPLIER;
