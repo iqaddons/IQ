@@ -1,7 +1,6 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
@@ -23,7 +22,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class BuildProgressWidget extends HudWidget {
 
-    private static final Pattern PROGRESS_PATTERN = Pattern.compile("Protect Elle:\\s*(\\d+)%");
+    private static final Pattern PROGRESS_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
     private static final String FRESH_MESSAGE = "Your Fresh Tools Perk bonus doubles your building speed";
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
@@ -50,19 +49,18 @@ public class BuildProgressWidget extends HudWidget {
         );
 
         titleLine = HudLine.of("§6§lBuild Progress");
-        progressLine = HudLine.of("§7Progress: §a0%");
-        freshLine = HudLine.of("§7Fresh: §b0")
-                .showWhen(() -> freshCount > 0);
-        etaLine = HudLine.of("§7ETA: §e--");
+        progressLine = HudLine.of("§fProgress: §a0%");
+        freshLine = HudLine.of("§fFresh: §b0").showWhen(() -> freshCount > 0);
+        etaLine = HudLine.of("§fETA: §e--");
 
         setEnabledSupplier(() -> PhaseTwoConfig.buildHelper);
         setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.BUILD);
 
         setExampleLines(List.of(
-                HudLine.of("§6§lBuild Progress"),
-                HudLine.of("§7Progress: §a75%"),
-                HudLine.of("§7Fresh: §b3"),
-                HudLine.of("§7ETA: §e12s")
+                titleLine,
+                HudLine.of("§fProgress: §a75%"),
+                HudLine.of("§fFresh: §b3"),
+                HudLine.of("§fETA: §e12s")
         ));
     }
 
@@ -111,27 +109,37 @@ public class BuildProgressWidget extends HudWidget {
         if (!event.isInGame()) return;
         if (!event.isNthTick(10)) return;
 
-        ScoreboardUtils.findLine("Protect Elle")
-                .ifPresent(line -> {
-                    String stripped = ScoreboardUtils.stripFormatting(line);
-                    Matcher matcher = PROGRESS_PATTERN.matcher(stripped);
-                    if (matcher.find()) {
-                        int newProgress = Integer.parseInt(matcher.group(1));
-                        if (newProgress != currentProgress) {
-                            currentProgress = newProgress;
-                            updateDisplay();
-                        }
-                    }
-                });
+        int newProgress = getBuildProgress();
+        if (newProgress >= 0 && newProgress != currentProgress) {
+            currentProgress = newProgress;
+            updateDisplay();
+            log.debug("Build progress updated: {}%", currentProgress);
+        }
+    }
+
+    private int getBuildProgress() {
+        for (String line : ScoreboardUtils.getLines()) {
+            String stripped = ScoreboardUtils.stripFormatting(line);
+
+            Matcher matcher = PROGRESS_PATTERN.matcher(stripped);
+            if (matcher.find()) {
+                try {
+                    return Integer.parseInt(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    log.warn("Failed to parse build progress: {}", stripped);
+                }
+            }
+        }
+        return -1;
     }
 
     private void updateDisplay() {
         String progressColor = getProgressColor(currentProgress);
-        progressLine.text(String.format("§7Progress: %s%d%%", progressColor, currentProgress));
-        freshLine.text(String.format("§7Fresh: §b%d", freshCount));
+        progressLine.text(String.format("§fProgress: %s%d%%", progressColor, currentProgress));
+        freshLine.text(String.format("§fFresh: §b%d", freshCount));
 
         String eta = calculateETA();
-        etaLine.text(String.format("§7ETA: §e%s", eta));
+        etaLine.text(String.format("§fETA: §e%s", eta));
 
         markDimensionsDirty();
     }
@@ -168,6 +176,7 @@ public class BuildProgressWidget extends HudWidget {
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
+
         if (shouldRender() && isActive() && currentProgress > 0) {
             float absX = getAbsoluteX();
             float absY = getAbsoluteY();

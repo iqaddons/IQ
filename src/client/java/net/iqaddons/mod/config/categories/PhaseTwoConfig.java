@@ -13,24 +13,24 @@ import java.awt.*;
 public class PhaseTwoConfig {
 
     @ConfigEntry(
-            id = "buildOverlay",
-            translation = "Build Overlay"
-    )
-    @Comment("Custom build overlay with pile colors based on percentage")
-    public static boolean buildOverlay = true;
-
-    @ConfigEntry(
             id = "buildHelper",
             translation = "Build Helper"
     )
-    @Comment("Build helper HUD (W.I.P)")
+    @Comment("Render some helpful holograms during the build phase")
     public static boolean buildHelper = true;
+
+    @ConfigEntry(
+            id = "buildProgressOverlay",
+            translation = "Build Progress Overlay"
+    )
+    @Comment("Display a build progress overlay on the screen")
+    public static boolean buildProgressOverlay = true;
 
     @ConfigEntry(
             id = "freshTimers",
             translation = "Fresh Times"
     )
-    @Comment("Display build times for all freshers (W.I.P)")
+    @Comment("Render a timer above freshers heads during the build phase")
     public static boolean freshTimers = true;
 
     @ConfigEntry(
