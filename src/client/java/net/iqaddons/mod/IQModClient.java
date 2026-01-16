@@ -86,7 +86,8 @@ public class IQModClient implements ClientModInitializer {
                 new BlockUselessPerksFeature(),
                 new HideMobNametagsFeature(),
                 new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature()
+                new KuudraPhaseAlertFeature(),
+                new DangerAlertFeature()
         );
 
         features.start();

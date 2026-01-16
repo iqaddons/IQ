@@ -23,4 +23,11 @@ public class PhaseFourConfig {
     @Comment("Track when any teammate deals Rend Damage")
     public static boolean rendDamageAlert = true;
 
+    @ConfigEntry(
+            id = "dangerZoneAlert",
+            translation = "Danger Zone Alert"
+    )
+    @Comment("Alert when you are in Tentacle's Danger Zone")
+    public static boolean dangerZoneAlert = true;
+
 }
