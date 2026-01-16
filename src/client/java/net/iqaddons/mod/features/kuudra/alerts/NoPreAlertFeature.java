@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class NoPreAlertFeature extends KuudraFeature {
 
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final String ELLE_FISHING_MESSAGE = "[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!";
     private static final long PRE_SPOT_DETECTION_DELAY_MS = 9000;
     private static final long SUPPLY_CHECK_DELAY_MS = 11500;
@@ -36,7 +37,6 @@ public class NoPreAlertFeature extends KuudraFeature {
             Pattern.CASE_INSENSITIVE
     );
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final ScheduledExecutorService scheduler;
 

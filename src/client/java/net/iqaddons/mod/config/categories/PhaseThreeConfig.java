@@ -35,6 +35,13 @@ public class PhaseThreeConfig {
     public static int kuudraHitboxColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
 
     @ConfigEntry(
+            id = "stunWaypoints",
+            translation = "Stun Waypoints"
+    )
+    @Comment("Display waypoints for stun locations")
+    public static boolean stunWaypoints = false;
+
+    @ConfigEntry(
             id = "blockUselessPerks",
             translation = "Block Useless Perks"
     )

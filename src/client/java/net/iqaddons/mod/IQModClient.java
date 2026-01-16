@@ -14,6 +14,7 @@ import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.waypoints.building.BuildWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
+import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
 import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
@@ -81,6 +82,7 @@ public class IQModClient implements ClientModInitializer {
                 new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(),
                 new BuildWaypointsFeature(),
+                new StunWaypointsFeature(),
                 new ManaDrainAlertFeature(),
                 new KuudraHealthDisplayFeature(),
                 new BlockUselessPerksFeature(),

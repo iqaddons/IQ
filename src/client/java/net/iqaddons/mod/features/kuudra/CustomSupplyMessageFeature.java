@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
-import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
@@ -55,12 +54,8 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
         event.setCancelled(true);
 
         String supplyCount = matcher.group(2);
-
         String formattedMessage = TextFormatUtil.toLegacyString(event.getText());
-        log.debug("Formatted message with colors: {}", formattedMessage);
-
         String formattedPlayerName = extractFormattedPlayerName(formattedMessage);
-        log.debug("Extracted formatted player name: {}", formattedPlayerName);
 
         double timeSeconds = supplyState.getElapsedTimeSeconds();
         String timeColor = getTimeColor(supplyState.getTimeTier());
