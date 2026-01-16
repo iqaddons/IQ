@@ -18,29 +18,23 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
 
     private static final int CHECK_INTERVAL_TICKS = 2;
 
-    private volatile boolean alertShown = false;
-    private volatile float lastKuudraHealth = 0;
-
     public KuudraDirectionAlertFeature() {
         super(
-                "kuudraSpawnAlert",
-                "Kuudra Spawn Alert",
-                () -> Configuration.PhaseFourConfig.kuudraSpawnAlert,
-                KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
+                "kuudraDirectionAlert",
+                "Kuudra Direction Alert",
+                () -> Configuration.PhaseFourConfig.kuudraDirectionAlert,
+                KuudraPhase.BOSS
         );
     }
 
     @Override
     protected void onKuudraActivate() {
-        alertShown = false;
-        lastKuudraHealth = 0;
         subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
         log.info("Kuudra Spawn Alert activated");
     }
 
     @Override
     protected void onKuudraDeactivate() {
-        alertShown = false;
         log.info("Kuudra Spawn Alert deactivated");
     }
 
@@ -48,30 +42,16 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
         if (!event.isInGame()) return;
         if (!event.isNthTick(CHECK_INTERVAL_TICKS)) return;
 
-        Optional<MagmaCubeEntity> optionalKuudra = KuudraDirectionUtil.findKuudra();
-        if (optionalKuudra.isEmpty()) {
-            if (alertShown) {
-                alertShown = false;
-                lastKuudraHealth = 0;
-            }
-            return;
-        }
+        var optionalKuudra = KuudraDirectionUtil.findKuudra();
+        if (optionalKuudra.isEmpty()) return;
 
         MagmaCubeEntity kuudra = optionalKuudra.get();
-        float currentHealth = kuudra.getHealth();
+        var direction = KuudraDirectionUtil.getSpawnDirection(kuudra);
+        log.info("Detected Kuudra spawn, direction: {}", direction.getName());
 
-        if (KuudraDirectionUtil.justBossSpawned(kuudra)) {
-            if (!alertShown || currentHealth > lastKuudraHealth) {
-                KuudraDirectionUtil.SpawnDirection direction = KuudraDirectionUtil.getSpawnDirection(kuudra);
-
-                if (direction != KuudraDirectionUtil.SpawnDirection.UNKNOWN) {
-                    MessageUtil.showTitle(direction.getFormattedName(), "", 0, 25, 5);
-                    log.debug("Kuudra spawn alert: {}", direction.getName());
-                }
-                alertShown = true;
-            }
+        if (direction != KuudraDirectionUtil.SpawnDirection.UNKNOWN) {
+            MessageUtil.showTitle(direction.getFormattedName(), "", 0, 25, 5);
+            log.info("Kuudra spawn alert: {}", direction.getName());
         }
-
-        lastKuudraHealth = currentHealth;
     }
 }

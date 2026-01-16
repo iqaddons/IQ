@@ -26,10 +26,11 @@ public class KuudraDirectionUtil {
     public static @NotNull Optional<MagmaCubeEntity> findKuudra() {
         ClientWorld world = MC.world;
         if (world == null) return Optional.empty();
-        return findKuudraInternal(world);
+
+        return findKuudraBoss(world);
     }
 
-    private static @NotNull Optional<MagmaCubeEntity> findKuudraInternal(@NotNull ClientWorld world) {
+    private static @NotNull Optional<MagmaCubeEntity> findKuudraBoss(@NotNull ClientWorld world) {
         for (var entity : world.getEntities()) {
             if (entity instanceof MagmaCubeEntity magmaCube) {
                 if (isKuudra(magmaCube)) {
@@ -50,19 +51,6 @@ public class KuudraDirectionUtil {
         return Math.abs(width - KUUDRA_WIDTH) < KUUDRA_WIDTH_TOLERANCE
                 && health <= KUUDRA_MAX_HEALTH
                 && health > 0;
-    }
-
-    public static boolean isInPhase4(@NotNull MagmaCubeEntity kuudra) {
-        return kuudra.getHealth() <= BOSS_HEALTH_THRESHOLD;
-    }
-
-    public static boolean justBossSpawned(@NotNull MagmaCubeEntity kuudra) {
-        float health = kuudra.getHealth();
-        return health <= BOSS_HEALTH_THRESHOLD && health > BOSS_SPAWN_HEALTH_MIN;
-    }
-
-    public static float getHealth(@NotNull MagmaCubeEntity kuudra) {
-        return kuudra.getHealth();
     }
 
     public static @NotNull SpawnDirection getSpawnDirection(@NotNull MagmaCubeEntity kuudra) {
