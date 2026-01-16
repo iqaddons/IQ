@@ -28,7 +28,7 @@ public class Configuration {
 
     @ConfigButton(
             title = "Open HUD Editor",
-            text = "Open"
+            text = "(W.I.P)"
     )
     @Comment("Open the HUD Editor to customize your HUD elements")
     public static final Runnable hudEditor = () -> {
@@ -41,23 +41,30 @@ public class Configuration {
             id = "autoRequeue",
             translation = "Auto Requeue"
     )
-    @Comment("Automatically requeue a Kuudra run after boss death")
+    @Comment("Automatically requeue a Kuudra run after boss death (W.I.P)")
     public static boolean autoRequeue = false;
 
     @ConfigEntry(
             id = "requeueDelay",
             translation = "Requeue Delay"
     )
-    @Comment("Delay in ticks before auto-requeue (5-50)")
+    @Comment("Delay in ticks before auto-requeue (5-50) (W.I.P)")
     @ConfigOption.Range(min = 5, max = 50)
     @ConfigOption.Slider
     public static int requeueDelay = 20;
 
     @ConfigEntry(
+            id = "kuudraProfitTracker",
+            translation = "Kuudra Profit Tracker"
+    )
+    @Comment("Track your profit/loss after each Kuudra run (W.I.P)")
+    public static boolean kuudraProfitTracker = false;
+
+    @ConfigEntry(
             id = "customSplits",
             translation = "Custom Splits"
     )
-    @Comment("Enable custom split timers")
+    @Comment("Enable custom split timers (W.I.P)")
     public static boolean customSplits = true;
 
     @ConfigEntry(
@@ -84,30 +91,30 @@ public class Configuration {
 
     @ConfigEntry(
             id = "kuudraPhaseAlert",
-            translation = "Kuudra Phase Alert"
+            translation = "Phase Alert"
     )
-    @Comment("Alert when Kuudra changes phase")
+    @Comment("Alert when Kuudra phase changes")
     public static boolean kuudraPhaseAlert = true;
 
     @ConfigEntry(
             id = "partyJoinSound",
             translation = "Party Join Sound"
     )
-    @Comment("Play a sound when a player joins your party")
+    @Comment("Play a sound when a player joins your party (W.I.P)")
     public static boolean partyJoinSound = true;
 
     @ConfigEntry(
             id = "hideMobNametags",
             translation = "Hide Mob Nametags"
     )
-    @Comment("Prevent Kuudra mobs nametags from loading.")
+    @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
 
     @ConfigEntry(
             id = "fixFishingHook",
             translation = "Fix Fishing Hook"
     )
-    @Comment("Fix the fishing hook block when throw the rod.")
+    @Comment("Fix the fishing hook block when throw the rod (W.I.P)")
     public static boolean fixFishingHook = true;
 
     @ConfigOption.Separator(
@@ -118,13 +125,13 @@ public class Configuration {
             id = "renderWaypoints",
             translation = "Render Waypoints"
     )
-    @Comment("Create waypoints from Patcher-formatted coordinates.")
+    @Comment("Create waypoints from Patcher-formatted coordinates (W.I.P)")
     public static boolean renderWaypoints = true;
 
 
     @ConfigEntry(
             id = "waypointsDuration",
-            translation = "Waypoints Duration (seconds)"
+            translation = "Waypoints Duration (seconds) (W.I.P)"
     )
     @ConfigOption.Range(min = 1, max = 60)
     @ConfigOption.Slider

@@ -38,6 +38,6 @@ public class PhaseThreeConfig {
             id = "blockUselessPerks",
             translation = "Block Useless Perks"
     )
-    @Comment("Prevent purchasing useless perks")
+    @Comment("Prevent purchasing useless perks (W.I.P)")
     public static boolean blockUselessPerks = true;
 }

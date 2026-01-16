@@ -16,7 +16,7 @@ public class PhaseOneConfig {
             id = "supplyTimers",
             translation = "Supply Times"
     )
-    @Comment("Display supply pickup times for all players")
+    @Comment("Display supply pickup times for all players (W.I.P)")
     public static boolean supplyTimers = true;
 
     @ConfigEntry(
@@ -80,6 +80,6 @@ public class PhaseOneConfig {
             id = "crateDisplay",
             translation = "Crate Display"
     )
-    @Comment("Custom HUD showing crate pickups")
+    @Comment("Custom HUD showing crate pickups (W.I.P)")
     public static boolean crateDisplay = true;
 }

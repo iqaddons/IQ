@@ -23,15 +23,22 @@ public class PhaseTwoConfig {
             id = "buildHelper",
             translation = "Build Helper"
     )
-    @Comment("Build helper HUD")
+    @Comment("Build helper HUD (W.I.P)")
     public static boolean buildHelper = true;
 
     @ConfigEntry(
             id = "freshTimers",
             translation = "Fresh Times"
     )
-    @Comment("Display build times for all freshers")
+    @Comment("Display build times for all freshers (W.I.P)")
     public static boolean freshTimers = true;
+
+    @ConfigEntry(
+            id = "freshCountdown",
+            translation = "Fresh Countdown"
+    )
+    @Comment("Display a countdown timer of you fresh")
+    public static boolean freshCountdown = false;
 
     @ConfigEntry(
             id = "elleHighlight",
@@ -52,7 +59,7 @@ public class PhaseTwoConfig {
             id = "freshMessage",
             translation = "Fresh Message"
     )
-    @Comment(" Send a party message when you fresh")
+    @Comment("Send a party message when you fresh")
     public static boolean freshMessage = true;
 
     @ConfigEntry(
