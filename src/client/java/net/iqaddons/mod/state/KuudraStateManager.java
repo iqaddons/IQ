@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.state.kuudra.KuudraRun;
-import net.iqaddons.mod.state.kuudra.KuudraTier;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -20,7 +18,6 @@ public final class KuudraStateManager {
     private static final KuudraStateManager INSTANCE = new KuudraStateManager();
 
     private volatile KuudraPhase currentPhase = KuudraPhase.NONE;
-    private volatile KuudraTier currentTier = KuudraTier.NONE;
 
     private Instant phaseStartTime;
     private Instant runStartTime;
@@ -28,10 +25,6 @@ public final class KuudraStateManager {
 
     public @NotNull KuudraPhase phase() {
         return currentPhase;
-    }
-
-    public @NotNull KuudraTier tier() {
-        return currentTier;
     }
 
     public boolean isInKuudra() {
@@ -45,11 +38,6 @@ public final class KuudraStateManager {
     public Optional<Duration> currentPhaseDuration() {
         if (phaseStartTime == null) return Optional.empty();
         return Optional.of(Duration.between(phaseStartTime, Instant.now()));
-    }
-
-    public Optional<Duration> runDuration() {
-        if (runStartTime == null) return Optional.empty();
-        return Optional.of(Duration.between(runStartTime, Instant.now()));
     }
 
     public @NotNull Optional<Duration> getPhaseDuration(@NotNull KuudraPhase phase) {
@@ -80,18 +68,10 @@ public final class KuudraStateManager {
         return true;
     }
 
-    public void setTier(@NotNull KuudraTier tier) {
-        if (currentTier != tier) {
-            currentTier = tier;
-            log.info("Tier set: {}", tier.getDisplayName());
-        }
-    }
-
     public void reset() {
         if (currentPhase != KuudraPhase.NONE) {
             KuudraPhase previous = currentPhase;
             currentPhase = KuudraPhase.NONE;
-            currentTier = KuudraTier.NONE;
             phaseStartTime = null;
             runStartTime = null;
             phaseDurations.clear();
@@ -99,16 +79,6 @@ public final class KuudraStateManager {
             log.info("State reset from {}", previous.getDisplayName());
             EventBus.post(new KuudraPhaseChangeEvent(previous, KuudraPhase.NONE, 0));
         }
-    }
-
-    public Optional<KuudraRun> buildRunSnapshot() {
-        if (runStartTime == null) return Optional.empty();
-
-        return Optional.of(new KuudraRun(
-                currentTier,
-                runStartTime,
-                Map.copyOf(phaseDurations)
-        ));
     }
 
     private long recordPhaseEnd() {

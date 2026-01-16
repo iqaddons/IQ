@@ -3,7 +3,7 @@ package net.iqaddons.mod.features.widgets;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.SupplyPickupEvent;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -12,20 +12,16 @@ import net.iqaddons.mod.state.SupplyStateManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {
-
-    private static final Pattern SUPPLY_PATTERN = Pattern.compile("(.+) recovered one of Elle's supplies! \\((\\d)/6\\)");
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     private final List<SupplyPickupEntry> pickupHistory = Collections.synchronizedList(new ArrayList<>());
 
-    private EventBus.Subscription<ChatReceivedEvent> chatSubscription;
+    private EventBus.Subscription<SupplyPickupEvent> supplyPickupSubscription;
 
     public SupplyTimerWidget() {
         super(
@@ -49,48 +45,35 @@ public class SupplyTimerWidget extends HudWidget {
 
     @Override
     protected void onActivate() {
-        chatSubscription = EventBus.subscribe(ChatReceivedEvent.class, this::onChat);
+        supplyPickupSubscription = EventBus.subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
         if (supplyState.getSuppliesPhaseStart() == null) {
             supplyState.startSuppliesPhase();
         }
 
         resetLocalState();
         updateDisplay();
-
-        log.info("Supply Timer Widget activated");
     }
 
     @Override
     protected void onDeactivate() {
-        if (chatSubscription != null) {
-            chatSubscription.unsubscribe();
-            chatSubscription = null;
+        if (supplyPickupSubscription != null) {
+            supplyPickupSubscription.unsubscribe();
+            supplyPickupSubscription = null;
         }
 
         resetLocalState();
-        log.info("Supply Timer Widget deactivated");
     }
 
     private void resetLocalState() {
         pickupHistory.clear();
     }
 
-    private void onChat(@NotNull ChatReceivedEvent event) {
-        String message = event.getStrippedMessage();
-        Matcher matcher = SUPPLY_PATTERN.matcher(message);
-
-        if (!matcher.find()) return;
-
-        String playerName = matcher.group(1);
-        int supplyNumber = Integer.parseInt(matcher.group(2));
-        long pickupTimeMs = supplyState.getElapsedTimeMillis();
-
-
+    private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
         pickupHistory.add(new SupplyPickupEntry(
-                playerName,
+                event.playerName(),
                 supplyState.getTimeColor(),
-                supplyNumber,
-                pickupTimeMs
+                event.currentSupply(),
+                event.pickupAt()
         ));
 
         updateDisplay();
@@ -120,20 +103,16 @@ public class SupplyTimerWidget extends HudWidget {
         }
 
         for (SupplyPickupEntry entry : pickupHistory) {
-            addLine(HudLine.of(formatPickupLine(entry)));
+            addLine(HudLine.of(String.format(
+                    "§f%s §8(%d/6) %s%s",
+                    entry.playerName(),
+                    entry.supplyNumber(),
+                    entry.color,
+                    formatTime(entry.timeMs())
+            )));
         }
 
         markDimensionsDirty();
-    }
-
-    private @NotNull String formatPickupLine(@NotNull SupplyPickupEntry entry) {
-        return String.format(
-                "§f%s §8(%d/6) %s%s",
-                entry.playerName(),
-                entry.supplyNumber(),
-                entry.color,
-                formatTime(entry.timeMs())
-        );
     }
 
     private @NotNull String formatTime(long timeMs) {
@@ -146,5 +125,6 @@ public class SupplyTimerWidget extends HudWidget {
             String color,
             int supplyNumber,
             long timeMs
-    ) {}
+    ) {
+    }
 }

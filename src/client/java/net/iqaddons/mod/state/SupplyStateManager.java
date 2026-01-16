@@ -117,8 +117,8 @@ public final class SupplyStateManager {
         return System.currentTimeMillis() - Objects.requireNonNull(suppliesPhaseStart).toEpochMilli();
     }
 
-    public double getElapsedTimeSeconds() {
-        return getElapsedTimeMillis() / 1000.0;
+    public long getElapsedTimeSeconds() {
+        return (long) (getElapsedTimeMillis() / 1000.0);
     }
 
     @Contract(pure = true)
