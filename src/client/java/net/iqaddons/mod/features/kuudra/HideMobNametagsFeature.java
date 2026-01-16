@@ -19,8 +19,7 @@ public class HideMobNametagsFeature extends KuudraFeature {
                 "hideMobNametags",
                 "Hide Mob Nametags",
                 () -> Configuration.hideMobNametags,
-                KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
-                KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
+                KuudraPhase.RUN_PHASES
         );
         instance = this;
     }

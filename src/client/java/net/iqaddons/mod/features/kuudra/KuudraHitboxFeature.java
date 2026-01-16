@@ -23,7 +23,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
                 "kuudraHitbox",
                 "Kuudra Hitbox",
                 () -> Configuration.PhaseThreeConfig.kuudraHitbox,
-                KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
+                KuudraPhase.RUN_PHASES
         );
     }
 

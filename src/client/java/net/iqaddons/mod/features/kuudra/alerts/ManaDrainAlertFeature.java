@@ -29,7 +29,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
                 "manaDrainNotify",
                 "Mana Drain Notify",
                 () -> Configuration.manaDrainNotify,
-                KuudraPhase.RUN_PHASES.toArray(new KuudraPhase[0])
+                KuudraPhase.RUN_PHASES
         );
     }
 
