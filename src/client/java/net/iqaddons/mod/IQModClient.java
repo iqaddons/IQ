@@ -93,7 +93,6 @@ public class IQModClient implements ClientModInitializer {
                 new CustomSplitsWidget(), new FreshCountdownWidget(),
                 new KuudraHealthWidget()
         );
-
     }
 
     private void registerCommands() {
