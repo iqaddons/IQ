@@ -10,11 +10,12 @@ import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
+import net.iqaddons.mod.features.kuudra.waypoints.building.BuildWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
-import net.iqaddons.mod.tracking.KuudraTracker;
-import net.iqaddons.mod.tracking.SkyBlockTracker;
+import net.iqaddons.mod.utils.tracking.KuudraTracker;
+import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.concurrent.Executors;
@@ -77,7 +78,7 @@ public class IQModClient implements ClientModInitializer {
                 new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(),
-                new BuildOverlayFeature(),
+                new BuildWaypointsFeature(),
                 new ManaDrainAlertFeature(),
                 new KuudraHealthDisplayFeature(),
                 new BlockUselessPerksFeature(),

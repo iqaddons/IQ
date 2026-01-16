@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
@@ -34,7 +34,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
         super(
                 "rendDamageAlert",
                 "Rend Damage Alert",
-                () -> Configuration.PhaseFourConfig.rendDamageAlert,
+                () -> PhaseFourConfig.rendDamageAlert,
                 KuudraPhase.DPS, KuudraPhase.BOSS
         );
     }

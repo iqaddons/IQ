@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -13,8 +14,6 @@ import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 @Slf4j
 public class KuudraHitboxFeature extends KuudraFeature {
 
@@ -22,7 +21,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
         super(
                 "kuudraHitbox",
                 "Kuudra Hitbox",
-                () -> Configuration.PhaseThreeConfig.kuudraHitbox,
+                () -> PhaseThreeConfig.kuudraHitbox,
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -46,7 +45,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
         float tickDelta = event.tickCounter().getTickProgress(true);
         Box hitbox = getBox(kuudra, tickDelta);
 
-        event.drawOutline(hitbox, true, RenderColor.fromArgb(Configuration.PhaseThreeConfig.kuudraHitboxColor));
+        event.drawOutline(hitbox, true, RenderColor.fromArgb(PhaseThreeConfig.kuudraHitboxColor));
     }
 
     @Contract("_, _ -> new")

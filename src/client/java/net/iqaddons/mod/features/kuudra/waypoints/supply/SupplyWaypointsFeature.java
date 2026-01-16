@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra.waypoints.supply;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
@@ -29,7 +29,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         super(
                 "supplyWaypoints",
                 "Supply Waypoints",
-                () -> Configuration.PhaseOneConfig.supplyWaypoints,
+                () -> PhaseOneConfig.supplyWaypoints,
                 KuudraPhase.SUPPLIES
         );
     }
@@ -67,7 +67,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         List<SupplyPosition> supplies = supplyState.getActiveSupplies();
         if (supplies.isEmpty()) return;
 
-        RenderColor color = RenderColor.fromArgb(Configuration.PhaseOneConfig.supplyWaypointColor);
+        RenderColor color = RenderColor.fromArgb(PhaseOneConfig.supplyWaypointColor);
         for (SupplyPosition supply : supplies) {
             Box crateBox = new Box(
                     supply.position().x,

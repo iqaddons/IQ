@@ -1,4 +1,4 @@
-package net.iqaddons.mod.tracking;
+package net.iqaddons.mod.utils.tracking;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;

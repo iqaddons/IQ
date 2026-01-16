@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -34,7 +34,7 @@ public class BlockUselessPerksFeature extends KuudraFeature {
         super(
                 "blockUselessPerks",
                 "Block Useless Perks",
-                () -> Configuration.PhaseThreeConfig.blockUselessPerks,
+                () -> PhaseThreeConfig.blockUselessPerks,
                 KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
         );
         instance = this;

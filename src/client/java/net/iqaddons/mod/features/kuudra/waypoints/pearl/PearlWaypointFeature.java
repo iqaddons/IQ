@@ -1,14 +1,14 @@
 package net.iqaddons.mod.features.kuudra.waypoints.pearl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.PearlWaypoint;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.data.WaypointArea;
-import net.iqaddons.mod.loader.WaypointConfigLoader;
+import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.state.SupplyStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.features.kuudra.waypoints.pearl.area.AreaDetection;
@@ -34,7 +34,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         super(
                 "pearlWaypoints",
                 "Pearl Waypoints",
-                () -> Configuration.PhaseOneConfig.pearlWaypoints,
+                () -> PhaseOneConfig.pearlWaypoints,
                 KuudraPhase.SUPPLIES
         );
 

@@ -1,0 +1,43 @@
+package net.iqaddons.mod.config.categories;
+
+import com.teamresourceful.resourcefulconfig.api.annotations.Category;
+import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+
+import java.awt.*;
+
+@Category(
+        value = "Phase 3 - Stun"
+)
+public class PhaseThreeConfig {
+
+    @ConfigEntry(
+            id = "kuudraHPBossbar",
+            translation = "Kuudra HP Bossbar"
+    )
+    @Comment("Show Kuudra's HP in a custom bossbar")
+    public static boolean kuudraHPBossbar = true;
+
+    @ConfigEntry(
+            id = "kuudraHitbox",
+            translation = "Kuudra Hitbox"
+    )
+    @Comment("Render Kuudra's hitbox during the stun phase")
+    public static boolean kuudraHitbox = true;
+
+    @ConfigEntry(
+            id = "kuudraHitboxColor",
+            translation = "Kuudra Hitbox Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Change Kuudra's hitbox color to something more visible")
+    public static int kuudraHitboxColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+
+    @ConfigEntry(
+            id = "blockUselessPerks",
+            translation = "Block Useless Perks"
+    )
+    @Comment("Prevent purchasing useless perks")
+    public static boolean blockUselessPerks = true;
+}

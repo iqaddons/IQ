@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
@@ -43,7 +43,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         super(
                 "secondSupplyAlert",
                 "Second Supply Alert",
-                () -> Configuration.PhaseOneConfig.secondSupplyAlert,
+                () -> PhaseOneConfig.secondSupplyAlert,
                 KuudraPhase.SUPPLIES
         );
 

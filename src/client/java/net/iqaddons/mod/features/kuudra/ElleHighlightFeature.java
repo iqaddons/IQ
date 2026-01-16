@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -25,7 +26,7 @@ public class ElleHighlightFeature extends KuudraFeature {
         super(
                 "elleHighlight",
                 "Elle Highlight",
-                () -> Configuration.PhaseTwoConfig.elleHighlight,
+                () -> PhaseTwoConfig.elleHighlight,
                 KuudraPhase.BUILD
         );
     }
@@ -59,7 +60,7 @@ public class ElleHighlightFeature extends KuudraFeature {
         }
 
         trackedElleId = elleId;
-        RenderColor glowColor = RenderColor.fromArgb(Configuration.PhaseTwoConfig.elleHighlightColor);
+        RenderColor glowColor = RenderColor.fromArgb(PhaseTwoConfig.elleHighlightColor);
         EntityGlowUtil.setGlowing(elleId, glowColor);
     }
 

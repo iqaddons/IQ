@@ -1,4 +1,4 @@
-package net.iqaddons.mod.loader;
+package net.iqaddons.mod.config.loader;
 
 import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;

@@ -1,16 +1,18 @@
 package net.iqaddons.mod.config;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.config.categories.PhaseFourConfig;
+import net.iqaddons.mod.config.categories.PhaseOneConfig;
+import net.iqaddons.mod.config.categories.PhaseThreeConfig;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 
 import java.awt.*;
 
 @Config(
         value = "iqaddons",
         categories = {
-                Configuration.PhaseOneConfig.class,
-                Configuration.PhaseTwoConfig.class,
-                Configuration.PhaseThreeConfig.class,
-                Configuration.PhaseFourConfig.class,
+                PhaseOneConfig.class, PhaseTwoConfig.class,
+                PhaseThreeConfig.class, PhaseFourConfig.class,
         }
 )
 @ConfigInfo(
@@ -129,193 +131,4 @@ public class Configuration {
     @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
     public static int waypointsDuration = 1;
 
-    @Category(
-            value = "Phase 1 - Supplies"
-    )
-    public static class PhaseOneConfig {
-
-        @ConfigEntry(
-                id = "supplyTimers",
-                translation = "Supply Times"
-        )
-        @Comment("Display supply pickup times for all players")
-        public static boolean supplyTimers = true;
-
-        @ConfigEntry(
-                id = "supplyWaypoints",
-                translation = "Supply Waypoints"
-        )
-        @Comment("Draw a beacon at supply locations")
-        public static boolean supplyWaypoints = true;
-
-        @ConfigEntry(
-                id = "supplyWaypointColor",
-                translation = "Supply Waypoint Color"
-        )
-        @ConfigOption.Color(alpha = true)
-        @Comment("Change the color of the supply waypoints")
-        public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
-
-        @ConfigEntry(
-                id = "pearlWaypoints",
-                translation = "Pearl Waypoints"
-        )
-        @Comment("Show pearl throw waypoints during the supply phase")
-        public static boolean pearlWaypoints = true;
-
-        @ConfigEntry(
-                id = "pileWaypoints",
-                translation = "Pile Waypoints"
-        )
-        @Comment("Display beacons at all crate pile locations")
-        public static boolean pileWaypoints = true;
-
-        @ConfigEntry(
-                id = "supplyPickingAlert",
-                translation = "Supply Already Picking Alert "
-        )
-        @Comment("Alert when another player is already picking your supply")
-        public static boolean supplyPickingAlert = true;
-
-        @ConfigEntry(
-                id = "noPreAlert",
-                translation = "No Pre Alert"
-        )
-        @Comment("Send a chat message if you have no pre")
-        public static boolean noPreAlert = true;
-
-        @ConfigEntry(
-                id = "secondSupplyAlert",
-                translation = "Second Supply Alert "
-        )
-        @Comment("Announce the position of the second supply in chat")
-        public static boolean secondSupplyAlert = true;
-
-        @ConfigEntry(
-                id = "supplyRecoverMessage",
-                translation = "Custom Supply Recover Message"
-        )
-        @Comment("Send a custom message when recover a supply")
-        public static boolean supplyRecoverMessage = true;
-
-        @ConfigEntry(
-                id = "crateDisplay",
-                translation = "Crate Display"
-        )
-        @Comment("Custom HUD showing crate pickups")
-        public static boolean crateDisplay = true;
-    }
-
-    @Category(
-            value = "Phase 2 - Build"
-    )
-    public static class PhaseTwoConfig {
-
-        @ConfigEntry(
-                id = "buildOverlay",
-                translation = "Build Overlay"
-        )
-        @Comment("Custom build overlay with pile colors based on percentage")
-        public static boolean buildOverlay = true;
-
-        @ConfigEntry(
-                id = "buildHelper",
-                translation = "Build Helper"
-        )
-        @Comment("Build helper HUD")
-        public static boolean buildHelper = true;
-
-        @ConfigEntry(
-                id = "freshTimers",
-                translation = "Fresh Times"
-        )
-        @Comment("Display build times for all freshers")
-        public static boolean freshTimers = true;
-
-        @ConfigEntry(
-                id = "elleHighlight",
-                translation = "Elle Highlight"
-        )
-        @Comment("Draw a box around Elle during the build phase")
-        public static boolean elleHighlight = true;
-
-        @ConfigEntry(
-                id = "elleHighlightColor",
-                translation = "Elle Highlight Color"
-        )
-        @ConfigOption.Color(alpha = true)
-        @Comment("Change the color of the Elle highlight")
-        public static int elleHighlightColor = new Color(0, 0, 0, 255).getRGB();
-
-        @ConfigEntry(
-                id = "freshMessage",
-                translation = "Fresh Message"
-        )
-        @Comment(" Send a party message when you fresh")
-        public static boolean freshMessage = true;
-
-        @ConfigEntry(
-                id = "teamHighlightFreshColor",
-                translation = "Team Highlight Fresh Color"
-        )
-        @ConfigOption.Color(alpha = true)
-        @Comment("Use a different color for freshers teammates")
-        public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
-    }
-
-    @Category(
-            value = "Phase 3 - Stun"
-    )
-    public static class PhaseThreeConfig {
-
-        @ConfigEntry(
-                id = "kuudraHPBossbar",
-                translation = "Kuudra HP Bossbar"
-        )
-        @Comment("Show Kuudra's HP in a custom bossbar")
-        public static boolean kuudraHPBossbar = true;
-
-        @ConfigEntry(
-                id = "kuudraHitbox",
-                translation = "Kuudra Hitbox"
-        )
-        @Comment("Render Kuudra's hitbox during the stun phase")
-        public static boolean kuudraHitbox = true;
-
-        @ConfigEntry(
-                id = "kuudraHitboxColor",
-                translation = "Kuudra Hitbox Color"
-        )
-        @ConfigOption.Color(alpha = true)
-        @Comment("Change Kuudra's hitbox color to something more visible")
-        public static int kuudraHitboxColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
-
-        @ConfigEntry(
-                id = "blockUselessPerks",
-                translation = "Block Useless Perks"
-        )
-        @Comment("Prevent purchasing useless perks")
-        public static boolean blockUselessPerks = true;
-    }
-
-    @Category(
-            value = "Phase 4 - Boss Fight"
-    )
-    public static class PhaseFourConfig {
-
-        @ConfigEntry(
-                id = "kuudraDirectionAlert",
-                translation = "Kuudra Direction Alert"
-        )
-        @Comment("Alert which side Kuudra will appear on")
-        public static boolean kuudraDirectionAlert = true;
-
-        @ConfigEntry(
-                id = "rendDamageAlert",
-                translation = "Rend Damage"
-        )
-        @Comment("Track when any teammate deals Rend Damage")
-        public static boolean rendDamageAlert = true;
-
-    }
 }

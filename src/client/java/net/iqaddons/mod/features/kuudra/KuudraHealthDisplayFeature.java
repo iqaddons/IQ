@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
@@ -39,7 +39,7 @@ public class KuudraHealthDisplayFeature extends KuudraFeature {
         super(
                 "kuudraHealthBossbar",
                 "Kuudra HP Bossbar",
-                () -> Configuration.PhaseThreeConfig.kuudraHPBossbar,
+                () -> PhaseThreeConfig.kuudraHPBossbar,
                 KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
         );
     }

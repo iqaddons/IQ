@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -40,7 +41,7 @@ public class FreshAlertFeature extends KuudraFeature {
         super(
                 "freshMessage",
                 "Fresh Message",
-                () -> Configuration.PhaseTwoConfig.freshMessage,
+                () -> PhaseTwoConfig.freshMessage,
                 KuudraPhase.BUILD
         );
 
@@ -67,7 +68,9 @@ public class FreshAlertFeature extends KuudraFeature {
             ClientPlayerEntity player = mc.player;
             if (player == null) return;
 
-            int buildProgress = getBuildingProgress();
+            int buildProgress = ScoreboardUtils.findLine("Building Progress")
+                    .map(this::extractProgress)
+                    .orElse(0);;
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(buildProgress));
 
             applyFreshGlow(player.getId(), player.getName().getString());
@@ -90,7 +93,7 @@ public class FreshAlertFeature extends KuudraFeature {
     }
 
     private void applyFreshGlow(int entityId, String playerName) {
-        EntityGlowUtil.setGlowing(entityId, RenderColor.fromArgb(Configuration.PhaseTwoConfig.freshHightlightColor));
+        EntityGlowUtil.setGlowing(entityId, RenderColor.fromArgb(PhaseTwoConfig.freshHightlightColor));
         glowingPlayers.put(entityId, System.currentTimeMillis());
         log.debug("Applied Fresh glow to {} (id: {})", playerName, entityId);
 
@@ -114,12 +117,6 @@ public class FreshAlertFeature extends KuudraFeature {
         return mc.world.getPlayers().stream()
                 .filter(player -> player.getName().getString().equalsIgnoreCase(name))
                 .findFirst();
-    }
-
-    private int getBuildingProgress() {
-        return ScoreboardUtils.findLine("Building Progress")
-                .map(this::extractProgress)
-                .orElse(0);
     }
 
     private int extractProgress(@NotNull String line) {

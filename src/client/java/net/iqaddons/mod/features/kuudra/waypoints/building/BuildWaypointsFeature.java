@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra.waypoints.building;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
@@ -26,11 +27,11 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
     private static final Pattern PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(?:§.)?(\\d+)%");
 
-    private static final RenderColor COLOR_0_20 = new RenderColor(168, 0, 0, 77);
-    private static final RenderColor COLOR_21_40 = new RenderColor(255, 0, 0, 77);
-    private static final RenderColor COLOR_41_60 = new RenderColor(255, 135, 0, 77);
-    private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 77);
-    private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 77);
+    private static final RenderColor COLOR_0_20 = new RenderColor(168, 0, 0, 255);
+    private static final RenderColor COLOR_21_40 = new RenderColor(255, 0, 0, 255);
+    private static final RenderColor COLOR_41_60 = new RenderColor(255, 135, 0, 255);
+    private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 255);
+    private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 255);
 
     private final List<BuildPile> buildPiles = new CopyOnWriteArrayList<>();
 
@@ -38,7 +39,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
         super(
                 "buildOverlay",
                 "Build Overlay",
-                () -> Configuration.PhaseTwoConfig.buildOverlay,
+                () -> PhaseTwoConfig.buildOverlay,
                 KuudraPhase.BUILD
         );
     }
