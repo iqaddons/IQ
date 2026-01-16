@@ -25,10 +25,12 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private static final float DAMAGE_MULTIPLIER = 9600f;
     private static final double ARENA_Y_THRESHOLD = 10.0;
     private static final double IGNORE_Y_THRESHOLD = 30.0;
+    private static final float MIN_VALID_HEALTH = 100f;
 
     private volatile float lastKuudraHealth = 25000f;
     private volatile long bossStartTime = 0;
     private volatile boolean inBoss = false;
+    private volatile boolean kuudraDead = false;
 
     public RendDamageAlertFeature() {
         super(
@@ -93,18 +95,24 @@ public class RendDamageAlertFeature extends KuudraFeature {
             return;
         }
 
+        if (currentHealth <= MIN_VALID_HEALTH) {
+            if (!kuudraDead && currentHealth <= 0) {
+                kuudraDead = true;
+            }
+            return;
+        }
+
         float damage = lastKuudraHealth - currentHealth;
-        log.info("Current Kuudra Health: {}, Last Health: {}, Damage: {}", currentHealth, lastKuudraHealth, damage);
         if (damage >= MIN_REND_DAMAGE) {
             float actualDamage = damage * DAMAGE_MULTIPLIER;
             String formattedDamage = formatHealth(actualDamage);
             String damageColor = getDamageColor(damage);
             double timeSinceStart = (System.currentTimeMillis() - bossStartTime) / 1000.0;
 
-            MessageUtil.INFO.sendMessage("Someone pulled for %s%s §7damage at §a%.2fs§r."
+            MessageUtil.INFO.sendMessage("Someone pulled for %s%s §7damage at §a%.2fs§7."
                     .formatted(damageColor, formattedDamage, timeSinceStart)
             );
-            log.info("Rend damage: {} ({})", formattedDamage, damage);
+            log.debug("Rend damage: {} ({})", formattedDamage, damage);
         }
 
         lastKuudraHealth = currentHealth;
