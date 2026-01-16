@@ -1,6 +1,8 @@
 package net.iqaddons.mod.utils.render;
 
 import net.minecraft.util.math.ColorHelper;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -36,23 +38,32 @@ public class RenderColor {
         this.argb = ColorHelper.fromFloats(this.a, this.r, this.g, this.b);
     }
 
-    public static RenderColor fromHex(int hex) {
+    @Contract("_ -> new")
+    public static @NotNull RenderColor fromHex(int hex) {
         return new RenderColor((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF, 255);
     }
 
-    public static RenderColor fromArgb(int hex) {
+    @Contract("_ -> new")
+    public static @NotNull RenderColor fromArgb(int hex) {
         return new RenderColor((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF, (hex >> 24) & 0xFF);
     }
 
-    public static RenderColor fromHex(int hex, float alpha) {
+    @Contract("_, _ -> new")
+    public static @NotNull RenderColor fromHex(int hex, float alpha) {
         return new RenderColor((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF, (int) (255 * alpha));
     }
 
-    public static RenderColor fromColor(Color color) {
+    @Contract("_ -> new")
+    public static @NotNull RenderColor fromColor(@NotNull Color color) {
         return RenderColor.fromHex(color.getRGB(), color.getAlpha());
     }
 
-    public static RenderColor fromFloat(float r, float g, float b, float a) {
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull RenderColor fromFloat(float r, float g, float b, float a) {
         return new RenderColor(r, g, b, a);
+    }
+
+    public RenderColor withOpacity(float opacityPercent) {
+        return new RenderColor(this.r, this.g, this.b, opacityPercent);
     }
 }

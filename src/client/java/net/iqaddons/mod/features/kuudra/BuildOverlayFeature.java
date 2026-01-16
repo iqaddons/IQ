@@ -26,11 +26,11 @@ public class BuildOverlayFeature extends KuudraFeature {
 
     private static final Pattern PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(?:§.)?(\\d+)%");
 
-    private static final RenderColor COLOR_0_20 = new RenderColor(168, 0, 0, 255);
-    private static final RenderColor COLOR_21_40 = new RenderColor(255, 0, 0, 255);
-    private static final RenderColor COLOR_41_60 = new RenderColor(255, 135, 0, 255);
-    private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 255);
-    private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 255);
+    private static final RenderColor COLOR_0_20 = new RenderColor(168, 0, 0, 77);
+    private static final RenderColor COLOR_21_40 = new RenderColor(255, 0, 0, 77);
+    private static final RenderColor COLOR_41_60 = new RenderColor(255, 135, 0, 77);
+    private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 77);
+    private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 77);
 
     private final List<BuildPile> buildPiles = new CopyOnWriteArrayList<>();
 
@@ -118,7 +118,7 @@ public class BuildOverlayFeature extends KuudraFeature {
             var progressColor = getColorForProgress(pile.progress);
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawBeam(beaconPos, 25, progressColor);
+            event.drawBeam(beaconPos, 25, true, progressColor.withOpacity(0.6f));
 
             Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);
             event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, progressColor);

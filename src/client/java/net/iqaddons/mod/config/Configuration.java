@@ -147,7 +147,7 @@ public class Configuration {
         )
         @ConfigOption.Color(alpha = true)
         @Comment("Change the color of the supply waypoints")
-        public static int supplyWaypointColor = new Color(0, 0, 0, 255).getRGB();
+        public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
 
         @ConfigEntry(
                 id = "pearlWaypoints",
