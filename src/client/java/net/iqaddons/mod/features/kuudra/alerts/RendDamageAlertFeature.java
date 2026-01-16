@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
-import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraDirectionUtil;

@@ -26,12 +26,6 @@ public class KuudraHitboxFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
-        log.info("Kuudra Hitbox activated");
-    }
-
-    @Override
-    protected void onKuudraDeactivate() {
-        log.info("Kuudra Hitbox deactivated");
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {

@@ -5,6 +5,9 @@ import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
+import net.iqaddons.mod.utils.hud.HudEditScreen;
+import net.iqaddons.mod.utils.hud.HudManager;
+import net.minecraft.client.MinecraftClient;
 
 import java.awt.*;
 
@@ -26,12 +29,15 @@ import java.awt.*;
 
 public class Configuration {
 
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+
     @ConfigButton(
             title = "Open HUD Editor",
-            text = "(W.I.P)"
+            text = "OPEN"
     )
     @Comment("Open the HUD Editor to customize your HUD elements")
     public static final Runnable hudEditor = () -> {
+        mc.execute(() -> HudManager.get().openEditor());
     };
 
     @ConfigOption.Separator(

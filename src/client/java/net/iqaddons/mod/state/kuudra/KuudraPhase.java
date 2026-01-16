@@ -32,7 +32,7 @@ public enum KuudraPhase {
     }
 
     public boolean isInRun() {
-        return order >= 1 && order <= 7;
+        return order >= 0 && order <= 7;
     }
 
     public boolean canTransitionTo(@NotNull KuudraPhase target) {

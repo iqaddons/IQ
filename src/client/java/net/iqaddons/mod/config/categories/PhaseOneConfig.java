@@ -16,7 +16,7 @@ public class PhaseOneConfig {
             id = "supplyTimers",
             translation = "Supply Times"
     )
-    @Comment("Display supply pickup times for all players (W.I.P)")
+    @Comment("Display supply pickup times for all players")
     public static boolean supplyTimers = true;
 
     @ConfigEntry(

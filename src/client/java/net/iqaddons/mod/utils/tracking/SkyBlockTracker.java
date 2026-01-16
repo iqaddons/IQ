@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
-import net.iqaddons.mod.events.impl.SkyBlockStatusEvent;
+import net.iqaddons.mod.events.impl.skyblock.SkyBlockStatusEvent;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +57,7 @@ public final class SkyBlockTracker {
         if (!newArea.equals(currentArea)) {
             String previousArea = currentArea;
             currentArea = newArea;
-            log.debug("Area: {} -> {}", previousArea, newArea);
+            log.info("Area: {} -> {}", previousArea, newArea);
         }
     }
 }

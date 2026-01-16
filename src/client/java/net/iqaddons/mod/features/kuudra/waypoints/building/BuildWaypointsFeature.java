@@ -1,7 +1,6 @@
 package net.iqaddons.mod.features.kuudra.waypoints.building;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
@@ -39,7 +38,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
         super(
                 "buildOverlay",
                 "Build Overlay",
-                () -> PhaseTwoConfig.buildOverlay,
+                () -> PhaseTwoConfig.buildHelper,
                 KuudraPhase.BUILD
         );
     }

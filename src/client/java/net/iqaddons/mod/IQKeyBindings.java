@@ -33,7 +33,7 @@ public class IQKeyBindings {
     public static void openConfigScreen(@NotNull MinecraftClient client) {
         client.setScreen(
                 ResourcefulConfigScreen.make(IQModClient.get().getConfigurator(), Configuration.class)
-                        .withParent(client.currentScreen)
+                        .withParent(null)
                         .build()
         );
     }
