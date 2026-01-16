@@ -27,15 +27,12 @@ public final class HudManager {
     private static final HudManager INSTANCE = new HudManager();
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final int SYNC_INTERVAL_TICKS = 20;
-
     private final HudConfigManager configManager;
 
     private final List<HudWidget> widgets = new CopyOnWriteArrayList<>();
     private final Map<String, HudWidget> widgetById = new LinkedHashMap<>();
 
     private boolean editorOpen = false;
-
     private boolean initialized = false;
 
     private HudManager() {
@@ -51,7 +48,6 @@ public final class HudManager {
         configManager.load();
 
         EventBus.subscribe(HudRenderEvent.class, this::onHudRender);
-        EventBus.subscribe(ClientTickEvent.class, this::onTick);
 
         initialized = true;
         log.info("HudManager initialized");
@@ -60,7 +56,6 @@ public final class HudManager {
     public void shutdown() {
         widgets.forEach(HudWidget::deactivate);
         configManager.shutdown();
-
         log.info("HudManager shutdown");
     }
 
@@ -119,7 +114,9 @@ public final class HudManager {
         double[] mousePos = getScaledMousePosition();
 
         for (HudWidget widget : widgets) {
-            if (widget.shouldRender() && widget.isActive()) {
+            updateWidgetActivation(widget);
+
+            if (widget.isActive()) {
                 widget.render(event.drawContext(), mousePos[0], mousePos[1], event.tickDelta());
             }
         }
@@ -127,29 +124,17 @@ public final class HudManager {
 
     public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         for (HudWidget widget : widgets) {
-            if (widget.isActive() || editorOpen) {
-                widget.render(context, mouseX, mouseY, delta);
-            }
+            widget.renderExample(context, mouseX, mouseY, delta);
         }
     }
 
-    private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame()) return;
+    private void updateWidgetActivation(@NotNull HudWidget widget) {
+        boolean shouldBeActive = widget.shouldRender();
 
-        if (event.isNthTick(SYNC_INTERVAL_TICKS)) {
-            syncWidgetStates();
-        }
-    }
-
-    private void syncWidgetStates() {
-        for (HudWidget widget : widgets) {
-            boolean shouldBeActive = widget.shouldRender();
-
-            if (shouldBeActive && !widget.isActive()) {
-                widget.activate();
-            } else if (!shouldBeActive && widget.isActive()) {
-                widget.deactivate();
-            }
+        if (shouldBeActive && !widget.isActive()) {
+            widget.activate();
+        } else if (!shouldBeActive && widget.isActive()) {
+            widget.deactivate();
         }
     }
 
@@ -157,7 +142,6 @@ public final class HudManager {
         if (mc.currentScreen instanceof HudEditScreen) {
             return;
         }
-
         mc.setScreen(new HudEditScreen());
     }
 
@@ -169,7 +153,7 @@ public final class HudManager {
 
     public boolean handleClick(double mouseX, double mouseY, int button) {
         if (editorOpen) return false;
-        if (!(mc.currentScreen instanceof ChatScreen)) return false;
+        if (mc.currentScreen instanceof ChatScreen) return false;
 
         for (HudWidget widget : widgets) {
             if (widget.isActive() && widget.shouldRender()) {

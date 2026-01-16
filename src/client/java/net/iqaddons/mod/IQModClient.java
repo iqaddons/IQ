@@ -16,6 +16,7 @@ import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
+import net.iqaddons.mod.features.widgets.BuildProgressWidget;
 import net.iqaddons.mod.features.widgets.SupplyTimerWidget;
 import net.iqaddons.mod.utils.hud.HudManager;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
@@ -104,6 +105,8 @@ public class IQModClient implements ClientModInitializer {
         hudManager.initialize();
 
         hudManager.register(
+                new SupplyTimerWidget(),
+                new BuildProgressWidget()
         );
 
     }

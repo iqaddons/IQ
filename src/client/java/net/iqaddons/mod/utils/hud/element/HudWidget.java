@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
-
 @Slf4j
 @Data
 public abstract class HudWidget implements HudElement {
@@ -86,6 +85,56 @@ public abstract class HudWidget implements HudElement {
         return anchor.calculateY(screen[1], getScaledHeight(), y);
     }
 
+    @Override
+    public int getWidth() {
+        if (dimensionsDirty) {
+            recalculateDimensions();
+        }
+        return Math.max(cachedWidth, 1);
+    }
+
+    @Override
+    public int getHeight() {
+        if (dimensionsDirty) {
+            recalculateDimensions();
+        }
+        return Math.max(cachedHeight, 1);
+    }
+
+    protected void markDimensionsDirty() {
+        dimensionsDirty = true;
+    }
+
+    private void recalculateDimensions() {
+        TextRenderer textRenderer = MC.textRenderer;
+        if (textRenderer == null) return;
+
+        List<HudLine> renderLines = getCurrentRenderableLines();
+
+        int maxWidth = 0;
+        int currentLineWidth = 0;
+        int totalHeight = 0;
+
+        for (HudLine line : renderLines) {
+            if (!line.shouldRender()) continue;
+
+            int lineWidth = textRenderer.getWidth(line.getText());
+            currentLineWidth += lineWidth;
+
+            if (line.hasLineBreak()) {
+                maxWidth = Math.max(maxWidth, currentLineWidth);
+                currentLineWidth = 0;
+                totalHeight += textRenderer.fontHeight + 1;
+            }
+        }
+
+        maxWidth = Math.max(maxWidth, currentLineWidth);
+
+        cachedWidth = Math.max(maxWidth, 20);
+        cachedHeight = Math.max(totalHeight, textRenderer.fontHeight);
+        dimensionsDirty = false;
+    }
+
     protected void addLine(@NotNull HudLine line) {
         lines.add(line);
         markDimensionsDirty();
@@ -121,63 +170,15 @@ public abstract class HudWidget implements HudElement {
         exampleLines.addAll(examples);
     }
 
-    protected @NotNull List<HudLine> getRenderableLines() {
+    private @NotNull List<HudLine> getCurrentRenderableLines() {
         if (lines.isEmpty() && !exampleLines.isEmpty() && HudManager.get().isEditorOpen()) {
             return exampleLines;
         }
         return lines;
     }
 
-    @Override
-    public int getWidth() {
-        if (dimensionsDirty) {
-            recalculateDimensions();
-        }
-
-        return cachedWidth;
-    }
-
-    @Override
-    public int getHeight() {
-        if (dimensionsDirty) {
-            recalculateDimensions();
-        }
-
-        return cachedHeight;
-    }
-
-    protected void markDimensionsDirty() {
-        dimensionsDirty = true;
-    }
-
-    private void recalculateDimensions() {
-        TextRenderer textRenderer = MC.textRenderer;
-        if (textRenderer == null) return;
-
-        List<HudLine> renderLines = getRenderableLines();
-
-        int maxWidth = 0;
-        int currentLineWidth = 0;
-        int totalHeight = 0;
-
-        for (HudLine line : renderLines) {
-            if (!line.shouldRender()) continue;
-
-            int lineWidth = textRenderer.getWidth(line.getText());
-            currentLineWidth += lineWidth;
-
-            if (line.hasLineBreak()) {
-                maxWidth = Math.max(maxWidth, currentLineWidth);
-                currentLineWidth = 0;
-                totalHeight += textRenderer.fontHeight + 1;
-            }
-        }
-
-        maxWidth = Math.max(maxWidth, currentLineWidth);
-
-        cachedWidth = maxWidth;
-        cachedHeight = totalHeight;
-        dimensionsDirty = false;
+    protected @NotNull List<HudLine> getRenderableLines() {
+        return getCurrentRenderableLines();
     }
 
     @Override
@@ -214,14 +215,41 @@ public abstract class HudWidget implements HudElement {
 
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        if (!shouldRender() && !HudManager.get().isEditorOpen()) return;
-
         TextRenderer textRenderer = MC.textRenderer;
         if (textRenderer == null) return;
 
         List<HudLine> renderLines = getRenderableLines();
         if (renderLines.isEmpty()) return;
 
+        renderInternal(context, mouseX, mouseY, renderLines, textRenderer);
+    }
+
+    @Override
+    public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+        TextRenderer textRenderer = MC.textRenderer;
+        if (textRenderer == null) return;
+
+        List<HudLine> renderLines;
+        if (!exampleLines.isEmpty()) {
+            renderLines = lines.isEmpty() ? exampleLines : lines;
+        } else {
+            renderLines = lines;
+        }
+
+        if (renderLines.isEmpty()) {
+            renderEmptyPlaceholder(context, textRenderer);
+            return;
+        }
+
+        renderInternal(context, mouseX, mouseY, renderLines, textRenderer);
+    }
+
+    private void renderInternal(
+            @NotNull DrawContext context,
+            double mouseX, double mouseY,
+            @NotNull List<HudLine> renderLines,
+            @NotNull TextRenderer textRenderer
+    ) {
         context.getMatrices().pushMatrix();
         context.getMatrices().scale(scale, scale);
 
@@ -263,6 +291,41 @@ public abstract class HudWidget implements HudElement {
         context.getMatrices().popMatrix();
     }
 
+    private void renderEmptyPlaceholder(
+            @NotNull DrawContext context,
+            @NotNull TextRenderer textRenderer
+    ) {
+        context.getMatrices().pushMatrix();
+        context.getMatrices().scale(scale, scale);
+
+        float scaledX = getAbsoluteX() / scale;
+        float scaledY = getAbsoluteY() / scale;
+
+        String placeholder = "§7[" + displayName + "]";
+        int width = textRenderer.getWidth(placeholder);
+        int height = textRenderer.fontHeight;
+
+        context.fill(
+                (int) scaledX - 2, (int) scaledY - 2,
+                (int) scaledX + width + 2, (int) scaledY + height + 2,
+                new Color(0, 0, 0, 150).getRGB()
+        );
+
+        context.drawTextWithShadow(
+                textRenderer,
+                placeholder,
+                (int) scaledX,
+                (int) scaledY,
+                new Color(128, 128, 128).getRGB()
+        );
+
+        if (selected) {
+            renderSelectionBorder(context, (int) scaledX - 2, (int) scaledY - 2, width + 4, height + 4, textRenderer);
+        }
+
+        context.getMatrices().popMatrix();
+    }
+
     private void renderSelectionBorder(
             @NotNull DrawContext context,
             int x, int y,
@@ -270,34 +333,19 @@ public abstract class HudWidget implements HudElement {
             @NotNull TextRenderer textRenderer
     ) {
         int borderColor = new Color(255, 0, 0, 170).getRGB();
-        context.drawStrokedRectangle(x, y, width, height, borderColor);
 
-        String info = String.format("X: %.0f Y: %.0f Scale: %.1f", this.x, this.y, scale);
+        context.fill(x, y, x + width, y + 1, borderColor);
+        context.fill(x, y + height - 1, x + width, y + height, borderColor);
+        context.fill(x, y, x + 1, y + height, borderColor);
+        context.fill(x + width - 1, y, x + width, y + height, borderColor);
+
         context.drawTextWithShadow(
                 textRenderer,
-                info,
+                String.format("X: %.0f Y: %.0f Scale: %.1f", this.x, this.y, scale),
                 x,
                 y - textRenderer.fontHeight - 2,
                 new Color(255, 255, 255, 200).getRGB()
         );
-    }
-
-    @Override
-    public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        if (!exampleLines.isEmpty()) {
-            List<HudLine> originalLines = new ArrayList<>(lines);
-            lines.clear();
-            lines.addAll(exampleLines);
-            markDimensionsDirty();
-
-            render(context, mouseX, mouseY, delta);
-
-            lines.clear();
-            lines.addAll(originalLines);
-            markDimensionsDirty();
-        } else {
-            render(context, mouseX, mouseY, delta);
-        }
     }
 
     @Override
@@ -345,23 +393,5 @@ public abstract class HudWidget implements HudElement {
     @Override
     public void onConfigChanged() {
         HudManager.get().saveConfig();
-    }
-
-    public void loadConfig(
-            @Nullable Float savedX,
-            @Nullable Float savedY,
-            @Nullable Float savedScale,
-            @Nullable String savedAnchor
-    ) {
-        if (savedX != null) this.x = savedX;
-        if (savedY != null) this.y = savedY;
-        if (savedScale != null) this.scale = savedScale;
-        if (savedAnchor != null) {
-            try {
-                this.anchor = HudAnchor.valueOf(savedAnchor);
-            } catch (IllegalArgumentException e) {
-                log.warn("Invalid anchor name: {}", savedAnchor);
-            }
-        }
     }
 }
