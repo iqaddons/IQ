@@ -13,7 +13,6 @@ import net.iqaddons.mod.utils.hud.element.HudWidget;
 import net.iqaddons.mod.utils.render.HudRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.entity.mob.MagmaCubeEntity;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,7 +53,7 @@ public class KuudraHealthWidget extends HudWidget {
                 .showWhen(() -> stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD);
 
         setEnabledSupplier(() -> PhaseThreeConfig.kuudraHPBossbar);
-        setVisibilityCondition(() -> kuudraFound && isInCombatPhase());
+        setVisibilityCondition(() -> isInCombatPhase());
 
         setExampleLines(List.of(
                 HudLine.of("§4§lKuudra Health"),

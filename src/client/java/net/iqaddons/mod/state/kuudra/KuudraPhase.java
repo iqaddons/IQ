@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 public enum KuudraPhase {
 
-    NONE("None", -1, msg -> false),
+    NONE("None", -1, msg -> msg.contains("Sending to server") || msg.contains("Starting in 5 seconds...")),
     SUPPLIES("Supplies", 0, msg -> msg.contains("[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!")),
     BUILD("Build", 1, msg -> msg.contains("[NPC] Elle: OMG! Great work collecting my supplies!")),
     EATEN("Eaten", 2, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
