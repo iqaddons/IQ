@@ -91,9 +91,7 @@ public class NoPreAlertFeature extends KuudraFeature {
             String preSpotName = matcher.group(1);
             PreSpot detectedPre = PreSpot.fromMessage(preSpotName);
 
-            if (detectedPre != null) {
-                updateMissingPre(detectedPre, message);
-            }
+            if (detectedPre != null) updateMissingPre(detectedPre);
             return;
         }
 
@@ -102,13 +100,11 @@ public class NoPreAlertFeature extends KuudraFeature {
             String preSpotName = simpleMatcher.group(1);
             PreSpot detectedPre = PreSpot.fromMessage(preSpotName);
 
-            if (detectedPre != null) {
-                updateMissingPre(detectedPre, message);
-            }
+            if (detectedPre != null) updateMissingPre(detectedPre);
         }
     }
 
-    private void updateMissingPre(@NotNull PreSpot preSpot, @NotNull String originalMessage) {
+    private void updateMissingPre(@NotNull PreSpot preSpot) {
         int missingPreValue = preSpot.getMissingPreValue();
         int currentMissingPre = supplyState.getMissingPre();
 

@@ -106,18 +106,18 @@ public final class SupplyStateManager {
         activeSupplies.clear();
         remainingPiles.clear();
         remainingPiles.addAll(PileLocation.DEFAULT_PILES);
+
         detectedPreSpot = null;
         preSpotLocked = false;
         suppliesPhaseStart = null;
+
         missingPre = 0;
         suppliesCollected = 0;
         log.debug("Supply state reset");
     }
 
     public long getElapsedTimeMillis() {
-        if (suppliesPhaseStart == null) {
-            return 0;
-        }
+        if (suppliesPhaseStart == null) return 0;
         return System.currentTimeMillis() - Objects.requireNonNull(suppliesPhaseStart).toEpochMilli();
     }
 

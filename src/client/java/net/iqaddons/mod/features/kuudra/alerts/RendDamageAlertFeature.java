@@ -61,9 +61,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.currentPhase() == KuudraPhase.DPS || event.currentPhase() == KuudraPhase.BOSS) {
-            if (!inBoss) {
-                resetState();
-            }
+            if (!inBoss) resetState();
         } else {
             resetState();
         }
@@ -124,13 +122,9 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
     @Contract(pure = true)
     private @NotNull String getDamageColor(float damage) {
-        if (damage > 7291) {
-            return "§a";
-        } else if (damage >= 4166) {
-            return "§e";
-        } else if (damage >= 1666) {
-            return "§c";
-        }
+        if (damage > 7291) return "§a";
+        else if (damage >= 4166) return "§e";
+        else if (damage >= 1666) return "§c";
         return "§f";
     }
 }
