@@ -41,7 +41,7 @@ public abstract class Feature {
         onDeactivate();
     }
 
-    protected final <T extends Event> void subscribe(EventBus.Subscription<T> subscription) {
+    protected <T extends Event> void subscribe(EventBus.Subscription<T> subscription) {
         subscriptions.add(subscription);
     }
 
