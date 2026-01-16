@@ -4,17 +4,19 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.experimental.UtilityClass;
+import net.iqaddons.mod.config.categories.PhaseThreeConfig;
+import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
@@ -132,7 +134,35 @@ public class WorldRenderUtils {
         buffer.vertex(entry, (float) pos.getX(), (float) pos.getY(), (float) pos.getZ()).color(color.r, color.g, color.b, color.a).normal(entry, normal);
         matrices.pop();
     }
-    
+
+    public static void drawHitBox(
+            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
+            @NotNull Camera camera, Entity entity, RenderTickCounter tickCounter,
+            boolean troughWalls, RenderColor color
+    ) {
+        float tickDelta = tickCounter.getTickProgress(true);
+        drawOutline(matrices, consumer, camera, getBox(entity, tickDelta), troughWalls, color);
+    }
+
+    @Contract("_, _ -> new")
+    private static @NotNull Box getBox(@NotNull Entity entity, float tickDelta) {
+        double x = entity.lastX + (entity.getX() - entity.lastX) * tickDelta;
+        double y = entity.lastY + (entity.getY() - entity.lastY) * tickDelta;
+        double z = entity.lastZ + (entity.getZ() - entity.lastZ) * tickDelta;
+
+        float width = entity.getWidth();
+        float height = entity.getHeight();
+        float halfWidth = width / 2.0f;
+
+        return new Box(
+                x - halfWidth,
+                y,
+                z - halfWidth,
+                x + halfWidth,
+                y + height,
+                z + halfWidth
+        );
+    }
 
     public static class Pipelines {
         public static final RenderPipeline.Snippet filledSnippet = RenderPipelines.POSITION_COLOR_SNIPPET;

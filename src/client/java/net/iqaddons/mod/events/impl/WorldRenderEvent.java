@@ -8,6 +8,7 @@ import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -50,6 +51,10 @@ public record WorldRenderEvent(
 
     public void drawTracer(Vec3d pos, RenderColor color) {
         WorldRenderUtils.drawTracer(matrices, consumer, camera, pos, color);
+    }
+
+    public void drawHitbox(Entity entity, boolean troughWalls, RenderColor color) {
+        WorldRenderUtils.drawHitBox(matrices, consumer, camera, entity, tickCounter, troughWalls, color);
     }
 }
 
