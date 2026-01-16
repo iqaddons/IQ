@@ -57,7 +57,7 @@ public final class SkyBlockTracker {
         if (!newArea.equals(currentArea)) {
             String previousArea = currentArea;
             currentArea = newArea;
-            log.debug("Area: {} -> {}", previousArea, newArea);
+            log.info("Area: {} -> {}", previousArea, newArea);
         }
     }
 }

@@ -57,7 +57,7 @@ public final class KuudraTracker {
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         if (!skyBlockTracker.isOnSkyBlock()) return;
-        if (!isInKuudraArea()) return;
+        if (!skyBlockTracker.isInArea(KUUDRA_AREA)) return;
 
         String message = event.getStrippedMessage();
         KuudraPhase detected = KuudraPhase.fromMessage(message);
@@ -135,12 +135,8 @@ public final class KuudraTracker {
     }
 
     private void onSkyBlockStatus(@NotNull SkyBlockStatusEvent event) {
-        if (!event.onSkyBlock() || !isInKuudraArea()) {
+        if (!event.onSkyBlock() || !skyBlockTracker.isInArea(KUUDRA_AREA)) {
             stateManager.reset();
         }
-    }
-
-    private boolean isInKuudraArea() {
-        return skyBlockTracker.isInArea(KUUDRA_AREA) || stateManager.isInKuudra();
     }
 }

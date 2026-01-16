@@ -20,7 +20,6 @@ public final class KuudraStateManager {
     private volatile KuudraPhase currentPhase = KuudraPhase.NONE;
 
     private Instant phaseStartTime;
-    private Instant runStartTime;
     private final Map<KuudraPhase, Duration> phaseDurations = new EnumMap<>(KuudraPhase.class);
 
     public @NotNull KuudraPhase phase() {
@@ -58,7 +57,6 @@ public final class KuudraStateManager {
         phaseStartTime = Instant.now();
 
         if (newPhase == KuudraPhase.SUPPLIES && previous == KuudraPhase.NONE) {
-            runStartTime = phaseStartTime;
             phaseDurations.clear();
         }
 
@@ -73,7 +71,6 @@ public final class KuudraStateManager {
             KuudraPhase previous = currentPhase;
             currentPhase = KuudraPhase.NONE;
             phaseStartTime = null;
-            runStartTime = null;
             phaseDurations.clear();
 
             log.info("State reset from {}", previous.getDisplayName());
