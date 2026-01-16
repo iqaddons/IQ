@@ -3,8 +3,8 @@ package net.iqaddons.mod.features.widgets;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.hud.component.HudLine;
@@ -25,7 +25,7 @@ public class FreshCountdownWidget extends HudWidget {
     private long freshStartTime = 0;
     private boolean freshActive = false;
 
-    private EventBus.Subscription<ChatReceivedEvent> chatSubscription;
+    private EventBus.Subscription<PlayerFreshEvent> playerFreshSubscription;
     private EventBus.Subscription<ClientTickEvent> tickSubscription;
 
     private final HudLine countdownLine;
@@ -57,15 +57,15 @@ public class FreshCountdownWidget extends HudWidget {
         clearLines();
         addLine(countdownLine);
 
-        chatSubscription = EventBus.subscribe(ChatReceivedEvent.class, this::onChat);
+        playerFreshSubscription = EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
         tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
     protected void onDeactivate() {
-        if (chatSubscription != null) {
-            chatSubscription.unsubscribe();
-            chatSubscription = null;
+        if (playerFreshSubscription != null) {
+            playerFreshSubscription.unsubscribe();
+            playerFreshSubscription = null;
         }
         if (tickSubscription != null) {
             tickSubscription.unsubscribe();
@@ -75,14 +75,11 @@ public class FreshCountdownWidget extends HudWidget {
         freshActive = false;
     }
 
-    private void onChat(@NotNull ChatReceivedEvent event) {
-        String message = event.getStrippedMessage();
+    private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
+        freshStartTime = event.freshAt();
+        freshActive = true;
 
-        if (message.contains(FRESH_TOOLS_MESSAGE)) {
-            freshStartTime = System.currentTimeMillis();
-            freshActive = true;
-            updateDisplay();
-        }
+        updateDisplay();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

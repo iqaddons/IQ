@@ -2,6 +2,7 @@ package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
@@ -9,6 +10,7 @@ import net.minecraft.entity.mob.GiantEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,10 +22,10 @@ import java.util.stream.StreamSupport;
 @UtilityClass
 public class EntityDetectorUtil {
 
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public static <T extends Entity> @NotNull List<T> getEntitiesOfType(@NotNull Class<T> entityClass) {
-        ClientWorld world = MC.world;
+        ClientWorld world = mc.world;
         if (world == null) {
             return Collections.emptyList();
         }
@@ -83,6 +85,24 @@ public class EntityDetectorUtil {
 
     public static @NotNull List<ArmorStandEntity> getAllArmorStands() {
         return getEntitiesOfType(ArmorStandEntity.class);
+    }
+
+    public static Optional<AbstractClientPlayerEntity> findPlayerByName(@NotNull String name) {
+        if (mc.world == null) return Optional.empty();
+
+        return mc.world.getPlayers().stream()
+                .filter(player -> player.getName().getString().equalsIgnoreCase(name))
+                .findFirst();
+    }
+
+    public static @Nullable AbstractClientPlayerEntity findPlayerById(int entityId) {
+        if (mc.world == null) return null;
+        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+            if (player.getId() == entityId) {
+                return player;
+            }
+        }
+        return null;
     }
 }
 

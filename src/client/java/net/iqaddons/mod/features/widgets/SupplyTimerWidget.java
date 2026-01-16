@@ -45,10 +45,11 @@ public class SupplyTimerWidget extends HudWidget {
 
     @Override
     protected void onActivate() {
-        supplyPickupSubscription = EventBus.subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
         if (supplyState.getSuppliesPhaseStart() == null) {
             supplyState.startSuppliesPhase();
         }
+
+        supplyPickupSubscription = EventBus.subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
 
         resetLocalState();
         updateDisplay();

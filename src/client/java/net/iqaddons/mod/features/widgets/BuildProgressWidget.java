@@ -3,8 +3,8 @@ package net.iqaddons.mod.features.widgets;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -31,7 +31,7 @@ public class BuildProgressWidget extends HudWidget {
     private long phaseStartTime = 0;
     private int freshCount = 0;
 
-    private EventBus.Subscription<ChatReceivedEvent> chatSubscription;
+    private EventBus.Subscription<PlayerFreshEvent> playerFreshSubscription;
     private EventBus.Subscription<ClientTickEvent> tickSubscription;
 
     private final HudLine titleLine;
@@ -76,7 +76,7 @@ public class BuildProgressWidget extends HudWidget {
                 freshLine, etaLine
         );
 
-        chatSubscription = EventBus.subscribe(ChatReceivedEvent.class, this::onChat);
+        playerFreshSubscription = EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
         tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
 
         log.info("Build Progress Widget activated");
@@ -84,9 +84,9 @@ public class BuildProgressWidget extends HudWidget {
 
     @Override
     protected void onDeactivate() {
-        if (chatSubscription != null) {
-            chatSubscription.unsubscribe();
-            chatSubscription = null;
+        if (playerFreshSubscription != null) {
+            playerFreshSubscription.unsubscribe();
+            playerFreshSubscription = null;
         }
         if (tickSubscription != null) {
             tickSubscription.unsubscribe();
@@ -96,13 +96,9 @@ public class BuildProgressWidget extends HudWidget {
         log.info("Build Progress Widget deactivated");
     }
 
-    private void onChat(@NotNull ChatReceivedEvent event) {
-        String message = event.getStrippedMessage();
-
-        if (message.contains(FRESH_MESSAGE)) {
-            freshCount++;
-            updateDisplay();
-        }
+    private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
+        freshCount++;
+        updateDisplay();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

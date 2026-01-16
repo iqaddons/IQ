@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Builder
 public record KuudraRun(
-        KuudraTier kuudraTier,
         Instant startTime,
         Map<KuudraPhase, Duration> phaseDurations
 ) {
