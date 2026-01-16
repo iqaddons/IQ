@@ -100,7 +100,7 @@ public class Configuration {
             id = "partyJoinSound",
             translation = "Party Join Sound"
     )
-    @Comment("Play a sound when a player joins your party (W.I.P)")
+    @Comment("Play a sound when a player joins your party")
     public static boolean partyJoinSound = true;
 
     @ConfigEntry(

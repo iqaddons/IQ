@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
+import static net.iqaddons.mod.utils.render.EntityGlowUtil.PRIORITY_TEAM_HIGHLIGHT;
+
 @Slf4j
 public class TeamHighlightFeature extends KuudraFeature {
 
@@ -77,7 +79,9 @@ public class TeamHighlightFeature extends KuudraFeature {
             currentTeammates.add(playerId);
 
             if (!highlightedPlayers.contains(playerId) && !EntityGlowUtil.isGlowing(playerId)) {
-                EntityGlowUtil.setGlowing(playerId, RenderColor.fromArgb(Configuration.teamHighlightColor));
+                var renderColor = RenderColor.fromArgb(Configuration.teamHighlightColor);
+                EntityGlowUtil.setGlowing(playerId, renderColor, PRIORITY_TEAM_HIGHLIGHT);
+
                 highlightedPlayers.add(playerId);
                 log.debug("Highlighted teammate: {}", player.getName().getString());
             }
@@ -87,7 +91,7 @@ public class TeamHighlightFeature extends KuudraFeature {
         for (Integer playerId : highlightedPlayers) {
             if (!currentTeammates.contains(playerId)) {
                 RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
-                if (currentColor != null) EntityGlowUtil.removeGlowing(playerId);
+                if (currentColor != null) EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
 
                 toRemove.add(playerId);
             }
@@ -108,8 +112,7 @@ public class TeamHighlightFeature extends KuudraFeature {
     private void clearAllHighlights() {
         for (Integer playerId : highlightedPlayers) {
             RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
-            if (currentColor != null) EntityGlowUtil.removeGlowing(playerId);
-
+            if (currentColor != null) EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
         }
 
         highlightedPlayers.clear();
