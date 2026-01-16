@@ -39,7 +39,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {
-        Optional<MagmaCubeEntity> optionalKuudra = KuudraDirectionUtil.findKuudra();
+        var optionalKuudra = KuudraDirectionUtil.findKuudra();
         if (optionalKuudra.isEmpty()) return;
         
         MagmaCubeEntity kuudra = optionalKuudra.get();

@@ -81,6 +81,13 @@ public class Configuration {
     public static boolean manaDrainNotify = true;
 
     @ConfigEntry(
+            id = "kuudraPhaseAlert",
+            translation = "Kuudra Phase Alert"
+    )
+    @Comment("Alert when Kuudra changes phase")
+    public static boolean kuudraPhaseAlert = true;
+
+    @ConfigEntry(
             id = "partyJoinSound",
             translation = "Party Join Sound"
     )
@@ -297,11 +304,11 @@ public class Configuration {
     public static class PhaseFourConfig {
 
         @ConfigEntry(
-                id = "kuudraSpawnAlert",
-                translation = "Kuudra Spawn Alert"
+                id = "kuudraDirectionAlert",
+                translation = "Kuudra Direction Alert"
         )
-        @Comment("Alert which side Kuudra will spawn on")
-        public static boolean kuudraSpawnAlert = true;
+        @Comment("Alert which side Kuudra will appear on")
+        public static boolean kuudraDirectionAlert = true;
 
         @ConfigEntry(
                 id = "rendDamageAlert",
