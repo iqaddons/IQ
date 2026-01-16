@@ -47,7 +47,7 @@ public final class KuudraTracker {
     }
 
     private void onSkyBlockStatus(@NotNull SkyBlockStatusEvent event) {
-        if (!event.onSkyBlock()) {
+        if (!event.onSkyBlock() || !isInKuudraArea()) {
             stateManager.reset();
         }
     }
