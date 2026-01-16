@@ -118,7 +118,7 @@ public final class SupplyStateManager {
     }
 
     public long getElapsedTimeSeconds() {
-        return (long) (getElapsedTimeMillis() / 1000.0);
+        return getElapsedTimeMillis() / 1000;
     }
 
     @Contract(pure = true)
