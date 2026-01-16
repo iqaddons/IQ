@@ -16,10 +16,7 @@ import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
-import net.iqaddons.mod.features.widgets.BuildProgressWidget;
-import net.iqaddons.mod.features.widgets.CustomSplitsWidget;
-import net.iqaddons.mod.features.widgets.FreshCountdownWidget;
-import net.iqaddons.mod.features.widgets.SupplyTimerWidget;
+import net.iqaddons.mod.features.widgets.*;
 import net.iqaddons.mod.utils.hud.HudManager;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
 import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
@@ -80,9 +77,8 @@ public class IQModClient implements ClientModInitializer {
                 new CustomSupplyMessageFeature(), new ElleHighlightFeature(), new FreshAlertFeature(),
                 new KuudraDirectionAlertFeature(), new KuudraHitboxFeature(), new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
-                new ManaDrainAlertFeature(), new KuudraHealthDisplayFeature(), new BlockUselessPerksFeature(),
-                new HideMobNametagsFeature(), new TeamHighlightFeature(), new KuudraPhaseAlertFeature(),
-                new DangerAlertFeature()
+                new ManaDrainAlertFeature(), new BlockUselessPerksFeature(), new HideMobNametagsFeature(),
+                new TeamHighlightFeature(), new KuudraPhaseAlertFeature(), new DangerAlertFeature()
         );
 
         features.start();
@@ -94,7 +90,8 @@ public class IQModClient implements ClientModInitializer {
 
         hudManager.register(
                 new SupplyTimerWidget(), new BuildProgressWidget(),
-                new CustomSplitsWidget(), new FreshCountdownWidget()
+                new CustomSplitsWidget(), new FreshCountdownWidget(),
+                new KuudraHealthWidget()
         );
 
     }
