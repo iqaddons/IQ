@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
+import net.iqaddons.mod.features.generic.PartyJoinSoundFeature;
 import net.iqaddons.mod.features.kuudra.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.waypoints.building.BuildWaypointsFeature;
@@ -66,6 +67,7 @@ public class IQModClient implements ClientModInitializer {
     private void initializeFeatures() {
         FeatureManager features = FeatureManager.get();
         features.register(
+                new PartyJoinSoundFeature(),
                 new PearlWaypointFeature(),
                 new SupplyWaypointsFeature(),
                 new PileWaypointsFeature(),
@@ -73,7 +75,7 @@ public class IQModClient implements ClientModInitializer {
                 new SecondSupplyAlertFeature(scheduler),
                 new CustomSupplyMessageFeature(),
                 new ElleHighlightFeature(),
-                new FreshAlertFeature(scheduler),
+                new FreshAlertFeature(),
                 new KuudraDirectionAlertFeature(),
                 new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(),
