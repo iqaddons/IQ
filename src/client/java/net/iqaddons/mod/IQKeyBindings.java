@@ -31,12 +31,10 @@ public class IQKeyBindings {
     }
 
     public static void openConfigScreen(@NotNull MinecraftClient client) {
-        if (client.currentScreen == null) {
-            client.setScreen(
-                    ResourcefulConfigScreen.make(IQModClient.get().getConfigurator(), Configuration.class)
-                            .withParent(null)
-                            .build()
-            );
-        }
+        client.setScreen(
+                ResourcefulConfigScreen.make(IQModClient.get().getConfigurator(), Configuration.class)
+                        .withParent(client.currentScreen)
+                        .build()
+        );
     }
 }

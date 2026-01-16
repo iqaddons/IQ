@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.kuudra.*;
@@ -18,8 +19,6 @@ import net.minecraft.client.MinecraftClient;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 @Slf4j
 @Getter
@@ -50,7 +49,7 @@ public class IQModClient implements ClientModInitializer {
         initializeTrackers();
         initializeFeatures();
         IQKeyBindings.register();
-        registerCommand();
+        registerCommands();
 
         log.info("IQ Mod has been initialized!");
     }
@@ -83,18 +82,16 @@ public class IQModClient implements ClientModInitializer {
                 new KuudraHealthDisplayFeature(),
                 new BlockUselessPerksFeature(),
                 new HideMobNametagsFeature(),
-                new TeamHighlightFeature()
+                new TeamHighlightFeature(),
+                new KuudraPhaseAlertFeature()
         );
 
         features.start();
     }
 
-    private void registerCommand() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) ->
-                dispatcher.register(literal("iq").executes(source -> {
-                    IQKeyBindings.openConfigScreen(mc);
-                    return 1;
-                }))
+    private void registerCommands() {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
+                IQCommand.register(dispatcher)
         );
     }
 

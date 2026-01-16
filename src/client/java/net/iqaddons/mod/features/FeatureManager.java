@@ -42,6 +42,7 @@ public final class FeatureManager {
             tickSubscription.unsubscribe();
             tickSubscription = null;
         }
+
         features.values().forEach(Feature::deactivate);
     }
 
