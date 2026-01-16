@@ -140,6 +140,12 @@ public abstract class HudWidget implements HudElement {
         markDimensionsDirty();
     }
 
+    protected void addLines(HudLine @NotNull ... lines) {
+        for (HudLine line : lines) {
+            addLine(line);
+        }
+    }
+
     protected void addLineAt(int index, @NotNull HudLine line) {
         lines.add(index, line);
         markDimensionsDirty();

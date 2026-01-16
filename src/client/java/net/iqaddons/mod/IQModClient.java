@@ -17,6 +17,7 @@ import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
 import net.iqaddons.mod.features.widgets.BuildProgressWidget;
+import net.iqaddons.mod.features.widgets.CustomSplitsWidget;
 import net.iqaddons.mod.features.widgets.SupplyTimerWidget;
 import net.iqaddons.mod.utils.hud.HudManager;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
@@ -73,27 +74,13 @@ public class IQModClient implements ClientModInitializer {
     private void initializeFeatures() {
         FeatureManager features = FeatureManager.get();
         features.register(
-                new PartyJoinSoundFeature(),
-                new PearlWaypointFeature(),
-                new SupplyWaypointsFeature(),
-                new PileWaypointsFeature(),
-                new NoPreAlertFeature(scheduler),
-                new SecondSupplyAlertFeature(scheduler),
-                new CustomSupplyMessageFeature(),
-                new ElleHighlightFeature(),
-                new FreshAlertFeature(),
-                new KuudraDirectionAlertFeature(),
-                new KuudraHitboxFeature(),
-                new RendDamageAlertFeature(),
-                new AlreadyPickingAlertFeature(),
-                new BuildWaypointsFeature(),
-                new StunWaypointsFeature(),
-                new ManaDrainAlertFeature(),
-                new KuudraHealthDisplayFeature(),
-                new BlockUselessPerksFeature(),
-                new HideMobNametagsFeature(),
-                new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature(),
+                new PartyJoinSoundFeature(), new PearlWaypointFeature(), new SupplyWaypointsFeature(),
+                new PileWaypointsFeature(), new NoPreAlertFeature(scheduler), new SecondSupplyAlertFeature(scheduler),
+                new CustomSupplyMessageFeature(), new ElleHighlightFeature(), new FreshAlertFeature(),
+                new KuudraDirectionAlertFeature(), new KuudraHitboxFeature(), new RendDamageAlertFeature(),
+                new AlreadyPickingAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
+                new ManaDrainAlertFeature(), new KuudraHealthDisplayFeature(), new BlockUselessPerksFeature(),
+                new HideMobNametagsFeature(), new TeamHighlightFeature(), new KuudraPhaseAlertFeature(),
                 new DangerAlertFeature()
         );
 
@@ -105,8 +92,8 @@ public class IQModClient implements ClientModInitializer {
         hudManager.initialize();
 
         hudManager.register(
-                new SupplyTimerWidget(),
-                new BuildProgressWidget()
+                new SupplyTimerWidget(), new BuildProgressWidget(),
+                new CustomSplitsWidget()
         );
 
     }

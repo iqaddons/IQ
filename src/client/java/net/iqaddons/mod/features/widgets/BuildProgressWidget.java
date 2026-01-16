@@ -71,10 +71,10 @@ public class BuildProgressWidget extends HudWidget {
         freshCount = 0;
 
         clearLines();
-        addLine(titleLine);
-        addLine(progressLine);
-        addLine(freshLine);
-        addLine(etaLine);
+        addLines(
+                titleLine, progressLine,
+                freshLine, etaLine
+        );
 
         chatSubscription = EventBus.subscribe(ChatReceivedEvent.class, this::onChat);
         tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);

@@ -91,10 +91,6 @@ public final class SupplyStateManager {
         remainingPiles.removeIf(pile -> pile.isNearby(armorStandPos));
     }
 
-    public int incrementSuppliesCollected() {
-        return ++suppliesCollected;
-    }
-
     public void setMissingPre(int value) {
         if (value != missingPre) {
             missingPre = value;
@@ -128,7 +124,7 @@ public final class SupplyStateManager {
     @Contract(pure = true)
     public @NotNull String getTimeColor() {
         return switch (getTimeTier()) {
-            case 0 -> "§f§l";
+            case 0 -> "§d§l";
             case 1 -> "§9§l";
             case 2 -> "§a§l";
             case 3 -> "§2§l";
