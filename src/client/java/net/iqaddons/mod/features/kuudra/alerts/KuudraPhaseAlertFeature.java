@@ -2,7 +2,7 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;

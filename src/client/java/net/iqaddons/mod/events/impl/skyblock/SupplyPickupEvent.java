@@ -1,4 +1,4 @@
-package net.iqaddons.mod.events.impl;
+package net.iqaddons.mod.events.impl.skyblock;
 
 import net.iqaddons.mod.events.Event;
 

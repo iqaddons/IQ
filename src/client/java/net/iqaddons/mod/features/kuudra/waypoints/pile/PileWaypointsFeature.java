@@ -1,11 +1,10 @@
 package net.iqaddons.mod.features.kuudra.waypoints.pile;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
-import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;

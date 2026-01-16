@@ -3,7 +3,7 @@ package net.iqaddons.mod.features;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
