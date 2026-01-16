@@ -100,28 +100,15 @@ public class WorldRenderUtils {
     }
 
     public static void drawBeam(
-            @NotNull MatrixStack matrices, OrderedRenderCommandQueue queue,
-            @NotNull Camera camera, @NotNull Vec3d pos, int height, @NotNull RenderColor color
+            MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
+            Camera camera, Vec3d pos, int height,
+            boolean throughWalls, RenderColor color
     ) {
-        matrices.push();
-
-        Vec3d camPos = camera.getPos();
-        matrices.translate(
-                pos.x - camPos.x,
-                pos.y - camPos.y,
-                pos.z - camPos.z
+        drawFilled(
+                matrices, consumer, camera,
+                Box.of(pos, 0.5, 0, 0.5).stretch(0, height, 0),
+                throughWalls, color
         );
-
-        BeaconBlockEntityRenderer.renderBeam(
-                matrices, queue, BeaconBlockEntityRenderer.BEAM_TEXTURE,
-                1.0f, 0.0f,
-                0, height,
-                color.argb,
-                0.2f,
-                0.25f
-        );
-
-        matrices.pop();
     }
 
     public static void drawTracer(

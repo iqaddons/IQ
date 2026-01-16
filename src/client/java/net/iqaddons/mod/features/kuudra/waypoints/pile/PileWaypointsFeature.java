@@ -51,6 +51,7 @@ public class PileWaypointsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraDeactivate() {
+        supplyState.getRemainingPiles().clear();
         log.info("Pile waypoints deactivated");
     }
 
@@ -64,7 +65,8 @@ public class PileWaypointsFeature extends KuudraFeature {
         if (!event.isInGame()) return;
         if (!event.isNthTick(UPDATE_INTERVAL_TICKS)) return;
 
-        for (ArmorStandEntity stand : EntityDetectorUtil.getCompletedPileStands()) {
+        List<ArmorStandEntity> completedStands = EntityDetectorUtil.getCompletedPileStands();
+        for (ArmorStandEntity stand : completedStands) {
             Vec3d standPos = new Vec3d(stand.getX(), stand.getY(), stand.getZ());
             supplyState.markPileCompleted(standPos);
         }
@@ -77,7 +79,7 @@ public class PileWaypointsFeature extends KuudraFeature {
         int missingPre = supplyState.getMissingPre();
         for (PileLocation pile : piles) {
             RenderColor color = pile.isNoPrePile(missingPre) ? NO_PRE_COLOR : NORMAL_COLOR;
-            event.drawBeam(pile.position(), BEACON_HEIGHT, color);
+            event.drawBeam(pile.position(), BEACON_HEIGHT, false, color);
         }
     }
 }
