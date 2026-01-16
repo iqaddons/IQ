@@ -16,6 +16,8 @@ import net.iqaddons.mod.features.kuudra.waypoints.pearl.PearlWaypointFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
+import net.iqaddons.mod.features.widgets.SupplyTimerWidget;
+import net.iqaddons.mod.utils.hud.HudManager;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
 import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
 import net.minecraft.client.MinecraftClient;
@@ -51,6 +53,8 @@ public class IQModClient implements ClientModInitializer {
 
         initializeTrackers();
         initializeFeatures();
+        initializeHudWidgets();
+
         IQKeyBindings.register();
         registerCommands();
 
@@ -93,6 +97,15 @@ public class IQModClient implements ClientModInitializer {
         );
 
         features.start();
+    }
+
+    private void initializeHudWidgets() {
+        HudManager hudManager = HudManager.get();
+        hudManager.initialize();
+
+        hudManager.register(
+        );
+
     }
 
     private void registerCommands() {
