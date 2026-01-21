@@ -16,6 +16,8 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
 
     private static final int CHECK_INTERVAL_TICKS = 2;
 
+    private volatile boolean alertShown = false;
+
     public KuudraDirectionAlertFeature() {
         super(
                 "kuudraDirectionAlert",
@@ -27,29 +29,32 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
+        alertShown = false;
+
         subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        log.info("Kuudra Spawn Alert activated");
     }
 
     @Override
     protected void onKuudraDeactivate() {
-        log.info("Kuudra Spawn Alert deactivated");
+        alertShown = false;
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
         if (!event.isNthTick(CHECK_INTERVAL_TICKS)) return;
+        if (alertShown) return;
 
         var optionalKuudra = KuudraDirectionUtil.findKuudra();
         if (optionalKuudra.isEmpty()) return;
 
         MagmaCubeEntity kuudra = optionalKuudra.get();
         var direction = KuudraDirectionUtil.getSpawnDirection(kuudra);
-        log.info("Detected Kuudra spawn, direction: {}", direction.getName());
+        log.debug("Detected Kuudra spawn, direction: {}", direction.getName());
 
         if (direction != KuudraDirectionUtil.SpawnDirection.UNKNOWN) {
             MessageUtil.showTitle(direction.getFormattedName(), "", 0, 25, 5);
-            log.info("Kuudra spawn alert: {}", direction.getName());
+            alertShown = true;
+            log.debug("Kuudra spawn alert: {}", direction.getName());
         }
     }
 }
