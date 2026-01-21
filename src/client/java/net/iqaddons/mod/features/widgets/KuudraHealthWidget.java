@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.KuudraDirectionUtil;
+import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -16,7 +16,6 @@ import net.minecraft.entity.mob.MagmaCubeEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public class KuudraHealthWidget extends HudWidget {
@@ -88,7 +87,7 @@ public class KuudraHealthWidget extends HudWidget {
         if (!event.isInGame()) return;
         if (!event.isNthTick(2)) return;
 
-        var optionalKuudra = KuudraDirectionUtil.findKuudra();
+        var optionalKuudra = KuudraLocationUtil.findKuudra();
         if (optionalKuudra.isEmpty()) {
             kuudraFound = false;
             return;

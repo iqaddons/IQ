@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 @UtilityClass
-public class KuudraDirectionUtil {
+public class KuudraLocationUtil {
 
     private static final MinecraftClient MC = MinecraftClient.getInstance();
 
@@ -20,8 +20,14 @@ public class KuudraDirectionUtil {
     private static final float KUUDRA_WIDTH_TOLERANCE = 0.5f;
     private static final float KUUDRA_MAX_HEALTH = 100_000f;
 
+    private static final double KUUDRA_ARENA_MIN_Y = 0.0;
+    private static final double KUUDRA_ARENA_MAX_Y = 50.0;
+    private static final double KUUDRA_ARENA_MIN_X = -200.0;
+    private static final double KUUDRA_ARENA_MAX_X = -50.0;
+    private static final double KUUDRA_ARENA_MIN_Z = -200.0;
+    private static final double KUUDRA_ARENA_MAX_Z = -50.0;
+
     public static final float BOSS_HEALTH_THRESHOLD = 25_000f;
-    public static final float BOSS_SPAWN_HEALTH_MIN = 24_900f;
 
     public static @NotNull Optional<MagmaCubeEntity> findKuudra() {
         ClientWorld world = MC.world;
@@ -48,9 +54,19 @@ public class KuudraDirectionUtil {
         float width = entity.getWidth();
         float health = entity.getHealth();
 
-        return Math.abs(width - KUUDRA_WIDTH) < KUUDRA_WIDTH_TOLERANCE
-                && health <= KUUDRA_MAX_HEALTH
-                && health > 0;
+        double x = entity.getX();
+        double y = entity.getY();
+        double z = entity.getZ();
+
+        boolean isInArena = x >= KUUDRA_ARENA_MIN_X && x <= KUUDRA_ARENA_MAX_X &&
+                y >= KUUDRA_ARENA_MIN_Y && y <= KUUDRA_ARENA_MAX_Y &&
+                z >= KUUDRA_ARENA_MIN_Z && z <= KUUDRA_ARENA_MAX_Z;
+
+        boolean hasCorrectSize = Math.abs(width - KUUDRA_WIDTH) < KUUDRA_WIDTH_TOLERANCE;
+        boolean hasValidHealth = health > 0 && health <= KUUDRA_MAX_HEALTH;
+        boolean isVisible = !entity.isInvisible();
+
+        return hasCorrectSize && hasValidHealth && isInArena && isVisible;
     }
 
     public static @NotNull SpawnDirection getSpawnDirection(@NotNull MagmaCubeEntity kuudra) {

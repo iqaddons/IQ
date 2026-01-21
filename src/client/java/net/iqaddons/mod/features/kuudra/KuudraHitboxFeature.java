@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.KuudraDirectionUtil;
+import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.render.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.entity.mob.MagmaCubeEntity;
@@ -30,7 +30,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {
-        var optionalKuudra = KuudraDirectionUtil.findKuudra();
+        var optionalKuudra = KuudraLocationUtil.findKuudra();
         if (optionalKuudra.isEmpty()) return;
         
         MagmaCubeEntity kuudra = optionalKuudra.get();

@@ -7,7 +7,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.KuudraDirectionUtil;
+import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.mob.MagmaCubeEntity;
@@ -86,12 +86,12 @@ public class RendDamageAlertFeature extends KuudraFeature {
     }
 
     private void checkRendDamage() {
-        Optional<MagmaCubeEntity> optionalKuudra = KuudraDirectionUtil.findKuudra();
+        Optional<MagmaCubeEntity> optionalKuudra = KuudraLocationUtil.findKuudra();
         if (optionalKuudra.isEmpty()) return;
 
         MagmaCubeEntity kuudra = optionalKuudra.get();
         float currentHealth = kuudra.getHealth();
-        if (currentHealth > KuudraDirectionUtil.BOSS_HEALTH_THRESHOLD) {
+        if (currentHealth > KuudraLocationUtil.BOSS_HEALTH_THRESHOLD) {
             return;
         }
 
