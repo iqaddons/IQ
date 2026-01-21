@@ -8,7 +8,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.function.BooleanSupplier;
 @Data
 public abstract class HudWidget implements HudElement {
 
-    protected static final MinecraftClient MC = MinecraftClient.getInstance();
+    protected static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private final String id;
     private final String displayName;
@@ -106,7 +105,7 @@ public abstract class HudWidget implements HudElement {
     }
 
     private void recalculateDimensions() {
-        TextRenderer textRenderer = MC.textRenderer;
+        TextRenderer textRenderer = mc.textRenderer;
         if (textRenderer == null) return;
 
         List<HudLine> renderLines = getCurrentRenderableLines();
@@ -221,10 +220,12 @@ public abstract class HudWidget implements HudElement {
 
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        TextRenderer textRenderer = MC.textRenderer;
+        if (mc.currentScreen != null) return;
+
+        var textRenderer = mc.textRenderer;
         if (textRenderer == null) return;
 
-        List<HudLine> renderLines = getRenderableLines();
+        var renderLines = getRenderableLines();
         if (renderLines.isEmpty()) return;
 
         renderInternal(context, mouseX, mouseY, renderLines, textRenderer);
@@ -232,7 +233,7 @@ public abstract class HudWidget implements HudElement {
 
     @Override
     public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        TextRenderer textRenderer = MC.textRenderer;
+        var textRenderer = mc.textRenderer;
         if (textRenderer == null) return;
 
         List<HudLine> renderLines;
@@ -282,7 +283,6 @@ public abstract class HudWidget implements HudElement {
 
         for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
-
             line.updateHoverState(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale);
             line.render(context, (int) currentX, (int) currentY, textRenderer);
 
@@ -359,7 +359,7 @@ public abstract class HudWidget implements HudElement {
         if (button != 0) return false;
         if (!isMouseOver(mouseX, mouseY)) return false;
 
-        TextRenderer textRenderer = MC.textRenderer;
+        TextRenderer textRenderer = mc.textRenderer;
         if (textRenderer == null) return false;
 
         float scaledX = getAbsoluteX() / scale;
