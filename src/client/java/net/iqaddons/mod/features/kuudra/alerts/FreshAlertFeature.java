@@ -108,6 +108,7 @@ public class FreshAlertFeature extends KuudraFeature {
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
         if (event.selfFresh()) {
+            MessageUtil.showTitle("§a§lFRESH!", "", 0, 20, 5);
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(event.buildingProgress()));
         }
 
