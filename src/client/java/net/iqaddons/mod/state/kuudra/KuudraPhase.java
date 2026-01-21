@@ -19,7 +19,7 @@ public enum KuudraPhase {
     STUN("Stun", 3, msg -> msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")),
     DPS("DPS", 4, msg -> msg.contains("destroyed one of Kuudra's pods!")),
     BOSS("Boss", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
-    COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
+    COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT") || msg.contains("Sending to server"));
 
     public static final KuudraPhase[] RUN_PHASES = { SUPPLIES, BUILD, EATEN, STUN, DPS, BOSS };
 
