@@ -53,7 +53,7 @@ public class KuudraHealthWidget extends HudWidget {
                 .showWhen(() -> stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD);
 
         setEnabledSupplier(() -> PhaseThreeConfig.kuudraHPBossbar);
-        setVisibilityCondition(() -> isInCombatPhase());
+        setVisibilityCondition(this::isInCombatPhase);
 
         setExampleLines(List.of(
                 HudLine.of("§4§lKuudra Health"),
@@ -88,7 +88,7 @@ public class KuudraHealthWidget extends HudWidget {
         if (!event.isInGame()) return;
         if (!event.isNthTick(2)) return;
 
-        Optional<MagmaCubeEntity> optionalKuudra = KuudraDirectionUtil.findKuudra();
+        var optionalKuudra = KuudraDirectionUtil.findKuudra();
         if (optionalKuudra.isEmpty()) {
             kuudraFound = false;
             return;
@@ -104,8 +104,7 @@ public class KuudraHealthWidget extends HudWidget {
     }
 
     private void updateDisplay() {
-        String formattedHP = formatHealth(currentHP);
-        healthLine.text(String.format("§c❤ %s §8(§c%s.2f%%§8)", formattedHP, percentage));
+        healthLine.text(String.format("§c❤ %.0f §8(§c%.2f%%§8)", currentHP, percentage));
 
         if (stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD) {
             float actualHP = currentHP * BOSS_MULTIPLIER;
@@ -114,13 +113,6 @@ public class KuudraHealthWidget extends HudWidget {
         }
 
         markDimensionsDirty();
-    }
-
-    private @NotNull String formatHealth(float health) {
-        if (health >= 1000) {
-            return String.format("%,.0f", health);
-        }
-        return String.format("%.0f", health);
     }
 
     private boolean isInCombatPhase() {
