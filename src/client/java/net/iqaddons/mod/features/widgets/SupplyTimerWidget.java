@@ -97,8 +97,9 @@ public class SupplyTimerWidget extends HudWidget {
         if (pickupHistory.isEmpty()) {
             long elapsed = supplyState.getElapsedTimeMillis();
             if (elapsed > 0) {
-                addLine(HudLine.of(String.format("§7Waiting... %.2f", (double) elapsed)));
+                addLine(HudLine.of(String.format("§7Waiting... %.2fs", elapsed / 1000.0)));
             }
+
             markDimensionsDirty();
             return;
         }
@@ -107,7 +108,7 @@ public class SupplyTimerWidget extends HudWidget {
             addLine(HudLine.of(String.format(
                     "§f%s §8(%d/6) %s%.2fs",
                     entry.playerName(), entry.supplyNumber(),
-                    entry.color, (double) entry.pickupAt()
+                    entry.color, entry.pickupAt()
             )));
         }
 
@@ -118,7 +119,7 @@ public class SupplyTimerWidget extends HudWidget {
             String playerName,
             String color,
             int supplyNumber,
-            long pickupAt
+            double pickupAt
     ) {
     }
 }

@@ -80,7 +80,7 @@ public final class KuudraTracker {
 
             String supplyCount = supplyMatcher.group(2);
             String formattedMessage = TextFormatUtil.toLegacyString(event.getText());
-            long timeSeconds = supplyState.getElapsedTimeSeconds();
+            double timeSeconds = supplyState.getElapsedTimeMillis() / 1000.0;
 
             EventBus.post(new SupplyPickupEvent(
                     formattedMessage,

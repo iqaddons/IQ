@@ -35,11 +35,9 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
 
     private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
         MessageUtil.sendFormattedMessage(String.format(
-                "%s §arecovered a supply in %s%ss §r§8(%s/6)",
-                event.playerName(),
-                supplyState.getTimeColor(),
-                String.format("%.2f", (double) event.pickupAt()),
-                event.currentSupply()
+                "%s §arecovered a supply in %s%.2fs §r§8(%s/6)",
+                event.playerName(), supplyState.getTimeColor(),
+                event.pickupAt(), event.currentSupply()
         ));
     }
 }

@@ -6,6 +6,6 @@ public record SupplyPickupEvent(
         String originalMessage,
         String playerName,
         int currentSupply,
-        long pickupAt
+        double pickupAt
 ) implements Event {
 }
