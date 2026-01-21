@@ -144,6 +144,7 @@ public class HudRenderer {
             int fillColor,
             int emptyColor
     ) {
+        if (mc.currentScreen != null) return;
         progress = Math.clamp(progress, 0.0f, 1.0f);
         int filledWidth = (int) (width * progress);
 

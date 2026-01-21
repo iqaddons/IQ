@@ -220,8 +220,6 @@ public abstract class HudWidget implements HudElement {
 
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        if (mc.currentScreen != null) return;
-
         var textRenderer = mc.textRenderer;
         if (textRenderer == null) return;
 

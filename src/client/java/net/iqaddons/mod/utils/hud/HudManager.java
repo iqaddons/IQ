@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
-import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.utils.hud.config.HudConfigManager;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -112,7 +111,6 @@ public final class HudManager {
         if (mc.options.playerListKey.isPressed()) return;
 
         double[] mousePos = getScaledMousePosition();
-
         for (HudWidget widget : widgets) {
             updateWidgetActivation(widget);
 
