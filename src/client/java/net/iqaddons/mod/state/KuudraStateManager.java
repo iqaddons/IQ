@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.KuudraLocationUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -60,6 +61,10 @@ public final class KuudraStateManager {
             phaseDurations.clear();
         }
 
+        if (newPhase == KuudraPhase.BOSS) {
+            KuudraLocationUtil.invalidateCache();
+        }
+
         log.info("Phase: {} -> {} ({}ms)", previous.getDisplayName(), newPhase.getDisplayName(), phaseDurationMs);
         EventBus.post(new KuudraPhaseChangeEvent(previous, newPhase, phaseDurationMs));
 
@@ -72,6 +77,8 @@ public final class KuudraStateManager {
             currentPhase = KuudraPhase.NONE;
             phaseStartTime = null;
             phaseDurations.clear();
+
+            KuudraLocationUtil.invalidateCache();
 
             log.info("State reset from {}", previous.getDisplayName());
             EventBus.post(new KuudraPhaseChangeEvent(previous, KuudraPhase.NONE, 0));

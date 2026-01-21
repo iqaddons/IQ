@@ -78,8 +78,6 @@ public class BuildProgressWidget extends HudWidget {
 
         playerFreshSubscription = EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
         tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
-
-        log.info("Build Progress Widget activated");
     }
 
     @Override
@@ -92,8 +90,6 @@ public class BuildProgressWidget extends HudWidget {
             tickSubscription.unsubscribe();
             tickSubscription = null;
         }
-
-        log.info("Build Progress Widget deactivated");
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {

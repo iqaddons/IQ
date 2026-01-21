@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.MagmaCubeEntity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -14,59 +15,58 @@ import java.util.Optional;
 @UtilityClass
 public class KuudraLocationUtil {
 
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final float KUUDRA_WIDTH = 15.3f;
-    private static final float KUUDRA_WIDTH_TOLERANCE = 0.5f;
-    private static final float KUUDRA_MAX_HEALTH = 100_000f;
-
-    private static final double KUUDRA_ARENA_MIN_Y = 0.0;
-    private static final double KUUDRA_ARENA_MAX_Y = 50.0;
-    private static final double KUUDRA_ARENA_MIN_X = -200.0;
-    private static final double KUUDRA_ARENA_MAX_X = -50.0;
-    private static final double KUUDRA_ARENA_MIN_Z = -200.0;
-    private static final double KUUDRA_ARENA_MAX_Z = -50.0;
+    private static final int KUUDRA_SIZE = 30;
 
     public static final float BOSS_HEALTH_THRESHOLD = 25_000f;
 
-    public static @NotNull Optional<MagmaCubeEntity> findKuudra() {
-        ClientWorld world = MC.world;
-        if (world == null) return Optional.empty();
+    private static MagmaCubeEntity cachedKuudra = null;
 
-        return findKuudraBoss(world);
+    public static @NotNull Optional<MagmaCubeEntity> findKuudra() {
+        ClientWorld world = mc.world;
+        if (world == null) {
+            cachedKuudra = null;
+            return Optional.empty();
+        }
+
+        if (cachedKuudra != null && cachedKuudra.isAlive() && isKuudra(cachedKuudra)) {
+            return Optional.of(cachedKuudra);
+        }
+
+        cachedKuudra = findKuudraBoss(world);
+        return Optional.ofNullable(cachedKuudra);
     }
 
-    private static @NotNull Optional<MagmaCubeEntity> findKuudraBoss(@NotNull ClientWorld world) {
-        for (var entity : world.getEntities()) {
-            if (entity instanceof MagmaCubeEntity magmaCube) {
-                if (isKuudra(magmaCube)) {
-                    return Optional.of(magmaCube);
-                }
+    private static @Nullable MagmaCubeEntity findKuudraBoss(@NotNull ClientWorld world) {
+        MagmaCubeEntity kuudra = null;
+        double maxY = 0;
+        int cubesFound = 0;
+        for (Entity entity : world.getEntities()) {
+            if (!(entity instanceof MagmaCubeEntity cube)) continue;
+            if (cube.getSize() != KUUDRA_SIZE) continue;
+
+            double y = cube.getY();
+            cubesFound++;
+            if (y > maxY) {
+                kuudra = cube;
+                maxY = y;
             }
         }
 
-        return Optional.empty();
+        if (kuudra == null || cubesFound == 0) return null;
+        if (kuudra.getHealth() <= 0) return null;
+
+        return kuudra;
     }
 
     public static boolean isKuudra(@Nullable MagmaCubeEntity entity) {
         if (entity == null) return false;
 
-        float width = entity.getWidth();
+        int size = entity.getSize();
         float health = entity.getHealth();
 
-        double x = entity.getX();
-        double y = entity.getY();
-        double z = entity.getZ();
-
-        boolean isInArena = x >= KUUDRA_ARENA_MIN_X && x <= KUUDRA_ARENA_MAX_X &&
-                y >= KUUDRA_ARENA_MIN_Y && y <= KUUDRA_ARENA_MAX_Y &&
-                z >= KUUDRA_ARENA_MIN_Z && z <= KUUDRA_ARENA_MAX_Z;
-
-        boolean hasCorrectSize = Math.abs(width - KUUDRA_WIDTH) < KUUDRA_WIDTH_TOLERANCE;
-        boolean hasValidHealth = health > 0 && health <= KUUDRA_MAX_HEALTH;
-        boolean isVisible = !entity.isInvisible();
-
-        return hasCorrectSize && hasValidHealth && isInArena && isVisible;
+        return size == KUUDRA_SIZE && health > 0;
     }
 
     public static @NotNull SpawnDirection getSpawnDirection(@NotNull MagmaCubeEntity kuudra) {
@@ -79,6 +79,10 @@ public class KuudraLocationUtil {
         if (z < -132) return SpawnDirection.BACK;
 
         return SpawnDirection.UNKNOWN;
+    }
+
+    public static void invalidateCache() {
+        cachedKuudra = null;
     }
 
     @Getter

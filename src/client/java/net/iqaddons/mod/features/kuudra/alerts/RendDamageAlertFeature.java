@@ -86,10 +86,15 @@ public class RendDamageAlertFeature extends KuudraFeature {
     }
 
     private void checkRendDamage() {
-        Optional<MagmaCubeEntity> optionalKuudra = KuudraLocationUtil.findKuudra();
+        var optionalKuudra = KuudraLocationUtil.findKuudra();
         if (optionalKuudra.isEmpty()) return;
 
         MagmaCubeEntity kuudra = optionalKuudra.get();
+        if (!kuudra.isAlive()) {
+            KuudraLocationUtil.invalidateCache();
+            return;
+        }
+
         float currentHealth = kuudra.getHealth();
         if (currentHealth > KuudraLocationUtil.BOSS_HEALTH_THRESHOLD) {
             return;
@@ -98,7 +103,9 @@ public class RendDamageAlertFeature extends KuudraFeature {
         if (currentHealth <= MIN_VALID_HEALTH) {
             if (!kuudraDead && currentHealth <= 0) {
                 kuudraDead = true;
+                KuudraLocationUtil.invalidateCache();
             }
+
             return;
         }
 
