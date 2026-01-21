@@ -67,6 +67,10 @@ public final class KuudraTracker {
 
         handleSupplyDetect(event, message);
         handleFreshDetect(message);
+
+        if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
+            stateManager.reset();
+        }
     }
 
     private void handleSupplyDetect(ChatReceivedEvent event, String message) {
