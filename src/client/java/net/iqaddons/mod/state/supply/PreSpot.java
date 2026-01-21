@@ -67,7 +67,7 @@ public enum PreSpot {
 
         return switch (normalized) {
             case "triangle", "tri", "shop" -> PreSpot.TRIANGLE;
-            case "x" -> PreSpot.X;
+            case "x", "xc" -> PreSpot.X;
             case "equals", "eq" -> PreSpot.EQUALS;
             case "slash", "square" -> PreSpot.SLASH;
             default -> null;
