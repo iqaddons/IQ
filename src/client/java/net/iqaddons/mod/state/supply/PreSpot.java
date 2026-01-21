@@ -63,15 +63,13 @@ public enum PreSpot {
     @Contract(pure = true)
     public static @Nullable PreSpot fromMessage(@NotNull String message) {
         String normalized = message.toLowerCase().trim();
+        if (normalized.contains("x cannon")) return PreSpot.X;
 
         return switch (normalized) {
-            case "triangle", "tri" -> PreSpot.TRIANGLE;
+            case "triangle", "tri", "shop" -> PreSpot.TRIANGLE;
             case "x" -> PreSpot.X;
             case "equals", "eq" -> PreSpot.EQUALS;
-            case "slash" -> PreSpot.SLASH;
-            case "shop" -> PreSpot.TRIANGLE;      // Shop is Triangle's secondary
-            case "x cannon" -> PreSpot.X;         // X Cannon is X's secondary
-            case "square" -> PreSpot.SLASH;       // Square is Slash's secondary
+            case "slash", "square" -> PreSpot.SLASH;
             default -> null;
         };
     }
