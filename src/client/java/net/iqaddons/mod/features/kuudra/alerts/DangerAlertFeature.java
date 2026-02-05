@@ -12,8 +12,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,10 +51,8 @@ public class DangerAlertFeature extends KuudraFeature {
         }
 
         if (currentDangerLevel != null) {
-            var color = currentDangerLevel.color.getIndex();
-
             if (currentDangerLevel.shouldJump()) {
-                MessageUtil.showTitle(Text.literal("JUMP!").withColor(color), Text.empty(), 0, 10, 5);
+                MessageUtil.showTitle("§e§lJUMP!", "", 0, 10, 5);
 
                 mc.world.playSound(
                         mc.player, mc.player.getBlockPos(),
@@ -64,7 +60,7 @@ public class DangerAlertFeature extends KuudraFeature {
                         SoundCategory.PLAYERS, 2.0f, 2.0f
                 );
             } else {
-                MessageUtil.showTitle(Text.literal("DANGER").withColor(color), Text.empty(), 0, 10, 5);
+                MessageUtil.showTitle("§c§lDANGER", "", 0, 10, 5);
             }
         }
     }
@@ -85,13 +81,12 @@ public class DangerAlertFeature extends KuudraFeature {
 
     @RequiredArgsConstructor
     private enum DangerLevel {
-        GREEN(DyeColor.GREEN, false),
-        LIME(DyeColor.LIME, false),
-        YELLOW(DyeColor.YELLOW, true),
-        ORANGE(DyeColor.ORANGE, true),
-        RED(DyeColor.RED, true);
+        GREEN(false),
+        LIME(false),
+        YELLOW(true),
+        ORANGE(true),
+        RED(true);
 
-        private final DyeColor color;
         private final boolean shouldJump;
 
         public boolean shouldJump() {
