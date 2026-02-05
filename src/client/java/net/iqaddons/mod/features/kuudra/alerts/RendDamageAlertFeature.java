@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -13,8 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.mob.MagmaCubeEntity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 @Slf4j
 public class RendDamageAlertFeature extends KuudraFeature {
@@ -44,9 +41,8 @@ public class RendDamageAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         resetState();
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange));
-        log.info("Rend Damage Alert activated");
+
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
@@ -61,8 +57,9 @@ public class RendDamageAlertFeature extends KuudraFeature {
         inBoss = false;
     }
 
-    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
-        if (event.currentPhase() == KuudraPhase.DPS || event.currentPhase() == KuudraPhase.BOSS) {
+    @Override
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.currentPhase().isCombatPhase()) {
             if (!inBoss) resetState();
         } else {
             resetState();

@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.SupplyStateManager;
@@ -30,7 +29,7 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
             supplyState.startSuppliesPhase();
         }
 
-        subscribe(EventBus.subscribe(SupplyPickupEvent.class, this::onSupplyPickup));
+        subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
     }
 
     private void onSupplyPickup(@NotNull SupplyPickupEvent event) {

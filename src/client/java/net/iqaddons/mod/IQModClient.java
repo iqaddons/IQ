@@ -17,6 +17,7 @@ import net.iqaddons.mod.features.kuudra.waypoints.pile.PileWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.stun.StunWaypointsFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.supply.SupplyWaypointsFeature;
 import net.iqaddons.mod.features.widgets.*;
+import net.iqaddons.mod.lifecycle.KuudraLifecycleManager;
 import net.iqaddons.mod.utils.hud.HudManager;
 import net.iqaddons.mod.utils.tracking.KuudraTracker;
 import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
@@ -57,6 +58,8 @@ public class IQModClient implements ClientModInitializer {
 
         IQKeyBindings.register();
         registerCommands();
+
+        KuudraLifecycleManager.get().start();
 
         log.info("IQ Mod has been initialized!");
     }

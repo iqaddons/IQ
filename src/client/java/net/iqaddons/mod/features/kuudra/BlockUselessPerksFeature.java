@@ -42,16 +42,10 @@ public class BlockUselessPerksFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        EventBus.subscribe(ScreenClickEvent.class, this::onScreenRender);
-        log.info("Block Useless Perks activated");
+        subscribe(ScreenClickEvent.class, this::onScreenClick);
     }
 
-    @Override
-    protected void onKuudraDeactivate() {
-        log.info("Block Useless Perks deactivated");
-    }
-
-    private void onScreenRender(@NotNull ScreenClickEvent event) {
+    private void onScreenClick(@NotNull ScreenClickEvent event) {
         String title = event.getScreen().getTitle().getString();
         if (!title.contains("Perk Menu")) return;
 

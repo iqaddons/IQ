@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -54,17 +53,13 @@ public class NoPreAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         supplyState.reset();
-        subscribe(EventBus.subscribe(ChatReceivedEvent.class, this::onChat));
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange));
-        log.info("No Pre Alert activated");
+
+        subscribe(ChatReceivedEvent.class, this::onChat);
+        subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
     }
 
     @Override
-    protected void onKuudraDeactivate() {
-        log.info("No Pre Alert deactivated");
-    }
-
-    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
             supplyState.reset();
             log.debug("Reset supply state for new run");

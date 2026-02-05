@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.waypoints.pearl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -49,8 +48,8 @@ public class PearlWaypointFeature extends KuudraFeature {
         List<WaypointArea> areas = configLoader.getCached();
         areaDetection.setAreas(areas);
 
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(WorldRenderEvent.class, this::onRender);
 
         log.info("Pearl waypoints activated with {} areas", areas.size());
     }

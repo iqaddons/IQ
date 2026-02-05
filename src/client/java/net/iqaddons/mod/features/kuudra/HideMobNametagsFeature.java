@@ -3,7 +3,6 @@ package net.iqaddons.mod.features.kuudra;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
@@ -26,13 +25,7 @@ public class HideMobNametagsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        EventBus.subscribe(ArmorStandRenderEvent.class, this::onArmorStandRender);
-        log.info("Hide Mob Nametags activated");
-    }
-
-    @Override
-    protected void onKuudraDeactivate() {
-        log.info("Hide Mob Nametags deactivated");
+        subscribe(ArmorStandRenderEvent.class, this::onArmorStandRender);
     }
 
     private void onArmorStandRender(ArmorStandRenderEvent event) {

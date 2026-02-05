@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -40,18 +39,16 @@ public class TeamHighlightFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         highlightedPlayers.clear();
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange));
-        log.info("Team Highlight activated");
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
     protected void onKuudraDeactivate() {
         clearAllHighlights();
-        log.info("Team Highlight deactivated");
     }
 
-    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+    @Override
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isExitingKuudra() || event.isRunCompleted()) {
             clearAllHighlights();
         }

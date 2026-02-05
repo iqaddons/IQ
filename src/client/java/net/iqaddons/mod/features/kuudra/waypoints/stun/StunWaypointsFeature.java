@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.waypoints.stun;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
@@ -31,7 +30,7 @@ public class StunWaypointsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
+        subscribe(WorldRenderEvent.class, this::onRender);
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {

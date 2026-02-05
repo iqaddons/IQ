@@ -46,15 +46,14 @@ public class BuildWaypointsFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         buildPiles.clear();
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
-        log.info("Build Overlay activated");
+
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(WorldRenderEvent.class, this::onRender);
     }
 
     @Override
     protected void onKuudraDeactivate() {
         buildPiles.clear();
-        log.info("Build Overlay deactivated");
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

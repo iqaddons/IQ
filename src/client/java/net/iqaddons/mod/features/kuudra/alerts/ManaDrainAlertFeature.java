@@ -35,13 +35,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        subscribe(EventBus.subscribe(ChatReceivedEvent.class, this::onChat));
-        log.info("Mana Drain Notify activated");
-    }
-
-    @Override
-    protected void onKuudraDeactivate() {
-        log.info("Mana Drain Notify deactivated");
+        subscribe(ChatReceivedEvent.class, this::onChat);
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {

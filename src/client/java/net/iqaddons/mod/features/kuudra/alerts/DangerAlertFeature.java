@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.RequiredArgsConstructor;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
@@ -13,8 +12,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class DangerAlertFeature extends KuudraFeature {
 
@@ -26,13 +28,13 @@ public class DangerAlertFeature extends KuudraFeature {
                 "dangerZoneAlert",
                 "Danger Zone Alert",
                 () -> PhaseFourConfig.dangerZoneAlert,
-                KuudraPhase.BOSS
+                KuudraPhase.RUN_PHASES
         );
     }
 
     @Override
     protected void onKuudraActivate() {
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
@@ -40,9 +42,9 @@ public class DangerAlertFeature extends KuudraFeature {
         if (!event.isNthTick(DANGER_CHECK_INTERVAL_TICKS)) return;
         if (mc.player == null || mc.world == null) return;
 
-        DangerLevel currentDangerLevel = DangerLevel.UNKNOWN;
+        DangerLevel currentDangerLevel = null;
         for (int i = 0; i < 5; i++) {
-            BlockPos blockPos = mc.player.getBlockPos().add(0, -i, 0);
+            BlockPos blockPos = mc.player.getBlockPos().down(i);
             DangerLevel level = getDangerLevel(blockPos);
             if (level != null) {
                 currentDangerLevel = level;
@@ -50,9 +52,11 @@ public class DangerAlertFeature extends KuudraFeature {
             }
         }
 
-        if (currentDangerLevel != DangerLevel.UNKNOWN) {
+        if (currentDangerLevel != null) {
+            var color = currentDangerLevel.color.getIndex();
+
             if (currentDangerLevel.shouldJump()) {
-                MessageUtil.showTitle("§e§lJUMP!", "", 0, 10, 5);
+                MessageUtil.showTitle(Text.literal("JUMP!").withColor(color), Text.empty(), 0, 10, 5);
 
                 mc.world.playSound(
                         mc.player, mc.player.getBlockPos(),
@@ -60,12 +64,12 @@ public class DangerAlertFeature extends KuudraFeature {
                         SoundCategory.PLAYERS, 2.0f, 2.0f
                 );
             } else {
-                MessageUtil.showTitle("§c§lDANGER", "", 0, 10, 5);
+                MessageUtil.showTitle(Text.literal("DANGER").withColor(color), Text.empty(), 0, 10, 5);
             }
         }
     }
 
-    private DangerLevel getDangerLevel(BlockPos blockPos) {
+    private @Nullable DangerLevel getDangerLevel(BlockPos blockPos) {
         BlockState state = mc.world.getBlockState(blockPos);
         Block block = state.getBlock();
 
@@ -75,19 +79,19 @@ public class DangerAlertFeature extends KuudraFeature {
             case Block b when b == Blocks.YELLOW_TERRACOTTA -> DangerLevel.YELLOW;
             case Block b when b == Blocks.ORANGE_TERRACOTTA -> DangerLevel.ORANGE;
             case Block b when b == Blocks.RED_TERRACOTTA -> DangerLevel.RED;
-            default -> DangerLevel.UNKNOWN;
+            default -> null;
         };
     }
 
     @RequiredArgsConstructor
     private enum DangerLevel {
-        UNKNOWN(false),
-        GREEN(false),
-        LIME(false),
-        YELLOW(true),
-        ORANGE(true),
-        RED(true);
+        GREEN(DyeColor.GREEN, false),
+        LIME(DyeColor.LIME, false),
+        YELLOW(DyeColor.YELLOW, true),
+        ORANGE(DyeColor.ORANGE, true),
+        RED(DyeColor.RED, true);
 
+        private final DyeColor color;
         private final boolean shouldJump;
 
         public boolean shouldJump() {

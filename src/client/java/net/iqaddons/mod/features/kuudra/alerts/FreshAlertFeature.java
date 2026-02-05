@@ -45,9 +45,9 @@ public class FreshAlertFeature extends KuudraFeature {
     protected void onKuudraActivate() {
         freshPlayers.clear();
 
-        subscribe(EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh));
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onWorldRender));
+        subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(WorldRenderEvent.class, this::onWorldRender);
     }
 
     @Override

@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.waypoints.pile;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
@@ -42,9 +41,8 @@ public class PileWaypointsFeature extends KuudraFeature {
     protected void onKuudraActivate() {
         supplyState.reset();
 
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange));
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(WorldRenderEvent.class, this::onRender);
 
         log.info("Pile waypoints activated");
     }
@@ -55,7 +53,8 @@ public class PileWaypointsFeature extends KuudraFeature {
         log.info("Pile waypoints deactivated");
     }
 
-    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+    @Override
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
             supplyState.reset();
         }

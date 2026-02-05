@@ -14,4 +14,12 @@ public class StringUtils {
 
         return formattedMessage;
     }
+
+    public @NotNull String getShortMessage(@NotNull String message) {
+        if (message.length() <= 30) {
+            return message;
+        }
+
+        return message.substring(0, 30) + "...";
+    }
 }

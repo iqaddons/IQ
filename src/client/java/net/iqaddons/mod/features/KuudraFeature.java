@@ -1,10 +1,13 @@
 package net.iqaddons.mod.features;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
+import net.iqaddons.mod.state.kuudra.KuudraContext;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,17 +15,26 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 @Slf4j
 public abstract class KuudraFeature extends Feature {
 
     private final Set<KuudraPhase> activePhases;
-    private final KuudraStateManager stateManager = KuudraStateManager.get();
 
+    protected final KuudraStateManager stateManager = KuudraStateManager.get();
     private final List<EventBus.Subscription<?>> kuudraSubscriptions = new ArrayList<>();
-    private volatile boolean kuudraActive = false;
-    private volatile boolean inKuudraActivation = false;
+
+    private final AtomicBoolean kuudraActive = new AtomicBoolean(false);
+    private final AtomicBoolean activating = new AtomicBoolean(false);
+    private final AtomicInteger activationCount = new AtomicInteger(0);
+
+    @Getter
+    private EventBus.Subscription<KuudraPhaseChangeEvent> phaseChangeSubscription;
+    private EventBus.Subscription<KuudraRunEndEvent> runEndSubscription;
 
     protected KuudraFeature(
             @NotNull String id,
@@ -38,27 +50,40 @@ public abstract class KuudraFeature extends Feature {
 
     @Override
     protected final void onActivate() {
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::handlePhaseChange));
+        phaseChangeSubscription = EventBus.subscribe(
+                KuudraPhaseChangeEvent.class,
+                this::handlePhaseChange
+        );
+
+        runEndSubscription = EventBus.subscribe(
+                KuudraRunEndEvent.class,
+                this::handleRunEnd
+        );
 
         if (shouldBeActiveForPhase(stateManager.phase())) {
-            onKuudraActivate();
+            activateKuudraFeature("Feature enabled while in applicable phase");
         }
+
+        log.debug("Feature {} activated, watching phases: {}", getName(), activePhases);
     }
 
     @Override
     protected final void onDeactivate() {
-        if (kuudraActive) {
-            onKuudraDeactivate();
+        if (kuudraActive.get()) {
+            deactivateKuudraFeature("Feature disabled");
         }
-    }
 
-    @Override
-    protected final <T extends Event> void subscribe(@NotNull EventBus.Subscription<T> subscription) {
-        if (inKuudraActivation) {
-            kuudraSubscriptions.add(subscription);
-        } else {
-            super.subscribe(subscription);
+        if (phaseChangeSubscription != null) {
+            phaseChangeSubscription.unsubscribe();
+            phaseChangeSubscription = null;
         }
+
+        if (runEndSubscription != null) {
+            runEndSubscription.unsubscribe();
+            runEndSubscription = null;
+        }
+
+        log.debug("Feature {} deactivated", getName());
     }
 
     private void handlePhaseChange(@NotNull KuudraPhaseChangeEvent event) {
@@ -66,60 +91,111 @@ public abstract class KuudraFeature extends Feature {
         boolean nowActive = shouldBeActiveForPhase(event.currentPhase());
 
         if (!wasActive && nowActive) {
-            activateKuudraFeatures();
+            activateKuudraFeature("Phase changed to " + event.currentPhase());
         } else if (wasActive && !nowActive) {
-            deactivateKuudraFeatures();
+            deactivateKuudraFeature("Phase changed to " + event.currentPhase());
+        }
+
+        if (kuudraActive.get()) {
+            onPhaseChange(event);
         }
     }
 
-    private void activateKuudraFeatures() {
-        if (kuudraActive) {
-            log.warn("Attempted to activate {} while already kuudra-active", getName());
+    private void handleRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (kuudraActive.get()) {
+            deactivateKuudraFeature("Run ended: " + event.reason());
+        }
+    }
+
+    private void activateKuudraFeature(@NotNull String reason) {
+        if (!activating.compareAndSet(false, true)) {
+            log.warn("Reentrant activation attempted for {}", getName());
             return;
         }
 
-        kuudraActive = true;
-        log.debug("Kuudra activating: {} (phase: {})", getName(), stateManager.phase());
         try {
-            inKuudraActivation = true;
-            onKuudraActivate();
-        } catch (Exception e) {
-            log.error("Error during onKuudraActivate for {}", getName(), e);
+            if (kuudraActive.get()) {
+                log.debug("Already kuudra-active: {}", getName());
+                return;
+            }
+
+            kuudraActive.set(true);
+            int cycle = activationCount.incrementAndGet();
+
+            log.info("Kuudra activating {}: {} (cycle {})", getName(), reason, cycle);
+            try {
+                onKuudraActivate();
+            } catch (Exception e) {
+                log.error("Error in onKuudraActivate for {}", getName(), e);
+                kuudraActive.set(false);
+                cleanupKuudraSubscriptions();
+            }
         } finally {
-            inKuudraActivation = false;
+            activating.set(false);
         }
     }
 
-    private void deactivateKuudraFeatures() {
-        if (!kuudraActive) {
-            log.warn("Attempted to deactivate {} while not kuudra-active", getName());
+    private void deactivateKuudraFeature(@NotNull String reason) {
+        if (!kuudraActive.compareAndSet(true, false)) {
+            log.debug("Already kuudra-inactive: {}", getName());
             return;
         }
 
-        kuudraActive = false;
-
-        int subCount = kuudraSubscriptions.size();
-        kuudraSubscriptions.forEach(EventBus.Subscription::unsubscribe);
-        kuudraSubscriptions.clear();
-
-        log.debug("Kuudra deactivating: {} (cleaned {} subscriptions)", getName(), subCount);
+        int subscriptionCount = kuudraSubscriptions.size();
+        cleanupKuudraSubscriptions();
+        log.info("Kuudra deactivating {}: {} (cleaned {} subscriptions)",
+                getName(), reason, subscriptionCount);
 
         try {
             onKuudraDeactivate();
         } catch (Exception e) {
-            log.error("Error during onKuudraDeactivate for {}", getName(), e);
+            log.error("Error in onKuudraDeactivate for {}", getName(), e);
         }
     }
 
+    private void cleanupKuudraSubscriptions() {
+        for (EventBus.Subscription<?> subscription : kuudraSubscriptions) {
+            try {
+                subscription.unsubscribe();
+            } catch (Exception e) {
+                log.warn("Error unsubscribing from event", e);
+            }
+        }
+
+        kuudraSubscriptions.clear();
+    }
+
     private boolean shouldBeActiveForPhase(@NotNull KuudraPhase phase) {
-        return stateManager.isInKuudra() && activePhases.contains(phase);
+        return phase.isInRun() && activePhases.contains(phase);
+    }
+
+    protected final <T extends Event> void subscribe(
+            @NotNull Class<T> eventClass,
+            @NotNull Consumer<T> handler
+    ) {
+        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler);
+        kuudraSubscriptions.add(subscription);
+    }
+
+    protected final @NotNull KuudraPhase currentPhase() {
+        return stateManager.phase();
+    }
+
+    protected final @NotNull KuudraContext currentContext() {
+        return stateManager.context();
+    }
+
+    protected final boolean isInPhase(@NotNull KuudraPhase @NotNull ... phases) {
+        KuudraPhase current = stateManager.phase();
+        for (KuudraPhase phase : phases) {
+            if (current == phase) return true;
+        }
+        return false;
     }
 
     protected void onKuudraActivate() {}
 
     protected void onKuudraDeactivate() {}
 
-    protected @NotNull KuudraPhase currentPhase() {
-        return stateManager.phase();
-    }
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {}
 }

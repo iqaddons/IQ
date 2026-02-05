@@ -69,7 +69,7 @@ public final class KuudraTracker {
         handleFreshDetect(message);
 
         if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
-            stateManager.reset();
+            stateManager.stop();
         }
     }
 
@@ -140,7 +140,7 @@ public final class KuudraTracker {
 
     private void onSkyBlockStatus(@NotNull SkyBlockStatusEvent event) {
         if (!event.onSkyBlock() || !skyBlockTracker.isInArea(KUUDRA_AREA)) {
-            stateManager.reset();
+            stateManager.stop();
         }
     }
 }

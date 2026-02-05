@@ -14,7 +14,6 @@ public record SupplyPosition(
     private static final double ANGLE_OFFSET = 130.0;
 
     public static final double CRATE_Y = 75.0;
-    public static final double MAX_CARRIER_Y = 67.0;
 
     public static @NotNull SupplyPosition fromGiant(
             double giantX, double giantZ,

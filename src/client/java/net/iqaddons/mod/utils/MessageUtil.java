@@ -50,15 +50,20 @@ public enum MessageUtil {
             int stay,
             int fadeOut
     ) {
+        showTitle(
+                Text.literal(title.replace('&', '§')),
+                subtitle != null && !subtitle.isEmpty()
+                        ? Text.literal(subtitle.replace('&', '§'))
+                        : Text.empty(),
+                fadeIn, stay, fadeOut
+        );
+    }
+
+    public static void showTitle(Text title, Text subtitle, int fadeIn, int stay, int fadeOut) {
         if (mc.inGameHud == null) return;
 
-        Text titleText = Text.literal(title.replace('&', '§'));
-        Text subtitleText = subtitle != null && !subtitle.isEmpty()
-                ? Text.literal(subtitle.replace('&', '§'))
-                : Text.empty();
-
-        mc.inGameHud.setTitle(titleText);
-        mc.inGameHud.setSubtitle(subtitleText);
+        mc.inGameHud.setTitle(title);
+        mc.inGameHud.setSubtitle(subtitle);
         mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
     }
 }

@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.waypoints.supply;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -36,14 +35,8 @@ public class SupplyWaypointsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        subscribe(EventBus.subscribe(ClientTickEvent.class, this::onTick));
-        subscribe(EventBus.subscribe(WorldRenderEvent.class, this::onRender));
-        log.info("Supply waypoints activated");
-    }
-
-    @Override
-    protected void onKuudraDeactivate() {
-        log.info("Supply waypoints deactivated");
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(WorldRenderEvent.class, this::onRender);
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -53,27 +52,19 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         resetState();
-        subscribe(EventBus.subscribe(ChatReceivedEvent.class, this::onChat));
-        subscribe(EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange));
-        log.info("Second Supply Alert activated");
+        subscribe(ChatReceivedEvent.class, this::onChat);
     }
 
     @Override
     protected void onKuudraDeactivate() {
         resetState();
-        log.info("Second Supply Alert deactivated");
     }
 
-    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+    @Override
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra() || event.isExitingKuudra()) {
             resetState();
         }
-    }
-
-    private void resetState() {
-        inTriangle = false;
-        inX = false;
-        inSlash = false;
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
@@ -141,5 +132,11 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
 
     private boolean isNear(@NotNull Vec3d pos1, @NotNull Vec3d pos2) {
         return pos1.squaredDistanceTo(pos2) < ZONE_RADIUS * ZONE_RADIUS;
+    }
+
+    private void resetState() {
+        inTriangle = false;
+        inX = false;
+        inSlash = false;
     }
 }
