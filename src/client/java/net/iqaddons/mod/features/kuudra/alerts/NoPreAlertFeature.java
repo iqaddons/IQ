@@ -27,7 +27,7 @@ public class NoPreAlertFeature extends KuudraFeature {
     private static final long SUPPLY_CHECK_DELAY_MS = 11500;
 
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
-            "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o (Triangle|Equals|Slash|Shop|X Cannon|Square|tri|eq|x)!?",
+            "Party > (?:\\[[^]]+] )?\\w+: [Nn]o (Triangle|Equals|Slash|Shop|X Cannon|Square|tri|eq|x)!?",
             Pattern.CASE_INSENSITIVE
     );
 

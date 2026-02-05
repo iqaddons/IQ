@@ -28,7 +28,7 @@ public enum MessageUtil {
         ClientPlayerEntity player = mc.player;
         if (player != null) {
             if (this == PARTY) {
-                player.networkHandler.sendChatCommand("pc [IQ] " + message);
+                player.networkHandler.sendChatCommand("pc " + message);
                 return;
             }
 
