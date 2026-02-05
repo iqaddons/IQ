@@ -33,9 +33,10 @@ public class KuudraHealthWidget extends HudWidget {
 
     private EventBus.Subscription<ClientTickEvent> tickSubscription;
 
-    private final HudLine titleLine;
-    private final HudLine healthLine;
-    private final HudLine damageLine;
+    private final HudLine titleLine = HudLine.of("§4§lKuudra Health");
+    private final HudLine healthLine = HudLine.of("§c❤ 100,000 §8(§c100%§8)");
+    private final HudLine damageLine = HudLine.of("§fDamage: §e0.0M")
+            .showWhen(() -> stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD);
 
     public KuudraHealthWidget() {
         super(
@@ -46,18 +47,17 @@ public class KuudraHealthWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        titleLine = HudLine.of("§4§lKuudra Health");
-        healthLine = HudLine.of("§c❤ 100,000 §8(§c100%§8)");
-        damageLine = HudLine.of("§fDamage: §e0.0M")
-                .showWhen(() -> stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD);
-
         setEnabledSupplier(() -> PhaseThreeConfig.kuudraHPBossbar);
-        setVisibilityCondition(this::isInCombatPhase);
+
+        KuudraPhase phase = stateManager.phase();
+        setVisibilityCondition(() -> phase == KuudraPhase.STUN
+                || phase == KuudraPhase.DPS
+                || phase == KuudraPhase.BOSS);
 
         setExampleLines(List.of(
-                HudLine.of("§4§lKuudra Health"),
-                HudLine.of("§c❤ 52,340 §8(§c52.34%§8)"),
-                HudLine.of("§fDamage: §e125.6M")
+                titleLine,
+                healthLine,
+                damageLine
         ));
     }
 
@@ -102,25 +102,6 @@ public class KuudraHealthWidget extends HudWidget {
         updateDisplay();
     }
 
-    private void updateDisplay() {
-        healthLine.text(String.format("§c❤ %.0f §8(§c%.2f%%§8)", currentHP, percentage));
-
-        if (stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD) {
-            float actualHP = currentHP * BOSS_MULTIPLIER;
-            float damageInMillions = (actualHP * DAMAGE_MULTIPLIER) / 1_000_000f;
-            damageLine.text(String.format("§fDamage: §e%.1fM", damageInMillions));
-        }
-
-        markDimensionsDirty();
-    }
-
-    private boolean isInCombatPhase() {
-        KuudraPhase phase = stateManager.phase();
-        return phase == KuudraPhase.STUN
-                || phase == KuudraPhase.DPS
-                || phase == KuudraPhase.BOSS;
-    }
-
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
@@ -144,6 +125,18 @@ public class KuudraHealthWidget extends HudWidget {
                     0xFF282828
             );
         }
+    }
+
+    private void updateDisplay() {
+        healthLine.text(String.format("§c❤ %.0f §8(§c%.2f%%§8)", currentHP, percentage));
+
+        if (stateManager.phase() == KuudraPhase.BOSS && currentHP <= BOSS_HEALTH_THRESHOLD) {
+            float actualHP = currentHP * BOSS_MULTIPLIER;
+            float damageInMillions = (actualHP * DAMAGE_MULTIPLIER) / 1_000_000f;
+            damageLine.text(String.format("§fDamage: §e%.1fM", damageInMillions));
+        }
+
+        markDimensionsDirty();
     }
 
     private int getHealthBarColor(float hp) {
