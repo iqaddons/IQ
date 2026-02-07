@@ -17,7 +17,8 @@ public enum PreSpot {
             "Shop",
             new Vec3d(-81, 76, -143),
             15.0,
-            6
+            6,  // Triangle pile missing
+            7   // Shop pile missing (secondary)
     ),
     X(
             "X",
@@ -25,7 +26,8 @@ public enum PreSpot {
             "X Cannon",
             new Vec3d(-143, 76, -125),
             30.0,
-            1
+            1,  // X pile missing
+            2   // X Cannon pile missing (secondary)
     ),
     EQUALS(
             "Equals",
@@ -33,7 +35,8 @@ public enum PreSpot {
             null,
             null,
             15.0,
-            5
+            5,  // Equals pile missing
+            -1  // No secondary
     ),
     SLASH(
             "Slash",
@@ -41,15 +44,19 @@ public enum PreSpot {
             "Square",
             new Vec3d(-143, 76, -80),
             15.0,
-            4
+            4,  // Slash pile missing
+            3   // Square pile missing (secondary) - Note: This maps to square waypoints
     );
 
     private final String displayName;
     private final Vec3d location;
+
     private final String secondaryName;
     private final Vec3d secondaryLocation;
     private final double detectionRadius;
+
     private final int missingPreValue;
+    private final int secondaryMissingValue;
 
     public static @Nullable PreSpot fromPlayerPosition(@NotNull Vec3d playerPos) {
         for (PreSpot spot : values()) {
@@ -63,13 +70,22 @@ public enum PreSpot {
     @Contract(pure = true)
     public static @Nullable PreSpot fromMessage(@NotNull String message) {
         String normalized = message.toLowerCase().trim();
-        if (normalized.contains("x cannon")) return PreSpot.X;
+
+        if (normalized.contains("x cannon") || normalized.equals("xc")) {
+            return PreSpot.X;  // X Cannon is secondary for X pre
+        }
+        if (normalized.contains("square")) {
+            return PreSpot.SLASH;  // Square is secondary for Slash pre
+        }
+        if (normalized.contains("shop")) {
+            return PreSpot.TRIANGLE;  // Shop is secondary for Triangle pre
+        }
 
         return switch (normalized) {
-            case "triangle", "tri", "shop" -> PreSpot.TRIANGLE;
-            case "x", "xc" -> PreSpot.X;
+            case "triangle", "tri" -> PreSpot.TRIANGLE;
+            case "x" -> PreSpot.X;
             case "equals", "eq" -> PreSpot.EQUALS;
-            case "slash", "square" -> PreSpot.SLASH;
+            case "slash" -> PreSpot.SLASH;
             default -> null;
         };
     }
