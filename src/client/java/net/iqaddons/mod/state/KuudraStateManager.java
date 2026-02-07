@@ -31,6 +31,9 @@ public final class KuudraStateManager {
     @Getter
     private volatile boolean started = false;
 
+    @Getter
+    private volatile boolean stunSkipDetected = false;
+
     private EventBus.Subscription<ClientTickEvent> heartbeatSubscription;
 
     public void start() {
@@ -72,6 +75,10 @@ public final class KuudraStateManager {
     public boolean setPhase(@NotNull KuudraPhase newPhase) {
         KuudraContext current = contextRef.get();
         if (current.phase() == newPhase) return false;
+        if (current.phase().isStunSkipTransition(newPhase)) {
+            return handleStunSkip(current, newPhase);
+        }
+
         if (!current.phase().canTransitionTo(newPhase)) {
             log.warn("Invalid phase transition: {} -> {}", current.phase(), newPhase);
             return false;
@@ -86,6 +93,40 @@ public final class KuudraStateManager {
         }
 
         return performPhaseTransition(current, newPhase);
+    }
+
+    private boolean handleStunSkip(@NotNull KuudraContext current, @NotNull KuudraPhase newPhase) {
+        log.info("Stun skip detected! Transitioning from {} directly to {}", current.phase(), newPhase);
+        stunSkipDetected = true;
+
+        KuudraPhase previousPhase = current.phase();
+        Duration phaseDuration = current.phaseDuration();
+        if (previousPhase.isInRun()) {
+            phaseDurations.put(previousPhase, phaseDuration);
+        }
+
+        phaseDurations.put(KuudraPhase.EATEN, Duration.ZERO);
+        EventBus.post(new KuudraPhaseChangeEvent(
+                previousPhase,
+                KuudraPhase.EATEN,
+                phaseDuration.toMillis()
+        ));
+
+        KuudraContext newContext = current.withPhase(newPhase);
+        boolean updated = contextRef.compareAndSet(current, newContext);
+        if (!updated) {
+            log.warn("Concurrent modification during stun skip transition");
+            return false;
+        }
+
+        EventBus.post(new KuudraPhaseChangeEvent(
+                KuudraPhase.EATEN,
+                newPhase,
+                0
+        ));
+
+        log.info("Stun skip complete: {} -> EATEN (0ms) -> {} (instant)", previousPhase, newPhase);
+        return true;
     }
 
     public void forceReset(@NotNull String reason) {

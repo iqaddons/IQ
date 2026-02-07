@@ -53,6 +53,10 @@ public enum KuudraPhase {
         return target == next();
     }
 
+    public boolean isStunSkipTransition(@NotNull KuudraPhase target) {
+        return this == BUILD && target == STUN;
+    }
+
     public @NotNull KuudraPhase next() {
         return switch (this) {
             case NONE -> SUPPLIES;
