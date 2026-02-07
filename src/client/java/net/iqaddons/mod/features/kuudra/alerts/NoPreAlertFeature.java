@@ -83,30 +83,29 @@ public class NoPreAlertFeature extends KuudraFeature {
 
         Matcher matcher = PARTY_NO_PRE_PATTERN.matcher(message);
         if (matcher.find()) {
-            String preSpotName = matcher.group(1);
-            PreSpot detectedPre = PreSpot.fromMessage(preSpotName);
+            String pileName = matcher.group(1);
+            int missingPreValue = PreSpot.getMissingPreValueFromPileName(pileName);
 
-            if (detectedPre != null) updateMissingPre(detectedPre);
+            if (missingPreValue > 0) updateMissingPre(missingPreValue, pileName);
             return;
         }
 
         Matcher simpleMatcher = NO_PRE_SIMPLE_PATTERN.matcher(message);
         if (simpleMatcher.find()) {
-            String preSpotName = simpleMatcher.group(1);
-            PreSpot detectedPre = PreSpot.fromMessage(preSpotName);
+            String pileName = simpleMatcher.group(1);
+            int missingPreValue = PreSpot.getMissingPreValueFromPileName(pileName);
 
-            if (detectedPre != null) updateMissingPre(detectedPre);
+            if (missingPreValue > 0) updateMissingPre(missingPreValue, pileName);
         }
     }
 
-    private void updateMissingPre(@NotNull PreSpot preSpot) {
-        int missingPreValue = preSpot.getMissingPreValue();
+    private void updateMissingPre(int missingPreValue, @NotNull String pileName) {
         int currentMissingPre = supplyState.getMissingPre();
 
         if (currentMissingPre != missingPreValue) {
             supplyState.setMissingPre(missingPreValue);
             log.debug("Detected missing pre from party chat: {} (value: {})",
-                    preSpot.getDisplayName(), missingPreValue);
+                    pileName, missingPreValue);
         }
     }
 

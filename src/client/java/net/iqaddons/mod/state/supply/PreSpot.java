@@ -90,6 +90,21 @@ public enum PreSpot {
         };
     }
 
+    public static int getMissingPreValueFromPileName(@NotNull String pileName) {
+        String normalized = pileName.toLowerCase().trim();
+
+        return switch (normalized) {
+            case "triangle", "tri" -> 6;
+            case "x" -> 1;
+            case "x cannon", "xc", "xcannon" -> 2;
+            case "equals", "eq" -> 5;
+            case "slash" -> 4;
+            case "shop" -> 7;
+            case "square" -> 3;
+            default -> 0;
+        };
+    }
+
     public boolean isPlayerNearby(@NotNull Vec3d playerPos) {
         return playerPos.squaredDistanceTo(location) < detectionRadius * detectionRadius;
     }
