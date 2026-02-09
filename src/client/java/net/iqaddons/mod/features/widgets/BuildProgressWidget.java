@@ -5,6 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
+import net.iqaddons.mod.utils.TimeUtils;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -129,9 +130,7 @@ public class BuildProgressWidget extends HudWidget {
         String progressColor = getProgressColor(currentProgress);
         progressLine.text(String.format("§fProgress: %s%d%%", progressColor, currentProgress));
         freshLine.text(String.format("§fFresh: §b%d", freshCount));
-
-        String eta = calculateETA();
-        etaLine.text(String.format("§fETA: §e%s", eta));
+        etaLine.text(String.format("§fETA: §e%s", calculateETA()));
 
         markDimensionsDirty();
     }
@@ -157,12 +156,8 @@ public class BuildProgressWidget extends HudWidget {
 
         int remaining = 100 - currentProgress;
         long remainingMs = (long) (remaining / progressPerMs);
-        double remainingSeconds = remainingMs / 1000.0;
 
-        if (remainingSeconds > 120) {
-            return String.format("%.0fm", remainingSeconds / 60);
-        }
-        return String.format("%.0fs", remainingSeconds);
+        return TimeUtils.formatTime(remainingMs);
     }
 
     @Override

@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.TimeUtils;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -66,24 +67,24 @@ public class CustomSplitsWidget extends HudWidget {
         );
 
         titleLine = HudLine.of("§b§lKuudra Splits");
-        suppliesLine = HudLine.of("§fSupplies §d0.00s");
-        buildLine = HudLine.of("§fBuild: §d0.00s");
-        eatenLine = HudLine.of("§fEaten: §d0.00s");
-        stunLine = HudLine.of("§fStun: §d0.00s");
-        dpsLine = HudLine.of("§fDPS: §d0.00s");
-        bossLine = HudLine.of("§fBoss: §d0.00s");
-        overallLine = HudLine.of("§fOverall: §d0.00s");
-        paceLine = HudLine.of("§fPace: §d0.00s");
+        suppliesLine = HudLine.of("§fSupplies §f0.00s");
+        buildLine = HudLine.of("§fBuild: §f0.00s");
+        eatenLine = HudLine.of("§fEaten: §f0.00s");
+        stunLine = HudLine.of("§fStun: §f0.00s");
+        dpsLine = HudLine.of("§fDPS: §f0.00s");
+        bossLine = HudLine.of("§fBoss: §f0.00s");
+        overallLine = HudLine.of("§fOverall: §f0.00s");
+        paceLine = HudLine.of("§fPace: §f0.00s");
 
         setEnabledSupplier(() -> Configuration.customSplits);
         setVisibilityCondition(stateManager::isInKuudra);
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),
-                HudLine.of("§fSupplies: §d22.45s"),
+                HudLine.of("§fSupplies: §f22.45s"),
                 HudLine.of("§fBuild: §914.32s"),
                 HudLine.of("§fEaten: §a5.21s"),
-                HudLine.of("§fStun: §d0.53s"),
+                HudLine.of("§fStun: §f0.53s"),
                 HudLine.of("§fDPS: §63.89s"),
                 HudLine.of("§fBoss: §c5.12s"),
                 HudLine.of("§fOverall: §a51.00s"),
@@ -187,8 +188,8 @@ public class CustomSplitsWidget extends HudWidget {
         String overallColor = getSplitColor(overall, OVERALL_THRESHOLDS);
         String paceColor = getSplitColor(pace, OVERALL_THRESHOLDS);
 
-        overallLine.text(String.format("§fOverall: %s%s", overallColor, formatTime(overall)));
-        paceLine.text(String.format("§fPace: %s%s", paceColor, formatTime(pace)));
+        overallLine.text(String.format("§fOverall: %s%s", overallColor, TimeUtils.formatTime(overall)));
+        paceLine.text(String.format("§fPace: %s%s", paceColor, TimeUtils.formatTime(pace)));
 
         markDimensionsDirty();
     }
@@ -196,7 +197,7 @@ public class CustomSplitsWidget extends HudWidget {
     private void updatePhaseLine(@NotNull HudLine line, @NotNull String label, @NotNull KuudraPhase phase) {
         double time = splits.getOrDefault(phase, 0.0);
         String color = getSplitColor(time, phase);
-        line.text(String.format("§f%s %s%s", label, color, formatTime(time)));
+        line.text(String.format("§f%s %s%s", label, color, TimeUtils.formatTime(time)));
     }
 
     private double calculateOverall() {
@@ -225,18 +226,13 @@ public class CustomSplitsWidget extends HudWidget {
     }
 
     private @NotNull String getSplitColor(double time, double @NotNull [] thresholds) {
-        if (time <= 0) return "§d";
+        if (time <= 0) return "§f";
 
-        if (time <= thresholds[0]) return "§d";
+        if (time <= thresholds[0]) return "§f";
         if (time <= thresholds[1]) return "§9";
         if (time <= thresholds[2]) return "§a";
         if (time <= thresholds[3]) return "§6";
         if (time <= thresholds[4]) return "§c";
         return "§4";
-    }
-
-    private @NotNull String formatTime(double seconds) {
-        if (seconds <= 0) return "0.00s";
-        return String.format("%.2fs", seconds);
     }
 }

@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.state.KuudraStateManager;
 import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.TimeUtils;
 import net.iqaddons.mod.utils.hud.component.HudLine;
 import net.iqaddons.mod.utils.hud.element.HudAnchor;
 import net.iqaddons.mod.utils.hud.element.HudWidget;
@@ -99,15 +100,13 @@ public class FreshCountdownWidget extends HudWidget {
             return;
         }
 
-        double remainingSeconds = remaining / 1000.0;
-        String color = getCountdownColor(remainingSeconds);
-
-        countdownLine.text(String.format("%s%.1fs", color, remainingSeconds));
+        countdownLine.text(getCountdownColor(remaining) + TimeUtils.formatTime(remaining));
         markDimensionsDirty();
-        log.info("Fresh countdown updated: {}s remaining", String.format("%.1f", remainingSeconds));
+        log.info("Fresh countdown updated: {}s remaining", remaining);
     }
 
-    private @NotNull String getCountdownColor(double remainingSeconds) {
+    private @NotNull String getCountdownColor(double remaining) {
+        double remainingSeconds = remaining / 1000;
         if (remainingSeconds > 6.0) return "§a";
         else if (remainingSeconds > 3.0) return "§e";
         else return "§c";
