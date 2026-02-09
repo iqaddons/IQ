@@ -16,7 +16,7 @@ public class ElleHighlightFeature extends KuudraFeature {
         super(
                 "elleHighlight",
                 "Elle Highlight",
-                () -> PhaseTwoConfig.elleHighlight,
+                () -> PhaseTwoConfig.ElleConfig.elleHighlight,
                 KuudraPhase.BUILD
         );
     }
@@ -27,10 +27,10 @@ public class ElleHighlightFeature extends KuudraFeature {
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {
-        var optionalElle = EntityDetectorUtil.findElle();
-        if (optionalElle.isEmpty()) return;
-
-        var elle = optionalElle.get();
-        event.drawHitbox(elle, true, RenderColor.fromArgb(PhaseTwoConfig.elleHighlightColor));
+        EntityDetectorUtil.findElle().ifPresent(elle ->
+                event.drawStyledHitbox(elle, true,
+                        RenderColor.fromArgb(PhaseTwoConfig.ElleConfig.elleHighlightColor),
+                        PhaseTwoConfig.ElleConfig.elleHighlightStyle
+                ));
     }
 }
