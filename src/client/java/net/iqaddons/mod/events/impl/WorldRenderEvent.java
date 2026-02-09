@@ -32,6 +32,10 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawOutline(matrices, consumer, camera, box, throughWalls, color);
     }
 
+    public void drawStyledBox(@NotNull Box box, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
+        WorldRenderUtils.drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
+    }
+
     public void drawText(Vec3d pos, Text text, float scale, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawText(matrices, consumer, camera, pos, text, scale, throughWalls, color);
     }
@@ -42,6 +46,18 @@ public record WorldRenderEvent(
 
     public void drawFilledWithBeam(Box box, int height, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawFilled(matrices, consumer, camera, box, throughWalls, color);
+
+        Vec3d center = box.getCenter();
+        WorldRenderUtils.drawBeam(
+                matrices, consumer, camera,
+                center.add(0, box.maxY - center.getY(), 0),
+                height, throughWalls, color
+        );
+    }
+
+    public void drawStyledWithBeam(Box box, int height, boolean throughWalls, RenderColor color, WorldRenderUtils.RenderStyle style) {
+        WorldRenderUtils.drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
+
         Vec3d center = box.getCenter();
         WorldRenderUtils.drawBeam(
                 this,
@@ -56,10 +72,6 @@ public record WorldRenderEvent(
 
     public void drawHitbox(Entity entity, boolean troughWalls, RenderColor color) {
         WorldRenderUtils.drawHitBox(matrices, consumer, camera, entity, tickCounter, troughWalls, color);
-    }
-
-    public void drawStyledBox(@NotNull Box box, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
-        WorldRenderUtils.drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
     }
 
     public void drawStyledHitbox(@NotNull Entity entity, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {

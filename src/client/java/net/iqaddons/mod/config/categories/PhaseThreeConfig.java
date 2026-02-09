@@ -32,7 +32,7 @@ public class PhaseThreeConfig {
     )
     @ConfigOption.Color(alpha = true)
     @Comment("Change Kuudra's hitbox color to something more visible")
-    public static int kuudraHitboxColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+    public static int kuudraHitboxColor = new Color(255, 2, 2, 231).getRGB();
 
     @ConfigEntry(
             id = "stunWaypoints",

@@ -1,5 +1,6 @@
 package net.iqaddons.mod.features.generic;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Slf4j
 public class WaypointFeature extends Feature {
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -28,7 +30,7 @@ public class WaypointFeature extends Feature {
 
     public WaypointFeature() {
         super("waypoints", "Waypoints",
-                () -> Configuration.renderWaypoints
+                () -> Configuration.Waypoints.activated
         );
     }
 
@@ -40,7 +42,7 @@ public class WaypointFeature extends Feature {
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
-        WaypointTracker.parse(event.getMessage(), Duration.ofSeconds(Configuration.waypointsDuration))
+        WaypointTracker.parse(event.getStrippedMessage(), Duration.ofSeconds(Configuration.Waypoints.duration))
                 .ifPresent(waypoints::add);
     }
 
@@ -52,16 +54,16 @@ public class WaypointFeature extends Feature {
             var distance = waypoint.distanceFrom(player.getEntityPos());
             var distanceColor = getDistanceColor(distance);
 
-            event.drawFilledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor);
+            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor, Configuration.Waypoints.style);
             event.drawText(waypoint.position(),
                     waypoint.playerName(),
-                    1.0f, true,
+                    0.5f, true,
                     distanceColor
             );
 
             event.drawText(waypoint.position().subtract(0, -1, 0),
-                    Text.of(String.format("§f%sm", distance)),
-                    1.0f, true,
+                    Text.of(String.format("§f%.2fm", distance)),
+                    0.5f, true,
                     distanceColor
             );
         });
@@ -75,12 +77,12 @@ public class WaypointFeature extends Feature {
 
     @Contract(pure = true)
     private @NotNull RenderColor getDistanceColor(double distance) {
-        if (distance < 10) return RenderColor.fromHex(0x55FF55);
-        if (distance < 25) return RenderColor.fromHex(0x00AA00);
-        if (distance < 50) return RenderColor.fromHex(0xFFFF55);
-        if (distance < 100) return RenderColor.fromHex(0xFFAA00);
-        if (distance < 200) return RenderColor.fromHex(0xFF5555);
-        return RenderColor.fromHex(0xAA0000);
+        if (distance < 10) return RenderColor.fromHex(0x55FF55, 0.30f);
+        if (distance < 25) return RenderColor.fromHex(0x00AA00, 0.30f);
+        if (distance < 50) return RenderColor.fromHex(0xFFFF55, 0.30f);
+        if (distance < 100) return RenderColor.fromHex(0xFFAA00, 0.30f);
+        if (distance < 200) return RenderColor.fromHex(0xFF5555, 0.30f);
+        return RenderColor.fromHex(0xAA0000, 0.30f);
     }
 
 }

@@ -6,6 +6,7 @@ import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.hud.HudManager;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.MinecraftClient;
 
 import java.awt.*;
@@ -86,7 +87,7 @@ public class Configuration {
     )
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the teammate highlight")
-    public static int teamHighlightColor = new Color(0, 221, 255, 185).getRGB();
+    public static int teamHighlightColor = new Color(67, 179, 29, 209).getRGB();
 
     @ConfigEntry(
             id = "manaDrainNotify",
@@ -123,25 +124,38 @@ public class Configuration {
     @Comment("Fix the fishing hook block when throw the rod (W.I.P)")
     public static boolean fixFishingHook = true;
 
-    @ConfigOption.Separator(
-            value = "Waypoints"
-    )
-
     @ConfigEntry(
-            id = "renderWaypoints",
-            translation = "Render Waypoints"
+            id = "waypointConfig",
+            translation = "Shared Waypoints"
     )
-    @Comment("Create waypoints from Patcher-formatted coordinates (W.I.P)")
-    public static boolean renderWaypoints = true;
+    @Comment("Configure the shared waypoints feature")
+    public static final Waypoints waypointConfig = new Waypoints();
 
+    @ConfigObject
+    public static class Waypoints {
 
-    @ConfigEntry(
-            id = "waypointsDuration",
-            translation = "Waypoints Duration (seconds) (W.I.P)"
-    )
-    @ConfigOption.Range(min = 1, max = 60)
-    @ConfigOption.Slider
-    @Comment("Set a duration in seconds or 0 to disable (mob waypoints last 1/3 of the time).")
-    public static int waypointsDuration = 1;
+        @ConfigEntry(
+                id = "renderWaypoints",
+                translation = "Render Waypoints"
+        )
+        @Comment("Create waypoints from Patcher-formatted coordinates")
+        public static boolean activated = true;
 
+        @ConfigEntry(
+                id = "waypointsDuration",
+                translation = "Waypoints Duration (seconds)"
+        )
+        @ConfigOption.Range(min = 1, max = 60)
+        @ConfigOption.Slider
+        @Comment("Set a duration in seconds or 0 to disable.")
+        public static int duration = 1;
+
+        @ConfigEntry(
+                id = "waypointStyle",
+                translation = "Waypoint Style"
+        )
+        @ConfigOption.Select
+        @Comment("Change the style of the waypoint rendering")
+        public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.BOTH;
+    }
 }
