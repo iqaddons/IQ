@@ -1,9 +1,9 @@
 package net.iqaddons.mod.hud.element;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.SubscriptionOwner;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.minecraft.client.MinecraftClient;
@@ -16,11 +16,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 @Slf4j
 @Data
-public abstract class HudWidget implements HudElement {
+@EqualsAndHashCode(callSuper = true)
+public abstract class HudWidget extends SubscriptionOwner implements HudElement {
 
     protected static final MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -36,7 +36,6 @@ public abstract class HudWidget implements HudElement {
 
     private final List<HudLine> lines = new ArrayList<>();
     private final List<HudLine> exampleLines = new ArrayList<>();
-    private final List<EventBus.Subscription<?>> subscriptions = new ArrayList<>();
 
     private BooleanSupplier visibilityCondition = () -> true;
     private BooleanSupplier enabledSupplier = () -> true;
@@ -212,7 +211,7 @@ public abstract class HudWidget implements HudElement {
             onActivate();
         } catch (Exception e) {
             log.error("Failed to activate widget", e);
-            cleanupSubscriptions();
+            clearSubscriptions();
         }
 
         log.debug("HUD Widget activated: {}", displayName);
@@ -223,33 +222,9 @@ public abstract class HudWidget implements HudElement {
 
         active = false;
         onDeactivate();
-        cleanupSubscriptions();
+        clearSubscriptions();
 
         log.debug("HUD Widget deactivated: {}", displayName);
-    }
-
-    protected <T extends Event> void subscribe(
-            @NotNull Class<T> eventClass,
-            @NotNull Consumer<T> handler
-    ) {
-        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler);
-        subscriptions.add(subscription);
-    }
-
-    protected void subscribe(@NotNull EventBus.Subscription<?> subscription) {
-        subscriptions.add(subscription);
-    }
-
-    private void cleanupSubscriptions() {
-        for (EventBus.Subscription<?> subscription : subscriptions) {
-            try {
-                subscription.unsubscribe();
-            } catch (Exception e) {
-                log.warn("Error unsubscribing", e);
-            }
-        }
-
-        subscriptions.clear();
     }
 
     protected void onActivate() {}
