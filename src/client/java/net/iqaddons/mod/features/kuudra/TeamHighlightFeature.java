@@ -8,7 +8,6 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import org.jetbrains.annotations.NotNull;

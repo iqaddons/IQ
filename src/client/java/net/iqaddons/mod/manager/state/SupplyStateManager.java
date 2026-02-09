@@ -1,4 +1,5 @@
 package net.iqaddons.mod.manager.state;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.spot.PileLocation;
@@ -11,7 +12,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j

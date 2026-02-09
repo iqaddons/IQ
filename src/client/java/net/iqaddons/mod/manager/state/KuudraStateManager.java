@@ -6,9 +6,9 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
+import net.iqaddons.mod.manager.validator.KuudraStateValidator;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
-import net.iqaddons.mod.manager.validator.KuudraStateValidator;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;

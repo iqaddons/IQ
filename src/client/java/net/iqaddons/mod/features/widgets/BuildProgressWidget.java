@@ -5,14 +5,14 @@ import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
-import net.iqaddons.mod.utils.TimeUtils;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.manager.state.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.TimeUtils;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.NotNull;
 

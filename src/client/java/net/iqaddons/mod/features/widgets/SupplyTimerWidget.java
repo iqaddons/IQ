@@ -11,7 +11,9 @@ import net.iqaddons.mod.manager.state.KuudraStateManager;
 import net.iqaddons.mod.manager.state.SupplyStateManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {

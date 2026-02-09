@@ -1,14 +1,15 @@
 package net.iqaddons.mod.utils;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.UtilityClass;
+import org.jetbrains.annotations.NotNull;
+
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.NotNull;
 
 @UtilityClass
 public class TimeUtils {

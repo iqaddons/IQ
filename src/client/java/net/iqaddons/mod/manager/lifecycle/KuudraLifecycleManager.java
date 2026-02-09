@@ -7,8 +7,8 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyBlockStatusEvent;
 import net.iqaddons.mod.manager.state.KuudraStateManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.manager.validator.KuudraStateValidator;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
