@@ -18,7 +18,6 @@ public class KuudraLocationUtil {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final int KUUDRA_SIZE = 30;
-
     public static final float BOSS_HEALTH_THRESHOLD = 25_000f;
 
     private static MagmaCubeEntity cachedKuudra = null;
@@ -56,6 +55,10 @@ public class KuudraLocationUtil {
 
         if (kuudra == null || cubesFound == 0) return null;
         if (kuudra.getHealth() <= 0) return null;
+        if (cubesFound == 2) {
+            cachedKuudra = kuudra;
+            return kuudra;
+        }
 
         return kuudra;
     }
