@@ -1,9 +1,9 @@
 package net.iqaddons.mod.manager.state;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.model.supply.PileLocation;
-import net.iqaddons.mod.model.supply.PreSpot;
-import net.iqaddons.mod.model.supply.SupplyPosition;
+import net.iqaddons.mod.model.spot.PileLocation;
+import net.iqaddons.mod.model.spot.PreSpot;
+import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

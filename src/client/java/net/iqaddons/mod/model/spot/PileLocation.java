@@ -1,4 +1,4 @@
-package net.iqaddons.mod.model.supply;
+package net.iqaddons.mod.model.spot;
 
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;

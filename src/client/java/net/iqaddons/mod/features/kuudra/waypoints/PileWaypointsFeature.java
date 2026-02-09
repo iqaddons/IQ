@@ -8,7 +8,7 @@ import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.state.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
-import net.iqaddons.mod.model.supply.PileLocation;
+import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.entity.decoration.ArmorStandEntity;

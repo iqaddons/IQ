@@ -1,4 +1,4 @@
-package net.iqaddons.mod.model.supply;
+package net.iqaddons.mod.model.spot;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
