@@ -54,16 +54,16 @@ public class WaypointFeature extends Feature {
             var distance = waypoint.distanceFrom(player.getEntityPos());
             var distanceColor = getDistanceColor(distance);
 
-            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor, Configuration.Waypoints.style);
+            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(0.30f), Configuration.Waypoints.style);
             event.drawText(waypoint.position(),
                     waypoint.playerName(),
-                    0.5f, true,
+                    0.1f, true,
                     distanceColor
             );
 
             event.drawText(waypoint.position().subtract(0, -1, 0),
                     Text.of(String.format("§f%.2fm", distance)),
-                    0.5f, true,
+                    0.1f, true,
                     distanceColor
             );
         });
@@ -77,12 +77,12 @@ public class WaypointFeature extends Feature {
 
     @Contract(pure = true)
     private @NotNull RenderColor getDistanceColor(double distance) {
-        if (distance < 10) return RenderColor.fromHex(0x55FF55, 0.30f);
-        if (distance < 25) return RenderColor.fromHex(0x00AA00, 0.30f);
-        if (distance < 50) return RenderColor.fromHex(0xFFFF55, 0.30f);
-        if (distance < 100) return RenderColor.fromHex(0xFFAA00, 0.30f);
-        if (distance < 200) return RenderColor.fromHex(0xFF5555, 0.30f);
-        return RenderColor.fromHex(0xAA0000, 0.30f);
+        if (distance < 10) return RenderColor.fromHex(0x55FF55);
+        if (distance < 25) return RenderColor.fromHex(0x00AA00);
+        if (distance < 50) return RenderColor.fromHex(0xFFFF55);
+        if (distance < 100) return RenderColor.fromHex(0xFFAA00);
+        if (distance < 200) return RenderColor.fromHex(0xFF5555);
+        return RenderColor.fromHex(0xAA0000);
     }
 
 }

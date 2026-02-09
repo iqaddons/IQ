@@ -57,7 +57,6 @@ public class PearlWaypointFeature extends KuudraFeature {
     @Override
     protected void onKuudraDeactivate() {
         areaDetection.reset();
-        log.info("Pearl waypoints deactivated");
     }
 
     public void reload() {
