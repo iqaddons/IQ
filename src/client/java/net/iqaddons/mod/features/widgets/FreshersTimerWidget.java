@@ -52,7 +52,7 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
-        freshEntries.add(new PlayerFreshedEntry(event.playerName(), event.freshAt()));
+        freshEntries.add(new PlayerFreshedEntry(event.playerName(), (System.currentTimeMillis() - event.freshAt())));
 
         updateDisplay();
     }
