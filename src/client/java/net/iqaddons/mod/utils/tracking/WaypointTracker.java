@@ -20,8 +20,20 @@ public class WaypointTracker {
             Pattern.CASE_INSENSITIVE
     );
 
+    private static final Pattern PARTY_PREFIX_PATTERN = Pattern.compile(
+            "^Party > (?:\\[[^]]+] )?(\\w+): (.+)$"
+    );
+
     public Optional<WaypointData> parse(String rawMessage, Duration baseDuration) {
-        Matcher matcher = WAYPOINT_PATTERN.matcher(rawMessage);
+        String processedMessage = rawMessage;
+        Matcher partyMatcher = PARTY_PREFIX_PATTERN.matcher(rawMessage);
+        if (partyMatcher.matches()) {
+            String playerName = partyMatcher.group(1);
+            String content = partyMatcher.group(2);
+            processedMessage = playerName + ": " + content;
+        }
+
+        Matcher matcher = WAYPOINT_PATTERN.matcher(processedMessage);
         if (!matcher.matches()) return Optional.empty();
 
         try {
