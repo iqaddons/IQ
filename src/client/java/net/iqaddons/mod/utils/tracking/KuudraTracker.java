@@ -106,8 +106,13 @@ public final class KuudraTracker {
         Matcher partyMatcher = PARTY_FRESH_PATTERN.matcher(message);
         if (partyMatcher.find()) {
             String playerName = partyMatcher.group(1);
-            if (mc.player != null && playerName.equalsIgnoreCase(mc.player.getName().getString())) {
-                return;
+            log.info("Extracted player name from FRESH message: '{}'", playerName);
+
+            if (mc.world != null) {
+                log.info("Available players in world:");
+                mc.world.getPlayers().forEach(p ->
+                    log.info("  - Player: '{}' (ID: {})", p.getName().getString(), p.getId())
+                );
             }
 
             findPlayerByName(playerName).ifPresentOrElse(

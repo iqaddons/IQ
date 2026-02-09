@@ -90,9 +90,20 @@ public class EntityDetectorUtil {
     public static Optional<AbstractClientPlayerEntity> findPlayerByName(@NotNull String name) {
         if (mc.world == null) return Optional.empty();
 
-        return mc.world.getPlayers().stream()
+        Optional<AbstractClientPlayerEntity> result = mc.world.getPlayers().stream()
                 .filter(player -> player.getName().getString().equalsIgnoreCase(name))
                 .findFirst();
+
+        if (result.isEmpty()) {
+            // Log all available players for debugging
+            System.out.println("DEBUG: Could not find player '" + name + "'. Available players:");
+            mc.world.getPlayers().forEach(p ->
+                System.out.println("  - '" + p.getName().getString() + "' (matches: " +
+                    p.getName().getString().equalsIgnoreCase(name) + ")")
+            );
+        }
+
+        return result;
     }
 
     public static @Nullable AbstractClientPlayerEntity findPlayerById(int entityId) {
