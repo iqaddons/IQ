@@ -28,11 +28,10 @@ public final class KuudraTracker {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final String KUUDRA_AREA = "Kuudra";
 
-    private static final Pattern SUPPLY_PATTERN = Pattern.compile("(.+) recovered one of Elle's supplies! \\((\\d)/6\\)");
-
     private static final String FRESH_TOOLS_MESSAGE = "Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!";
+    private static final Pattern SUPPLY_PATTERN = Pattern.compile("(.+) recovered one of Elle's supplies! \\((\\d)/6\\)");
+    private static final Pattern PARTY_FRESH_PATTERN = Pattern.compile("Party > (?:\\[[^]]+] )?(\\w+): (?:\\[IQ] )?FRESH");
     private static final Pattern PROTECT_ELLE_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
-    private static final Pattern PARTY_FRESH_PATTERN = Pattern.compile("Party > (?:\\[[^]]+] )?(\\w+): (?:\\[IQ] )?FRESH!");
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final KuudraStateManager stateManager;
