@@ -4,17 +4,19 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.experimental.UtilityClass;
-import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -102,15 +104,58 @@ public class WorldRenderUtils {
     }
 
     public static void drawBeam(
-            MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            Camera camera, Vec3d pos, int height,
-            boolean throughWalls, RenderColor color
+            WorldRenderEvent event,
+            Vec3d pos,
+            int height,
+            RenderColor color
     ) {
-        drawFilled(
-                matrices, consumer, camera,
-                Box.of(pos, 0.5, 0, 0.5).stretch(0, height, 0),
-                throughWalls, color
+        int packedColor = ColorHelper.getArgb(255,
+                (int)(color.r * 255),
+                (int)(color.g * 255),
+                (int)(color.b * 255));
+
+        float tickDelta = event.tickCounter().getTickProgress(true);
+        long worldTime = MinecraftClient.getInstance().world.getTime();
+
+        float rotation = (float)Math.floorMod(worldTime, 40) + tickDelta;
+
+        MatrixStack matrices = event.matrices();
+        matrices.push();
+
+        double x = pos.x - event.camera().getPos().x;
+        double y = pos.y - event.camera().getPos().y;
+        double z = pos.z - event.camera().getPos().z;
+        matrices.translate(x, y, z);
+
+        BeaconBlockEntityRenderer.renderBeam(
+                matrices,
+                event.commandQueue(),
+                BeaconBlockEntityRenderer.BEAM_TEXTURE,
+                1.0F,
+                rotation,
+                0,
+                height,
+                packedColor,
+                0.2F,
+                0.25F
         );
+
+        matrices.pop();
+    }
+
+    public static void drawStyledBox(
+            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
+            @NotNull Camera camera, @NotNull Box box, boolean throughWalls,
+            @NotNull RenderColor color, int style
+    ) {
+        switch (style) {
+            case 0 -> drawFilled(matrices, consumer, camera, box, throughWalls, color);
+            case 1 -> drawOutline(matrices, consumer, camera, box, throughWalls, color);
+            case 2 -> {
+                drawFilled(matrices, consumer, camera, box, throughWalls, color.withOpacity(color.a * 0.5f));
+                drawOutline(matrices, consumer, camera, box, throughWalls, color);
+            }
+        }
     }
 
     public static void drawTracer(
