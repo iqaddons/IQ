@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 
 public record WorldRenderEvent(
@@ -55,6 +56,14 @@ public record WorldRenderEvent(
 
     public void drawHitbox(Entity entity, boolean troughWalls, RenderColor color) {
         WorldRenderUtils.drawHitBox(matrices, consumer, camera, entity, tickCounter, troughWalls, color);
+    }
+
+    public void drawStyledBox(@NotNull Box box, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
+        WorldRenderUtils.drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
+    }
+
+    public void drawStyledHitbox(@NotNull Entity entity, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
+        WorldRenderUtils.drawStyledHitBox(matrices, consumer, camera, entity, tickCounter, throughWalls, color, style);
     }
 }
 
