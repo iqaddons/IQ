@@ -20,6 +20,8 @@ public class FreshersTimerWidget extends HudWidget {
 
     private final List<PlayerFreshedEntry> freshEntries = Collections.synchronizedList(new ArrayList<>());
 
+    private final KuudraStateManager kuudraManager = KuudraStateManager.get();
+
     public FreshersTimerWidget() {
         super("freshers_timer",
                 "Freshers Timer",
@@ -52,7 +54,15 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
-        freshEntries.add(new PlayerFreshedEntry(event.playerName(), (System.currentTimeMillis() - event.freshAt())));
+        var context = kuudraManager.context();
+        if (context.phase() != KuudraPhase.BUILD) {
+            return;
+        }
+
+        freshEntries.add(new PlayerFreshedEntry(
+                event.playerName(),
+                context.phaseDuration().toMillis())
+        );
 
         updateDisplay();
     }
