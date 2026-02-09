@@ -21,11 +21,11 @@ public class FreshersTimerWidget extends HudWidget {
     private final List<PlayerFreshedEntry> freshEntries = Collections.synchronizedList(new ArrayList<>());
 
     public FreshersTimerWidget() {
-        super("freshers-timer",
+        super("freshers_timer",
                 "Freshers Timer",
-                840, 30,
+                10.0f, 30,
                 1.0f,
-                HudAnchor.TOP_RIGHT
+                HudAnchor.TOP_LEFT
         );
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
@@ -33,14 +33,13 @@ public class FreshersTimerWidget extends HudWidget {
 
         setExampleLines(List.of(
                 HudLine.of("§b§lFresh Timers §7[2]"),
-                HudLine.of("§fckac10 §8- §f5.23s"),
-                HudLine.of("§fPeHenrii §8- §a7.85s")
+                HudLine.of("§bckac10 §f5.23s"),
+                HudLine.of("§aPeHenrii §a7.85s")
         ));
     }
 
     @Override
     protected void onActivate() {
-
         subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
 
         freshEntries.clear();
@@ -55,24 +54,24 @@ public class FreshersTimerWidget extends HudWidget {
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
         freshEntries.add(new PlayerFreshedEntry(event.playerName(), event.freshAt()));
 
-        log.info("Player {} got fresh at {}ms", event.playerName(), event.freshAt());
         updateDisplay();
     }
 
     private void updateDisplay() {
-        addLine(HudLine.of(String.format("§b§lFresh Timers §b%d[%d]",
-                freshEntries.size(), freshEntries.size()))
+        clearLines();
+        addLine(HudLine.of(String.format("§b§lFresh Timers §7[%d]",
+                freshEntries.size()))
         );
 
         if (freshEntries.isEmpty()) {
-            addLine(HudLine.of("§7No fresh timers yet"));
+            addLine(HudLine.of("§7No freshers..."));
             return;
         }
 
         for (PlayerFreshedEntry entry : freshEntries) {
             double timeInSeconds = entry.freshTime / 1000.0;
 
-            addLine(HudLine.of(String.format("§f%s %s§l%.2fs",
+            addLine(HudLine.of(String.format("§f%s §8- %s%.2fs",
                     entry.playerName(), getTimeColor(timeInSeconds), timeInSeconds)
             ));
         }
