@@ -10,6 +10,7 @@
     "EntityGlowMixin",
     "EntityMixin",
     "HandledScreenMixin",
+    "HudClickMixin",
     "InGameHudMixin",
     "WorldRendererMixin"
   ],
