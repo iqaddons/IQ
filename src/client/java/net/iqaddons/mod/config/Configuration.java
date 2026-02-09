@@ -23,6 +23,7 @@ import java.awt.*;
         links = {
                 @ConfigInfo.Link(value = "https://github.com/pehenrii/IQ", icon = "code-2", text = "Github"),
                 @ConfigInfo.Link(value = "https://discord.gg/HdhXhCWcW9", icon = "discord", text = "Discord"),
+                @ConfigInfo.Link(value = "https://patreon.com/IQAddons", icon = "patreon", text = "Patreon")
         }
 )
 
@@ -85,7 +86,7 @@ public class Configuration {
     )
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the teammate highlight")
-    public static int teamHighlightColor = new Color(255, 215, 0, 255).getRGB();
+    public static int teamHighlightColor = new Color(0, 221, 255, 185).getRGB();
 
     @ConfigEntry(
             id = "manaDrainNotify",

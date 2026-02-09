@@ -24,7 +24,7 @@ public class StunWaypointsFeature extends KuudraFeature {
                 "stunWaypoints",
                 "Stun Waypoints",
                 () -> PhaseThreeConfig.stunWaypoints,
-                KuudraPhase.EATEN
+                KuudraPhase.STUN, KuudraPhase.EATEN
         );
     }
 

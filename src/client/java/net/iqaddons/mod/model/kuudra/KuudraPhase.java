@@ -17,7 +17,7 @@ public enum KuudraPhase {
     SUPPLIES("Supplies", 0, msg -> msg.contains("[NPC] Elle: Okay adventurers, I will go and fish up Kuudra!")),
     BUILD("Build", 1, msg -> msg.contains("[NPC] Elle: OMG! Great work collecting my supplies!")),
     EATEN("Eaten", 2, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
-    STUN("Stun", 3, msg -> msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")),
+    STUN("Stun", 3, msg -> (msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")) || msg.contains("You purchased Human Cannonball!")),
     DPS("DPS", 4, msg -> msg.contains("destroyed one of Kuudra's pods!")),
     BOSS("Boss", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
     COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));

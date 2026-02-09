@@ -1,9 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
 
@@ -41,19 +39,38 @@ public class PhaseTwoConfig {
     public static boolean freshCountdown = false;
 
     @ConfigEntry(
-            id = "elleHighlight",
-            translation = "Elle Highlight"
+            id = "elleHighlightConfig",
+            translation = "Elle Highlight Config"
     )
-    @Comment("Draw a box around Elle during the build phase")
-    public static boolean elleHighlight = true;
+    @Comment("Configure the Elle highlight feature")
+    public static final ElleConfig elleConfig = new ElleConfig();
 
-    @ConfigEntry(
-            id = "elleHighlightColor",
-            translation = "Elle Highlight Color"
-    )
-    @ConfigOption.Color(alpha = true)
-    @Comment("Change the color of the Elle highlight")
-    public static int elleHighlightColor = new Color(0, 0, 0, 255).getRGB();
+    @ConfigObject
+    public static class ElleConfig {
+
+        @ConfigEntry(
+                id = "elleHighlight",
+                translation = "Elle Highlight"
+        )
+        @Comment("Draw a box around Elle during the build phase")
+        public static boolean elleHighlight = true;
+
+        @ConfigEntry(
+                id = "elleHighlightColor",
+                translation = "Elle Highlight Color"
+        )
+        @ConfigOption.Color(alpha = true)
+        @Comment("Change the color of the Elle highlight")
+        public static int elleHighlightColor = new Color(255, 83, 83, 171).getRGB();
+
+        @ConfigEntry(
+                id = "elleHighlightStyle",
+                translation = "Elle Highlight Style"
+        )
+        @ConfigOption.Select
+        @Comment("Change the style of the Elle highlight")
+        public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.BOTH;
+    }
 
     @ConfigEntry(
             id = "freshMessage",

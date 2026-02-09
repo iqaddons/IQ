@@ -22,7 +22,7 @@ public final class KuudraStateManager {
 
     private static final KuudraStateManager INSTANCE = new KuudraStateManager();
 
-    private static final int HEARTBEAT_INTERVAL_TICKS = 10;
+    private static final int CHECK_INTERVAL_TICKS = 10;
 
     private final AtomicReference<KuudraContext> contextRef = new AtomicReference<>(KuudraContext.empty());
     private final KuudraStateValidator validator = new KuudraStateValidator();
@@ -38,7 +38,7 @@ public final class KuudraStateManager {
             return;
         }
 
-        heartbeatSubscription = EventBus.subscribe(ClientTickEvent.class, this::onHeartbeat);
+        heartbeatSubscription = EventBus.subscribe(ClientTickEvent.class, this::onClientTick);
         started = true;
     }
 
@@ -106,8 +106,8 @@ public final class KuudraStateManager {
         return Optional.of(ctx.phaseDuration());
     }
 
-    private void onHeartbeat(@NotNull ClientTickEvent event) {
-        if (!event.isNthTick(HEARTBEAT_INTERVAL_TICKS)) {
+    private void onClientTick(@NotNull ClientTickEvent event) {
+        if (!event.isNthTick(CHECK_INTERVAL_TICKS)) {
             return;
         }
 
@@ -159,7 +159,6 @@ public final class KuudraStateManager {
                 .reduce(Duration.ZERO, Duration::plus);
 
         log.info("Kuudra run ended: {} (total: {}ms)", reason, totalDuration.toMillis());
-
         EventBus.post(new KuudraPhaseChangeEvent(
                 previousPhase,
                 KuudraPhase.NONE,

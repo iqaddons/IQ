@@ -54,7 +54,7 @@ public class BuildProgressWidget extends HudWidget {
         freshLine = HudLine.of("§fFresh: §b0").showWhen(() -> freshCount > 0);
         etaLine = HudLine.of("§fETA: §e--");
 
-        setEnabledSupplier(() -> PhaseTwoConfig.buildHelper);
+        setEnabledSupplier(() -> PhaseTwoConfig.buildProgressOverlay);
         setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.BUILD);
 
         setExampleLines(List.of(

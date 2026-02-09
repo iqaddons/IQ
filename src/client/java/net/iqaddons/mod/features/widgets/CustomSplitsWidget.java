@@ -159,7 +159,6 @@ public class CustomSplitsWidget extends HudWidget {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
-        if (!event.isNthTick(4)) return;
 
         KuudraPhase currentPhase = stateManager.phase();
         if (currentPhase == KuudraPhase.NONE || currentPhase == KuudraPhase.COMPLETED) {
