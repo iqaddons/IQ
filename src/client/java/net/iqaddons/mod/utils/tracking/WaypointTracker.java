@@ -53,7 +53,6 @@ public class WaypointTracker {
             Instant expiresAt = Instant.now().plus(duration);
 
             return Optional.of(new WaypointData(playerName, position, expiresAt, isUrgent));
-
         } catch (NumberFormatException e) {
             return Optional.empty();
         }

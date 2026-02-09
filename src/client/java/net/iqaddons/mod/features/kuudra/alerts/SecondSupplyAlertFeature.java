@@ -5,7 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.MessageUtil;

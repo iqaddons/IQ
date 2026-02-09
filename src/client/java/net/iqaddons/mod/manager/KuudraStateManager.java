@@ -1,14 +1,17 @@
-package net.iqaddons.mod.manager.state;
+package net.iqaddons.mod.manager;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.SubscriptionOwner;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
-import net.iqaddons.mod.manager.validator.KuudraStateValidator;
+import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
+import net.iqaddons.mod.model.kuudra.validator.KuudraStateValidator;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -17,40 +20,75 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static net.iqaddons.mod.IQConstants.DEFAULT_CHECK_INTERVAL_TICKS;
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+
 @Slf4j
-public final class KuudraStateManager {
+public final class KuudraStateManager extends SubscriptionOwner {
 
-    private static final KuudraStateManager INSTANCE = new KuudraStateManager();
-
-    private static final int CHECK_INTERVAL_TICKS = 10;
+    private static KuudraStateManager instance;
 
     private final AtomicReference<KuudraContext> contextRef = new AtomicReference<>(KuudraContext.empty());
     private final KuudraStateValidator validator = new KuudraStateValidator();
     private final Map<KuudraPhase, Duration> phaseDurations = new EnumMap<>(KuudraPhase.class);
 
-    @Getter
-    private volatile boolean started = false;
-
-    private EventBus.Subscription<ClientTickEvent> heartbeatSubscription;
-
     public void start() {
-        if (started) {
+        subscribe(ClientTickEvent.class, this::onClientTick);
+        EventBus.subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        EventBus.subscribe(SkyblockAreaChangeEvent.class, this::onSkyBlockAreaChange);
+
+        instance = this;
+    }
+
+    private void onClientTick(@NotNull ClientTickEvent event) {
+        if (!event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) return;
+
+        KuudraContext current = contextRef.get();
+        if (current.phase() == KuudraPhase.NONE) {
             return;
         }
 
-        heartbeatSubscription = EventBus.subscribe(ClientTickEvent.class, this::onClientTick);
-        started = true;
+        KuudraStateValidator.ValidationResult result = validator.validate(current);
+        if (result.isValid()) {
+            KuudraContext validated = current.validated();
+            contextRef.compareAndSet(current, validated);
+            log.trace("Validation passed for phase {}", current.phase());
+        } else {
+            forceReset("Validation failures: " + result.reason());
+        }
     }
 
-    public void stop() {
-        if (!started) return;
-        if (heartbeatSubscription != null) {
-            heartbeatSubscription.unsubscribe();
-            heartbeatSubscription = null;
+    private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        String message = event.getStrippedMessage();
+        KuudraPhase detected = KuudraPhase.fromMessage(message);
+        if (detected == null) return;
+        log.debug("Detected phase trigger in chat: {} -> {}", message.substring(0, Math.min(50, message.length())), detected);
+
+        if (detected == KuudraPhase.NONE) {
+            if (isInKuudra()) {
+                forceReset("Exit message detected: " + StringUtils.getShortMessage(message));
+            }
+
+            return;
         }
 
-        forceReset("Manager stopped");
-        started = false;
+        setPhase(detected);
+
+        if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
+            forceReset("Server transfer detected: " + StringUtils.getShortMessage(message));
+        }
+    }
+
+    private void onSkyBlockAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        if (!event.newArea().contains(KUUDRA_AREA_ID) && isInKuudra()) {
+            log.info("Detected leaving Kuudra area (now in: {})", event.newArea());
+            forceReset("Left Kuudra area -> " + event.newArea());
+        }
+
+        if (!event.onSkyBlock() && isInKuudra()) {
+            log.info("Detected leaving SkyBlock");
+            forceReset("Left SkyBlock");
+        }
     }
 
     public @NotNull KuudraPhase phase() {
@@ -104,26 +142,6 @@ public final class KuudraStateManager {
         }
 
         return Optional.of(ctx.phaseDuration());
-    }
-
-    private void onClientTick(@NotNull ClientTickEvent event) {
-        if (!event.isNthTick(CHECK_INTERVAL_TICKS)) {
-            return;
-        }
-
-        KuudraContext current = contextRef.get();
-        if (current.phase() == KuudraPhase.NONE) {
-            return;
-        }
-
-        KuudraStateValidator.ValidationResult result = validator.validate(current);
-        if (result.isValid()) {
-            KuudraContext validated = current.validated();
-            contextRef.compareAndSet(current, validated);
-            log.trace("Validation passed for phase {}", current.phase());
-        } else {
-            forceReset("Validation failures: " + result.reason());
-        }
     }
 
     private boolean handleRunStart() {
@@ -188,7 +206,6 @@ public final class KuudraStateManager {
 
         KuudraContext newContext = current.withPhase(newPhase);
         boolean updated = contextRef.compareAndSet(current, newContext);
-
         if (!updated) {
             log.warn("Concurrent modification during phase transition");
             return false;
@@ -209,6 +226,10 @@ public final class KuudraStateManager {
     }
 
     public static KuudraStateManager get() {
-        return INSTANCE;
+        if (instance == null) {
+            throw new IllegalStateException("KuudraStateManager not initialized yet");
+        }
+
+        return instance;
     }
 }

@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
