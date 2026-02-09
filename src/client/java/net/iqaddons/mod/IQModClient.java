@@ -95,7 +95,7 @@ public class IQModClient implements ClientModInitializer {
         hudManager.register(
                 new SupplyTimerWidget(), new BuildProgressWidget(),
                 new CustomSplitsWidget(), new FreshCountdownWidget(),
-                new KuudraHealthWidget()
+                new KuudraHealthWidget(), new FreshersTimerWidget()
         );
     }
 

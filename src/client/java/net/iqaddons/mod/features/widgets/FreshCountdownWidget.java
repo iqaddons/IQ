@@ -57,21 +57,12 @@ public class FreshCountdownWidget extends HudWidget {
         clearLines();
         addLine(countdownLine);
 
-        playerFreshSubscription = EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
-        tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
     protected void onDeactivate() {
-        if (playerFreshSubscription != null) {
-            playerFreshSubscription.unsubscribe();
-            playerFreshSubscription = null;
-        }
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
-
         freshActive = false;
     }
 

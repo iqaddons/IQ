@@ -2,6 +2,8 @@ package net.iqaddons.mod.hud.element;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.minecraft.client.MinecraftClient;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 @Slf4j
 @Data
@@ -33,6 +36,7 @@ public abstract class HudWidget implements HudElement {
 
     private final List<HudLine> lines = new ArrayList<>();
     private final List<HudLine> exampleLines = new ArrayList<>();
+    private final List<EventBus.Subscription<?>> subscriptions = new ArrayList<>();
 
     private BooleanSupplier visibilityCondition = () -> true;
     private BooleanSupplier enabledSupplier = () -> true;
@@ -202,16 +206,50 @@ public abstract class HudWidget implements HudElement {
 
     public final void activate() {
         if (active) return;
+
         active = true;
-        onActivate();
+        try {
+            onActivate();
+        } catch (Exception e) {
+            log.error("Failed to activate widget", e);
+            cleanupSubscriptions();
+        }
+
         log.debug("HUD Widget activated: {}", displayName);
     }
 
     public final void deactivate() {
         if (!active) return;
+
         active = false;
         onDeactivate();
+        cleanupSubscriptions();
+
         log.debug("HUD Widget deactivated: {}", displayName);
+    }
+
+    protected <T extends Event> void subscribe(
+            @NotNull Class<T> eventClass,
+            @NotNull Consumer<T> handler
+    ) {
+        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler);
+        subscriptions.add(subscription);
+    }
+
+    protected void subscribe(@NotNull EventBus.Subscription<?> subscription) {
+        subscriptions.add(subscription);
+    }
+
+    private void cleanupSubscriptions() {
+        for (EventBus.Subscription<?> subscription : subscriptions) {
+            try {
+                subscription.unsubscribe();
+            } catch (Exception e) {
+                log.warn("Error unsubscribing", e);
+            }
+        }
+
+        subscriptions.clear();
     }
 
     protected void onActivate() {}

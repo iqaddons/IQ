@@ -124,7 +124,6 @@ public final class KuudraTracker {
     private int getBuildingProgress() {
         for (String line : ScoreboardUtils.getLines()) {
             String stripped = ScoreboardUtils.stripFormatting(line);
-
             Matcher matcher = PROTECT_ELLE_PATTERN.matcher(stripped);
             if (matcher.find()) {
                 try {

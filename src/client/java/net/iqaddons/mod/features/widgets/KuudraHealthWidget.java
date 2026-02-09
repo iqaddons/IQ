@@ -70,16 +70,11 @@ public class KuudraHealthWidget extends HudWidget {
         clearLines();
         addLines(titleLine, healthLine, damageLine);
 
-        tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
     protected void onDeactivate() {
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
-
         kuudraFound = false;
     }
 

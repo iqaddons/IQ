@@ -44,9 +44,6 @@ public class CustomSplitsWidget extends HudWidget {
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final Map<KuudraPhase, Double> splits = new EnumMap<>(KuudraPhase.class);
 
-    private EventBus.Subscription<ClientTickEvent> tickSubscription;
-    private EventBus.Subscription<KuudraPhaseChangeEvent> phaseSubscription;
-
     private final HudLine titleLine;
     private final HudLine suppliesLine;
     private final HudLine buildLine;
@@ -104,8 +101,8 @@ public class CustomSplitsWidget extends HudWidget {
                 overallLine, paceLine
         );
 
-        tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
-        phaseSubscription = EventBus.subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
+        subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
 
         updateDisplay();
         log.info("Custom Splits Widget activated");
@@ -118,20 +115,6 @@ public class CustomSplitsWidget extends HudWidget {
                 splits.put(phase, seconds);
             });
         }
-    }
-
-    @Override
-    protected void onDeactivate() {
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
-        if (phaseSubscription != null) {
-            phaseSubscription.unsubscribe();
-            phaseSubscription = null;
-        }
-
-        log.info("Custom Splits Widget deactivated");
     }
 
     private void resetSplits() {

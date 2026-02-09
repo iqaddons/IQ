@@ -49,6 +49,8 @@ public class WaypointTracker {
 
     private @NotNull Text parsePlayerName(@NotNull String raw) {
         String formatted = raw.replace("&", "§");
+        formatted = formatted.replaceFirst("\\[\\d+]\\s*", "");
+
         int bracketIndex = formatted.indexOf("[");
         if (bracketIndex > 0) {
             formatted = formatted.substring(bracketIndex);

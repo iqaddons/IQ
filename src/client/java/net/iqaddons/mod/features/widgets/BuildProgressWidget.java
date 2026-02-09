@@ -77,20 +77,8 @@ public class BuildProgressWidget extends HudWidget {
                 freshLine, etaLine
         );
 
-        playerFreshSubscription = EventBus.subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
-        tickSubscription = EventBus.subscribe(ClientTickEvent.class, this::onTick);
-    }
-
-    @Override
-    protected void onDeactivate() {
-        if (playerFreshSubscription != null) {
-            playerFreshSubscription.unsubscribe();
-            playerFreshSubscription = null;
-        }
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
+        subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {

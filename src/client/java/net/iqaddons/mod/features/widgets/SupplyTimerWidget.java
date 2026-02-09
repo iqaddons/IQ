@@ -23,8 +23,6 @@ public class SupplyTimerWidget extends HudWidget {
 
     private final List<SupplyPickupEntry> pickupHistory = Collections.synchronizedList(new ArrayList<>());
 
-    private EventBus.Subscription<SupplyPickupEvent> supplyPickupSubscription;
-
     public SupplyTimerWidget() {
         super(
                 "supplyTimer",
@@ -51,7 +49,7 @@ public class SupplyTimerWidget extends HudWidget {
             supplyState.startSuppliesPhase();
         }
 
-        supplyPickupSubscription = EventBus.subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
+        subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
 
         resetLocalState();
         updateDisplay();
@@ -59,11 +57,6 @@ public class SupplyTimerWidget extends HudWidget {
 
     @Override
     protected void onDeactivate() {
-        if (supplyPickupSubscription != null) {
-            supplyPickupSubscription.unsubscribe();
-            supplyPickupSubscription = null;
-        }
-
         resetLocalState();
     }
 
