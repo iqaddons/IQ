@@ -20,6 +20,13 @@ public class PhaseThreeConfig {
     public static boolean kuudraHPBossbar = true;
 
     @ConfigEntry(
+            id = "kuudraHealthDisplay",
+            translation = "Kuudra Health Display"
+    )
+    @Comment("Display Kuudra's health with health, percent & damage")
+    public static boolean kuudraHealthDisplay = true;
+
+    @ConfigEntry(
             id = "kuudraHitbox",
             translation = "Kuudra Hitbox"
     )

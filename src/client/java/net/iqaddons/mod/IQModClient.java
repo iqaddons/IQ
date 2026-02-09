@@ -86,7 +86,7 @@ public class IQModClient implements ClientModInitializer {
                 new KuudraHitboxFeature(), new RendDamageAlertFeature(), new AlreadyPickingAlertFeature(),
                 new BuildWaypointsFeature(), new StunWaypointsFeature(), new ManaDrainAlertFeature(),
                 new BlockUselessPerksFeature(), new HideMobNametagsFeature(), new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature(), new DangerAlertFeature()
+                new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature()
         );
 
         features.start();

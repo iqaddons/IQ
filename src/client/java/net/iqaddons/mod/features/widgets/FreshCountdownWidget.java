@@ -18,7 +18,6 @@ import java.util.List;
 @Slf4j
 public class FreshCountdownWidget extends HudWidget {
 
-    private static final String FRESH_TOOLS_MESSAGE = "Your Fresh Tools Perk bonus doubles your building speed for the next 10 seconds!";
     private static final long FRESH_DURATION_MS = 10_000;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();

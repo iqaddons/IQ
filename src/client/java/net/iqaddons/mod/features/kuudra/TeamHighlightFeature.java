@@ -21,7 +21,6 @@ import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_TEAM_HIGHLIGHT;
 @Slf4j
 public class TeamHighlightFeature extends KuudraFeature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final int UPDATE_INTERVAL_TICKS = 10;
     private static final int REAL_PLAYER_PING = 1;
 

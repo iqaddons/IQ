@@ -47,7 +47,7 @@ public class KuudraHealthWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        setEnabledSupplier(() -> PhaseThreeConfig.kuudraHPBossbar);
+        setEnabledSupplier(() -> PhaseThreeConfig.kuudraHealthDisplay);
 
         KuudraPhase phase = stateManager.phase();
         setVisibilityCondition(() -> phase == KuudraPhase.STUN

@@ -40,8 +40,8 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawText(matrices, consumer, camera, pos, text, scale, throughWalls, color);
     }
 
-    public void drawBeam(Vec3d pos, int height, RenderColor color) {
-        WorldRenderUtils.drawBeam(this, pos, height, color);
+    public void drawBeam(Vec3d pos, int height, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawBeam(matrices, consumer, camera, pos, height, throughWalls, color);
     }
 
     public void drawFilledWithBeam(Box box, int height, boolean throughWalls, RenderColor color) {
@@ -60,9 +60,9 @@ public record WorldRenderEvent(
 
         Vec3d center = box.getCenter();
         WorldRenderUtils.drawBeam(
-                this,
+                matrices, consumer, camera,
                 center.add(0, box.maxY - center.getY(), 0),
-                height, color
+                height, throughWalls, color
         );
     }
 

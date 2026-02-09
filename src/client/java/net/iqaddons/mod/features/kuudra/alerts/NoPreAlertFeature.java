@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class NoPreAlertFeature extends KuudraFeature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final int CHECK_DELAY_TICKS = 20;
 
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(

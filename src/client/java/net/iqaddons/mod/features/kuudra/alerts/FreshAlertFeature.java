@@ -25,8 +25,6 @@ import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_FRESH;
 @Slf4j
 public class FreshAlertFeature extends KuudraFeature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final long FRESH_DURATION_MS = 10_000;
 
     private final Map<Integer, Long> freshPlayers = new ConcurrentHashMap<>();

@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class DangerAlertFeature extends KuudraFeature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final int DANGER_CHECK_INTERVAL_TICKS = 5;
 
     public DangerAlertFeature() {

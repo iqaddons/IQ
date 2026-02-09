@@ -8,15 +8,12 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.mob.MagmaCubeEntity;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
 public class RendDamageAlertFeature extends KuudraFeature {
-
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
 
     private static final float MIN_REND_DAMAGE = 1666f;
     private static final float DAMAGE_MULTIPLIER = 9600f;
@@ -68,14 +65,14 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
-        if (MC.player == null) return;
+        if (mc.player == null) return;
 
-        if (MC.player.getY() < ARENA_Y_THRESHOLD && !inBoss) {
+        if (mc.player.getY() < ARENA_Y_THRESHOLD && !inBoss) {
             inBoss = true;
             bossStartTime = System.currentTimeMillis();
         }
 
-        if (MC.player.getY() > IGNORE_Y_THRESHOLD) {
+        if (mc.player.getY() > IGNORE_Y_THRESHOLD) {
             return;
         }
 

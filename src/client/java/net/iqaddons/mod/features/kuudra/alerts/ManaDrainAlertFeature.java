@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 @Slf4j
 public class ManaDrainAlertFeature extends KuudraFeature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final Pattern EXTREME_FOCUS_PATTERN = Pattern.compile("Used Extreme Focus! \\((\\d+) Mana\\)");
     private static final double AFFECT_RADIUS = 5.0;
     private static final int REAL_PLAYER_PING = 1;

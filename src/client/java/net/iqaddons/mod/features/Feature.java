@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.EventBus;
+import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.function.Consumer;
 @Getter
 @RequiredArgsConstructor
 public abstract class Feature {
+
+    protected static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private final String id;
     private final String name;
