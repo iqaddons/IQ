@@ -76,7 +76,7 @@ public class IQModClient implements ClientModInitializer {
         FeatureManager features = FeatureManager.get();
         features.register(
                 new PartyJoinSoundFeature(), new PearlWaypointFeature(), new SupplyWaypointsFeature(),
-                new PileWaypointsFeature(), new NoPreAlertFeature(scheduler), new SecondSupplyAlertFeature(scheduler),
+                new PileWaypointsFeature(), new NoPreAlertFeature(), new SecondSupplyAlertFeature(scheduler),
                 new CustomSupplyMessageFeature(), new ElleHighlightFeature(), new FreshAlertFeature(),
                 new KuudraDirectionAlertFeature(), new KuudraHitboxFeature(), new RendDamageAlertFeature(),
                 new AlreadyPickingAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
