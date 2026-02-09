@@ -15,9 +15,9 @@ public class BlockUselessPerksFeature extends KuudraFeature {
 
     private static final Set<String> BLOCKED_PERKS = Set.of(
             "Steady Hands",
+            "Mining Frenzy",
             "Bomberman",
             "Auto Revive",
-            "Human Cannonball",
             "Elle's Lava Rod",
             "Elle's Pickaxe"
     );
@@ -27,16 +27,14 @@ public class BlockUselessPerksFeature extends KuudraFeature {
             Pattern.CASE_INSENSITIVE
     );
 
-    private static BlockUselessPerksFeature instance;
 
     public BlockUselessPerksFeature() {
         super(
                 "blockUselessPerks",
                 "Block Useless Perks",
                 () -> PhaseThreeConfig.blockUselessPerks,
-                KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.BOSS
+                KuudraPhase.RUN_PHASES
         );
-        instance = this;
     }
 
     @Override
@@ -55,10 +53,6 @@ public class BlockUselessPerksFeature extends KuudraFeature {
     }
 
     public static boolean shouldBlockPerk(@NotNull String itemName) {
-        if (instance == null || !instance.isActive()) {
-            return false;
-        }
-
         String stripped = itemName.replaceAll("§.", "");
         return BLOCKED_PATTERN.matcher(stripped).find();
     }
