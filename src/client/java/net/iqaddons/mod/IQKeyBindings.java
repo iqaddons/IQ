@@ -13,6 +13,8 @@ import org.lwjgl.glfw.GLFW;
 
 public class IQKeyBindings {
 
+    private static KeyBinding.Category IQ_CATEGORY = KeyBinding.Category.create(Identifier.of("iq"));
+
     private static KeyBinding openConfigKey;
 
     public static void register() {

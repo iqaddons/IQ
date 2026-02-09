@@ -5,8 +5,8 @@ import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.state.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.render.EntityGlowUtil;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.iqaddons.mod.utils.render.EntityGlowUtil.PRIORITY_TEAM_HIGHLIGHT;
+import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_TEAM_HIGHLIGHT;
 
 @Slf4j
 public class TeamHighlightFeature extends KuudraFeature {

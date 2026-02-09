@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 
 @Slf4j
 public class HideMobNametagsFeature extends KuudraFeature {

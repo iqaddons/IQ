@@ -1,7 +1,7 @@
 package net.iqaddons.mod.events.impl.skyblock;
 
 import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;

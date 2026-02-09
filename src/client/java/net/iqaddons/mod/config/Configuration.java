@@ -5,8 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.iqaddons.mod.utils.hud.HudEditScreen;
-import net.iqaddons.mod.utils.hud.HudManager;
+import net.iqaddons.mod.hud.HudManager;
 import net.minecraft.client.MinecraftClient;
 
 import java.awt.*;

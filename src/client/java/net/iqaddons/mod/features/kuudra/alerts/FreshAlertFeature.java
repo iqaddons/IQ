@@ -6,9 +6,9 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.iqaddons.mod.utils.render.EntityGlowUtil;
+import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.iqaddons.mod.utils.EntityDetectorUtil.findPlayerById;
-import static net.iqaddons.mod.utils.render.EntityGlowUtil.PRIORITY_FRESH;
+import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_FRESH;
 
 @Slf4j
 public class FreshAlertFeature extends KuudraFeature {

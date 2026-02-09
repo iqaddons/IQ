@@ -5,7 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.state.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.MinecraftClient;

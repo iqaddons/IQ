@@ -1,6 +1,6 @@
 package net.iqaddons.mod.mixin;
 
-import net.iqaddons.mod.utils.hud.HudManager;
+import net.iqaddons.mod.hud.HudManager;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.ChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
