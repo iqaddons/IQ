@@ -2,12 +2,10 @@ package net.iqaddons.mod.mixin;
 
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
-import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,13 +33,5 @@ public abstract class InGameHudMixin {
                 width,
                 height
         ));
-    }
-
-    @Inject(method = "setTitle", at = @At("HEAD"), cancellable = true)
-    private void iq$onSetTitle(Text title, CallbackInfo ci) {
-        TitleReceivedEvent event = EventBus.post(new TitleReceivedEvent(title));
-        if (event.isCancelled()) {
-            ci.cancel();
-        }
     }
 }
