@@ -26,10 +26,10 @@ public class PhaseThreeConfig {
 
 
     @ConfigEntry(
-            id = "elleHighlightConfig",
-            translation = "Elle Highlight Config"
+            id = "kuudraHitbox",
+            translation = "Kuudra Hitbox Config"
     )
-    @Comment("Configure the Elle highlight feature")
+    @Comment("Configure Kuudra's hitbox rendering during the stun phase")
     public static final KuudraHitbox kuudraHitbox = new KuudraHitbox();
 
     @ConfigObject
