@@ -2,23 +2,19 @@ package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
-import net.iqaddons.mod.events.impl.ClientTickEvent;
-import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.stream.Stream;
 
 @Slf4j
 public class KuudraHealthFeature extends KuudraFeature {
 
-    private static final float MAX_HEALTH = 100_000f;
-    
     public KuudraHealthFeature() {
         super(
                 "kuudraHealthDisplay",
@@ -57,7 +53,7 @@ public class KuudraHealthFeature extends KuudraFeature {
             return String.format("%.1fM/2.4M", millions);
         }
         
-        return String.format("%.0fk/100k", currentHealth / 1000f);
+        return String.format(Locale.ROOT, "%,.0f/100.000", currentHealth);
     }
 
     private @NotNull RenderColor getHealthColor(float currentHealth) {

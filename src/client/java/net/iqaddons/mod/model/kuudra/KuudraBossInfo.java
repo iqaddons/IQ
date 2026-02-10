@@ -31,6 +31,8 @@ public record KuudraBossInfo(
     }
 
     public double getHealthPercentage() {
-        return maxHealth > 0 ? (currentHealth / maxHealth) * 100.0 : 0.0;
+        if (maxHealth <= 0) return 0.0;
+
+        return Math.min(100.0, Math.max(0.0, (currentHealth * 100.0) / maxHealth));
     }
 }

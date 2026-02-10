@@ -16,7 +16,6 @@ import java.util.List;
 @Slf4j
 public class KuudraHealthWidget extends HudWidget {
 
-    private static final float BOSS_MULTIPLIER = 4f;
     private static final float DAMAGE_MULTIPLIER = 2400f;
     private static final float BOSS_HEALTH_THRESHOLD = 25_000f;
 
@@ -40,10 +39,12 @@ public class KuudraHealthWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseThreeConfig.kuudraHealthDisplay);
 
-        KuudraPhase phase = stateManager.phase();
-        setVisibilityCondition(() -> phase == KuudraPhase.STUN
-                || phase == KuudraPhase.DPS
-                || phase == KuudraPhase.BOSS);
+        setVisibilityCondition(() -> {
+            KuudraPhase phase = stateManager.phase();
+            return phase == KuudraPhase.STUN
+                    || phase == KuudraPhase.DPS
+                    || phase == KuudraPhase.BOSS;
+        });
 
         setExampleLines(List.of(
                 titleLine,
@@ -72,12 +73,11 @@ public class KuudraHealthWidget extends HudWidget {
 
     private void updateDisplay(@NotNull KuudraBossInfo bossInfo) {
         float currentHealth = bossInfo.currentHealth();
-        healthLine.text(String.format("§c❤ %.0f §8(§c%.2f%%§8)",
+        healthLine.text(String.format("§c❤ %.0f §8(§c%.1f%%§8)",
                 currentHealth, bossInfo.getHealthPercentage())
         );
 
-        float actualHP = currentHealth * BOSS_MULTIPLIER;
-        float damageInMillions = (actualHP * DAMAGE_MULTIPLIER) / 1_000_000f;
+        double damageInMillions = (bossInfo.damageReceived() * DAMAGE_MULTIPLIER) / 1_000_000f;
         damageLine.text(String.format("§fDamage: §e%.1fM", damageInMillions));
 
         markDimensionsDirty();
