@@ -157,6 +157,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
             return false;
         }
 
+        KuudraLocationUtil.invalidateCache();
+
         KuudraContext newContext = KuudraContext.entering();
         KuudraContext old = contextRef.getAndSet(newContext);
 
