@@ -74,9 +74,17 @@ public class KuudraHealthWidget extends HudWidget {
 
     private void updateDisplay(@NotNull KuudraBossInfo bossInfo) {
         float currentHealth = bossInfo.currentHealth();
-        healthLine.text(String.format(Locale.ROOT, "§c❤ %,.0f §8(§c%.1f%%§8)",
-                currentHealth, bossInfo.getHealthPercentage())
-        );
+        if (stateManager.phase() == KuudraPhase.BOSS) {
+            healthLine.text(String.format(Locale.ROOT, "§c❤ %.1fM/240M §8(§c%.1f%%§8)",
+                    currentHealth / 100f,
+                    bossInfo.getHealthPercentage())
+            );
+        } else {
+            healthLine.text(String.format(Locale.ROOT, "§c❤ %,.0f §8(§c%.1f%%§8)",
+                    currentHealth,
+                    bossInfo.getHealthPercentage())
+            );
+        }
 
         double damageInMillions = (bossInfo.damageReceived() * DAMAGE_MULTIPLIER) / 1_000_000f;
         damageLine.text(String.format("§fDamage: §e%.1fM", damageInMillions));
