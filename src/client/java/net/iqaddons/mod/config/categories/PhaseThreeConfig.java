@@ -66,6 +66,14 @@ public class PhaseThreeConfig {
     public static boolean stunWaypoints = false;
 
     @ConfigEntry(
+            id = "stunWaypointColor",
+            translation = "Stun Waypoints Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Change the color of the stun waypoints")
+    public static int color = new Color(0, 245, 255, 200).getRGB();
+
+    @ConfigEntry(
             id = "blockUselessPerks",
             translation = "Block Useless Perks"
     )
