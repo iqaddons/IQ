@@ -17,7 +17,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
         super(
                 "kuudraHitbox",
                 "Kuudra Hitbox",
-                () -> PhaseThreeConfig.kuudraHitbox,
+                () -> PhaseThreeConfig.KuudraHitbox.enabled,
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -28,11 +28,13 @@ public class KuudraHitboxFeature extends KuudraFeature {
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {
-        var optionalKuudra = KuudraLocationUtil.findKuudra();
-        if (optionalKuudra.isEmpty()) return;
+        var bossInfo = currentContext().bossInfo();
+        if (!bossInfo.isAlive()) return;
         
-        MagmaCubeEntity kuudra = optionalKuudra.get();
-        event.drawHitbox(kuudra, true, RenderColor.fromArgb(PhaseThreeConfig.kuudraHitboxColor));
+        event.drawStyledHitbox(bossInfo.bossEntity(), true,
+                RenderColor.fromArgb(PhaseThreeConfig.KuudraHitbox.color),
+                PhaseThreeConfig.KuudraHitbox.style
+        );
     }
 }
 

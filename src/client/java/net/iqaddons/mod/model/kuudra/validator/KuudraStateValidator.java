@@ -1,7 +1,8 @@
-package net.iqaddons.mod.manager.validator;
+package net.iqaddons.mod.model.kuudra.validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;
@@ -13,14 +14,14 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
+
 @Slf4j
 @RequiredArgsConstructor
 public final class KuudraStateValidator {
 
     private static final MinecraftClient mc = MinecraftClient.getInstance();
-
-    private static final String KUUDRA_AREA_PREFIX = "Kuudra";
-    private static final String SKYBLOCK_TITLE = "SKYBLOCK";
 
     private static final Pattern SUPPLIES_PATTERN = Pattern.compile("Rescue supplies");
     private static final Pattern BUILD_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
@@ -115,7 +116,7 @@ public final class KuudraStateValidator {
         if (context.isInRun()) {
             String currentArea = getCurrentArea();
             if (!isInKuudraArea(currentArea)) {
-                return new ValidationResult.AreaMismatch(KUUDRA_AREA_PREFIX, currentArea);
+                return new ValidationResult.AreaMismatch(KUUDRA_AREA_ID, currentArea);
             }
 
             Optional<KuudraPhase> detectedPhase = detectPhaseFromScoreboard();
@@ -136,7 +137,7 @@ public final class KuudraStateValidator {
     }
 
     private boolean isOnSkyBlock() {
-        return ScoreboardUtils.hasTitle(SKYBLOCK_TITLE);
+        return ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
     }
 
     private @NotNull String getCurrentArea() {
@@ -144,7 +145,7 @@ public final class KuudraStateValidator {
     }
 
     private boolean isInKuudraArea(@NotNull String area) {
-        return area.toLowerCase().contains(KUUDRA_AREA_PREFIX.toLowerCase());
+        return area.toLowerCase().contains(KUUDRA_AREA_ID.toLowerCase());
     }
 
     private @NotNull Optional<KuudraPhase> detectPhaseFromScoreboard() {

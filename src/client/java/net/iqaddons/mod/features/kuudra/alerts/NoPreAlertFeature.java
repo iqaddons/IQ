@@ -6,8 +6,8 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.manager.state.KuudraStateManager;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.KuudraStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.model.spot.SupplyPosition;
@@ -22,10 +22,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
+import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
+
 @Slf4j
 public class NoPreAlertFeature extends KuudraFeature {
 
-    private static final int CHECK_DELAY_TICKS = 50;
+    // FIXED - No pre alert feature
 
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
             "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
@@ -40,9 +43,6 @@ public class NoPreAlertFeature extends KuudraFeature {
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final KuudraStateManager kuudraState = KuudraStateManager.get();
 
-    private int checkDelayTicks = -1;
-    private boolean hasChecked = false;
-
     public NoPreAlertFeature() {
         super(
                 "noPreAlert",
@@ -55,62 +55,36 @@ public class NoPreAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         supplyState.reset();
-        resetState();
 
         subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
-        subscribe(ClientTickEvent.class, this::onClientTick);
-    }
-
-    @Override
-    protected void onKuudraDeactivate() {
-        hasChecked = false;
     }
 
     @Override
     protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
             supplyState.reset();
-            resetState();
             log.debug("Reset supply state for new run");
-        }
-
-        if (event.currentPhase() == KuudraPhase.SUPPLIES && checkDelayTicks == -1) {
-            checkDelayTicks = CHECK_DELAY_TICKS;
-            hasChecked = false;
-            log.debug("Started countdown for pre spot check ({} ticks)", CHECK_DELAY_TICKS);
-        }
-
-        if (event.previousPhase() == KuudraPhase.SUPPLIES && event.currentPhase() != KuudraPhase.SUPPLIES) {
-            resetState();
-        }
-    }
-
-    private void onClientTick(ClientTickEvent event) {
-        if (kuudraState.phase() != KuudraPhase.SUPPLIES) {
-            return;
-        }
-
-        if (checkDelayTicks == -1) {
-            checkDelayTicks = CHECK_DELAY_TICKS;
-            hasChecked = false;
-            log.debug("Late initialization of countdown ({} ticks)", CHECK_DELAY_TICKS);
-        }
-
-        if (checkDelayTicks > 0) {
-            checkDelayTicks--;
-
-            if (checkDelayTicks == 0 && !hasChecked) {
-                mc.execute(this::performSupplyCheck);
-                hasChecked = true;
-            }
         }
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
-        if (!message.startsWith("Party >")) return;
+        if (message.contains(ELLE_HEAD_OVER_MESSAGE)) {
+            detectPreSpotFromPlayerPosition();
+            return;
+        }
 
+        if (message.contains(ELLE_NOT_AGAIN_MESSAGE)) {
+            if (kuudraState.phase() == KuudraPhase.SUPPLIES) {
+                mc.execute(this::performSupplyCheck);
+                log.info("Triggered no-pre check from Elle's 'Not again!' message");
+            }
+
+            return;
+        }
+
+        if (!message.startsWith("Party >")) return;
         Matcher matcher = PARTY_NO_PRE_PATTERN.matcher(message);
         if (matcher.find()) {
             String pileName = matcher.group(1);
@@ -135,8 +109,21 @@ public class NoPreAlertFeature extends KuudraFeature {
         int currentMissingPre = supplyState.getMissingPre();
         if (currentMissingPre != missingPreValue) {
             supplyState.setMissingPre(missingPreValue);
-            log.debug("Detected missing pre from party chat: {} (value: {})",
+            log.info("Detected missing pre from party chat: {} (value: {})",
                     pileName, missingPreValue);
+        }
+    }
+
+    private void detectPreSpotFromPlayerPosition() {
+        if (mc.player == null) return;
+
+        Vec3d playerPos = mc.player.getEntityPos();
+        boolean detected = supplyState.tryDetectPreSpot(playerPos);
+        if (detected) {
+            PreSpot preSpot = supplyState.getDetectedPreSpot();
+            if (preSpot != null) {
+                log.info("Locked pre spot from Elle head-over message: {}", preSpot.getDisplayName());
+            }
         }
     }
 
@@ -158,24 +145,27 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         supplyState.updateSupplyPositions(supplies);
-        log.debug("Updated supply positions: {} supplies found", supplies.size());
+        log.info("Updated supply positions: {} supplies found", supplies.size());
     }
 
     private void performSupplyCheck() {
         if (mc.player == null) return;
 
-        Vec3d playerPos = mc.player.getEntityPos();
-        boolean detected = supplyState.tryDetectPreSpot(playerPos);
-        if (!detected) {
-            MessageUtil.ERROR.sendMessage("Could not determine your pre spot (too far away?)");
-            log.warn("Failed to detect pre spot at position: {}", playerPos);
-            return;
-        }
-
         PreSpot preSpot = supplyState.getDetectedPreSpot();
         if (preSpot == null) {
-            log.error("Pre spot is null after successful detection!");
-            return;
+            Vec3d playerPos = mc.player.getEntityPos();
+            boolean detected = supplyState.tryDetectPreSpot(playerPos);
+            if (!detected) {
+                MessageUtil.ERROR.sendMessage("Could not determine your pre spot (too far away?)");
+                log.warn("Failed to detect pre spot at position: {}", playerPos);
+                return;
+            }
+
+            preSpot = supplyState.getDetectedPreSpot();
+            if (preSpot == null) {
+                log.error("Pre spot is null after successful detection!");
+                return;
+            }
         }
 
         log.info("Detected pre spot: {}", preSpot.getDisplayName());
@@ -195,16 +185,12 @@ public class NoPreAlertFeature extends KuudraFeature {
                 log.info("No secondary supply detected for {}, announced to party",
                         preSpot.getSecondaryName());
             } else if (hasSecondary != null) {
-                log.debug("Secondary supply found for {}", preSpot.getSecondaryName());
+                log.info("Secondary supply found for {}", preSpot.getSecondaryName());
             }
         }
 
         if (hasPre) {
             log.info("Pre supply found for {}", preSpot.getDisplayName());
         }
-    }
-
-    private void resetState() {
-        hasChecked = false;
     }
 }

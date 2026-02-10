@@ -7,7 +7,6 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.entity.mob.MagmaCubeEntity;
 import org.jetbrains.annotations.NotNull;
 
 import static net.iqaddons.mod.utils.KuudraLocationUtil.SpawnDirection.UNKNOWN;
@@ -43,19 +42,15 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
         if (!event.isInGame()) return;
         if (!event.isNthTick(CHECK_INTERVAL_TICKS)) return;
 
-        var optionalKuudra = KuudraLocationUtil.findKuudra();
-        if (optionalKuudra.isEmpty()) return;
+        var bossInfo = currentContext().bossInfo();
+        if (!bossInfo.isAlive()) return;
 
-        MagmaCubeEntity kuudra = optionalKuudra.get();
-        var direction = KuudraLocationUtil.getSpawnDirection(kuudra);
+        var direction = KuudraLocationUtil.getDirection(bossInfo.bossEntity());
         if (direction != UNKNOWN && direction != currentDirection) {
             currentDirection = direction;
+
             MessageUtil.showTitle(direction.getFormattedName(), "", 0, 25, 5);
-            log.info("Kuudra spawn direction alert: {} (pos: {}, {}, {})",
-                    direction.getName(),
-                    String.format("%.1f", kuudra.getX()),
-                    String.format("%.1f", kuudra.getY()),
-                    String.format("%.1f", kuudra.getZ()));
+            log.info("Kuudra spawn direction alert: {}", direction.getName());
         }
     }
 }

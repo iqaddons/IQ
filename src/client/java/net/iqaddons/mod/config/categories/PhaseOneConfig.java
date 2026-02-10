@@ -42,6 +42,15 @@ public class PhaseOneConfig {
     public static boolean pearlWaypoints = true;
 
     @ConfigEntry(
+            id = "pearlWaypointsScale",
+            translation = "Pearl Waypoint Text Scale"
+    )
+    @ConfigOption.Range(min = 0.01, max = 1)
+    @ConfigOption.Slider
+    @Comment("Scale the text on pearl throw waypoints")
+    public static float pearlWaypointsScale = 0.25f;
+
+    @ConfigEntry(
             id = "pileWaypoints",
             translation = "Pile Waypoints"
     )

@@ -19,7 +19,7 @@ public enum KuudraPhase {
     EATEN("Eaten", 2, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
     STUN("Stun", 3, msg -> (msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")) || msg.contains("You purchased Human Cannonball!")),
     DPS("DPS", 4, msg -> msg.contains("destroyed one of Kuudra's pods!")),
-    BOSS("Boss", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
+    BOSS("Boss", 5, msg -> false), // The boss phase is detected by player Y position
     COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
 
     public static final KuudraPhase[] RUN_PHASES = { SUPPLIES, BUILD, EATEN, STUN, DPS, BOSS };
@@ -44,13 +44,6 @@ public enum KuudraPhase {
 
     public boolean isPreCombat() {
         return PRE_COMBAT_PHASES.contains(this);
-    }
-
-    public boolean canTransitionTo(@NotNull KuudraPhase target) {
-        if (target == NONE) return true;
-        if (target == COMPLETED) return true;
-        if (this == NONE && target == SUPPLIES) return true;
-        return target == next();
     }
 
     public @NotNull KuudraPhase next() {

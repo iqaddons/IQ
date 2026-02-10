@@ -1,4 +1,4 @@
-package net.iqaddons.mod.manager.state;
+package net.iqaddons.mod.manager;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

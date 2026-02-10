@@ -17,15 +17,10 @@ import java.util.Map;
 @NoArgsConstructor
 public final class FeatureManager {
 
-    private static final FeatureManager INSTANCE = new FeatureManager();
     private static final int SYNC_INTERVAL_TICKS = 20;
 
     private final Map<String, Feature> features = new LinkedHashMap<>();
     private EventBus.Subscription<ClientTickEvent> tickSubscription;
-
-    public static FeatureManager get() {
-        return INSTANCE;
-    }
 
     public void register(@NotNull Feature @NotNull ... features) {
         for (Feature feature : features) {
@@ -41,10 +36,7 @@ public final class FeatureManager {
     }
 
     public void stop() {
-        if (tickSubscription != null) {
-            tickSubscription.unsubscribe();
-            tickSubscription = null;
-        }
+        EventBus.unsubscribe(tickSubscription);
 
         features.values().forEach(Feature::deactivate);
     }

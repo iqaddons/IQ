@@ -28,7 +28,7 @@ public class PartyJoinSoundFeature extends Feature {
 
     @Override
     protected void onActivate() {
-        subscribe(EventBus.subscribe(ChatReceivedEvent.class, this::onChat));
+        subscribe(ChatReceivedEvent.class, this::onChat);
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {

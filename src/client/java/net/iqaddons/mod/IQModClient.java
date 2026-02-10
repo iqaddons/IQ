@@ -7,19 +7,16 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
-import net.iqaddons.mod.features.FeatureManager;
-import net.iqaddons.mod.features.generic.PartyJoinSoundFeature;
-import net.iqaddons.mod.features.generic.WaypointFeature;
-import net.iqaddons.mod.features.kuudra.*;
-import net.iqaddons.mod.features.kuudra.alerts.*;
-import net.iqaddons.mod.features.kuudra.waypoints.*;
-import net.iqaddons.mod.features.widgets.*;
-import net.iqaddons.mod.hud.HudManager;
-import net.iqaddons.mod.manager.lifecycle.KuudraLifecycleManager;
-import net.iqaddons.mod.utils.tracking.KuudraTracker;
-import net.iqaddons.mod.utils.tracking.SkyBlockTracker;
+import net.iqaddons.mod.events.dispatcher.KuudraEventsDispatcher;
+import net.iqaddons.mod.lifecycle.LifecycleComponent;
+import net.iqaddons.mod.lifecycle.modules.FeatureModule;
+import net.iqaddons.mod.lifecycle.modules.KuudraModule;
+import net.iqaddons.mod.lifecycle.modules.WidgetModule;
 import net.minecraft.client.MinecraftClient;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -32,15 +29,15 @@ public class IQModClient implements ClientModInitializer {
 
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
-    private Configurator configurator;
-    private SkyBlockTracker skyBlockTracker;
-    private KuudraTracker kuudraTracker;
-
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "IQ-Mod-Scheduler");
         t.setDaemon(true);
         return t;
     });
+
+    private Configurator configurator;
+
+    private final List<LifecycleComponent> components = new ArrayList<>();
 
     @Override
     public void onInitializeClient() {
@@ -49,54 +46,22 @@ public class IQModClient implements ClientModInitializer {
         configurator = new Configurator(MOD_ID);
         configurator.register(Configuration.class);
 
-        initializeTrackers();
-        initializeFeatures();
-        initializeHudWidgets();
+        initializeModules(
+                new KuudraModule(), new KuudraEventsDispatcher(),
+                new FeatureModule(scheduler), new WidgetModule()
+        );
 
         IQKeyBindings.register();
         registerCommands();
 
-        KuudraLifecycleManager.get().start();
-
         log.info("IQ Mod has been initialized!");
     }
 
-    private void initializeTrackers() {
-        skyBlockTracker = new SkyBlockTracker();
-        skyBlockTracker.start();
-
-        kuudraTracker = new KuudraTracker(skyBlockTracker);
-        kuudraTracker.start();
-    }
-
-    private void initializeFeatures() {
-        FeatureManager features = FeatureManager.get();
-        features.register(
-                new PartyJoinSoundFeature(), new WaypointFeature()
-        );
-
-        features.register(
-                new PearlWaypointFeature(), new SupplyWaypointsFeature(), new PileWaypointsFeature(),
-                new NoPreAlertFeature(), new SecondSupplyAlertFeature(scheduler), new CustomSupplyMessageFeature(),
-                new ElleHighlightFeature(), new FreshAlertFeature(), new KuudraDirectionAlertFeature(),
-                new KuudraHitboxFeature(), new RendDamageAlertFeature(), new AlreadyPickingAlertFeature(),
-                new BuildWaypointsFeature(), new StunWaypointsFeature(), new ManaDrainAlertFeature(),
-                new BlockUselessPerksFeature(), new HideMobNametagsFeature(), new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature()
-        );
-
-        features.start();
-    }
-
-    private void initializeHudWidgets() {
-        HudManager hudManager = HudManager.get();
-        hudManager.initialize();
-
-        hudManager.register(
-                new SupplyTimerWidget(), new BuildProgressWidget(),
-                new CustomSplitsWidget(), new FreshCountdownWidget(),
-                new KuudraHealthWidget(), new FreshersTimerWidget()
-        );
+    private void initializeModules(LifecycleComponent @NotNull ... components) {
+        for (LifecycleComponent component : components) {
+            this.components.add(component);
+            component.start();
+        }
     }
 
     private void registerCommands() {

@@ -5,7 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.MessageUtil;
@@ -18,11 +18,11 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
+import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
+
 @Slf4j
 public class SecondSupplyAlertFeature extends KuudraFeature {
-
-    private static final String ELLE_HEAD_OVER_MESSAGE = "[NPC] Elle: Head over to the main platform";
-    private static final String ELLE_NOT_AGAIN_MESSAGE = "[NPC] Elle: Not again!";
 
     private static final Vec3d TRIANGLE_ZONE = new Vec3d(-67.5, 77, -122.5);
     private static final Vec3d X_ZONE = new Vec3d(-134.5, 77, -138.5);

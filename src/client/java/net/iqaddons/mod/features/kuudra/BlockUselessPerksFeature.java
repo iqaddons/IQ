@@ -14,12 +14,9 @@ import java.util.regex.Pattern;
 public class BlockUselessPerksFeature extends KuudraFeature {
 
     private static final Set<String> BLOCKED_PERKS = Set.of(
-            "Steady Hands",
-            "Mining Frenzy",
-            "Bomberman",
-            "Auto Revive",
-            "Elle's Lava Rod",
-            "Elle's Pickaxe"
+            "Steady Hands", "Mining Frenzy",
+            "Bomberman", "Auto Revive",
+            "Elle's Lava Rod", "Elle's Pickaxe"
     );
 
     private static final Pattern BLOCKED_PATTERN = Pattern.compile(

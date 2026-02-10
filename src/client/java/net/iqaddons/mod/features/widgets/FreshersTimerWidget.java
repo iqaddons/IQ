@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.manager.state.KuudraStateManager;
+import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +19,8 @@ import java.util.List;
 public class FreshersTimerWidget extends HudWidget {
 
     private final List<PlayerFreshedEntry> freshEntries = Collections.synchronizedList(new ArrayList<>());
+
+    private final KuudraStateManager kuudraManager = KuudraStateManager.get();
 
     public FreshersTimerWidget() {
         super("freshers_timer",
@@ -52,7 +54,16 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
-        freshEntries.add(new PlayerFreshedEntry(event.playerName(), (System.currentTimeMillis() - event.freshAt())));
+        if (event.selfFresh()) return;
+        var context = kuudraManager.context();
+        if (context.phase() != KuudraPhase.BUILD) {
+            return;
+        }
+
+        freshEntries.add(new PlayerFreshedEntry(
+                event.playerName(),
+                context.phaseDuration().toMillis())
+        );
 
         updateDisplay();
     }

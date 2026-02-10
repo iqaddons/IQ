@@ -2,13 +2,12 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.manager.state.KuudraStateManager;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.KuudraStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

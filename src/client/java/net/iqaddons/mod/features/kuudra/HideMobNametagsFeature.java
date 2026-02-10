@@ -10,9 +10,6 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 @Slf4j
 public class HideMobNametagsFeature extends KuudraFeature {
 
-    @Getter
-    private static HideMobNametagsFeature instance;
-
     public HideMobNametagsFeature() {
         super(
                 "hideMobNametags",
@@ -20,7 +17,6 @@ public class HideMobNametagsFeature extends KuudraFeature {
                 () -> Configuration.hideMobNametags,
                 KuudraPhase.RUN_PHASES
         );
-        instance = this;
     }
 
     @Override
@@ -29,9 +25,7 @@ public class HideMobNametagsFeature extends KuudraFeature {
     }
 
     private void onArmorStandRender(ArmorStandRenderEvent event) {
-        if (instance == null || !instance.isActive()) {
-            return;
-        }
+        if (!isActive()) return;
 
         var state = event.getRenderState();
         if (state == null || state.displayName == null) {

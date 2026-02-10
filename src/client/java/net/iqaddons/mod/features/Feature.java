@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.SubscriptionOwner;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,7 @@ import java.util.function.Consumer;
 @Slf4j
 @Getter
 @RequiredArgsConstructor
-public abstract class Feature {
+public abstract class Feature extends SubscriptionOwner {
 
     protected static final MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -26,7 +27,6 @@ public abstract class Feature {
     private final BooleanSupplier enabledSupplier;
 
     private final AtomicBoolean active = new AtomicBoolean(false);
-    private final List<EventBus.Subscription<?>> subscriptions = new ArrayList<>();
 
     public final boolean isEnabled() {
         return enabledSupplier.getAsBoolean();
@@ -48,7 +48,7 @@ public abstract class Feature {
         } catch (Exception e) {
             log.error("Error activating feature {}", name, e);
             active.set(false);
-            cleanupSubscriptions();
+            clearSubscriptions();
             return false;
         }
 
@@ -62,7 +62,7 @@ public abstract class Feature {
         }
 
         log.debug("Deactivating feature: {}", name);
-        cleanupSubscriptions();
+        clearSubscriptions();
 
         try {
             onDeactivate();
@@ -71,30 +71,6 @@ public abstract class Feature {
         }
 
         return true;
-    }
-
-    protected <T extends Event> void subscribe(
-            @NotNull Class<T> eventClass,
-            @NotNull Consumer<T> handler
-    ) {
-        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler);
-        subscriptions.add(subscription);
-    }
-
-    protected void subscribe(@NotNull EventBus.Subscription<?> subscription) {
-        subscriptions.add(subscription);
-    }
-
-    private void cleanupSubscriptions() {
-        for (EventBus.Subscription<?> subscription : subscriptions) {
-            try {
-                subscription.unsubscribe();
-            } catch (Exception e) {
-                log.warn("Error unsubscribing", e);
-            }
-        }
-
-        subscriptions.clear();
     }
 
     protected void onActivate() {}

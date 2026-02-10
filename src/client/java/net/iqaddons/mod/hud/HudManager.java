@@ -26,8 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Setter
 public final class HudManager {
 
-    private static final HudManager INSTANCE = new HudManager();
     private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static HudManager instance;
 
     private final HudConfigManager configManager;
 
@@ -37,8 +37,10 @@ public final class HudManager {
     private boolean editorOpen = false;
     private boolean initialized = false;
 
-    private HudManager() {
+    public HudManager() {
         this.configManager = new HudConfigManager();
+
+        instance = this;
     }
 
     public void initialize() {
@@ -48,14 +50,13 @@ public final class HudManager {
         }
 
         configManager.load();
-
         EventBus.subscribe(HudRenderEvent.class, this::onHudRender);
 
         initialized = true;
         log.info("HudManager initialized");
     }
 
-    public void shutdown() {
+    public void stop() {
         widgets.forEach(HudWidget::deactivate);
         configManager.shutdown();
         log.info("HudManager shutdown");
@@ -176,6 +177,10 @@ public final class HudManager {
     }
 
     public static HudManager get() {
-        return INSTANCE;
+        if (instance == null) {
+            throw new IllegalStateException("HudManager not initialized yet!");
+        }
+
+        return instance;
     }
 }

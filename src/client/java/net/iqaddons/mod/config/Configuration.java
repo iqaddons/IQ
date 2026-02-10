@@ -124,6 +124,22 @@ public class Configuration {
     @Comment("Fix the fishing hook block when throw the rod (W.I.P)")
     public static boolean fixFishingHook = true;
 
+    @ConfigOption.Separator("Wardrobe")
+
+    @ConfigEntry(
+            id = "wardrobeKeybinds",
+            translation = "Wardrobe Keybinds"
+    )
+    @Comment("Enable keybind-based wardrobe slot selection")
+    public static boolean wardrobeKeybinds = false;
+
+    @ConfigEntry(
+            id = "wardrobeSound",
+            translation = "Wardrobe Sound"
+    )
+    @Comment("Play a sound after selecting a wardrobe slot")
+    public static boolean wardrobeSound = true;
+
     @ConfigEntry(
             id = "waypointConfig",
             translation = "Shared Waypoints"

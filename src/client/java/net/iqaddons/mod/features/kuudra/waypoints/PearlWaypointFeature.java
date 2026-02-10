@@ -6,7 +6,7 @@ import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
-import net.iqaddons.mod.manager.state.SupplyStateManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.pearl.PearlWaypoint;
 import net.iqaddons.mod.model.pearl.WaypointArea;
@@ -96,10 +96,13 @@ public class PearlWaypointFeature extends KuudraFeature {
                 target.getX() + half - 0.5, target.getY() + size, target.getZ() + half - 0.5
         );
 
-        event.drawFilled(targetBox, true, waypoint.color());
+        event.drawFilled(targetBox, true, waypoint.color().withOpacity(80.0f));
         if (!waypoint.label().isEmpty()) {
             Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() - 1.5, target.getZ() - 0.5);
-            event.drawText(textPos, Text.literal(waypoint.label()), 0.25f, true, RenderColor.white);
+            event.drawText(textPos, Text.literal(waypoint.label()),
+                    PhaseOneConfig.pearlWaypointsScale, true,
+                    RenderColor.white
+            );
         }
 
         if (waypoint.hasStandBlock()) {
@@ -108,6 +111,7 @@ public class PearlWaypointFeature extends KuudraFeature {
                     block.getX(), block.getY(), block.getZ(),
                     block.getX() + 1, block.getY() + 1, block.getZ() + 1
             );
+
             event.drawOutline(blockBox, true, waypoint.color());
         }
     }
