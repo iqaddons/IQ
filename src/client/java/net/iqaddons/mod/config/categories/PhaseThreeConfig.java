@@ -1,9 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
 
@@ -26,21 +24,40 @@ public class PhaseThreeConfig {
     @Comment("Display Kuudra's health with health, percent & damage")
     public static boolean kuudraHealthDisplay = true;
 
-    @ConfigEntry(
-            id = "kuudraHitbox",
-            translation = "Kuudra Hitbox"
-    )
-    @Comment("Render Kuudra's hitbox during the stun phase")
-    public static boolean kuudraHitbox = true;
 
     @ConfigEntry(
-            id = "kuudraHitboxColor",
-            translation = "Kuudra Hitbox Color"
+            id = "elleHighlightConfig",
+            translation = "Elle Highlight Config"
     )
-    @ConfigOption.Color(alpha = true)
-    @Comment("Change Kuudra's hitbox color to something more visible")
-    public static int kuudraHitboxColor = new Color(255, 2, 2, 231).getRGB();
+    @Comment("Configure the Elle highlight feature")
+    public static final KuudraHitbox kuudraHitbox = new KuudraHitbox();
 
+    @ConfigObject
+    public static class KuudraHitbox {
+
+        @ConfigEntry(
+                id = "kuudraHitbox",
+                translation = "Kuudra Hitbox"
+        )
+        @Comment("Render Kuudra's hitbox during the stun phase")
+        public static boolean enabled = true;
+
+        @ConfigEntry(
+                id = "kuudraHitboxColor",
+                translation = "Kuudra Hitbox Color"
+        )
+        @ConfigOption.Color(alpha = true)
+        @Comment("Change Kuudra's hitbox color to something more visible")
+        public static int color = new Color(255, 2, 2, 231).getRGB();
+
+        @ConfigEntry(
+                id = "kuudraHitboxStyle",
+                translation = "Kuudra Hitbox Style"
+        )
+        @ConfigOption.Select
+        @Comment("Change the style of the Elle highlight")
+        public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
+    }
     @ConfigEntry(
             id = "stunWaypoints",
             translation = "Stun Waypoints"
@@ -52,6 +69,6 @@ public class PhaseThreeConfig {
             id = "blockUselessPerks",
             translation = "Block Useless Perks"
     )
-    @Comment("Prevent purchasing useless perks (W.I.P)")
+    @Comment("Prevent purchasing useless perks")
     public static boolean blockUselessPerks = true;
 }

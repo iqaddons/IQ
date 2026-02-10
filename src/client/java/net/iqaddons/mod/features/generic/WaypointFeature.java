@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.model.WaypointData;
+import net.iqaddons.mod.utils.TextFormatUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.tracking.WaypointTracker;
 import net.minecraft.client.MinecraftClient;
@@ -42,8 +43,10 @@ public class WaypointFeature extends Feature {
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
-        WaypointTracker.parse(event.getStrippedMessage(), Duration.ofSeconds(Configuration.Waypoints.duration))
-                .ifPresent(waypoints::add);
+        WaypointTracker.parse(
+                TextFormatUtil.toLegacyString(event.getText()),
+                Duration.ofSeconds(Configuration.Waypoints.duration)
+        ).ifPresent(waypoints::add);
     }
 
     private void onWorldRender(WorldRenderEvent event) {

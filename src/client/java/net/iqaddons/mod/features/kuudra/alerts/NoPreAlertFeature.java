@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class NoPreAlertFeature extends KuudraFeature {
 
-    private static final int CHECK_DELAY_TICKS = 50;
+    private static final int CHECK_DELAY_TICKS = 200;
 
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
             "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
@@ -78,7 +78,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (event.currentPhase() == KuudraPhase.SUPPLIES && checkDelayTicks == -1) {
             checkDelayTicks = CHECK_DELAY_TICKS;
             hasChecked = false;
-            log.debug("Started countdown for pre spot check ({} ticks)", CHECK_DELAY_TICKS);
+            log.info("Started countdown for pre spot check ({} ticks)", CHECK_DELAY_TICKS);
         }
 
         if (event.previousPhase() == KuudraPhase.SUPPLIES && event.currentPhase() != KuudraPhase.SUPPLIES) {
@@ -94,7 +94,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (checkDelayTicks == -1) {
             checkDelayTicks = CHECK_DELAY_TICKS;
             hasChecked = false;
-            log.debug("Late initialization of countdown ({} ticks)", CHECK_DELAY_TICKS);
+            log.info("Late initialization of countdown ({} ticks)", CHECK_DELAY_TICKS);
         }
 
         if (checkDelayTicks > 0) {

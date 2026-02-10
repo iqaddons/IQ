@@ -24,16 +24,12 @@ import java.util.regex.Pattern;
 public class BuildProgressWidget extends HudWidget {
 
     private static final Pattern PROGRESS_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
-    private static final String FRESH_MESSAGE = "Your Fresh Tools Perk bonus doubles your building speed";
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
 
     private int currentProgress = 0;
     private long phaseStartTime = 0;
     private int freshCount = 0;
-
-    private EventBus.Subscription<PlayerFreshEvent> playerFreshSubscription;
-    private EventBus.Subscription<ClientTickEvent> tickSubscription;
 
     private final HudLine titleLine;
     private final HudLine progressLine;
@@ -146,26 +142,5 @@ public class BuildProgressWidget extends HudWidget {
         long remainingMs = (long) (remaining / progressPerMs);
 
         return TimeUtils.formatTime(remainingMs);
-    }
-
-    @Override
-    public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-
-        if (shouldRender() && isActive() && currentProgress > 0) {
-            float absX = getAbsoluteX();
-            float absY = getAbsoluteY();
-            int height = getScaledHeight();
-
-            int barY = (int) (absY + height + 2);
-            int barWidth = Math.max(getScaledWidth(), 100);
-
-            HudRenderer.drawProgressBarAuto(
-                    context,
-                    (int) absX, barY,
-                    barWidth, 6,
-                    currentProgress / 100.0f
-            );
-        }
     }
 }

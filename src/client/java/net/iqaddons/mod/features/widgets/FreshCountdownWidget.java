@@ -25,9 +25,6 @@ public class FreshCountdownWidget extends HudWidget {
     private long freshStartTime = 0;
     private boolean freshActive = false;
 
-    private EventBus.Subscription<PlayerFreshEvent> playerFreshSubscription;
-    private EventBus.Subscription<ClientTickEvent> tickSubscription;
-
     private final HudLine countdownLine;
 
     public FreshCountdownWidget() {
@@ -39,14 +36,12 @@ public class FreshCountdownWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        countdownLine = HudLine.of("§a10.0s");
+        countdownLine = HudLine.of("§a8.5s");
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshCountdown);
         setVisibilityCondition(() -> freshActive && stateManager.phase() == KuudraPhase.BUILD);
 
-        setExampleLines(List.of(
-                HudLine.of("§a8.5s")
-        ));
+        setExampleLines(countdownLine);
     }
 
     @Override

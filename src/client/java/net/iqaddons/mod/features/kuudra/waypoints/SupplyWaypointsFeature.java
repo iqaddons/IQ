@@ -10,6 +10,7 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.entity.mob.GiantEntity;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.NotNull;
@@ -71,7 +72,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
                     supply.position().z + 1
             );
 
-            event.drawFilledWithBeam(crateBox, BEACON_HEIGHT, true, color);
+            event.drawStyledWithBeam(crateBox, BEACON_HEIGHT, true, color, WorldRenderUtils.RenderStyle.BOTH);
         }
     }
 }

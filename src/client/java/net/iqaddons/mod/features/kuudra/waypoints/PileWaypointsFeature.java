@@ -11,7 +11,10 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,7 +81,13 @@ public class PileWaypointsFeature extends KuudraFeature {
         int missingPre = supplyState.getMissingPre();
         for (PileLocation pile : piles) {
             RenderColor color = pile.isNoPrePile(missingPre) ? NO_PRE_COLOR : NORMAL_COLOR;
-            event.drawBeam(pile.position(), BEACON_HEIGHT, false, color);
+
+            event.drawStyledWithBeam(Box.from(pile.position()), BEACON_HEIGHT,
+                    false, color, WorldRenderUtils.RenderStyle.BOTH);
+            event.drawText(pile.position().add(0, 2.5, 0),
+                    Text.literal(pile.name()), 0.1f,
+                    false, color.withOpacity(100)
+            );
         }
     }
 }

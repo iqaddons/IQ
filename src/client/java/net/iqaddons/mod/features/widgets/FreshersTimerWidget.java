@@ -54,6 +54,7 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
+        if (event.selfFresh()) return;
         var context = kuudraManager.context();
         if (context.phase() != KuudraPhase.BUILD) {
             return;

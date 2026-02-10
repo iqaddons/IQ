@@ -173,6 +173,11 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         return Collections.unmodifiableList(lines);
     }
 
+    protected void setExampleLines(HudLine @NotNull ... examples) {
+        exampleLines.clear();
+        Collections.addAll(exampleLines, examples);
+    }
+
     protected void setExampleLines(@NotNull List<HudLine> examples) {
         exampleLines.clear();
         exampleLines.addAll(examples);
