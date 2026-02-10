@@ -1,0 +1,11 @@
+{
+  "pb_new_record": {
+    "subtitle": "iq.sound.pb_new_record",
+    "sounds": [
+      {
+        "name": "iq:pb_new_record",
+        "stream": false
+      }
+    ]
+  }
+}

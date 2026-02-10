@@ -97,6 +97,13 @@ public class Configuration {
     public static boolean manaDrainNotify = true;
 
     @ConfigEntry(
+            id = "personalBestTracker",
+            translation = "Personal Best Tracker"
+    )
+    @Comment("Track your best Kuudra run and notify when you beat your PB")
+    public static boolean personalBestTracker = true;
+
+    @ConfigEntry(
             id = "kuudraPhaseAlert",
             translation = "Phase Alert"
     )
