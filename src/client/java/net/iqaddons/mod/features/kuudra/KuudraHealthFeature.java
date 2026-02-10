@@ -48,9 +48,8 @@ public class KuudraHealthFeature extends KuudraFeature {
 
     private @NotNull String formatHealth(float currentHealth) {
         if (currentPhase() == KuudraPhase.BOSS) {
-            float effectiveHealth = currentHealth * 4;
-            float millions = (effectiveHealth * 2.4f) / 1_000_000f;
-            return String.format("%.1fM/2.4M", millions);
+            float millions = currentHealth / 100f;
+            return String.format(Locale.ROOT, "%.1fM/240M", millions);
         }
         
         return String.format(Locale.ROOT, "%,.0f/100.000", currentHealth);

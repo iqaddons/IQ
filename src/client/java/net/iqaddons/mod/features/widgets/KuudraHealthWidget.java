@@ -12,6 +12,7 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public class KuudraHealthWidget extends HudWidget {
@@ -73,7 +74,7 @@ public class KuudraHealthWidget extends HudWidget {
 
     private void updateDisplay(@NotNull KuudraBossInfo bossInfo) {
         float currentHealth = bossInfo.currentHealth();
-        healthLine.text(String.format("§c❤ %.0f §8(§c%.1f%%§8)",
+        healthLine.text(String.format(Locale.ROOT, "§c❤ %,.0f §8(§c%.1f%%§8)",
                 currentHealth, bossInfo.getHealthPercentage())
         );
 
