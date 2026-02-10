@@ -33,7 +33,8 @@ public class FeatureModule implements LifecycleComponent {
                 new KuudraHitboxFeature(), new RendDamageAlertFeature(), new AlreadyPickingAlertFeature(),
                 new BuildWaypointsFeature(), new StunWaypointsFeature(), new ManaDrainAlertFeature(),
                 new BlockUselessPerksFeature(), new HideMobNametagsFeature(), new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature()
+                new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature(),
+                new HideDamageTitleFeature()
         );
 
         features.start();
