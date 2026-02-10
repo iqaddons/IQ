@@ -99,7 +99,10 @@ public class PearlWaypointFeature extends KuudraFeature {
         event.drawFilled(targetBox, true, waypoint.color().withOpacity(80.0f));
         if (!waypoint.label().isEmpty()) {
             Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() - 1.5, target.getZ() - 0.5);
-            event.drawText(textPos, Text.literal(waypoint.label()), 0.25f, true, RenderColor.white);
+            event.drawText(textPos, Text.literal(waypoint.label()),
+                    PhaseOneConfig.pearlWaypointsScale, true,
+                    RenderColor.white
+            );
         }
 
         if (waypoint.hasStandBlock()) {
