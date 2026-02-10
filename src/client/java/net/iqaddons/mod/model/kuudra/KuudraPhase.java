@@ -36,7 +36,7 @@ public enum KuudraPhase {
     }
 
     public boolean isInRun() {
-        return order >= 0 && order < 6;
+        return order >= 0 && order <= BOSS.order;
     }
 
     public boolean isCombatPhase() {
