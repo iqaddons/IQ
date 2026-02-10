@@ -6,7 +6,6 @@
   "client": [
     "ArmorStandRendererMixin",
     "ChatHudMixin",
-    "ClientPlayNetworkHandlerMixin",
     "ClientTickMixin",
     "EntityGlowMixin",
     "EntityMixin",

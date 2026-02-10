@@ -2,10 +2,13 @@ package net.iqaddons.mod.mixin;
 
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
+import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,6 +23,10 @@ public abstract class InGameHudMixin {
     @Final
     private MinecraftClient client;
 
+    @Shadow
+    @Nullable
+    private Text title;
+
     @Inject(method = "render", at = @At("TAIL"))
     private void iq$onRenderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (client.player == null) return;
@@ -33,5 +40,19 @@ public abstract class InGameHudMixin {
                 width,
                 height
         ));
+    }
+
+
+
+    @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
+    private void iq$onRenderTitleAndSubtitle(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        if (title == null || title.getString().isEmpty()) {
+            return;
+        }
+
+        TitleReceivedEvent event = EventBus.post(new TitleReceivedEvent(title));
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
     }
 }
