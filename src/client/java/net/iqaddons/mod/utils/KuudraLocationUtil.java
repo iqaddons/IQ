@@ -72,9 +72,9 @@ public class KuudraLocationUtil {
         return size == KUUDRA_SIZE && health > 0;
     }
 
-    public static @NotNull SpawnDirection getSpawnDirection(@NotNull MagmaCubeEntity kuudra) {
-        double x = kuudra.getX();
-        double z = kuudra.getZ();
+    public static @NotNull SpawnDirection getDirection(@NotNull Entity entity) {
+        double x = entity.getX();
+        double z = entity.getZ();
 
         if (x < -128) return SpawnDirection.RIGHT;
         if (z > -84) return SpawnDirection.FRONT;

@@ -8,9 +8,11 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
+import net.iqaddons.mod.model.kuudra.KuudraBossInfo;
 import net.iqaddons.mod.model.kuudra.validator.KuudraStateValidator;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,9 +46,9 @@ public final class KuudraStateManager extends SubscriptionOwner {
         if (!event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) return;
 
         KuudraContext current = contextRef.get();
-        if (current.phase() == KuudraPhase.NONE) {
-            return;
-        }
+        performBossScan(current);
+
+        if (current.phase() == KuudraPhase.NONE) return;
 
         KuudraStateValidator.ValidationResult result = validator.validate(current);
         if (result.isValid()) {
@@ -151,7 +153,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
             return false;
         }
 
-        KuudraContext newContext = KuudraContext.entering(areaInfo.areaName());
+        KuudraContext newContext = KuudraContext.entering();
         KuudraContext old = contextRef.getAndSet(newContext);
 
         phaseDurations.clear();
@@ -223,6 +225,24 @@ public final class KuudraStateManager extends SubscriptionOwner {
         ));
 
         return true;
+    }
+
+    private void performBossScan(@NotNull KuudraContext current) {
+        if (current.phase() == KuudraPhase.NONE) {
+            if (current.bossInfo().isAlive()) {
+                contextRef.compareAndSet(current, current.withBossInfo(KuudraBossInfo.empty()));
+            }
+
+            return;
+        }
+
+        var nextBossInfo = KuudraLocationUtil.findKuudra()
+                .map(KuudraBossInfo::tracked)
+                .orElseGet(KuudraBossInfo::empty);
+
+        if (!current.bossInfo().equals(nextBossInfo)) {
+            contextRef.compareAndSet(current, current.withBossInfo(nextBossInfo));
+        }
     }
 
     public static KuudraStateManager get() {
