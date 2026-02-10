@@ -28,8 +28,6 @@ import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
 @Slf4j
 public class NoPreAlertFeature extends KuudraFeature {
 
-    // FIXED - No pre alert feature
-
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
             "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
             Pattern.CASE_INSENSITIVE

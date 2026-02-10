@@ -23,7 +23,7 @@ public enum KuudraPhase {
     BOSS("Boss", 6, msg -> false), // The boss phase is detected by player Y position
     COMPLETED("Completed", 7, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
 
-    public static final KuudraPhase[] RUN_PHASES = { SUPPLIES, BUILD, EATEN, STUN, DPS, BOSS };
+    public static final KuudraPhase[] RUN_PHASES = { SUPPLIES, BUILD, EATEN, STUN, DPS, SKIP, BOSS };
     public static final Set<KuudraPhase> COMBAT_PHASES = EnumSet.of(STUN, DPS, BOSS);
     public static final Set<KuudraPhase> PRE_COMBAT_PHASES = EnumSet.of(SUPPLIES, BUILD, EATEN);
 
