@@ -17,7 +17,8 @@ public class WidgetModule implements LifecycleComponent {
         hudManager.register(
                 new SupplyTimerWidget(), new BuildProgressWidget(),
                 new CustomSplitsWidget(), new FreshCountdownWidget(),
-                new KuudraHealthWidget(), new FreshersTimerWidget()
+                new KuudraHealthWidget(), new FreshersTimerWidget(),
+                new SupplyProgressWidget()
         );
     }
 

@@ -35,6 +35,13 @@ public class PhaseOneConfig {
     public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
 
     @ConfigEntry(
+            id = "supplyProgressDisplay",
+            translation = "Supply Progress Display"
+    )
+    @Comment("Hide supply progress title and render it as a movable widget")
+    public static boolean supplyProgressDisplay = false;
+
+    @ConfigEntry(
             id = "pearlWaypoints",
             translation = "Pearl Waypoints"
     )
