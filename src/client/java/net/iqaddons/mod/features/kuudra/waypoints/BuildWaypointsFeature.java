@@ -8,8 +8,10 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -116,7 +118,9 @@ public class BuildWaypointsFeature extends KuudraFeature {
             var progressColor = getColorForProgress(pile.progress);
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawBeam(beaconPos, 25, true, progressColor.withOpacity(0.6f));
+            event.drawStyledWithBeam(Box.from(beaconPos), 25, true,
+                    progressColor.withOpacity(0.6f), WorldRenderUtils.RenderStyle.BOTH
+            );
 
             Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);
             event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, progressColor);
