@@ -1,6 +1,7 @@
 package net.iqaddons.mod.utils.tracking;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.WaypointData;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @UtilityClass
 public class WaypointTracker {
 
@@ -39,12 +41,12 @@ public class WaypointTracker {
 
             Text playerName = parsePlayerName(playerRaw);
 
-            double x = Double.parseDouble(matcher.group(2));
-            double y = Double.parseDouble(matcher.group(3));
-            double z = Double.parseDouble(matcher.group(4));
+            double x = Double.parseDouble(matcher.group(1));
+            double y = Double.parseDouble(matcher.group(2));
+            double z = Double.parseDouble(matcher.group(3));
             Vec3d position = new Vec3d(x, y, z);
 
-            String suffix = matcher.group(5).trim();
+            String suffix = matcher.group(4).trim();
             boolean isUrgent = suffix.contains("|");
 
             double multiplier = isUrgent ? 0.33 : 1.0;
@@ -53,6 +55,7 @@ public class WaypointTracker {
 
             return Optional.of(new WaypointData(playerName, position, expiresAt, isUrgent));
         } catch (NumberFormatException e) {
+            log.error("Failed to parse coordinates from message: {}", rawMessage, e);
             return Optional.empty();
         }
     }
