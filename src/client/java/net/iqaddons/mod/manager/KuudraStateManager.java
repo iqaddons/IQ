@@ -43,6 +43,14 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
+        if (!context().isInRun()) return;
+
+        var player = event.client().player;
+        if (player == null) return;
+        if (player.getEntityPos().getY() < 10 && context().phase() != KuudraPhase.BOSS) {
+            setPhase(KuudraPhase.BOSS);
+        }
+
         KuudraContext current = contextRef.get();
         if (current.phase().isCombatPhase() || current.phase() == KuudraPhase.BOSS) {
             performBossScan(current);
