@@ -26,6 +26,7 @@ public class CustomSplitsWidget extends HudWidget {
             KuudraPhase.EATEN, new double[]{4.0, 5.3, 5.7, 6.0, 7.0},
             KuudraPhase.STUN, new double[]{0.0, 0.1, 0.3, 0.8, 1.0},
             KuudraPhase.DPS, new double[]{3.0, 3.6, 3.8, 4.2, 4.5},
+            KuudraPhase.SKIP, new double[]{3.0, 4.2, 4.5, 4.8, 5.3},
             KuudraPhase.BOSS, new double[]{3.0, 4.2, 4.6, 5.0, 5.4}
     );
 
@@ -205,7 +206,7 @@ public class CustomSplitsWidget extends HudWidget {
 
     private @NotNull String getSplitColor(double time, @NotNull KuudraPhase phase) {
         double[] thresholds = PHASE_THRESHOLDS.get(phase);
-        if (thresholds == null) return "§d";
+        if (thresholds == null) return "§f";
 
         return getSplitColor(time, thresholds);
     }
