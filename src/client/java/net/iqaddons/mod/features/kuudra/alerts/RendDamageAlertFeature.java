@@ -73,6 +73,8 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
             log.debug("Rend pull detected: raw={} scaled={}", diff, scaledDamage);
         }
+
+        lastKuudraHealth = currentHealth;
     }
 
     private void resetState() {

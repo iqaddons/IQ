@@ -112,7 +112,6 @@ public abstract class KuudraFeature extends Feature {
         }
 
         clearSubscriptions();
-
         try {
             onKuudraDeactivate();
         } catch (Exception e) {
