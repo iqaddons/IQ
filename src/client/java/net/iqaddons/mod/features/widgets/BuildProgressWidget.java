@@ -78,6 +78,8 @@ public class BuildProgressWidget extends HudWidget {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
+        if (event.selfFresh()) return;
+
         freshCount++;
         updateDisplay();
     }
