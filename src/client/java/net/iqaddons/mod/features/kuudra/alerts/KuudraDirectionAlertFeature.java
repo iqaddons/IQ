@@ -14,8 +14,6 @@ import static net.iqaddons.mod.utils.KuudraLocationUtil.SpawnDirection.UNKNOWN;
 @Slf4j
 public class KuudraDirectionAlertFeature extends KuudraFeature {
 
-    private static final int CHECK_INTERVAL_TICKS = 2;
-
     private volatile KuudraLocationUtil.SpawnDirection currentDirection = UNKNOWN;
 
     public KuudraDirectionAlertFeature() {
@@ -40,7 +38,6 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
-        if (!event.isNthTick(CHECK_INTERVAL_TICKS)) return;
 
         var bossInfo = currentContext().bossInfo();
         if (!bossInfo.isAlive()) return;
