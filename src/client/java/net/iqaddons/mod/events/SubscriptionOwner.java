@@ -25,6 +25,10 @@ public abstract class SubscriptionOwner {
         subscriptions.add(subscription);
     }
 
+    protected final int subscriptionCount() {
+        return subscriptions.size();
+    }
+
     protected final void clearSubscriptions() {
         for (EventBus.Subscription<?> subscription : subscriptions) {
             try {
@@ -35,5 +39,22 @@ public abstract class SubscriptionOwner {
         }
 
         subscriptions.clear();
+    }
+
+    protected final void clearSubscriptionsFrom(int startIndex) {
+        if (startIndex <= 0) {
+            clearSubscriptions();
+            return;
+        }
+
+        if (startIndex >= subscriptions.size()) return;
+        for (int i = subscriptions.size() - 1; i >= startIndex; i--) {
+            EventBus.Subscription<?> subscription = subscriptions.remove(i);
+            try {
+                subscription.unsubscribe();
+            } catch (Exception e) {
+                log.warn("Error unsubscribing", e);
+            }
+        }
     }
 }

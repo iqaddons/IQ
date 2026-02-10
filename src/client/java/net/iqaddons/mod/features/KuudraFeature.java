@@ -24,6 +24,7 @@ public abstract class KuudraFeature extends Feature {
     private final AtomicBoolean kuudraActive = new AtomicBoolean(false);
     private final AtomicBoolean activating = new AtomicBoolean(false);
     private final AtomicInteger activationCount = new AtomicInteger(0);
+    private final AtomicInteger subscriptionsStartIndex = new AtomicInteger(-1);
 
     protected KuudraFeature(
             @NotNull String id,
@@ -90,6 +91,7 @@ public abstract class KuudraFeature extends Feature {
             }
 
             kuudraActive.set(true);
+            subscriptionsStartIndex.set(subscriptionCount());
             int cycle = activationCount.incrementAndGet();
 
             log.info("Kuudra activating {}: {} (cycle {})", getName(), reason, cycle);
@@ -98,7 +100,7 @@ public abstract class KuudraFeature extends Feature {
             } catch (Exception e) {
                 log.error("Error in onKuudraActivate for {}", getName(), e);
                 kuudraActive.set(false);
-                clearSubscriptions();
+                clearKuudraSubscriptions();
             }
         } finally {
             activating.set(false);
@@ -111,7 +113,7 @@ public abstract class KuudraFeature extends Feature {
             return;
         }
 
-        clearSubscriptions();
+        clearKuudraSubscriptions();
         try {
             onKuudraDeactivate();
         } catch (Exception e) {
@@ -144,4 +146,11 @@ public abstract class KuudraFeature extends Feature {
     protected void onKuudraDeactivate() {}
 
     protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {}
+
+    private void clearKuudraSubscriptions() {
+        int startIndex = subscriptionsStartIndex.getAndSet(-1);
+        if (startIndex >= 0) {
+            clearSubscriptionsFrom(startIndex);
+        }
+    }
 }
