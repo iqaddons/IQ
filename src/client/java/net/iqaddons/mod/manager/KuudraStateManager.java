@@ -215,6 +215,11 @@ public final class KuudraStateManager extends SubscriptionOwner {
             @NotNull KuudraPhase newPhase
     ) {
         KuudraPhase previousPhase = current.phase();
+        if (previousPhase == KuudraPhase.DPS && newPhase == KuudraPhase.STUN) {
+            log.warn("Invalid phase transition: {} -> {}", previousPhase, newPhase);
+            return false;
+        }
+
         Duration phaseDuration = current.phaseDuration();
         if (previousPhase.isInRun()) {
             phaseDurations.put(previousPhase, phaseDuration);
