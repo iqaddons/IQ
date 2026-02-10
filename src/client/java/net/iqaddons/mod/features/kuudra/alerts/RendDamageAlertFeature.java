@@ -7,7 +7,6 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -65,10 +64,9 @@ public class RendDamageAlertFeature extends KuudraFeature {
         float diff = Math.max(0f, lastKuudraHealth - currentHealth);
         if (diff > MIN_REND_DAMAGE) {
             float scaledDamage = diff * DAMAGE_MULTIPLIER;
-            MessageUtil.INFO.sendMessage("Someone pulled for %s%s §7damage at §a%s§7."
+            MessageUtil.INFO.sendMessage("§fSomeone pulled for %s%s §fdamage at §a%.2fs§f."
                     .formatted(getDamageColor(diff), formatDamage(scaledDamage),
-                            TimeUtils.formatTime(currentContext().phaseDuration())
-                    )
+                            currentContext().phaseDuration().toMillis() / 1000.0)
             );
 
             log.debug("Rend pull detected: raw={} scaled={}", diff, scaledDamage);
