@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.SupplyDropEvent;
 import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.utils.ScoreboardUtils;
@@ -92,6 +93,13 @@ public class KuudraEventsDispatcher extends EventDispatcher {
                     StringUtils.extractFormattedPlayerName(formattedMessage),
                     Integer.parseInt(supplyCount), timeSeconds
             ));
+            return;
+        }
+
+        Matcher supplyDroppedMatcher = SUPPLY_DROPPED_PATTERN.matcher(message);
+        if (supplyDroppedMatcher.find()) {
+            String droppedBy = StringUtils.extractFormattedPlayerName(TextFormatUtil.toLegacyString(event.getText()));
+            EventBus.post(new SupplyDropEvent(droppedBy, Integer.parseInt(supplyDroppedMatcher.group(2))));
         }
     }
 

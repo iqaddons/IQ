@@ -92,4 +92,11 @@ public class PhaseOneConfig {
     @Comment("Send a custom message when recover a supply")
     public static boolean supplyRecoverMessage = true;
 
+    @ConfigEntry(
+            id = "supplyDroppedTitle",
+            translation = "Supply Dropped Title"
+    )
+    @Comment("Show a title when a supply is dropped")
+    public static boolean supplyDroppedTitle = true;
+
 }
