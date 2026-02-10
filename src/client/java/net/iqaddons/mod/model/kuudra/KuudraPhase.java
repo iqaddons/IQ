@@ -19,8 +19,9 @@ public enum KuudraPhase {
     EATEN("Eaten", 2, msg -> msg.contains("[NPC] Elle: Phew! The Ballista is finally ready! It should be strong enough to tank Kuudra's blows now!")),
     STUN("Stun", 3, msg -> (msg.contains("has been eaten by Kuudra!") && !msg.contains("Elle")) || msg.contains("You purchased Human Cannonball!")),
     DPS("DPS", 4, msg -> msg.contains("destroyed one of Kuudra's pods!")),
-    BOSS("Boss", 5, msg -> false), // The boss phase is detected by player Y position
-    COMPLETED("Completed", 6, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
+    SKIP("Skip", 5, msg -> msg.contains("[NPC] Elle: POW! SURELY THAT'S IT! I don't think he has any more in him!")),
+    BOSS("Boss", 6, msg -> false), // The boss phase is detected by player Y position
+    COMPLETED("Completed", 7, msg -> msg.contains("KUUDRA DOWN!") || msg.contains("DEFEAT"));
 
     public static final KuudraPhase[] RUN_PHASES = { SUPPLIES, BUILD, EATEN, STUN, DPS, BOSS };
     public static final Set<KuudraPhase> COMBAT_PHASES = EnumSet.of(STUN, DPS, BOSS);
@@ -53,7 +54,8 @@ public enum KuudraPhase {
             case BUILD -> EATEN;
             case EATEN -> STUN;
             case STUN -> DPS;
-            case DPS -> BOSS;
+            case DPS -> SKIP;
+            case SKIP -> BOSS;
             case BOSS, COMPLETED -> COMPLETED;
         };
     }
@@ -65,7 +67,8 @@ public enum KuudraPhase {
             case EATEN -> BUILD;
             case STUN -> EATEN;
             case DPS -> STUN;
-            case BOSS -> DPS;
+            case SKIP -> DPS;
+            case BOSS -> SKIP;
             case COMPLETED -> BOSS;
         };
     }

@@ -49,6 +49,7 @@ public class CustomSplitsWidget extends HudWidget {
     private final HudLine eatenLine;
     private final HudLine stunLine;
     private final HudLine dpsLine;
+    private final HudLine skipLine;
     private final HudLine bossLine;
     private final HudLine overallLine;
     private final HudLine paceLine;
@@ -68,6 +69,7 @@ public class CustomSplitsWidget extends HudWidget {
         eatenLine = HudLine.of("§fEaten: §f0.00s");
         stunLine = HudLine.of("§fStun: §f0.00s");
         dpsLine = HudLine.of("§fDPS: §f0.00s");
+        skipLine = HudLine.of("§fSkip: §f0.00s");
         bossLine = HudLine.of("§fBoss: §f0.00s");
         overallLine = HudLine.of("§fOverall: §f0.00s");
         paceLine = HudLine.of("§fPace: §f0.00s");
@@ -82,6 +84,7 @@ public class CustomSplitsWidget extends HudWidget {
                 HudLine.of("§fEaten: §a5.21s"),
                 HudLine.of("§fStun: §f0.53s"),
                 HudLine.of("§fDPS: §63.89s"),
+                HudLine.of("§fSkip: §f0.00s"),
                 HudLine.of("§fBoss: §c5.12s"),
                 HudLine.of("§fOverall: §a51.00s"),
                 HudLine.of("§fPace: §953.50s")
@@ -96,8 +99,8 @@ public class CustomSplitsWidget extends HudWidget {
         clearLines();
         addLines(
                 titleLine, suppliesLine, buildLine,
-                eatenLine, stunLine, dpsLine, bossLine,
-                overallLine, paceLine
+                eatenLine, stunLine, dpsLine, skipLine,
+                bossLine, overallLine, paceLine
         );
 
         subscribe(ClientTickEvent.class, this::onTick);
@@ -161,6 +164,7 @@ public class CustomSplitsWidget extends HudWidget {
         updatePhaseLine(eatenLine, "Eaten:", KuudraPhase.EATEN);
         updatePhaseLine(stunLine, "Stun:", KuudraPhase.STUN);
         updatePhaseLine(dpsLine, "DPS:", KuudraPhase.DPS);
+        updatePhaseLine(skipLine, "Skip:", KuudraPhase.SKIP);
         updatePhaseLine(bossLine, "Boss:", KuudraPhase.BOSS);
 
         double overall = calculateOverall();

@@ -23,7 +23,7 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
                 "kuudraDirectionAlert",
                 "Kuudra Direction Alert",
                 () -> PhaseFourConfig.kuudraDirectionAlert,
-                KuudraPhase.BOSS
+                KuudraPhase.SKIP, KuudraPhase.BOSS
         );
     }
 

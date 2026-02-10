@@ -18,7 +18,7 @@ public record KuudraBossInfo(
 
     public static @NotNull KuudraBossInfo tracked(@NotNull MagmaCubeEntity bossEntity) {
         float clamped = Math.max(0f, bossEntity.getHealth());
-        float damageReceived = Math.max(0f, bossEntity.getMaxHealth() - clamped);
+        float damageReceived = Math.min(0f, bossEntity.getMaxHealth() - clamped);
 
         return new KuudraBossInfo(bossEntity,
                 clamped, bossEntity.getMaxHealth(),
