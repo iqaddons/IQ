@@ -43,11 +43,14 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
-        if (!event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) return;
-
         KuudraContext current = contextRef.get();
-        performBossScan(current);
+        if (current.phase().isCombatPhase() || current.phase() == KuudraPhase.BOSS) {
+            performBossScan(current);
+        } else if (event.isNthTick(2)) {
+            performBossScan(current);
+        }
 
+        if (!event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) return;
         if (current.phase() == KuudraPhase.NONE) return;
 
         KuudraStateValidator.ValidationResult result = validator.validate(current);
@@ -116,7 +119,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
             return handleRunEnd(current, "Phase set to NONE");
         }
 
-        if (current.phase() == KuudraPhase.NONE && newPhase == KuudraPhase.SUPPLIES) {
+        if ((current.phase() == KuudraPhase.NONE || current.phase() == KuudraPhase.COMPLETED)
+                && newPhase == KuudraPhase.SUPPLIES) {
             return handleRunStart();
         }
 
