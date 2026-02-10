@@ -3,6 +3,7 @@ package net.iqaddons.mod.lifecycle.modules;
 import lombok.RequiredArgsConstructor;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.generic.PartyJoinSoundFeature;
+import net.iqaddons.mod.features.generic.WardrobeFeature;
 import net.iqaddons.mod.features.generic.WaypointFeature;
 import net.iqaddons.mod.features.kuudra.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
@@ -22,7 +23,7 @@ public class FeatureModule implements LifecycleComponent {
     public void start() {
         features = new FeatureManager();
         features.register(
-                new PartyJoinSoundFeature(), new WaypointFeature()
+                new PartyJoinSoundFeature(), new WaypointFeature(), new WardrobeFeature()
         );
 
         features.register(
