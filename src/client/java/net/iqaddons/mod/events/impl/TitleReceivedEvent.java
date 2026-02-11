@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.iqaddons.mod.events.Cancellable;
 import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.utils.StringUtils;
 import net.iqaddons.mod.utils.TextFormatUtil;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -27,10 +28,6 @@ public class TitleReceivedEvent implements Event, Cancellable {
         this.subtitle = subtitle;
 
         this.message = TextFormatUtil.toLegacyString(title);
-        this.strippedMessage = stripFormatting(message);
-    }
-
-    private static @NotNull String stripFormatting(String text) {
-        return text == null ? "" : text.replaceAll("§[0-9a-fk-or]", "");
+        this.strippedMessage = StringUtils.stripFormatting(message);
     }
 }

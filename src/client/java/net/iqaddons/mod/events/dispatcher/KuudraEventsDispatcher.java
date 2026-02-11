@@ -5,18 +5,25 @@ import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
-import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
-import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
-import net.iqaddons.mod.events.impl.skyblock.SupplyDropEvent;
-import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.ScreenClickEvent;
+import net.iqaddons.mod.events.impl.skyblock.*;
+import net.iqaddons.mod.features.kuudra.tracker.KuudraProfitTrackerFeature;
 import net.iqaddons.mod.manager.SupplyStateManager;
+import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.utils.ChestProfitUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
 import net.iqaddons.mod.utils.TextFormatUtil;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 
 import static net.iqaddons.mod.IQConstants.*;
@@ -25,15 +32,22 @@ import static net.iqaddons.mod.utils.EntityDetectorUtil.findPlayerByName;
 @Slf4j
 public class KuudraEventsDispatcher extends EventDispatcher {
 
+    private static final int BUY_SLOT = 31;
+    private static final int REROLL_SLOT = 50;
+    private static final int SHARD_REROLL_SLOT = 51;
+
     private final SupplyStateManager supplyStateManager = SupplyStateManager.get();
 
     private volatile boolean onSkyBlock = false;
     private volatile String currentArea = "";
 
+    private final Map<Integer, ChestWindowState> windowStates = new ConcurrentHashMap<>();
+
     @Override
     public void start() {
         subscribe(ClientTickEvent.class, this::onClientTick);
         subscribe(ChatReceivedEvent.class, this::onChat);
+        subscribe(ScreenClickEvent.class, this::onScreenClick);
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
@@ -78,6 +92,46 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         String message = event.getStrippedMessage();
         performSupplyDetect(event, message);
         performFreshDetect(message, TextFormatUtil.toLegacyString(event.getText()));
+    }
+
+    private void onScreenClick(@NotNull ScreenClickEvent event) {
+        if (!(event.getScreen() instanceof GenericContainerScreen screen)) {
+            return;
+        }
+
+        String title = screen.getTitle().getString();
+        ChestType chestType = ChestType.fromString(title);
+        if (chestType == ChestType.UNKNOWN) return;
+
+        Slot slot = event.getSlot();
+        if (slot == null) return;
+
+        ScreenHandler handler = screen.getScreenHandler();
+        int windowId = handler.syncId;
+        ChestWindowState state = windowStates.computeIfAbsent(windowId, key -> new ChestWindowState());
+
+        if (slot.id == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this chest")) {
+            state.rerolled = true;
+            EventBus.post(new KuudraChestRerollEvent(
+                    windowId, KuudraChestRerollEvent.RerollType.ITEMS
+            ));
+            return;
+        }
+
+        if (slot.id == SHARD_REROLL_SLOT && !state.shardRerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this shard")) {
+            state.shardRerolled = true;
+            EventBus.post(new KuudraChestRerollEvent(
+                    windowId, KuudraChestRerollEvent.RerollType.SHARD
+            ));
+            return;
+        }
+
+        if (slot.id != BUY_SLOT || state.bought) return;
+        if (!isBuyAction(slot.getStack())) return;
+
+        EventBus.post(new KuudraChestOpenEvent(
+                windowId, title, handler.slots, chestType
+        ));
     }
 
     private void performSupplyDetect(ChatReceivedEvent event, String message) {
@@ -152,6 +206,15 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         return currentArea.toLowerCase().contains(areaName.toLowerCase());
     }
 
+    private boolean isBuyAction(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        String name = StringUtils.stripFormatting(stack.getName().getString());
+        return name.equalsIgnoreCase("Open Reward Chest") || name.equalsIgnoreCase("Opened Reward Chest");
+    }
+
     private int getBuildingProgress() {
         for (String line : ScoreboardUtils.getLines()) {
             String stripped = ScoreboardUtils.stripFormatting(line);
@@ -169,4 +232,10 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     @Override
     public void stop() {}
+
+    private static final class ChestWindowState {
+        private boolean rerolled;
+        private boolean shardRerolled;
+        private boolean bought;
+    }
 }

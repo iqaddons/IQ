@@ -35,8 +35,10 @@ public final class KuudraProfitTrackerManager {
 
     public synchronized void onRunEnd(long runMillis, boolean failed) {
         long safeRunMillis = Math.max(0L, runMillis);
+
         updateRun(lifetime, safeRunMillis, failed);
         updateRun(session, safeRunMillis, failed);
+
         save();
     }
 
@@ -73,13 +75,9 @@ public final class KuudraProfitTrackerManager {
 
     private void updateRun(@NotNull ProfitData data, long runMillis, boolean failed) {
         data.runs++;
-        if (failed) {
-            data.failedRuns++;
-        }
+        if (failed) data.failedRuns++;
+        if (runMillis > 0) data.totalRunMillis += runMillis;
 
-        if (runMillis > 0) {
-            data.totalRunMillis += runMillis;
-        }
     }
 
     private void updateChest(@NotNull ProfitData data, @NotNull ChestData record) {

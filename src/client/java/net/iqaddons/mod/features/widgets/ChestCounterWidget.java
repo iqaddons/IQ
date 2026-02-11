@@ -3,6 +3,7 @@ package net.iqaddons.mod.features.widgets;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.features.kuudra.tracker.ChestCounterTrackerFeature;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
@@ -25,6 +26,10 @@ public class ChestCounterWidget extends HudWidget {
         );
 
         setEnabledSupplier(() -> KuudraGeneralConfig.chestCounterTracker);
+        setVisibilityCondition(
+                () -> ChestCounterManager.get().getChests() > 0 && ChestCounterTrackerFeature.overlayVisible
+        );
+
         setExampleLines(List.of(HudLine.of("§b§lChests §a20§f/60")));
     }
 

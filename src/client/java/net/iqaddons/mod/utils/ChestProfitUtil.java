@@ -8,6 +8,7 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,14 +18,14 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ChestProfitParser {
+public final class ChestProfitUtil {
 
     private static final Pattern ESSENCE_PATTERN = Pattern.compile("(?i)(\\d+)\\s*crimson essence");
 
     public static @NotNull ChestData parseChest(
             @NotNull List<Slot> slots,
             @NotNull KuudraPriceCacheManager priceCache,
-            @NotNull String title
+            @NotNull ChestType chestType
     ) {
         long grossValue = 0L;
         long keyCost = parseKeyCost(slots, priceCache);
@@ -70,7 +71,7 @@ public final class ChestProfitParser {
         }
 
         return new ChestData(
-                ChestType.fromString(title),
+                chestType,
                 grossValue,
                 keyCost,
                 grossValue - keyCost,
@@ -90,7 +91,7 @@ public final class ChestProfitParser {
 
         List<String> lore = getLoreLines(buyStack);
         for (int i = 0; i < lore.size(); i++) {
-            String line = stripFormatting(lore.get(i));
+            String line = StringUtils.stripFormatting(lore.get(i));
             if (!line.equalsIgnoreCase("Cost")) {
                 continue;
             }
@@ -99,7 +100,7 @@ public final class ChestProfitParser {
                 return 0L;
             }
 
-            String costLine = stripFormatting(lore.get(i + 1));
+            String costLine = StringUtils.stripFormatting(lore.get(i + 1));
             if (costLine.contains("FREE") || costLine.contains("This Chest is Free")) {
                 return 0L;
             }
@@ -117,7 +118,7 @@ public final class ChestProfitParser {
     }
 
     private static int parseEssenceAmount(@NotNull ItemStack stack, int fallbackCount) {
-        Matcher matcher = ESSENCE_PATTERN.matcher(stripFormatting(stack.getName().getString()));
+        Matcher matcher = ESSENCE_PATTERN.matcher(StringUtils.stripFormatting(stack.getName().getString()));
         if (matcher.find()) {
             try {
                 return Integer.parseInt(matcher.group(1));
@@ -130,7 +131,7 @@ public final class ChestProfitParser {
     }
 
     private static @Nullable String mapFromDisplay(@NotNull String displayName) {
-        String stripped = stripFormatting(displayName).toUpperCase(Locale.ROOT);
+        String stripped = StringUtils.stripFormatting(displayName).toUpperCase(Locale.ROOT);
         if (stripped.contains("CRIMSON ESSENCE")) return "ESSENCE_CRIMSON";
         if (stripped.contains("KUUDRA TEETH")) return "KUUDRA_TEETH";
         if (stripped.contains("KISMET FEATHER")) return "KISMET_FEATHER";
@@ -168,8 +169,21 @@ public final class ChestProfitParser {
         return lines;
     }
 
-    public static @NotNull String stripFormatting(@NotNull String text) {
-        return text.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+    public static boolean canUseReroll(ItemStack stack, @NotNull String blockedPhrase) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        String title = Formatting.strip(stack.getName().getString()).toLowerCase();
+        if (!title.contains("reroll")) return false;
+
+        String loreJoined = getLoreLines(stack).stream()
+                .map(StringUtils::stripFormatting)
+                .map(String::toLowerCase)
+                .reduce("", (a, b) -> a + "\n" + b);
+
+        return !loreJoined.contains(blockedPhrase.toLowerCase());
     }
+
 
 }

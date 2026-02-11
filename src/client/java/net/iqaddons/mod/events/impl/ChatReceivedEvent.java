@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.iqaddons.mod.events.Cancellable;
 import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ public class ChatReceivedEvent implements Event, Cancellable {
     public ChatReceivedEvent(@NotNull Text text) {
         this.text = text;
         this.message = text.getString();
-        this.strippedMessage = stripFormatting(message);
+        this.strippedMessage = StringUtils.stripFormatting(message);
     }
 
     public boolean contains(@NotNull String str) {
@@ -33,7 +34,4 @@ public class ChatReceivedEvent implements Event, Cancellable {
         return message.startsWith(prefix);
     }
 
-    private static String stripFormatting(String text) {
-        return text == null ? "" : text.replaceAll("§[0-9a-fk-or]", "");
-    }
 }

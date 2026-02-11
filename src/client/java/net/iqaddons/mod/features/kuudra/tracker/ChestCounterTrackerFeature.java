@@ -15,12 +15,12 @@ import org.jetbrains.annotations.NotNull;
 public class ChestCounterTrackerFeature extends Feature {
 
     private static final long OVERLAY_TIMEOUT_MS = 3 * 60 * 1000L;
+    public static boolean overlayVisible;
 
     private final ChestCounterManager manager = ChestCounterManager.get();
 
     private int paidChestCount;
     private boolean autoResetLocked;
-    private boolean overlayVisible;
     private long lastRunTimestamp;
 
     public ChestCounterTrackerFeature() {
@@ -38,8 +38,7 @@ public class ChestCounterTrackerFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        String reason = event.reason();
-        if (!event.completed() && !reason.contains("DEFEAT")) return;
+        if (!event.isCompleted()) return;
 
         int current = manager.increment();
         lastRunTimestamp = System.currentTimeMillis();

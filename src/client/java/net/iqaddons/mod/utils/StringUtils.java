@@ -100,4 +100,8 @@ public class StringUtils {
 
         return -1;
     }
+
+    public static @NotNull String stripFormatting(@NotNull String text) {
+        return text.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+    }
 }
