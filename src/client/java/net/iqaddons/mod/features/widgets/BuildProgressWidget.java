@@ -10,6 +10,7 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -83,14 +84,12 @@ public class BuildProgressWidget extends HudWidget {
         if (newProgress >= 0 && newProgress != currentProgress) {
             currentProgress = newProgress;
             updateDisplay();
-            log.debug("Build progress updated: {}%", currentProgress);
         }
     }
 
     private int getBuildProgress() {
         for (String line : ScoreboardUtils.getLines()) {
-            String stripped = ScoreboardUtils.stripFormatting(line);
-
+            String stripped = StringUtils.stripFormatting(line);
             Matcher matcher = PROGRESS_PATTERN.matcher(stripped);
             if (matcher.find()) {
                 try {

@@ -98,7 +98,7 @@ public class AutoRequeueFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        if (!event.completed()) {
+        if (!event.isCompleted() && !event.isFailed()) {
             pendingRequeueTicks = -1;
             return;
         }

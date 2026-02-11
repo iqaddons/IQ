@@ -8,6 +8,7 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ProfitData;
+import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.TimeUtils;
 
 import java.util.List;
@@ -18,12 +19,13 @@ public class KuudraProfitTrackerWidget extends HudWidget {
 
     private final KuudraProfitTrackerManager tracker = KuudraProfitTrackerManager.get();
 
-    private final HudLine title = HudLine.of("§6§lKuudra Tracker §7(SESSION)");
+    private final HudLine title = HudLine.of("§e§lKuudra Profit Tracker §7(SESSION)");
     private final HudLine netProfit = HudLine.of("§fProfit: §a+0");
     private final HudLine runs = HudLine.of("§fRuns: §a0");
     private final HudLine chests = HudLine.of("§fChests: §e0");
     private final HudLine rerolls = HudLine.of("§fRerolls: §b0§7/§d0");
     private final HudLine avg = HudLine.of("§fAvg Time: §b0.00s");
+    private final HudLine totalTime = HudLine.of("§fTotal Time: §b0.00s");
     private final HudLine rate = HudLine.of("§fRate: §a0/hr");
 
     public KuudraProfitTrackerWidget() {
@@ -36,21 +38,21 @@ public class KuudraProfitTrackerWidget extends HudWidget {
 
         setEnabledSupplier(() -> KuudraGeneralConfig.kuudraProfitTracker);
         setExampleLines(List.of(
-                HudLine.of("§6§lKuudra Tracker §7(SESSION)"),
+                HudLine.of("§e§lKuudra Profit Tracker §7(SESSION)"),
                 HudLine.of("§fProfit: §a+12.5m"),
                 HudLine.of("§fRuns: §a15 §7(§c1 failed§7)"),
                 HudLine.of("§fChests: §e9 §7(§69 paid§7/§a0 free§7)"),
                 HudLine.of("§fRerolls: §b4§7/§d1"),
                 HudLine.of("§fAvg Time: §b58.33s"),
+                HudLine.of("§fTotal Time: §b14m35s"),
                 HudLine.of("§fRate: §a12.8m/hr")
         ));
     }
 
     @Override
     protected void onActivate() {
-        log.debug("Kuudra Profit Tracker Widget activating");
         clearLines();
-        addLines(title, netProfit, runs, chests, rerolls, avg, rate);
+        addLines(title, netProfit, runs, chests, rerolls, avg, totalTime, rate);
 
         subscribe(ClientTickEvent.class, event -> {
             if (event.isNthTick(5)) {
@@ -59,17 +61,14 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         });
 
         updateLines();
-        log.debug("Kuudra Profit Tracker Widget activated successfully");
     }
 
     private void updateLines() {
-        ProfitData data = tracker.session();
-
-        log.debug("Updating profit tracker widget - profit: {}, runs: {}, failed: {}, chests: {} (paid: {}, free: {}), rerolls: {}/{}, avgTime: {}ms",
-                data.profit, data.runs, data.failedRuns, data.chestsOpened, data.paidChests, data.freeChests,
-                data.rerolls, data.shardRerolls, data.averageRunMillis());
-
-        title.text("§6§lKuudra Tracker §7(SESSION)");
+        ProfitScope scope = tracker.scope();
+        ProfitData data = scope == ProfitScope.LIFETIME
+                ? tracker.lifetime()
+                : tracker.session();
+        title.text("§6§lKuudra Tracker §7(" + scope.name() + ")");
 
         String sign = data.profit >= 0 ? "§a+" : "§c-";
         netProfit.text("§fProfit: " + sign + formatCoins(Math.abs(data.profit)));
@@ -78,6 +77,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         chests.text("§fChests: §e" + data.chestsOpened + " §7(§6" + data.paidChests + " paid§7/§a" + data.freeChests + " free§7)");
         rerolls.text("§fRerolls: §b" + data.rerolls + "§7/§d" + data.shardRerolls + " §7(§c-" + formatCoins(data.rerollCostCoins) + "§7)");
         avg.text("§fAvg Time: §b" + TimeUtils.formatTime(data.averageRunMillis() / 1000.0));
+        totalTime.text("§fTime: §b" + TimeUtils.formatTime(data.totalRunMillis / 1000.0));
         rate.text("§fRate: §a" + formatCoins(Math.max(0, data.hourlyRateCoins())) + "/hr");
 
         markDimensionsDirty();

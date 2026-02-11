@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.profit.ChestData;
 import net.iqaddons.mod.model.profit.ChestType;
 import net.iqaddons.mod.model.profit.ProfitData;
+import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.data.DataKey;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,12 +21,16 @@ public final class KuudraProfitTrackerManager {
 
     private volatile ProfitData lifetime = new ProfitData();
     private volatile ProfitData session = new ProfitData();
+    private volatile ProfitScope currentScope = ProfitScope.SESSION;
 
     private KuudraProfitTrackerManager() {
         PersistentKuudraProfit persisted = store.getOrDefault(PROFIT_KEY, new PersistentKuudraProfit());
         if (hasData(persisted) || Files.exists(IQPersistentDataStore.DATA_FILE) && store.has(PROFIT_KEY)) {
             lifetime = persisted.lifetime;
             session = persisted.session;
+            currentScope = persisted.scope == null
+                    ? ProfitScope.SESSION
+                    : persisted.scope;
         }
     }
 
@@ -59,6 +64,11 @@ public final class KuudraProfitTrackerManager {
         save();
     }
 
+    public synchronized void resetLifetime() {
+        lifetime = new ProfitData();
+        save();
+    }
+
     public synchronized void resetAll() {
         lifetime = new ProfitData();
         session = new ProfitData();
@@ -71,6 +81,21 @@ public final class KuudraProfitTrackerManager {
 
     public @NotNull ProfitData session() {
         return session.copy();
+    }
+
+    public @NotNull ProfitScope scope() {
+        return currentScope;
+    }
+
+    public synchronized void setScope(@NotNull ProfitScope scope) {
+        this.currentScope = scope;
+        save();
+    }
+
+    public synchronized @NotNull ProfitScope toggleScope() {
+        currentScope = (currentScope == ProfitScope.SESSION) ? ProfitScope.LIFETIME : ProfitScope.SESSION;
+        save();
+        return currentScope;
     }
 
     private void updateRun(@NotNull ProfitData data, long runMillis, boolean failed) {
@@ -113,7 +138,7 @@ public final class KuudraProfitTrackerManager {
     }
 
     private synchronized void save() {
-        store.set(PROFIT_KEY, new PersistentKuudraProfit(lifetime, session));
+        store.set(PROFIT_KEY, new PersistentKuudraProfit(lifetime, session, currentScope));
     }
 
     @AllArgsConstructor
@@ -121,10 +146,12 @@ public final class KuudraProfitTrackerManager {
 
         public ProfitData lifetime;
         public ProfitData session;
+        public ProfitScope scope;
 
         public PersistentKuudraProfit() {
             this.lifetime = new ProfitData();
             this.session = new ProfitData();
+            this.scope = ProfitScope.SESSION;
         }
     }
 }

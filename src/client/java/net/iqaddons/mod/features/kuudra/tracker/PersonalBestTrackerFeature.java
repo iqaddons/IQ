@@ -32,7 +32,7 @@ public class PersonalBestTrackerFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        if (!event.completed()) return;
+        if (!event.isCompleted()) return;
 
         long runMillis = event.totalDuration().toMillis();
         if (runMillis <= 0) return;
