@@ -1,29 +1,27 @@
 package net.iqaddons.mod.manager;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.utils.data.DataKey;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Slf4j
 public final class ChestCounterManager {
 
     public static final int MAX_CHESTS = 60;
-
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path FILE = Path.of("config", "iq", "chest_counter.json");
-
     private static final ChestCounterManager INSTANCE = new ChestCounterManager();
 
+    private static final DataKey<Integer> CHEST_COUNT_KEY = DataKey.of("chestCount", Integer.class);
+
+    private final IQPersistentDataStore store = IQPersistentDataStore.get();
     private volatile int chests;
 
     private ChestCounterManager() {
-        load();
+        int stored = Math.max(0, Math.min(MAX_CHESTS, store.getOrDefault(CHEST_COUNT_KEY, 0)));
+        if (stored > 0 || Files.exists(IQPersistentDataStore.DATA_FILE) && store.has(CHEST_COUNT_KEY)) {
+            chests = stored;
+        }
     }
 
     public static @NotNull ChestCounterManager get() {
@@ -37,7 +35,7 @@ public final class ChestCounterManager {
     public synchronized int increment() {
         if (chests < MAX_CHESTS) {
             chests++;
-            save();
+            store.set(CHEST_COUNT_KEY, chests);
         }
 
         return chests;
@@ -45,35 +43,6 @@ public final class ChestCounterManager {
 
     public synchronized void reset() {
         chests = 0;
-        save();
-    }
-
-    private synchronized void load() {
-        if (!Files.exists(FILE)) {
-            return;
-        }
-
-        try {
-            String json = Files.readString(FILE, StandardCharsets.UTF_8);
-            ChestCounterState state = GSON.fromJson(json, ChestCounterState.class);
-            if (state != null) {
-                chests = Math.max(0, Math.min(MAX_CHESTS, state.chests));
-            }
-        } catch (Exception e) {
-            log.warn("Failed to load chest counter", e);
-            chests = 0;
-        }
-    }
-
-    private synchronized void save() {
-        try {
-            Files.createDirectories(FILE.getParent());
-            Files.writeString(FILE, GSON.toJson(new ChestCounterState(chests)), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            log.warn("Failed to save chest counter", e);
-        }
-    }
-
-    private record ChestCounterState(int chests) {
+        store.set(CHEST_COUNT_KEY, chests);
     }
 }
