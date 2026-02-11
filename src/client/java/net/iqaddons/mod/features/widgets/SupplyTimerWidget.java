@@ -100,7 +100,7 @@ public class SupplyTimerWidget extends HudWidget {
 
         for (SupplyPickupEntry entry : pickupHistory) {
             addLine(HudLine.of(String.format(
-                    "§f%s §8(%d/6) %s%.2fs",
+                    "%s §8(%d/6) %s%.2fs",
                     entry.playerName(), entry.supplyNumber(),
                     entry.color, entry.pickupAt()
             )));

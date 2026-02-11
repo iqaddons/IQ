@@ -14,6 +14,7 @@ import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
 import net.iqaddons.mod.utils.TextFormatUtil;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
@@ -76,7 +77,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
         String message = event.getStrippedMessage();
         performSupplyDetect(event, message);
-        performFreshDetect(message);
+        performFreshDetect(message, TextFormatUtil.toLegacyString(event.getText()));
     }
 
     private void performSupplyDetect(ChatReceivedEvent event, String message) {
@@ -103,14 +104,14 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         }
     }
 
-    private void performFreshDetect(@NotNull String message) {
+    private void performFreshDetect(@NotNull String message, @NotNull String formattedMessage) {
         int buildProgress = getBuildingProgress();
         if (message.contains(FRESH_TOOLS_MESSAGE)) {
             ClientPlayerEntity player = client.player;
             if (player == null) return;
 
             EventBus.post(new PlayerFreshEvent(
-                    true, player.getName().getString(),
+                    true, getPlayerNick(player),
                     player.getId(), buildProgress,
                     System.currentTimeMillis()
             ));
@@ -121,7 +122,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         if (partyMatcher.find()) {
             if (client.world == null) return;
 
-            String playerName = partyMatcher.group(1);
+            String playerName = StringUtils.extractFormattedPlayerName(formattedMessage);
             findPlayerByName(playerName).ifPresentOrElse(
                     player ->
                             EventBus.post(new PlayerFreshEvent(
@@ -131,6 +132,20 @@ public class KuudraEventsDispatcher extends EventDispatcher {
                     () -> log.warn("Player '{}' not found in world", playerName)
             );
         }
+    }
+
+    private @NotNull String getPlayerNick(@NotNull ClientPlayerEntity player) {
+        if (client.getNetworkHandler() == null) {
+            return "§7" + player.getName().getString();
+        }
+
+        PlayerListEntry entry = client.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (entry == null || entry.getDisplayName() == null) {
+            return "§7" + player.getName().getString();
+        }
+
+        String displayName = TextFormatUtil.toLegacyString(entry.getDisplayName());
+        return StringUtils.formatPlayerNick(displayName);
     }
 
     private boolean isInArea(@NotNull String areaName) {

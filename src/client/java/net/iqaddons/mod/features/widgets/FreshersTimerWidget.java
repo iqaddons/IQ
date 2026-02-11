@@ -35,8 +35,8 @@ public class FreshersTimerWidget extends HudWidget {
 
         setExampleLines(List.of(
                 HudLine.of("§b§lFresh Timers §7[2]"),
-                HudLine.of("§bckac10 §f5.23s"),
-                HudLine.of("§aPeHenrii §a7.85s")
+                HudLine.of("§bckac10 §8- §f§l5.23s"),
+                HudLine.of("§aPeHenrii §8- §a§l7.85s")
         ));
     }
 
@@ -82,7 +82,7 @@ public class FreshersTimerWidget extends HudWidget {
         for (PlayerFreshedEntry entry : freshEntries) {
             double timeInSeconds = entry.freshTime / 1000.0;
 
-            addLine(HudLine.of(String.format("§f%s §8- %s%.2fs",
+            addLine(HudLine.of(String.format("%s §8- %s§l%.2fs",
                     entry.playerName(), getTimeColor(timeInSeconds), timeInSeconds)
             ));
         }

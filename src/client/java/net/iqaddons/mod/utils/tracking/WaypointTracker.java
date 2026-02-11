@@ -3,6 +3,7 @@ package net.iqaddons.mod.utils.tracking;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.WaypointData;
+import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -62,11 +63,7 @@ public class WaypointTracker {
 
     private @NotNull Text parsePlayerName(@NotNull String raw) {
         String formatted = raw.replaceFirst("\\[\\d+]\\s*", "");
-        int bracketIndex = formatted.indexOf("[");
-        if (bracketIndex > 0) {
-            formatted = formatted.substring(bracketIndex);
-        }
 
-        return Text.literal(formatted);
+        return Text.literal(StringUtils.formatPlayerNick(formatted));
     }
 }
