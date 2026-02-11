@@ -1,5 +1,6 @@
 package net.iqaddons.mod.features.kuudra;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -8,18 +9,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
 
+@Slf4j
 public class HideDamageTitleFeature extends KuudraFeature {
 
-    private static final Pattern KUUDRA_DAMAGE_TITLE = Pattern.compile("^☠\\s*[\\d.,]+[KMBT]?/[\\d.,]+[KMBT]?❤$");
+    private static final Pattern KUUDRA_DAMAGE_TITLE = Pattern.compile("^(?:☠\\s*)?[\\d.,]+[KMBT]?/[\\d.,]+[KMBT]?❤$");
 
     public HideDamageTitleFeature() {
         super(
                 "hideDamageTitle",
                 "Hide Kuudra Damage Title",
                 () -> PhaseFourConfig.hideDamageTitle,
-                KuudraPhase.STUN,
-                KuudraPhase.DPS,
-                KuudraPhase.BOSS
+                KuudraPhase.RUN_PHASES
         );
     }
 
@@ -30,6 +30,8 @@ public class HideDamageTitleFeature extends KuudraFeature {
 
     private void onTitleReceived(@NotNull TitleReceivedEvent event) {
         if (KUUDRA_DAMAGE_TITLE.matcher(event.getStrippedMessage()).matches()) {
+            log.info("Cancelled damage title: {}", event.getStrippedMessage());
+
             event.setCancelled(true);
         }
     }

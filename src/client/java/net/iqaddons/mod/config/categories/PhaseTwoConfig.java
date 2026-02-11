@@ -10,6 +10,7 @@ import java.awt.*;
 )
 public class PhaseTwoConfig {
 
+    @ConfigOption.Separator("Build Waypoints")
     @ConfigEntry(
             id = "buildHelper",
             translation = "Build Helper"
@@ -17,6 +18,7 @@ public class PhaseTwoConfig {
     @Comment("Render some helpful holograms during the build phase")
     public static boolean buildHelper = true;
 
+    @ConfigOption.Separator("Build Widgets")
     @ConfigEntry(
             id = "buildProgressOverlay",
             translation = "Build Progress Overlay"
@@ -37,6 +39,22 @@ public class PhaseTwoConfig {
     )
     @Comment("Display a countdown timer of you fresh")
     public static boolean freshCountdown = false;
+
+    @ConfigOption.Separator("Build Highlights")
+    @ConfigEntry(
+            id = "teamHighlight",
+            translation = "Team Highlight"
+    )
+    @Comment("Highlight teammates and show freshers during the build phase")
+    public static boolean teamHighlight = true;
+
+    @ConfigEntry(
+            id = "teamHighlightColor",
+            translation = "Team Hightlight Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Change the color of the teammate highlight")
+    public static int teamHighlightColor = new Color(67, 179, 29, 209).getRGB();
 
     @ConfigEntry(
             id = "elleHighlightConfig",
@@ -72,6 +90,7 @@ public class PhaseTwoConfig {
         public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.BOTH;
     }
 
+    @ConfigOption.Separator("Build Alerts")
     @ConfigEntry(
             id = "freshMessage",
             translation = "Fresh Message"

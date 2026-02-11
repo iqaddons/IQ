@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -29,7 +29,7 @@ public class TeamHighlightFeature extends KuudraFeature {
         super(
                 "teamHighlight",
                 "Team Highlight",
-                () -> Configuration.teamHighlight,
+                () -> PhaseTwoConfig.teamHighlight,
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -74,7 +74,7 @@ public class TeamHighlightFeature extends KuudraFeature {
             currentTeammates.add(playerId);
 
             if (!highlightedPlayers.contains(playerId) && !EntityGlowUtil.isGlowing(playerId)) {
-                var renderColor = RenderColor.fromArgb(Configuration.teamHighlightColor);
+                var renderColor = RenderColor.fromArgb(PhaseTwoConfig.teamHighlightColor);
                 EntityGlowUtil.setGlowing(playerId, renderColor, PRIORITY_TEAM_HIGHLIGHT);
 
                 highlightedPlayers.add(playerId);

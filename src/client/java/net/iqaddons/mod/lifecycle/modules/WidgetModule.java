@@ -1,6 +1,5 @@
 package net.iqaddons.mod.lifecycle.modules;
 
-import lombok.Getter;
 import net.iqaddons.mod.features.widgets.*;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.lifecycle.LifecycleComponent;

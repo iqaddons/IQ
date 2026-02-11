@@ -1,6 +1,6 @@
 package net.iqaddons.mod.features.kuudra;
 
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.PersonalBestManager;
@@ -23,7 +23,7 @@ public class PersonalBestTrackerFeature extends Feature {
 
     public PersonalBestTrackerFeature() {
         super("personalBestTracker", "PB Tracker",
-                () -> Configuration.personalBestTracker);
+                () -> KuudraGeneralConfig.personalBestTracker);
     }
 
     @Override

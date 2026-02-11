@@ -1,6 +1,6 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
@@ -13,7 +13,7 @@ public class KuudraPhaseAlertFeature extends KuudraFeature {
         super(
                 "kuudraPhaseAlert",
                 "Kuudra Phase Alert",
-                () -> Configuration.kuudraPhaseAlert,
+                () -> KuudraGeneralConfig.kuudraPhaseAlert,
                 KuudraPhase.RUN_PHASES
         );
     }

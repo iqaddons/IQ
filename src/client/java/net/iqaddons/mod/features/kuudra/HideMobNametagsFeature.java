@@ -1,8 +1,7 @@
 package net.iqaddons.mod.features.kuudra;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
@@ -14,7 +13,7 @@ public class HideMobNametagsFeature extends KuudraFeature {
         super(
                 "hideMobNametags",
                 "Hide Mob Nametags",
-                () -> Configuration.hideMobNametags,
+                () -> KuudraGeneralConfig.hideMobNametags,
                 KuudraPhase.RUN_PHASES
         );
     }

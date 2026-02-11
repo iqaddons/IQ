@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.iqaddons.mod.events.Cancellable;
 import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.utils.TextFormatUtil;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,16 +13,20 @@ import org.jetbrains.annotations.NotNull;
 @RequiredArgsConstructor
 public class TitleReceivedEvent implements Event, Cancellable {
 
-    private final Text text;
+    private final Text title;
+    private final Text subtitle;
+
     private final String message;
     private final String strippedMessage;
 
     @Setter
     private boolean cancelled;
 
-    public TitleReceivedEvent(@NotNull Text text) {
-        this.text = text;
-        this.message = text.getString();
+    public TitleReceivedEvent(@NotNull Text title, @NotNull Text subtitle) {
+        this.title = title;
+        this.subtitle = subtitle;
+
+        this.message = TextFormatUtil.toLegacyString(title);
         this.strippedMessage = stripFormatting(message);
     }
 

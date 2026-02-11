@@ -22,7 +22,6 @@ public class StunWaypointsFeature extends KuudraFeature {
     private static final Vec3d BLOCK_2 = new Vec3d(-153, 27, -173);
     private static final Vec3d ENTER_POS = new Vec3d(-161, 49, -186);
 
-    private static final RenderColor WAYPOINT_COLOR = new RenderColor(0, 245, 255, 200);
     private static final double EATEN_Y_THRESHOLD = 50.0;
 
     private static final AtomicReference<Vec3d> currentBlock = new AtomicReference<>(BLOCK_2);
@@ -110,6 +109,9 @@ public class StunWaypointsFeature extends KuudraFeature {
                 pos.getX() + half, pos.getY() + 1.0, pos.getZ() + half
         );
 
-        event.drawStyledBox(waypointBox, true, WAYPOINT_COLOR, WorldRenderUtils.RenderStyle.BOTH);
+        event.drawStyledBox(waypointBox, true,
+                RenderColor.fromArgb(PhaseThreeConfig.stunWaypointColor),
+                WorldRenderUtils.RenderStyle.BOTH
+        );
     }
 }

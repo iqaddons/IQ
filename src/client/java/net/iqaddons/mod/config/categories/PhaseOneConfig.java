@@ -12,6 +12,7 @@ import java.awt.*;
 )
 public class PhaseOneConfig {
 
+    @ConfigOption.Separator("Supply Widgets")
     @ConfigEntry(
             id = "supplyTimers",
             translation = "Supply Times"
@@ -19,6 +20,14 @@ public class PhaseOneConfig {
     @Comment("Display supply pickup times for all players")
     public static boolean supplyTimers = true;
 
+    @ConfigEntry(
+            id = "supplyProgressDisplay",
+            translation = "Supply Progress Display"
+    )
+    @Comment("Hide supply progress title and render it as a movable widget")
+    public static boolean supplyProgressDisplay = false;
+
+    @ConfigOption.Separator("Supply Waypoints")
     @ConfigEntry(
             id = "supplyWaypoints",
             translation = "Supply Waypoints"
@@ -33,13 +42,6 @@ public class PhaseOneConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the supply waypoints")
     public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
-
-    @ConfigEntry(
-            id = "supplyProgressDisplay",
-            translation = "Supply Progress Display"
-    )
-    @Comment("Hide supply progress title and render it as a movable widget")
-    public static boolean supplyProgressDisplay = false;
 
     @ConfigEntry(
             id = "pearlWaypoints",
@@ -64,9 +66,10 @@ public class PhaseOneConfig {
     @Comment("Display beacons at all crate pile locations")
     public static boolean pileWaypoints = true;
 
+    @ConfigOption.Separator("Supply Alerts")
     @ConfigEntry(
             id = "supplyPickingAlert",
-            translation = "Supply Already Picking Alert "
+            translation = "Supply Already Picking Alert"
     )
     @Comment("Alert when another player is already picking your supply")
     public static boolean supplyPickingAlert = true;

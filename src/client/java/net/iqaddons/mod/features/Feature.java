@@ -3,17 +3,11 @@ package net.iqaddons.mod.features;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.events.Event;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.SubscriptionOwner;
 import net.minecraft.client.MinecraftClient;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 @Slf4j
 @Getter

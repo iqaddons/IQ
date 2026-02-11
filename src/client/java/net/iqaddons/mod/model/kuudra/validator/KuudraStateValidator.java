@@ -2,7 +2,6 @@ package net.iqaddons.mod.model.kuudra.validator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;

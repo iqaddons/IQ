@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.hud.component.HudLine;
@@ -75,7 +75,7 @@ public class CustomSplitsWidget extends HudWidget {
         overallLine = HudLine.of("§fOverall: §f0.00s");
         paceLine = HudLine.of("§fPace: §f0.00s");
 
-        setEnabledSupplier(() -> Configuration.customSplits);
+        setEnabledSupplier(() -> KuudraGeneralConfig.customSplits);
         setVisibilityCondition(stateManager::isInKuudra);
 
         setExampleLines(List.of(

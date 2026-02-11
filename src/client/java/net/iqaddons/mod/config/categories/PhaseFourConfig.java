@@ -3,12 +3,21 @@ package net.iqaddons.mod.config.categories;
 import com.teamresourceful.resourcefulconfig.api.annotations.Category;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 
 @Category(
         value = "Phase 4 - Boss Fight"
 )
 public class PhaseFourConfig {
 
+    @ConfigEntry(
+            id = "hideDamageTitle",
+            translation = "Hide Kuudra Damage Title"
+    )
+    @Comment("Hide Kuudra's default damage title (☠ 240M/240M❤)")
+    public static boolean hideDamageTitle = true;
+
+    @ConfigOption.Separator("Boss Alerts")
     @ConfigEntry(
             id = "kuudraDirectionAlert",
             translation = "Kuudra Direction Alert"
@@ -30,10 +39,4 @@ public class PhaseFourConfig {
     @Comment("Alert when you are in Tentacle's Danger Zone")
     public static boolean dangerZoneAlert = true;
 
-    @ConfigEntry(
-            id = "hideDamageTitle",
-            translation = "Hide Kuudra Damage Title"
-    )
-    @Comment("Hide Kuudra's default damage title (☠ 240M/240M❤)")
-    public static boolean hideDamageTitle = true;
 }

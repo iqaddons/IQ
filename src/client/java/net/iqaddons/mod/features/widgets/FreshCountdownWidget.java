@@ -2,7 +2,6 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.hud.component.HudLine;
@@ -12,8 +11,6 @@ import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 @Slf4j
 public class FreshCountdownWidget extends HudWidget {

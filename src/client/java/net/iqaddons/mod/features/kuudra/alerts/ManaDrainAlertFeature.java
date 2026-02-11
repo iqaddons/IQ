@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
@@ -24,7 +24,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
         super(
                 "manaDrainNotify",
                 "Mana Drain Notify",
-                () -> Configuration.manaDrainNotify,
+                () -> KuudraGeneralConfig.manaDrainNotify,
                 KuudraPhase.RUN_PHASES
         );
     }

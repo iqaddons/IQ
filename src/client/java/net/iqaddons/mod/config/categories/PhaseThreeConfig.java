@@ -10,6 +10,8 @@ import java.awt.*;
 )
 public class PhaseThreeConfig {
 
+    @ConfigOption.Separator("Stun Widgets")
+
     @ConfigEntry(
             id = "kuudraHPBossbar",
             translation = "Kuudra HP Bossbar"
@@ -23,7 +25,6 @@ public class PhaseThreeConfig {
     )
     @Comment("Display Kuudra's health with health, percent & damage")
     public static boolean kuudraHealthDisplay = true;
-
 
     @ConfigEntry(
             id = "kuudraHitbox",
@@ -55,9 +56,11 @@ public class PhaseThreeConfig {
                 translation = "Kuudra Hitbox Style"
         )
         @ConfigOption.Select
-        @Comment("Change the style of the Elle highlight")
+        @Comment("Change the style of the Kuudra hitbox")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
     }
+
+    @ConfigOption.Separator("Stun Waypoints")
     @ConfigEntry(
             id = "stunWaypoints",
             translation = "Stun Waypoints"
@@ -71,7 +74,7 @@ public class PhaseThreeConfig {
     )
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the stun waypoints")
-    public static int color = new Color(0, 245, 255, 200).getRGB();
+    public static int stunWaypointColor = new Color(0, 245, 255, 200).getRGB();
 
     @ConfigEntry(
             id = "blockUselessPerks",
