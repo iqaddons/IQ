@@ -10,24 +10,17 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 )
 public class KuudraGeneralConfig {
 
-    @ConfigOption.Separator(
-            value = "Kuudra"
-    )
     @ConfigEntry(
             id = "autoRequeue",
             translation = "Auto Requeue"
     )
-    @Comment("Automatically requeue a Kuudra run after boss death (W.I.P)")
+    @Comment("Automatically requeue a Kuudra run after boss death.")
     public static boolean autoRequeue = false;
 
-    @ConfigEntry(
-            id = "requeueDelay",
-            translation = "Requeue Delay"
-    )
-    @Comment("Delay in ticks before auto-requeue (5-50) (W.I.P)")
-    @ConfigOption.Range(min = 5, max = 50)
+    @Comment("Delay in ticks before auto-requeue (1-50)")
+    @ConfigOption.Range(min = 1, max = 50)
     @ConfigOption.Slider
-    public static int requeueDelay = 20;
+    public static int requeueDelay = 15;
 
     @ConfigEntry(
             id = "kuudraProfitTracker",

@@ -86,7 +86,6 @@ public final class KuudraStateManager extends SubscriptionOwner {
         }
 
         setPhase(detected);
-
         if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
             forceReset("Server transfer detected: " + StringUtils.getShortMessage(message));
         }
