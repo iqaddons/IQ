@@ -77,7 +77,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         chests.text("§fChests: §e" + data.chestsOpened + " §7(§6" + data.paidChests + " paid§7/§a" + data.freeChests + " free§7)");
         rerolls.text("§fRerolls: §b" + data.rerolls + "§7/§d" + data.shardRerolls + " §7(§c-" + formatCoins(data.rerollCostCoins) + "§7)");
         var avgTimeSeconds = data.averageRunMillis() / 1000.0;
-        avg.text("§fAvg Time: §b" + getAverageTimeColor(avgTimeSeconds) + avgTimeSeconds);
+        avg.text("§fAvg Time: §b" + getAverageTimeColor(avgTimeSeconds) + TimeUtils.formatTime(avgTimeSeconds));
         totalTime.text("§fTime: §b" + TimeUtils.formatTime(data.totalRunMillis / 1000.0));
         rate.text("§fRate: §a" + formatCoins(Math.max(0, data.hourlyRateCoins())) + "/hr");
 
@@ -92,7 +92,8 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     }
 
     public String getAverageTimeColor(double avgTimeSeconds) {
-        if (avgTimeSeconds <= 80) return "§a";
+        if (avgTimeSeconds <= 70) return "§2";
+        if (avgTimeSeconds <= 75) return "§a";
         if (avgTimeSeconds <= 100) return "§c";
         return "§4";
     }

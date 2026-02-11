@@ -72,6 +72,11 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.contains("DEFEAT") && isInKuudra()) {
+            forceReset(KuudraRunEndEvent.EndReason.DEFEATED);
+            return;
+        }
+
         KuudraPhase detected = KuudraPhase.fromMessage(message);
         if (detected == null) return;
         log.debug("Detected phase trigger in chat: {} -> {}", message.substring(0, Math.min(50, message.length())), detected);
