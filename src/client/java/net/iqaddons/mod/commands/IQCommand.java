@@ -32,7 +32,7 @@ public class IQCommand {
                         }))
                         .then(literal("resetchests").executes(ctx -> {
                             ChestCounterManager.get().reset();
-                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reset."));
+                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reseted."));
                             return 1;
                         }))
                         .then(literal("pb").executes(ctx -> sendPersonalBest(ctx.getSource())))

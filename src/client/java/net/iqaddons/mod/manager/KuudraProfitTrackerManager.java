@@ -13,8 +13,8 @@ import java.nio.file.Files;
 @Slf4j
 public final class KuudraProfitTrackerManager {
 
-    private static final KuudraProfitTrackerManager INSTANCE = new KuudraProfitTrackerManager();
     private static final DataKey<PersistentKuudraProfit> PROFIT_KEY = DataKey.of("kuudraProfit", PersistentKuudraProfit.class);
+    private static final KuudraProfitTrackerManager INSTANCE = new KuudraProfitTrackerManager();
 
     private final IQPersistentDataStore store = IQPersistentDataStore.get();
 
@@ -91,7 +91,7 @@ public final class KuudraProfitTrackerManager {
         }
 
         data.grossCoins += record.grossValue();
-        data.netCoins += record.netProfit();
+        data.profit += record.netProfit();
         data.keyCostCoins += record.keyCost();
         data.pricedItems += Math.max(0, record.pricedItems());
         data.essence += Math.max(0, record.essence());
@@ -106,12 +106,12 @@ public final class KuudraProfitTrackerManager {
         }
 
         data.rerollCostCoins += Math.max(0L, rerollCost);
-        data.netCoins -= Math.max(0L, rerollCost);
+        data.profit -= Math.max(0L, rerollCost);
     }
 
     private boolean hasData(@NotNull PersistentKuudraProfit persisted) {
         return persisted.lifetime.runs > 0 || persisted.session.runs > 0
-                || persisted.lifetime.netCoins != 0 || persisted.session.netCoins != 0;
+                || persisted.lifetime.profit != 0 || persisted.session.profit != 0;
     }
 
     private synchronized void save() {

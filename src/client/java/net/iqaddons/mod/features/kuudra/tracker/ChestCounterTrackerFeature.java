@@ -1,5 +1,6 @@
 package net.iqaddons.mod.features.kuudra.tracker;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
@@ -10,6 +11,7 @@ import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
+@Slf4j
 public class ChestCounterTrackerFeature extends Feature {
 
     private static final long OVERLAY_TIMEOUT_MS = 3 * 60 * 1000L;
@@ -27,10 +29,12 @@ public class ChestCounterTrackerFeature extends Feature {
 
     @Override
     protected void onActivate() {
+        log.debug("Chest Counter Tracker activating");
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
         subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(ClientTickEvent.class, this::onTick);
         resetRuntimeState();
+        log.debug("Chest Counter Tracker activated successfully");
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
@@ -54,14 +58,15 @@ public class ChestCounterTrackerFeature extends Feature {
             playLevelUp(1.0f);
             MessageUtil.showTitle("§b§l60/60", "§aChest limit reached", 0, 30, 10);
             if (KuudraGeneralConfig.chestCounterPartyAnnouncements) {
-                MessageUtil.PARTY.sendMessage("[IQ] Run 60/60, opening chests.");
+                MessageUtil.PARTY.sendMessage("[IQ] Run 60/60, opening chests...");
             }
 
-            MessageUtil.sendFormattedMessage("§fYour chest tracker is full! Run §b/iq resetchests §fto reset your progress.");
+            MessageUtil.sendFormattedMessage("§fYour chest tracker is full! Run §e/iq resetchests §fto reset your progress.");
         }
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
+        log.info("Received chat message: {}", event.getStrippedMessage());
         if (!event.getStrippedMessage().contains("PAID CHEST REWARDS")) {
             return;
         }

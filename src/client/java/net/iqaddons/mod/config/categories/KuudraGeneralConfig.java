@@ -26,7 +26,7 @@ public class KuudraGeneralConfig {
             id = "kuudraProfitTracker",
             translation = "Kuudra Profit Tracker"
     )
-    @Comment("Track your profit/loss after each Kuudra run (W.I.P)")
+    @Comment("Track your profit/loss after each Kuudra run and display it")
     public static boolean kuudraProfitTracker = false;
 
     @ConfigEntry(

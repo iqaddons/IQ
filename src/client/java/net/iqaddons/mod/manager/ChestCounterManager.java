@@ -10,9 +10,8 @@ import java.nio.file.Files;
 public final class ChestCounterManager {
 
     public static final int MAX_CHESTS = 60;
-    private static final ChestCounterManager INSTANCE = new ChestCounterManager();
-
     private static final DataKey<Integer> CHEST_COUNT_KEY = DataKey.of("chestCount", Integer.class);
+    private static final ChestCounterManager INSTANCE = new ChestCounterManager();
 
     private final IQPersistentDataStore store = IQPersistentDataStore.get();
     private volatile int chests;

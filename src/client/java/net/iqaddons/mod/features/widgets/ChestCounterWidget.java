@@ -1,27 +1,36 @@
 package net.iqaddons.mod.features.widgets;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.ChestCounterManager;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Slf4j
 public class ChestCounterWidget extends HudWidget {
 
     private final HudLine line = HudLine.of("§b§lChests §f§l0/60");
 
     public ChestCounterWidget() {
-        super("chestCounterWidget", "Chest Counter", 10.0f, 110.0f, 1.0f, HudAnchor.TOP_LEFT);
-        setEnabledSupplier(() -> KuudraGeneralConfig.chestCounterTracker);
+        super("chestCounterWidget", "Chest Counter",
+                10.0f, 110.0f,
+                1.0f,
+                HudAnchor.TOP_LEFT
+        );
 
-        setExampleLines(List.of(HudLine.of("§b§lChests §a§l20§f§l/60")));
+        setEnabledSupplier(() -> KuudraGeneralConfig.chestCounterTracker);
+        setExampleLines(List.of(HudLine.of("§b§lChests §a20§f/60")));
     }
 
     @Override
     protected void onActivate() {
+        log.debug("Chest Counter Widget activating");
         clearLines();
         addLine(line);
 
@@ -32,16 +41,19 @@ public class ChestCounterWidget extends HudWidget {
         });
 
         updateLine();
+        log.debug("Chest Counter Widget activated successfully");
     }
 
     private void updateLine() {
         int chests = ChestCounterManager.get().getChests();
-        line.text("§b§lChests " + getColor(chests) + "§l" + chests + "§f§l/" + ChestCounterManager.MAX_CHESTS);
+        log.debug("Updating chest counter widget - chests: {}/{}", chests, ChestCounterManager.MAX_CHESTS);
+        line.text("§b§lChests " + getColor(chests) + "§l" + chests + "§f/" + ChestCounterManager.MAX_CHESTS);
         markDimensionsDirty();
     }
 
-    private String getColor(int count) {
-        if (count >= 60) return "§c";
+    @Contract(pure = true)
+    private @NotNull String getColor(int count) {
+        if (count >= 60) return "§c§l";
         if (count >= 50) return "§4";
         if (count >= 40) return "§6";
         if (count >= 30) return "§e";

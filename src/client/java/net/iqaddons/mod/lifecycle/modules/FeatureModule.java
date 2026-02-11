@@ -8,6 +8,7 @@ import net.iqaddons.mod.features.generic.WaypointFeature;
 import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.miscellaneous.*;
 import net.iqaddons.mod.features.kuudra.tracker.ChestCounterTrackerFeature;
+import net.iqaddons.mod.features.kuudra.tracker.KuudraProfitTrackerFeature;
 import net.iqaddons.mod.features.kuudra.tracker.PersonalBestTrackerFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.*;
 import net.iqaddons.mod.lifecycle.LifecycleComponent;
@@ -37,7 +38,7 @@ public class FeatureModule implements LifecycleComponent {
                 new BlockUselessPerksFeature(), new HideMobNametagsFeature(), new TeamHighlightFeature(),
                 new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature(),
                 new HideDamageTitleFeature(), new SupplyDroppedAlertFeature(), new PersonalBestTrackerFeature(),
-                new AutoRequeueFeature(), new ChestCounterTrackerFeature()
+                new AutoRequeueFeature(), new ChestCounterTrackerFeature(), new KuudraProfitTrackerFeature()
         );
 
         features.start();

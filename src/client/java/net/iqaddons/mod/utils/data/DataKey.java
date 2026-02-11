@@ -11,11 +11,11 @@ public record DataKey<T>(
 ) {
 
     public static <T> @NotNull DataKey<T> of(@NotNull String id, @NotNull Class<T> type) {
-        return new DataKey<>(id, type);
+        return new DataKey<T>(id, type);
     }
 
     public static <T> @NotNull DataKey<T> of(@NotNull String id, @NotNull TypeToken<T> typeToken) {
-        return new DataKey<>(id, typeToken.getType());
+        return new DataKey<T>(id, typeToken.getType());
     }
 
     @Override

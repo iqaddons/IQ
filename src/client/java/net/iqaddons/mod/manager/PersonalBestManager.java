@@ -14,8 +14,8 @@ import java.util.Map;
 @Slf4j
 public final class PersonalBestManager {
 
-    private static final PersonalBestManager INSTANCE = new PersonalBestManager();
     private static final DataKey<PersonalBest> PB_KEY = DataKey.of("personalBest", PersonalBest.class);
+    private static final PersonalBestManager INSTANCE = new PersonalBestManager();
 
     private final IQPersistentDataStore store = IQPersistentDataStore.get();
 

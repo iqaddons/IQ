@@ -22,7 +22,7 @@ public final class ProfitData {
     public long shardRerolls;
 
     public long grossCoins;
-    public long netCoins;
+    public long profit;
     public long keyCostCoins;
     public long rerollCostCoins;
 
@@ -47,14 +47,14 @@ public final class ProfitData {
             return 0L;
         }
 
-        return (long) (netCoins * (3600_000d / totalRunMillis));
+        return (long) (profit * (3600_000d / totalRunMillis));
     }
 
     @NotNull
     public ProfitData copy() {
         return new ProfitData(
                 runs, failedRuns, totalRunMillis, chestsOpened, paidChests, freeChests,
-                rerolls, shardRerolls, grossCoins, netCoins, keyCostCoins,
+                rerolls, shardRerolls, grossCoins, profit, keyCostCoins,
                 rerollCostCoins, pricedItems, essence, teeth
         );
     }
