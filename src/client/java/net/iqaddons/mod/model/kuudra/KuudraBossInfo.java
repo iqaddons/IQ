@@ -29,10 +29,4 @@ public record KuudraBossInfo(
     public boolean isAlive() {
         return bossEntity != null && bossEntity.isAlive();
     }
-
-    public double getHealthPercentage() {
-        if (maxHealth <= 0) return 0.0;
-
-        return Math.min(100.0, Math.max(0.0, (currentHealth / maxHealth) * 100.0));
-    }
 }

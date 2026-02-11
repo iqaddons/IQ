@@ -17,17 +17,14 @@ import java.util.Locale;
 @Slf4j
 public class KuudraHealthWidget extends HudWidget {
 
-    private static final float DAMAGE_MULTIPLIER = 2400f;
-    private static final float BOSS_HEALTH_THRESHOLD = 25_000f;
+    private static final float BOSS_PHASE_MAX_HEALTH = 24_000f;
+    private static final float PRE_BOSS_MIN_HEALTH = 24_000f;
+    private static final float PRE_BOSS_MAX_HEALTH = 100_000f;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
 
     private final HudLine titleLine = HudLine.of("§4§lKuudra Health");
     private final HudLine healthLine = HudLine.of("§c❤ 100,000 §8(§c100%§8)");
-    private final HudLine damageLine = HudLine.of("§fDamage: §e0.0M")
-            .showWhen(() -> stateManager.phase() == KuudraPhase.BOSS
-                    && stateManager.context().bossInfo().currentHealth() <= BOSS_HEALTH_THRESHOLD
-            );
 
     public KuudraHealthWidget() {
         super(
@@ -42,22 +39,19 @@ public class KuudraHealthWidget extends HudWidget {
 
         setVisibilityCondition(() -> {
             KuudraPhase phase = stateManager.phase();
-            return phase == KuudraPhase.STUN
-                    || phase == KuudraPhase.DPS
-                    || phase == KuudraPhase.BOSS;
+            return KuudraPhase.COMBAT_PHASES.contains(phase);
         });
 
         setExampleLines(List.of(
                 titleLine,
-                healthLine,
-                damageLine
+                healthLine
         ));
     }
 
     @Override
     protected void onActivate() {
         clearLines();
-        addLines(titleLine, healthLine, damageLine);
+        addLines(titleLine, healthLine);
 
         subscribe(ClientTickEvent.class, this::onTick);
     }
@@ -73,22 +67,45 @@ public class KuudraHealthWidget extends HudWidget {
     }
 
     private void updateDisplay(@NotNull KuudraBossInfo bossInfo) {
+        KuudraPhase phase = stateManager.phase();
         float currentHealth = bossInfo.currentHealth();
+        double healthPercentage = getHealthPercentageByPhase(phase, currentHealth);
+
         if (stateManager.phase() == KuudraPhase.BOSS) {
             healthLine.text(String.format(Locale.ROOT, "§c❤ %.1fM/240M §8(§c%.1f%%§8)",
                     currentHealth / 100f,
-                    bossInfo.getHealthPercentage())
+                    healthPercentage)
             );
         } else {
             healthLine.text(String.format(Locale.ROOT, "§c❤ %,.0f §8(§c%.1f%%§8)",
                     currentHealth,
-                    bossInfo.getHealthPercentage())
+                    healthPercentage)
             );
         }
 
-        double damageInMillions = (bossInfo.damageReceived() * DAMAGE_MULTIPLIER) / 1_000_000f;
-        damageLine.text(String.format("§fDamage: §e%.1fM", damageInMillions));
-
         markDimensionsDirty();
+    }
+
+    private double getHealthPercentageByPhase(@NotNull KuudraPhase phase, float currentHealth) {
+        if (phase == KuudraPhase.BOSS) {
+            return clampPercentage((currentHealth / BOSS_PHASE_MAX_HEALTH) * 100.0);
+        }
+
+        if (phase == KuudraPhase.STUN || phase == KuudraPhase.DPS || phase == KuudraPhase.SKIP) {
+            float normalizedHealth = currentHealth - PRE_BOSS_MIN_HEALTH;
+            float preBossRange = PRE_BOSS_MAX_HEALTH - PRE_BOSS_MIN_HEALTH;
+            return clampPercentage((normalizedHealth / preBossRange) * 100.0);
+        }
+
+        return bossInfoFallbackPercentage(currentHealth);
+    }
+
+    private double bossInfoFallbackPercentage(float currentHealth) {
+        var bossInfo = stateManager.context().bossInfo();
+        return bossInfo.maxHealth() <= 0f ? 0.0 : clampPercentage((currentHealth / bossInfo.maxHealth()) * 100.0);
+    }
+
+    private double clampPercentage(double value) {
+        return Math.min(100.0, Math.max(0.0, value));
     }
 }

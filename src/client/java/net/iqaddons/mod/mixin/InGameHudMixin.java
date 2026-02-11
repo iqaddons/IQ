@@ -27,6 +27,10 @@ public abstract class InGameHudMixin {
     @Nullable
     private Text title;
 
+    @Shadow
+    @Nullable
+    private Text subtitle;
+
     @Inject(method = "render", at = @At("TAIL"))
     private void iq$onRenderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (client.player == null) return;
@@ -46,11 +50,13 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
     private void iq$onRenderTitleAndSubtitle(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (title == null || title.getString().isEmpty()) {
-            return;
-        }
+        if (title == null || title.getString().isEmpty()) return;
+        if (subtitle == null || subtitle.getString().isEmpty()) return;
 
-        TitleReceivedEvent event = EventBus.post(new TitleReceivedEvent(title));
+        TitleReceivedEvent event = EventBus.post(
+                new TitleReceivedEvent(title, subtitle)
+        );
+
         if (event.isCancelled()) {
             ci.cancel();
         }
