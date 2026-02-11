@@ -1,6 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.features.kuudra.waypoints.StunWaypointsFeature;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
@@ -60,6 +61,13 @@ public class PhaseThreeConfig {
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
     }
 
+    @ConfigEntry(
+            id = "blockUselessPerks",
+            translation = "Block Useless Perks"
+    )
+    @Comment("Prevent purchasing useless perks")
+    public static boolean blockUselessPerks = true;
+
     @ConfigOption.Separator("Stun Waypoints")
     @ConfigEntry(
             id = "stunWaypoints",
@@ -77,9 +85,10 @@ public class PhaseThreeConfig {
     public static int stunWaypointColor = new Color(0, 245, 255, 200).getRGB();
 
     @ConfigEntry(
-            id = "blockUselessPerks",
-            translation = "Block Useless Perks"
+            id = "stunWaypointBlock",
+            translation = "Stun Waypoint Block"
     )
-    @Comment("Prevent purchasing useless perks")
-    public static boolean blockUselessPerks = true;
+    @ConfigOption.Select
+    @Comment("Change the block used for stun waypoints")
+    public static StunWaypointsFeature.StunWaypoint stunWaypointBlock = StunWaypointsFeature.StunWaypoint.BLOCK_2;
 }

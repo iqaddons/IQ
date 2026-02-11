@@ -3,8 +3,8 @@ package net.iqaddons.mod.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.iqaddons.mod.IQKeyBindings;
-import net.iqaddons.mod.features.kuudra.waypoints.StunWaypointsFeature;
 import net.iqaddons.mod.hud.HudManager;
+import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.manager.PersonalBestManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.minecraft.client.MinecraftClient;
@@ -30,10 +30,9 @@ public class IQCommand {
                             mc.send(() -> HudManager.get().openEditor());
                             return 1;
                         }))
-                        .then(literal("toggleblock").executes(ctx -> {
-                            StunWaypointsFeature.toggleBlock();
-                            boolean blockTwo = StunWaypointsFeature.isBlockTwoSelected();
-                            ctx.getSource().sendFeedback(Text.literal("§aSelected Stun Waypoint: §b " + (blockTwo ? "2" : "1")));
+                        .then(literal("resetchests").executes(ctx -> {
+                            ChestCounterManager.get().reset();
+                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reset."));
                             return 1;
                         }))
                         .then(literal("pb").executes(ctx -> sendPersonalBest(ctx.getSource())))

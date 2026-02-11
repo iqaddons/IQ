@@ -1,5 +1,7 @@
 package net.iqaddons.mod.features.kuudra.waypoints;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
@@ -13,18 +15,12 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 @Slf4j
 public class StunWaypointsFeature extends KuudraFeature {
 
-    private static final Vec3d BLOCK_1 = new Vec3d(-168, 27, -169);
-    private static final Vec3d BLOCK_2 = new Vec3d(-153, 27, -173);
     private static final Vec3d ENTER_POS = new Vec3d(-161, 49, -186);
 
     private static final double EATEN_Y_THRESHOLD = 50.0;
-
-    private static final AtomicReference<Vec3d> currentBlock = new AtomicReference<>(BLOCK_2);
 
     private boolean stunPhase = false;
     private boolean eaten = false;
@@ -49,14 +45,6 @@ public class StunWaypointsFeature extends KuudraFeature {
     protected void onKuudraDeactivate() {
         stunPhase = false;
         eaten = false;
-    }
-
-    public static boolean isBlockTwoSelected() {
-        return currentBlock.get().equals(BLOCK_2);
-    }
-
-    public static void toggleBlock() {
-        currentBlock.updateAndGet(block -> block.equals(BLOCK_2) ? BLOCK_1 : BLOCK_2);
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
@@ -84,7 +72,7 @@ public class StunWaypointsFeature extends KuudraFeature {
         if (!eaten && !stunPhase) return;
         if (mc.player == null) return;
 
-        Vec3d selected = currentBlock.get();
+        Vec3d selected = PhaseThreeConfig.stunWaypointBlock.getPos();
         Vec3d renderPos = stunPhase
                 ? selected.add(getInterpolatedPlayerPos(event).subtract(ENTER_POS))
                 : selected;
@@ -113,5 +101,14 @@ public class StunWaypointsFeature extends KuudraFeature {
                 RenderColor.fromArgb(PhaseThreeConfig.stunWaypointColor),
                 WorldRenderUtils.RenderStyle.BOTH
         );
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum StunWaypoint {
+        BLOCK_1(new Vec3d(-168, 27, -169)),
+        BLOCK_2(new Vec3d(-153, 27, -173));
+
+        private final Vec3d pos;
     }
 }
