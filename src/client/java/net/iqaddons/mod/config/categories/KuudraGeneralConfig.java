@@ -30,6 +30,20 @@ public class KuudraGeneralConfig {
     public static boolean kuudraProfitTracker = false;
 
     @ConfigEntry(
+            id = "chestCounterTracker",
+            translation = "Chest Counter Tracker"
+    )
+    @Comment("Track Kuudra runs toward your 60 chest cap")
+    public static boolean chestCounterTracker = true;
+
+    @ConfigEntry(
+            id = "chestCounterPartyAnnouncements",
+            translation = "Chest Counter Party Announcements"
+    )
+    @Comment("Send 10-run and cap reminders to party chat")
+    public static boolean chestCounterPartyAnnouncements = true;
+
+    @ConfigEntry(
             id = "customSplits",
             translation = "Custom Splits"
     )

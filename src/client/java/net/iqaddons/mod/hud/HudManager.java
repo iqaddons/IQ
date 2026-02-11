@@ -126,6 +126,8 @@ public final class HudManager {
 
     public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         for (HudWidget widget : widgets) {
+            if (!widget.isActive()) return;
+
             widget.renderExample(context, mouseX, mouseY, delta);
         }
     }
