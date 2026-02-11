@@ -11,7 +11,6 @@ import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ChestData;
 import net.iqaddons.mod.model.profit.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
-
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j

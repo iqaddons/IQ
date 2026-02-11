@@ -1,6 +1,9 @@
 package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
@@ -8,6 +11,8 @@ import java.util.regex.Pattern;
 
 @UtilityClass
 public class StringUtils {
+
+    private static final MinecraftClient client = MinecraftClient.getInstance();
 
     private static final Pattern MINECRAFT_NAME_PATTERN = Pattern.compile("([A-Za-z0-9_]{3,16})(?!.*[A-Za-z0-9_]{3,16})");
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("§([0-9a-fA-F])");
@@ -37,6 +42,21 @@ public class StringUtils {
         }
 
         return message.substring(0, 30) + "...";
+    }
+
+    @NotNull
+    public String getPlayerNick(@NotNull ClientPlayerEntity player) {
+        if (client.getNetworkHandler() == null) {
+            return "§7" + player.getName().getString();
+        }
+
+        PlayerListEntry entry = client.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (entry == null || entry.getDisplayName() == null) {
+            return "§7" + player.getName().getString();
+        }
+
+        String displayName = TextFormatUtil.toLegacyString(entry.getDisplayName());
+        return StringUtils.formatPlayerNick(displayName);
     }
 
     public @NotNull String formatPlayerNick(@NotNull String rawPlayerText) {
