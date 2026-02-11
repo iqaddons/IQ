@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra;
+package net.iqaddons.mod.features.kuudra.miscellaneous;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;

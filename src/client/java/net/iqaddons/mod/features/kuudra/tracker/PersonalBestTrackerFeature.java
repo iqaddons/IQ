@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra;
+package net.iqaddons.mod.features.kuudra.tracker;
 
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
