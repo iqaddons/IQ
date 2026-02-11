@@ -17,6 +17,10 @@ public class KuudraGeneralConfig {
     @Comment("Automatically requeue a Kuudra run after boss death.")
     public static boolean autoRequeue = false;
 
+    @ConfigEntry(
+            id = "requeueDelay",
+            translation = "Auto Requeue Delay"
+    )
     @Comment("Delay in ticks before auto-requeue (1-50)")
     @ConfigOption.Range(min = 1, max = 50)
     @ConfigOption.Slider
