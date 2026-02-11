@@ -39,7 +39,12 @@ public class FreshDetector {
             if (client.world == null) return;
 
             String playerName = StringUtils.extractFormattedPlayerName(event.getMessage());
-            findPlayerByName(playerName).ifPresentOrElse(
+            String plainPlayerName = StringUtils.stripFormatting(playerName);
+            if (plainPlayerName.isBlank()) {
+                plainPlayerName = partyMatcher.group(1);
+            }
+
+            findPlayerByName(plainPlayerName).ifPresentOrElse(
                     player ->
                             postEvent.accept(new PlayerFreshEvent(
                                     false, playerName, player.getId(),
