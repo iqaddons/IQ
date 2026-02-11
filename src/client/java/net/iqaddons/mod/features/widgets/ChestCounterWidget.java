@@ -16,7 +16,9 @@ import java.util.List;
 @Slf4j
 public class ChestCounterWidget extends HudWidget {
 
-    private final HudLine line = HudLine.of("§b§lChests §f§l0/60");
+    private static final String KUUDRA_ICON = "\uE000";
+
+    private final HudLine line = HudLine.of(KUUDRA_ICON + " §f§l0/60");
 
     public ChestCounterWidget() {
         super("chestCounterWidget", "Chest Counter",
@@ -30,12 +32,11 @@ public class ChestCounterWidget extends HudWidget {
                 () -> ChestCounterManager.get().getChests() > 0 && ChestCounterTrackerFeature.overlayVisible
         );
 
-        setExampleLines(List.of(HudLine.of("§b§lChests §a20§f/60")));
+        setExampleLines(List.of(HudLine.of(KUUDRA_ICON + " §a20§f/60")));
     }
 
     @Override
     protected void onActivate() {
-        log.debug("Chest Counter Widget activating");
         clearLines();
         addLine(line);
 
@@ -46,13 +47,11 @@ public class ChestCounterWidget extends HudWidget {
         });
 
         updateLine();
-        log.debug("Chest Counter Widget activated successfully");
     }
 
     private void updateLine() {
         int chests = ChestCounterManager.get().getChests();
-        log.debug("Updating chest counter widget - chests: {}/{}", chests, ChestCounterManager.MAX_CHESTS);
-        line.text("§b§lChests " + getColor(chests) + "§l" + chests + "§f/" + ChestCounterManager.MAX_CHESTS);
+        line.text(KUUDRA_ICON + " " + getColor(chests) + chests + "§f/" + ChestCounterManager.MAX_CHESTS);
         markDimensionsDirty();
     }
 
