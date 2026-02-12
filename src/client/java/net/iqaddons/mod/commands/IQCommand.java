@@ -3,6 +3,7 @@ package net.iqaddons.mod.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.iqaddons.mod.IQKeyBindings;
+import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
@@ -32,6 +33,11 @@ public class IQCommand {
                             mc.send(() -> HudManager.get().openEditor());
                             return 1;
                         }))
+                        .then(literal("reload").executes(ctx -> {
+                            mc.send(() -> WaypointConfigLoader.get().reload());
+                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fPearl Waypoints reloaded."));
+                            return 1;
+                        }))
                         .then(literal("resetchests").executes(ctx -> {
                             ChestCounterManager.get().reset();
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reseted."));
@@ -47,6 +53,7 @@ public class IQCommand {
                                         .then(literal("session").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.SESSION)))
                                         .then(literal("lifetime").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.LIFETIME)))
                                         .then(literal("all").executes(ctx -> resetProfitTrackerAll(ctx.getSource())))))
+
         );
     }
 

@@ -28,6 +28,8 @@ import java.util.Optional;
 @Slf4j
 public class WaypointConfigLoader {
 
+    private static final WaypointConfigLoader INSTANCE = new WaypointConfigLoader();
+
     private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("iq");
     private static final Path CONFIG_FILE = CONFIG_DIR.resolve("pearl_waypoints.json");
     private static final String DEFAULT_RESOURCE = "/default-config/iq/pearl_waypoints.json";
@@ -180,5 +182,9 @@ public class WaypointConfigLoader {
         } catch (Exception e) {
             log.warn("Failed to save default config", e);
         }
+    }
+
+    public static WaypointConfigLoader get() {
+        return INSTANCE;
     }
 }
