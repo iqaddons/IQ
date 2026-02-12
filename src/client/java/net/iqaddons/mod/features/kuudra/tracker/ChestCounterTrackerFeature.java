@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
+import net.iqaddons.mod.model.profit.ChestType;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
@@ -24,17 +26,17 @@ public class ChestCounterTrackerFeature extends Feature {
     private long lastRunTimestamp;
 
     public ChestCounterTrackerFeature() {
-        super("chestCounterTracker", "Chest Counter Tracker", () -> KuudraGeneralConfig.chestCounterTracker);
+        super("chestCounterTracker", "Chest Counter Tracker",
+                () -> KuudraGeneralConfig.chestCounterTracker
+        );
     }
 
     @Override
     protected void onActivate() {
-        log.debug("Chest Counter Tracker activating");
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
-        subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(KuudraChestOpenEvent.class, this::onChestOpen);
         resetRuntimeState();
-        log.debug("Chest Counter Tracker activated successfully");
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
@@ -64,21 +66,18 @@ public class ChestCounterTrackerFeature extends Feature {
         }
     }
 
-    private void onChat(@NotNull ChatReceivedEvent event) {
-        log.info("Received chat message: {}", event.getStrippedMessage());
-        if (!event.getStrippedMessage().contains("PAID CHEST REWARDS")) {
-            return;
-        }
+    private void onChestOpen(@NotNull KuudraChestOpenEvent event) {
+        if (event.chestType() == ChestType.PAID) {
+            if (autoResetLocked) return;
 
-        if (autoResetLocked) return;
-
-        paidChestCount++;
-        int chests = manager.getChests();
-        if (paidChestCount >= 5 && chests >= ChestCounterManager.MAX_CHESTS) {
-            manager.reset();
-            resetRuntimeState();
-            MessageUtil.sendFormattedMessage("§fChest tracker reset automatically (chests opened).");
-            playLevelUp(1.0f);
+            paidChestCount++;
+            int chests = manager.getChests();
+            if (paidChestCount >= 5 && chests >= ChestCounterManager.MAX_CHESTS) {
+                manager.reset();
+                resetRuntimeState();
+                MessageUtil.sendFormattedMessage("§fChest tracker reset automatically (chests opened).");
+                playLevelUp(1.0f);
+            }
         }
     }
 

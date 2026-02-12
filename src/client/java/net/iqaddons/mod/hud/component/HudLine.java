@@ -4,17 +4,21 @@ import lombok.Data;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 @Data
 public class HudLine {
 
     private String text;
+    private Text textComponent;
     private OrderedText orderedText;
 
     private boolean shadow = true;
@@ -30,13 +34,22 @@ public class HudLine {
     private boolean hovered = false;
     private BooleanSupplier visibilityCondition = () -> true;
 
+    private Style minecraftStyle = Style.EMPTY;
+
     private HudLine(@NotNull String text) {
-        this.text = text;
-        this.orderedText = Text.of(text).asOrderedText();
+        this(Text.literal(text));
+    }
+
+    private HudLine(@NotNull Text textComponent) {
+        updateTextComponent(textComponent);
     }
 
     public static @NotNull HudLine of(@NotNull String text) {
         return new HudLine(text);
+    }
+
+    public static @NotNull HudLine of(@NotNull Text textComponent) {
+        return new HudLine(textComponent);
     }
 
     public static @NotNull HudLine formatted(@NotNull String format, Object... args) {
@@ -54,10 +67,32 @@ public class HudLine {
     }
 
     public @NotNull HudLine text(@NotNull String text) {
-        this.text = text;
-        this.orderedText = Text.of(text).asOrderedText();
-        this.cachedWidth = -1;
+        updateTextComponent(Text.literal(text));
         return this;
+    }
+
+    public HudLine text(@NotNull Text text) {
+        updateTextComponent(text);
+        return this;
+    }
+
+    public @NotNull HudLine withStyle(@NotNull UnaryOperator<Style> style) {
+        this.minecraftStyle = style.apply(this.minecraftStyle);
+        refreshOrderedText();
+        return this;
+    }
+
+    private void updateTextComponent(@NotNull Text newTextComponent) {
+        this.textComponent = newTextComponent.copy();
+        this.text = newTextComponent.getString();
+        refreshOrderedText();
+    }
+
+    private void refreshOrderedText() {
+        this.orderedText = textComponent.copy()
+                .styled(style -> style.withParent(minecraftStyle))
+                .asOrderedText();
+        this.cachedWidth = -1;
     }
 
     public int getWidth(@NotNull TextRenderer textRenderer) {
