@@ -39,6 +39,15 @@ public class KuudraGeneralConfig {
     @Comment("Set your Crimson Isle faction for better profit calculations")
     public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
 
+
+    @ConfigEntry(
+            id = "armorValueType",
+            translation = "Armor Value Type"
+    )
+    @ConfigOption.Select
+    @Comment("Choose whether to value armor based on its salvage value or auction house value in the profit tracker")
+    public static ArmorValueType armorValueType = ArmorValueType.SALVAGE;
+
     @ConfigEntry(
             id = "kuudraPetBonus",
             translation = "Kuudra Pet Bonus"
@@ -103,4 +112,8 @@ public class KuudraGeneralConfig {
     )
     @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
+
+    public enum ArmorValueType {
+        SALVAGE, AUCTION
+    }
 }
