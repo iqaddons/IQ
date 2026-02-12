@@ -88,7 +88,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         rerolls.text("§fRerolls: §b" + data.rerolls + "§7/§d" + data.shardRerolls + " §7(§c-" + formatCoins(data.rerollCostCoins) + "§7)");
         var avgTimeSeconds = data.averageRunMillis() / 1000.0;
         avg.text("§fAvg Time: §b" + getAverageTimeColor(avgTimeSeconds) + TimeUtils.formatTime(avgTimeSeconds));
-        totalTime.text("§fTime: §b" + TimeUtils.formatTime(data.totalRunMillis / 1000.0));
+        totalTime.text("§fTime: §b" + TimeUtils.formatTime(data.totalRunMillis));
         rate.text("§fRate: §a" + formatCoins(Math.max(0, data.hourlyRateCoins())) + "/hr");
 
         markDimensionsDirty();
