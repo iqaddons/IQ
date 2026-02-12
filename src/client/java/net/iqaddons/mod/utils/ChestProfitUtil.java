@@ -83,7 +83,6 @@ public final class ChestProfitUtil {
         ChestContents contents = new ChestContents(chestItems, parseKeyType(slots));
         double totalValue = CHEST_PROFIT_CALCULATOR.calculateTotalValue(contents);
         double keyCost = ItemPriceManager.get().calculateKeyPrice(contents.keyType());
-        log.info("Calculated chest value breakdown: totalValue={}, keyCost={}, netProfit={}", totalValue, keyCost, totalValue - keyCost);
 
         return new ChestValueBreakdown(
                 totalValue, keyCost,
