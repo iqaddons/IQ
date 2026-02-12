@@ -4,6 +4,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.Category;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import net.iqaddons.mod.model.profit.CrimsonFaction;
 
 @Category(
         value = "Kuudra Utilities"
@@ -32,6 +33,14 @@ public class KuudraGeneralConfig {
     )
     @Comment("Track your profit/loss after each Kuudra run and display it")
     public static boolean kuudraProfitTracker = false;
+
+    @ConfigEntry(
+            id = "crimsonIsleFaction",
+            translation = "Crimson Isle Faction"
+    )
+    @ConfigOption.Select
+    @Comment("Set your Crimson Isle faction for better profit calculations")
+    public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
 
     @ConfigEntry(
             id = "chestCounterTracker",

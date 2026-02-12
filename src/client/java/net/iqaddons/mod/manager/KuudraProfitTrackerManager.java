@@ -2,8 +2,8 @@ package net.iqaddons.mod.manager;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.model.profit.ChestData;
-import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.model.profit.chest.ChestData;
+import net.iqaddons.mod.model.profit.chest.ChestType;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.data.DataKey;

@@ -1,8 +1,8 @@
 package net.iqaddons.mod.utils;
 
-import net.iqaddons.mod.manager.KuudraPriceCacheManager;
-import net.iqaddons.mod.model.profit.ChestData;
-import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.manager.ItemPriceManager;
+import net.iqaddons.mod.model.profit.chest.ChestData;
+import net.iqaddons.mod.model.profit.chest.ChestType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
@@ -24,7 +24,7 @@ public final class ChestProfitUtil {
 
     public static @NotNull ChestData parseChest(
             @NotNull List<Slot> slots,
-            @NotNull KuudraPriceCacheManager priceCache,
+            @NotNull ItemPriceManager priceCache,
             @NotNull ChestType chestType
     ) {
         long grossValue = 0L;
@@ -81,7 +81,7 @@ public final class ChestProfitUtil {
         );
     }
 
-    private static long parseKeyCost(@NotNull List<Slot> slots, @NotNull KuudraPriceCacheManager priceCache) {
+    private static long parseKeyCost(@NotNull List<Slot> slots, @NotNull ItemPriceManager priceCache) {
         if (31 >= slots.size()) return 0L;
 
         ItemStack buyStack = slots.get(31).getStack();

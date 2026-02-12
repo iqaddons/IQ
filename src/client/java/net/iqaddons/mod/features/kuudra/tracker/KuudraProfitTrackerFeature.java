@@ -7,10 +7,10 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
-import net.iqaddons.mod.manager.KuudraPriceCacheManager;
+import net.iqaddons.mod.manager.ItemPriceManager;
 import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
-import net.iqaddons.mod.model.profit.ChestData;
-import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.model.profit.chest.ChestData;
+import net.iqaddons.mod.model.profit.chest.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 public class KuudraProfitTrackerFeature extends Feature {
 
     private final KuudraProfitTrackerManager manager = KuudraProfitTrackerManager.get();
-    private final KuudraPriceCacheManager priceCache = KuudraPriceCacheManager.get();
+    private final ItemPriceManager priceCache = ItemPriceManager.get();
 
     public KuudraProfitTrackerFeature() {
         super("kuudraProfitTracker", "Kuudra Profit Tracker",

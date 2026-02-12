@@ -5,7 +5,7 @@ import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
-import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.model.profit.chest.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
