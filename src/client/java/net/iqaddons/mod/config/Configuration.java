@@ -48,7 +48,7 @@ public class Configuration {
             id = "fixFishingHook",
             translation = "Fix Fishing Hook"
     )
-    @Comment("Fix the fishing hook block when throw the rod (W.I.P)")
+    @Comment("Fix the fishing hook block when throw the rod")
     public static boolean fixFishingHook = true;
 
     @ConfigOption.Separator("Wardrobe")

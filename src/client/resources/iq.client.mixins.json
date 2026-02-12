@@ -21,6 +21,7 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "EntityGlowMixin"
+    "EntityGlowMixin",
+    "FishingHookMixin"
   ]
 }
