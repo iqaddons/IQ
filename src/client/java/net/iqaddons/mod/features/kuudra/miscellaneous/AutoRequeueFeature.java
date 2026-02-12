@@ -69,9 +69,13 @@ public class AutoRequeueFeature extends Feature {
         MessageUtil.INFO.sendMessage("§aAuto Requeue: executing §f/instancerequeue§a.");
         log.info("Executed auto-requeue command");
     }
-
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.contains("You are not allowed to use that command as a spectator!")) {
+            pendingRequeueTicks = 15;
+            return;
+        }
+
         Matcher matcher = PARTY_DT_PATTERN.matcher(message);
         if (!matcher.find()) return;
 
