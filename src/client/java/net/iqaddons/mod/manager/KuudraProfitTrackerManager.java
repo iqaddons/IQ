@@ -14,6 +14,8 @@ import java.nio.file.Files;
 @Slf4j
 public final class KuudraProfitTrackerManager {
 
+    private static final long SESSION_TIMEOUT_MILLIS = 5L * 60L * 1000L;
+
     private static final DataKey<PersistentKuudraProfit> PROFIT_KEY = DataKey.of("kuudraProfit", PersistentKuudraProfit.class);
     private static final KuudraProfitTrackerManager INSTANCE = new KuudraProfitTrackerManager();
 
@@ -22,6 +24,7 @@ public final class KuudraProfitTrackerManager {
     private volatile ProfitData lifetime = new ProfitData();
     private volatile ProfitData session = new ProfitData();
     private volatile ProfitScope currentScope = ProfitScope.SESSION;
+    private volatile long lastKuudraActivityAt = 0L;
 
     private KuudraProfitTrackerManager() {
         PersistentKuudraProfit persisted = store.getOrDefault(PROFIT_KEY, new PersistentKuudraProfit());
@@ -31,6 +34,12 @@ public final class KuudraProfitTrackerManager {
             currentScope = persisted.scope == null
                     ? ProfitScope.SESSION
                     : persisted.scope;
+            lastKuudraActivityAt = Math.max(0L, persisted.lastActivityAt);
+        }
+
+        if (isSessionExpired()) {
+            session = new ProfitData();
+            save();
         }
     }
 
@@ -39,28 +48,37 @@ public final class KuudraProfitTrackerManager {
     }
 
     public synchronized void onRunEnd(long runMillis, boolean failed) {
-        long safeRunMillis = Math.max(0L, runMillis);
+        expireSessionIfNeeded();
 
+        long safeRunMillis = Math.max(0L, runMillis);
         updateRun(lifetime, safeRunMillis, failed);
         updateRun(session, safeRunMillis, failed);
+        lastKuudraActivityAt = System.currentTimeMillis();
 
         save();
     }
 
     public synchronized void onChestBought(ChestData chest) {
+        expireSessionIfNeeded();
+
         updateChest(lifetime, chest);
         updateChest(session, chest);
+        lastKuudraActivityAt = System.currentTimeMillis();
         save();
     }
 
     public synchronized void onReroll(boolean shard, long rerollCost) {
+        expireSessionIfNeeded();
+
         updateReroll(lifetime, shard, rerollCost);
         updateReroll(session, shard, rerollCost);
+        lastKuudraActivityAt = System.currentTimeMillis();
         save();
     }
 
     public synchronized void resetSession() {
         session = new ProfitData();
+        lastKuudraActivityAt = 0L;
         save();
     }
 
@@ -72,6 +90,7 @@ public final class KuudraProfitTrackerManager {
     public synchronized void resetAll() {
         lifetime = new ProfitData();
         session = new ProfitData();
+        lastKuudraActivityAt = 0L;
         save();
     }
 
@@ -81,6 +100,14 @@ public final class KuudraProfitTrackerManager {
 
     public @NotNull ProfitData session() {
         return session.copy();
+    }
+
+    public synchronized void expireSessionIfNeeded() {
+        if (isSessionExpired()) {
+            session = new ProfitData();
+            lastKuudraActivityAt = 0L;
+            save();
+        }
     }
 
     public @NotNull ProfitScope scope() {
@@ -137,8 +164,12 @@ public final class KuudraProfitTrackerManager {
                 || persisted.lifetime.profit != 0 || persisted.session.profit != 0;
     }
 
+    private boolean isSessionExpired() {
+        return lastKuudraActivityAt > 0L && (System.currentTimeMillis() - lastKuudraActivityAt) > SESSION_TIMEOUT_MILLIS;
+    }
+
     private synchronized void save() {
-        store.set(PROFIT_KEY, new PersistentKuudraProfit(lifetime, session, currentScope));
+        store.set(PROFIT_KEY, new PersistentKuudraProfit(lifetime, session, currentScope, lastKuudraActivityAt));
     }
 
     @AllArgsConstructor
@@ -147,11 +178,13 @@ public final class KuudraProfitTrackerManager {
         public ProfitData lifetime;
         public ProfitData session;
         public ProfitScope scope;
+        public long lastActivityAt;
 
         public PersistentKuudraProfit() {
             this.lifetime = new ProfitData();
             this.session = new ProfitData();
             this.scope = ProfitScope.SESSION;
+            this.lastActivityAt = 0L;
         }
     }
 }

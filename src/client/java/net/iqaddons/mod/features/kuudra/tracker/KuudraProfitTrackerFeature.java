@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra.tracker;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
@@ -29,9 +30,16 @@ public class KuudraProfitTrackerFeature extends Feature {
     protected void onActivate() {
         priceCache.refreshAsyncIfStale();
 
+        subscribe(ClientTickEvent.class, this::onClientTick);
         subscribe(KuudraRunEndEvent.class, this::onKuudraRunEnd);
         subscribe(KuudraChestOpenEvent.class, this::onKuudraChestOpen);
         subscribe(KuudraChestRerollEvent.class, this::onKuudraChestReroll);
+    }
+
+    private void onClientTick(@NotNull ClientTickEvent event) {
+        if (!event.isNthTick(20)) return;
+
+        manager.expireSessionIfNeeded();
     }
 
     private void onKuudraRunEnd(@NotNull KuudraRunEndEvent event) {
