@@ -38,7 +38,7 @@ public class FreshCountdownWidget extends HudWidget {
         setEnabledSupplier(() -> PhaseTwoConfig.freshCountdown);
         setVisibilityCondition(() -> freshActive && stateManager.phase() == KuudraPhase.BUILD);
 
-        setExampleLines(HudLine.of("§8.5s"));
+        setExampleLines(HudLine.of("§a8.5s"));
     }
 
     @Override
