@@ -10,6 +10,13 @@ import java.awt.*;
 )
 public class PhaseTwoConfig {
 
+    @ConfigEntry(
+            id = "luckyBuild",
+            translation = "Lucky Build Things"
+    )
+    @Comment("Give you some extra luck during the build phase ❤")
+    public static boolean luckyBuild = true;
+
     @ConfigOption.Separator("Build Waypoints")
     @ConfigEntry(
             id = "buildHelper",

@@ -16,5 +16,23 @@
         "stream": false
       }
     ]
+  },
+  "lucky_build": {
+    "subtitle": "iq.sound.lucky_build",
+    "sounds": [
+      {
+        "name": "iq:lucky_build",
+        "stream": false
+      }
+    ]
+  },
+  "lucky_build_end": {
+    "subtitle": "iq.sound.lucky_build_end",
+    "sounds": [
+      {
+        "name": "iq:lucky_build_end",
+        "stream": false
+      }
+    ]
   }
 }
