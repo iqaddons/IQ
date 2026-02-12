@@ -7,5 +7,14 @@
         "stream": false
       }
     ]
+  },
+  "ballista_build": {
+    "subtitle": "iq.sound.ballista_build",
+    "sounds": [
+      {
+        "name": "iq:ballista_build",
+        "stream": false
+      }
+    ]
   }
 }

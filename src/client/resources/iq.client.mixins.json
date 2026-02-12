@@ -12,7 +12,8 @@
     "HandledScreenMixin",
     "HudClickMixin",
     "InGameHudMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "feature.BallistaBuildSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -22,6 +23,6 @@
   },
   "mixins": [
     "EntityGlowMixin",
-    "FishingHookMixin"
+    "feature.FishingBooberFixMixin"
   ]
 }

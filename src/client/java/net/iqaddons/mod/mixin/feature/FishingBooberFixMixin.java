@@ -1,4 +1,4 @@
-package net.iqaddons.mod.mixin;
+package net.iqaddons.mod.mixin.feature;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(FishingBobberEntity.class)
-public abstract class FishingHookMixin extends ProjectileEntity {
+public abstract class FishingBooberFixMixin extends ProjectileEntity {
 
-    public FishingHookMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
+    public FishingBooberFixMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
         super(entityType, world);
     }
 
