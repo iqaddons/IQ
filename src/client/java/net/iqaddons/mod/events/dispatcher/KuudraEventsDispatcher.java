@@ -8,6 +8,7 @@ import net.iqaddons.mod.events.dispatcher.detector.SupplyDetector;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
+import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.utils.ScoreboardUtils;
@@ -34,6 +35,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         subscribe(ClientTickEvent.class, this::onClientTick);
         subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(ScreenClickEvent.class, this::onScreenClick);
+        subscribe(TitleReceivedEvent.class, this::onTitleReceived);
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
@@ -76,7 +78,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         if (!onSkyBlock) return;
-        if (!currentArea.toLowerCase().contains(KUUDRA_AREA_ID.toLowerCase())) return;
+        if (isOutOfKuudra()) return;
 
         String message = event.getStrippedMessage();
         supplyDetector.detect(event, message, EventBus::post);
@@ -87,6 +89,17 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         if (!onSkyBlock) return;
 
         chestInteractionDetector.detect(event, lastTickCount, EventBus::post);
+    }
+
+    private void onTitleReceived(TitleReceivedEvent event) {
+        if (!onSkyBlock) return;
+        if (isOutOfKuudra()) return;
+
+        supplyDetector.detectProgress(event, EventBus::post);
+    }
+
+    private boolean isOutOfKuudra() {
+        return !currentArea.toLowerCase().contains(KUUDRA_AREA_ID.toLowerCase());
     }
 
     @Override

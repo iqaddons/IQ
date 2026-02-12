@@ -31,6 +31,7 @@ public final class SupplyStateManager {
     private volatile Instant suppliesPhaseStart = null;
     private volatile int missingPre = 0;
     private volatile int suppliesCollected = 0;
+    private volatile int currentSupplyProgress = 0;
 
     public void startSuppliesPhase() {
         suppliesPhaseStart = Instant.now();
@@ -101,6 +102,16 @@ public final class SupplyStateManager {
         }
     }
 
+    public boolean setSupplyProgress(int value) {
+        if (value != currentSupplyProgress) {
+            currentSupplyProgress = value;
+            log.debug("Current supply progress set to: {}", value);
+            return true;
+        }
+
+         return false;
+    }
+
     public void reset() {
         activeSupplies.clear();
         remainingPiles.clear();
@@ -112,6 +123,7 @@ public final class SupplyStateManager {
 
         missingPre = 0;
         suppliesCollected = 0;
+        currentSupplyProgress = 0;
         log.debug("Supply state reset");
     }
 

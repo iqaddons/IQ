@@ -1,4 +1,4 @@
-package net.iqaddons.mod.events.impl.skyblock;
+package net.iqaddons.mod.events.impl.skyblock.supply;
 
 import net.iqaddons.mod.events.Event;
 import org.jetbrains.annotations.NotNull;

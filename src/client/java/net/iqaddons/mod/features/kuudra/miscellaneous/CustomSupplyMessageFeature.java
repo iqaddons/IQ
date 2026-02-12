@@ -2,7 +2,7 @@ package net.iqaddons.mod.features.kuudra.miscellaneous;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
@@ -29,14 +29,14 @@ public class CustomSupplyMessageFeature extends KuudraFeature {
             supplyState.startSuppliesPhase();
         }
 
-        subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
+        subscribe(SupplyPlaceEvent.class, this::onSupplyPlace);
     }
 
-    private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
+    private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
         MessageUtil.sendFormattedMessage(String.format(
                 "%s §arecovered a supply in %s%.2fs §r§8(%s/6)",
                 event.playerName(), supplyState.getTimeColor(),
-                event.pickupAt(), event.currentSupply()
+                event.placedAt(), event.currentSupply()
         ));
     }
 }
