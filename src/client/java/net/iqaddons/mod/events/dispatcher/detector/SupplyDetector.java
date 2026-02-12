@@ -71,6 +71,13 @@ public final class SupplyDetector {
             String droppedBy = StringUtils.extractFormattedPlayerName(TextFormatUtil.toLegacyString(event.getText()));
             postEvent.accept(new SupplyDropEvent(droppedBy));
         }
+
+        if (message.contains("You moved and the Chest slipped out of your hands!")) {
+            var player = client.player;
+            if (player == null) return;
+
+            postEvent.accept(new SupplyDropEvent(player.getName().getString()));
+        }
     }
 
     public void detectProgress(@NotNull TitleReceivedEvent event, Consumer<Event> postEvent) {
