@@ -20,8 +20,7 @@ public class ChestCounterTrackerFeature extends Feature {
 
     private final ChestCounterManager manager = ChestCounterManager.get();
 
-    private int paidChestCount;
-    private boolean autoResetLocked;
+    private int chestCount;
     private long lastRunTimestamp;
 
     public ChestCounterTrackerFeature() {
@@ -51,7 +50,7 @@ public class ChestCounterTrackerFeature extends Feature {
         }
 
         if (current == 59 && KuudraGeneralConfig.chestCounterPartyAnnouncements) {
-            MessageUtil.PARTY.sendMessage("[IQ] Run 59/60, opening chests next run.");
+            MessageUtil.PARTY.sendMessage("!dt [IQ] Run 59/60, opening chests next run.");
         }
 
         if (current == ChestCounterManager.MAX_CHESTS) {
@@ -67,11 +66,9 @@ public class ChestCounterTrackerFeature extends Feature {
 
     private void onChestOpen(@NotNull KuudraChestOpenEvent event) {
         if (event.chestType() == ChestType.PAID) {
-            if (autoResetLocked) return;
-
-            paidChestCount++;
+            chestCount++;
             int chests = manager.getChests();
-            if (paidChestCount >= 5 && chests >= ChestCounterManager.MAX_CHESTS) {
+            if (chestCount >= 5 && chests >= ChestCounterManager.MAX_CHESTS) {
                 manager.reset();
                 resetRuntimeState();
                 MessageUtil.sendFormattedMessage("§fChest tracker reset automatically (chests opened).");
@@ -89,15 +86,10 @@ public class ChestCounterTrackerFeature extends Feature {
             overlayVisible = false;
             MessageUtil.sendFormattedMessage("§fNo runs completed in the last 3 minutes. Overlay hidden.");
         }
-
-        if (manager.getChests() < ChestCounterManager.MAX_CHESTS) {
-            autoResetLocked = false;
-        }
     }
 
     private void resetRuntimeState() {
-        paidChestCount = 0;
-        autoResetLocked = false;
+        chestCount = 0;
         overlayVisible = false;
         lastRunTimestamp = 0L;
     }
