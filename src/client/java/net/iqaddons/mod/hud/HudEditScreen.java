@@ -85,16 +85,8 @@ public class HudEditScreen extends Screen {
             maxWidth = Math.max(maxWidth, client.textRenderer.getWidth(line));
         }
 
-        /*context.fill(
-                x - 3,
-                y - 3,
-                x + maxWidth + 3,
-                y + (helpLines.size() * lineHeight) + 2,
-                new Color(0, 0, 0, 120).getRGB()
-        );*/
-
         for (String line : helpLines) {
-            context.drawText(client.textRenderer, line, x, y, 0xFFFFFF, false);
+            context.drawTextWithShadow(client.textRenderer, line, x, y, 0xFFFFFFFF);
             y += lineHeight;
         }
 
