@@ -1,6 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
+import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyProgressEvent;
@@ -9,6 +10,9 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.MessageUtil;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -46,10 +50,10 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        /*subscribe(TitleReceivedEvent.class, event -> {
+        subscribe(TitleReceivedEvent.class, event -> {
             if (currentProgress.isEmpty()) return;
             clearProgress();
-        });*/
+        });
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
 
@@ -58,14 +62,19 @@ public class SupplyProgressWidget extends HudWidget {
 
 
     private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
-        if (event.getCurrentProgress() == 100) {
-            clearProgress();
-            return;
-        }
-
         currentProgress = event.getProgressText();
         progressLine.text(currentProgress);
         markDimensionsDirty();
+
+        if (event.getCurrentProgress() == 100) {
+            clearProgress();
+            MessageUtil.showTitle("§a§lSUPPLY PICKED UP!", "", 10, 40, 10);
+            mc.world.playSound(
+                    mc.player, mc.player.getBlockPos(),
+                    SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
+                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            );
+        }
 
         event.setCancelled(true);
     }
