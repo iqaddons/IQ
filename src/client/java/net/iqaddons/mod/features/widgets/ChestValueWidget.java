@@ -46,7 +46,7 @@ public class ChestValueWidget extends HudWidget {
     @Override
     protected void onActivate() {
         subscribe(ClientTickEvent.class, event -> {
-            if (!event.isNthTick(2)) return;
+            if (!event.isNthTick(20)) return;
             updateFromCurrentChest();
         });
 

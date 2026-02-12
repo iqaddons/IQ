@@ -45,7 +45,6 @@ public final class ChestInteractionDetector {
         ChestWindowState state = windowStates.computeIfAbsent(windowId, key -> new ChestWindowState());
         state.lastInteractionTick = tickCount;
 
-
         if (slot.id == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this chest")) {
             state.rerolled = true;
             postEvent.accept(new KuudraChestRerollEvent(windowId, KuudraChestRerollEvent.RerollType.ITEMS));
@@ -101,7 +100,7 @@ public final class ChestInteractionDetector {
                 .map(StringUtils::stripFormatting)
                 .anyMatch(str -> str.contains("Already opened!")
                         || str.contains("Chest already opened!")
-                        || str.contains("You have already opened this chest!")
+                        || str.contains("You have already opened a chest!")
                 );
     }
 

@@ -61,7 +61,7 @@ public final class ItemPriceManager {
         return Math.max(0L, Math.round(calculateKeyPrice(keyType)));
     }
 
-    public @NotNull Optional<Double> getPrice(String itemId) {
+    private @NotNull Optional<Double> getPrice(String itemId) {
         Lock readLock = lock.readLock();
         readLock.lock();
         try {

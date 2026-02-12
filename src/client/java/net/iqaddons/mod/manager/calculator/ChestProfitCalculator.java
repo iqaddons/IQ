@@ -1,5 +1,6 @@
 package net.iqaddons.mod.manager.calculator;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.manager.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.impl.GenericValueCalculator;
 import net.iqaddons.mod.model.profit.chest.data.ChestContents;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 public class ChestProfitCalculator {
 
     private final ItemPriceManager priceManager = ItemPriceManager.get();
@@ -26,15 +28,6 @@ public class ChestProfitCalculator {
         this.defaultCalculator = defaultCalculator;
         this.calculators = calculators;
         this.itemIdResolver = itemIdResolver;
-    }
-
-    public double calculateProfit(@NotNull ChestContents contents) {
-        double totalValue = contents.items().stream()
-                .mapToDouble(this::calculateItemValue)
-                .sum();
-
-        double keyCost = priceManager.calculateKeyPrice(contents.keyType());
-        return totalValue - keyCost;
     }
 
     public double calculateTotalValue(@NotNull ChestContents contents) {
