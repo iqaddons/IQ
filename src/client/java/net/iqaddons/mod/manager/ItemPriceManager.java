@@ -6,7 +6,7 @@ import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.manager.pricing.AuctionPriceProvider;
 import net.iqaddons.mod.manager.pricing.BazaarPriceProvider;
 import net.iqaddons.mod.manager.pricing.PriceProvider;
-import net.iqaddons.mod.model.profit.chest.ChestKeyType;
+import net.iqaddons.mod.model.profit.chest.type.ChestKeyType;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.http.HttpClient;
@@ -78,6 +78,18 @@ public final class ItemPriceManager {
         }
     }
 
+    public double calculateKeyPrice(ChestKeyType key) {
+        if (key == ChestKeyType.FREE || key == ChestKeyType.UNKNOWN) {
+            log.info("Attempted to calculate price for key type {}. Returning 0.", key);
+            return 0D;
+        }
+
+        double netherStar = getPrice("NETHER_STAR").orElse(0D);
+        double factionMaterial = getPrice(KuudraGeneralConfig.crimsonIsleFaction.getMaterialId()).orElse(0D);
+
+        return key.getBaseCoinsCost() + (2 * netherStar) + (key.getMaterialAmount() * factionMaterial);
+    }
+
     private void updateAll() {
         Lock writeLock = lock.writeLock();
         writeLock.lock();
@@ -88,18 +100,15 @@ public final class ItemPriceManager {
         }
     }
 
-    private double calculateKeyPrice(ChestKeyType key) {
-        if (key == ChestKeyType.FREE || key == ChestKeyType.UNKNOWN) {
-            return 0D;
-        }
-
-        double netherStar = getPrice("NETHER_STAR").orElse(0D);
-        double factionMaterial = getPrice(KuudraGeneralConfig.crimsonIsleFaction.getMaterialId()).orElse(0D);
-
-        return key.getBaseCoinsCost() + (2 * netherStar) + (key.getMaterialAmount() * factionMaterial);
-    }
-
     public static @NotNull ItemPriceManager get() {
         return INSTANCE;
+    }
+
+    public long getKismetPrice() {
+        return getItemPrice("KISMET_FEATHER");
+    }
+
+    public long getWheelOfFatePrice() {
+        return getItemPrice("WHEEL_OF_FATE");
     }
 }

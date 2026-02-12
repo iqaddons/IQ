@@ -7,7 +7,7 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
-import net.iqaddons.mod.model.profit.chest.ChestType;
+import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;

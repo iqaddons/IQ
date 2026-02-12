@@ -5,7 +5,7 @@ import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
-import net.iqaddons.mod.model.profit.chest.ChestType;
+import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -38,12 +38,13 @@ public final class ChestInteractionDetector {
         if (chestType == ChestType.UNKNOWN) return;
 
         Slot slot = event.getSlot();
-        if (slot == null) return;
+        if (slot == null || isOpened(slot.getStack())) return;
 
         ScreenHandler handler = screen.getScreenHandler();
         int windowId = handler.syncId;
         ChestWindowState state = windowStates.computeIfAbsent(windowId, key -> new ChestWindowState());
         state.lastInteractionTick = tickCount;
+
 
         if (slot.id == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this chest")) {
             state.rerolled = true;
@@ -53,7 +54,10 @@ public final class ChestInteractionDetector {
 
         if (slot.id == SHARD_REROLL_SLOT && !state.shardRerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this shard")) {
             state.shardRerolled = true;
-            postEvent.accept(new KuudraChestRerollEvent(windowId, KuudraChestRerollEvent.RerollType.SHARD));
+            postEvent.accept(new KuudraChestRerollEvent(
+                    windowId,
+                    KuudraChestRerollEvent.RerollType.SHARD)
+            );
             return;
         }
 
@@ -61,7 +65,10 @@ public final class ChestInteractionDetector {
         if (!isBuyAction(slot.getStack())) return;
 
         state.bought = true;
-        postEvent.accept(new KuudraChestOpenEvent(windowId, title, handler.slots, chestType));
+        postEvent.accept(new KuudraChestOpenEvent(
+                windowId, title,
+                handler.slots, chestType)
+        );
     }
 
     public void evictExpired(long tickCount) {
@@ -78,8 +85,24 @@ public final class ChestInteractionDetector {
             return false;
         }
 
-        String name = StringUtils.stripFormatting(stack.getName().getString());
-        return name.equalsIgnoreCase("Open Reward Chest") || name.equalsIgnoreCase("Opened Reward Chest");
+        return ChestProfitUtil.getLoreLines(stack)
+                .stream()
+                .map(StringUtils::stripFormatting)
+                .anyMatch(str -> str.contains("Click to open!"));
+    }
+
+    private boolean isOpened(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+
+        return ChestProfitUtil.getLoreLines(stack)
+                .stream()
+                .map(StringUtils::stripFormatting)
+                .anyMatch(str -> str.contains("Already opened!")
+                        || str.contains("Chest already opened!")
+                        || str.contains("You have already opened this chest!")
+                );
     }
 
     private static final class ChestWindowState {

@@ -93,7 +93,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 data.chestsOpened, data.paidChests, data.freeChests)
         );
 
-        rerolls.text(String.format("§fRerolls: §b%s/%s §8(§c-%s§8)",
+        rerolls.text(String.format("§fRerolls: §b%sC/%sS §8(§c-%s§8)",
                 data.rerolls, data.shardRerolls, formatCoins(data.rerollCostCoins))
         );
 

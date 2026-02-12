@@ -28,7 +28,6 @@ public final class ProfitData {
 
     public long pricedItems;
     public long essence;
-    public long teeth;
 
     public long averageRunMillis() {
         if (runs <= 0) {
@@ -55,7 +54,7 @@ public final class ProfitData {
         return new ProfitData(
                 runs, failedRuns, totalRunMillis, chestsOpened, paidChests, freeChests,
                 rerolls, shardRerolls, grossCoins, profit, keyCostCoins,
-                rerollCostCoins, pricedItems, essence, teeth
+                rerollCostCoins, pricedItems, essence
         );
     }
 }

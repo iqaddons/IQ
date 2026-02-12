@@ -1,4 +1,4 @@
-package net.iqaddons.mod.model.profit.chest;
+package net.iqaddons.mod.model.profit.chest.type;
 
 public enum ChestType {
 
