@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.hud.config.HudElementConfig;
 import net.iqaddons.mod.hud.element.HudElement;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.utils.HudRenderer;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -48,9 +47,9 @@ public class HudEditScreen extends Screen {
         }
 
         HudManager.get().renderAll(context, mouseX, mouseY, delta);
-        renderHelpText(context);
 
         super.render(context, mouseX, mouseY, delta);
+        renderHelpText(context);
     }
 
     private void renderGrid(@NotNull DrawContext context) {
@@ -66,6 +65,8 @@ public class HudEditScreen extends Screen {
     }
 
     private void renderHelpText(@NotNull DrawContext context) {
+        if (client == null || client.textRenderer == null) return;
+
         List<String> helpLines = List.of(
                 "§e[Drag]§7 Move element",
                 "§e[Scroll]§7 Scale",
@@ -74,14 +75,38 @@ public class HudEditScreen extends Screen {
                 "§e[R]§7 Reset selected | §e[ESC]§7 Save & close"
         );
 
-        int y = height - helpLines.size() * 10 - 5;
+        int lineHeight = client.textRenderer.fontHeight + 1;
+        int padding = 5;
+        int x = 5;
+        int y = height - (helpLines.size() * lineHeight) - padding;
+
+        int maxWidth = 0;
         for (String line : helpLines) {
-            HudRenderer.drawText(context, line, 5, y, 0xFFFFFF);
-            y += 10;
+            maxWidth = Math.max(maxWidth, client.textRenderer.getWidth(line));
         }
 
-        String snapStatus = snapToGrid ? "§aSnap: ON" : "§cSnap: OFF";
-        HudRenderer.drawText(context, snapStatus, width - HudRenderer.getTextWidth(snapStatus) - 5, 5, 0xFFFFFF);
+        /*context.fill(
+                x - 3,
+                y - 3,
+                x + maxWidth + 3,
+                y + (helpLines.size() * lineHeight) + 2,
+                new Color(0, 0, 0, 120).getRGB()
+        );*/
+
+        for (String line : helpLines) {
+            context.drawText(client.textRenderer, line, x, y, 0xFFFFFF, false);
+            y += lineHeight;
+        }
+
+        String snapStatus = snapToGrid ? "Snap: ON" : "Snap: OFF";
+        int snapColor = snapToGrid ? 0xFF55FF55 : 0xFFFF5555;
+        context.drawTextWithShadow(
+                client.textRenderer,
+                snapStatus,
+                width - client.textRenderer.getWidth(snapStatus) - 5,
+                5,
+                snapColor
+        );;
     }
 
     @Override

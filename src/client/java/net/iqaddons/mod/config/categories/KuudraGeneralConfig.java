@@ -1,9 +1,6 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 
 @Category(
@@ -41,6 +38,22 @@ public class KuudraGeneralConfig {
     @ConfigOption.Select
     @Comment("Set your Crimson Isle faction for better profit calculations")
     public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
+
+    @ConfigEntry(
+            id = "kuudraPetBonus",
+            translation = "Kuudra Pet Bonus"
+    )
+    @ConfigOption.Range(min = 0, max = 20)
+    @ConfigOption.Slider
+    @Comment("Calculate the bonus from your Kuudra pet level in the profit tracker")
+    public static int kuudraPetBonus = 0;
+
+    @ConfigEntry(
+            id = "chestValueWidget",
+            translation = "Chest Value Display"
+    )
+    @Comment("Display the value of each chest you open in an overlay")
+    public static boolean chestValueWidget = true;
 
     @ConfigEntry(
             id = "chestCounterTracker",

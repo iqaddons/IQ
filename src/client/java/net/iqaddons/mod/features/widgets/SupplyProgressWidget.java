@@ -15,8 +15,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class SupplyProgressWidget extends HudWidget {
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
@@ -39,7 +37,7 @@ public class SupplyProgressWidget extends HudWidget {
         setEnabledSupplier(() -> PhaseOneConfig.supplyProgressDisplay);
         setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.SUPPLIES);
 
-        setExampleLines(List.of(progressLine));
+        setExampleLines(HudLine.of("§8[§a|||||||||||||§f|||||||§8] §b69%§r"));
     }
 
     @Override
