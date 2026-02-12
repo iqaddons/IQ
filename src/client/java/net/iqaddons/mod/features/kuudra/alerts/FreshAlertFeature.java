@@ -10,6 +10,8 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -106,6 +108,12 @@ public class FreshAlertFeature extends KuudraFeature {
         if (event.selfFresh()) {
             MessageUtil.showTitle("§a§lFRESH!", "", 0, 20, 5);
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(event.buildingProgress()));
+
+            mc.world.playSound(
+                    mc.player, mc.player.getBlockPos(),
+                    SoundEvents.ENTITY_PLAYER_SPLASH,
+                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            );
         }
 
         applyFreshEffect(event.playerEntityId(), event.playerName());
