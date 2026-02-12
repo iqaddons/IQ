@@ -102,14 +102,11 @@ public final class SupplyStateManager {
         }
     }
 
-    public boolean setSupplyProgress(int value) {
+    public void setSupplyProgress(int value) {
         if (value != currentSupplyProgress) {
             currentSupplyProgress = value;
             log.debug("Current supply progress set to: {}", value);
-            return true;
         }
-
-         return false;
     }
 
     public void reset() {

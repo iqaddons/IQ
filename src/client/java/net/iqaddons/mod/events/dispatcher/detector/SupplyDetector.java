@@ -1,5 +1,6 @@
 package net.iqaddons.mod.events.dispatcher.detector;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
@@ -20,6 +21,7 @@ import java.util.regex.Matcher;
 
 import static net.iqaddons.mod.IQConstants.*;
 
+@Slf4j
 public final class SupplyDetector {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
@@ -47,11 +49,11 @@ public final class SupplyDetector {
             return;
         }
 
-        Matcher supplyMatcher = SUPPLY_PLACE_PATTERN.matcher(message);
-        if (supplyMatcher.find()) {
+        Matcher supplyPlacedMatcher = SUPPLY_PLACE_PATTERN.matcher(message);
+        if (supplyPlacedMatcher.find()) {
             event.setCancelled(PhaseOneConfig.supplyRecoverMessage);
 
-            String supplyCount = supplyMatcher.group(2);
+            String supplyCount = supplyPlacedMatcher.group(2);
             String formattedMessage = TextFormatUtil.toLegacyString(event.getText());
             double timeSeconds = supplyStateManager.getElapsedTimeMillis() / 1000.0;
 
@@ -67,35 +69,33 @@ public final class SupplyDetector {
         Matcher supplyDroppedMatcher = SUPPLY_DROPPED_PATTERN.matcher(message);
         if (supplyDroppedMatcher.find()) {
             String droppedBy = StringUtils.extractFormattedPlayerName(TextFormatUtil.toLegacyString(event.getText()));
-            postEvent.accept(new SupplyDropEvent(droppedBy, Integer.parseInt(supplyDroppedMatcher.group(2))));
+            postEvent.accept(new SupplyDropEvent(droppedBy));
         }
     }
 
     public void detectProgress(@NotNull TitleReceivedEvent event, Consumer<Event> postEvent) {
-        String title = TextFormatUtil.toLegacyString(event.getTitle());
-        Matcher progressMatcher = SUPPLY_PROGRESS_PATTERN.matcher(title);
-        if (progressMatcher.find()) {
+        var strippedMessage = event.getStrippedMessage();
+        Matcher progressMatcher = SUPPLY_PROGRESS_PATTERN.matcher(strippedMessage);
+        if (progressMatcher.matches()) {
             int progress = Integer.parseInt(progressMatcher.group(1));
 
-            boolean updated = supplyStateManager.setSupplyProgress(progress);
-            if (updated) {
-                var player = client.player;
-                if (player == null) return;
+            supplyStateManager.setSupplyProgress(progress);
+            var player = client.player;
+            if (player == null) return;
 
-                var playerPos = player.getEntityPos();
-                if (playerPos == null) return;
+            var playerPos = player.getEntityPos();
+            if (playerPos == null) return;
 
-                var progressEvent = new SupplyProgressEvent(
-                        supplyStateManager.findSupplyNear(playerPos, 3),
-                        PreSpot.fromPlayerPosition(playerPos),
-                        event.getMessage(),
-                        progress
-                );
+            var progressEvent = new SupplyProgressEvent(
+                    supplyStateManager.findSupplyNear(playerPos, 3),
+                    PreSpot.fromPlayerPosition(playerPos),
+                    event.getMessage(),
+                    progress
+            );
 
-                postEvent.accept(progressEvent);
-                if (progressEvent.isCancelled()) {
-                    event.setCancelled(true);
-                }
+            postEvent.accept(progressEvent);
+            if (progressEvent.isCancelled()) {
+                event.setCancelled(true);
             }
         }
     }

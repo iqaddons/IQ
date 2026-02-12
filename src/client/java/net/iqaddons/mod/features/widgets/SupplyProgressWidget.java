@@ -46,13 +46,25 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
+        /*subscribe(TitleReceivedEvent.class, event -> {
+            if (currentProgress.isEmpty()) return;
+            clearProgress();
+        });*/
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
+
+        subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
     }
 
+
     private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
-        progressLine.text(event.getProgressText());
+        if (event.getCurrentProgress() == 100) {
+            clearProgress();
+            return;
+        }
+
+        currentProgress = event.getProgressText();
+        progressLine.text(currentProgress);
         markDimensionsDirty();
 
         event.setCancelled(true);

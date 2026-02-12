@@ -77,8 +77,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
-        if (!onSkyBlock) return;
-        if (isOutOfKuudra()) return;
+        if (!onSkyBlock || isOutOfKuudra()) return;
 
         String message = event.getStrippedMessage();
         supplyDetector.detect(event, message, EventBus::post);
@@ -92,8 +91,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
     }
 
     private void onTitleReceived(TitleReceivedEvent event) {
-        if (!onSkyBlock) return;
-        if (isOutOfKuudra()) return;
+        if (!onSkyBlock || isOutOfKuudra()) return;
 
         supplyDetector.detectProgress(event, EventBus::post);
     }
