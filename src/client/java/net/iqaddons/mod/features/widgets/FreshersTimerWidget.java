@@ -31,7 +31,13 @@ public class FreshersTimerWidget extends HudWidget {
         );
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
-        setVisibilityCondition(() -> KuudraStateManager.get().phase() == KuudraPhase.BUILD);
+        setVisibilityCondition(() -> {
+            var phase = KuudraStateManager.get().phase();
+            return KuudraPhase.isOneOf(
+                    KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.DPS,
+                    KuudraPhase.SKIP, KuudraPhase.BOSS
+            ).test(phase);
+        });
 
         setExampleLines(List.of(
                 HudLine.of("§b§lFresh Timers §7[2]"),
