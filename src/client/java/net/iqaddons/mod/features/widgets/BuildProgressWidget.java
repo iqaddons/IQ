@@ -69,6 +69,12 @@ public class BuildProgressWidget extends HudWidget {
         subscribe(ClientTickEvent.class, this::onTick);
     }
 
+    @Override
+    protected void onDeactivate() {
+        currentProgress = 0;
+        freshCount = 0;
+    }
+
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
         if (event.selfFresh()) return;
 
