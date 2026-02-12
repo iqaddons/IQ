@@ -1,24 +1,25 @@
 package net.iqaddons.mod.features.widgets;
 
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyProgressEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.MessageUtil;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class SupplyProgressWidget extends HudWidget {
 
-    private static final Pattern SUPPLY_PROGRESS_PATTERN = Pattern.compile("^\\[[| ]+]\\s*\\d+%$");
-
     private final KuudraStateManager stateManager = KuudraStateManager.get();
-
     private final HudLine progressLine;
 
     private String currentProgress = "";
@@ -32,10 +33,11 @@ public class SupplyProgressWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        progressLine = HudLine.of("§8[§a|||||||||||||§f|||||||§8] §b69%§r");
+        progressLine = HudLine.of("§8[§a|||||||||||||§f|||||||§8] §b69%§r")
+                .showWhen(() -> !currentProgress.isEmpty());
 
         setEnabledSupplier(() -> PhaseOneConfig.supplyProgressDisplay);
-        setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.SUPPLIES && !currentProgress.isEmpty());
+        setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.SUPPLIES);
 
         setExampleLines(List.of(progressLine));
     }
@@ -48,34 +50,33 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        subscribe(TitleReceivedEvent.class, this::onTitleReceived);
-        subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(TitleReceivedEvent.class, event -> {
+            if (currentProgress.isEmpty()) return;
+            clearProgress();
+        });
+        subscribe(SupplyPickupEvent.class, event -> clearProgress());
+        subscribe(SupplyDropEvent.class, event -> clearProgress());
+
+        subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
     }
 
-    private void onTitleReceived(@NotNull TitleReceivedEvent event) {
-        if (stateManager.phase() != KuudraPhase.SUPPLIES) return;
 
-        String stripped = event.getStrippedMessage();
-        if (!SUPPLY_PROGRESS_PATTERN.matcher(stripped).matches()) return;
-
-        currentProgress = event.getMessage();
+    private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
+        currentProgress = event.getProgressText();
         progressLine.text(currentProgress);
         markDimensionsDirty();
 
+        if (event.getCurrentProgress() == 100) {
+            clearProgress();
+            MessageUtil.showTitle("§a§lSUPPLY PICKED UP!", "", 10, 40, 10);
+            mc.world.playSound(
+                    mc.player, mc.player.getBlockPos(),
+                    SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
+                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            );
+        }
+
         event.setCancelled(true);
-    }
-
-    private void onChatReceived(@NotNull ChatReceivedEvent event) {
-        String message = event.getStrippedMessage();
-
-        if (message.contains("You retrieved some of Elle's supplies from the Lava!")) {
-            clearProgress();
-            return;
-        }
-
-        if (message.contains("You moved and the Chest slipped out of your hands!")) {
-            clearProgress();
-        }
     }
 
     private void clearProgress() {

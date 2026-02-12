@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -149,7 +150,7 @@ public final class KuudraStateValidator {
 
     private @NotNull Optional<KuudraPhase> detectPhaseFromScoreboard() {
         for (String line : ScoreboardUtils.getLines()) {
-            String stripped = ScoreboardUtils.stripFormatting(line);
+            String stripped = StringUtils.stripFormatting(line);
             if (SUPPLIES_PATTERN.matcher(stripped).find()) {
                 return Optional.of(KuudraPhase.SUPPLIES);
             }

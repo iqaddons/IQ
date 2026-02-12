@@ -50,7 +50,6 @@ public abstract class WorldRendererMixin {
         MatrixStack matrices = new MatrixStack();
         matrices.multiplyPositionMatrix(positionMatrix);
 
-
         EventBus.post(new WorldRenderEvent(
                 immediate,
                 entityRenderCommandQueue,

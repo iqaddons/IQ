@@ -2,7 +2,7 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.skyblock.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
@@ -36,9 +36,9 @@ public class SupplyTimerWidget extends HudWidget {
 
         setExampleLines(List.of(
                 HudLine.of("§e§lSupply Times §7[§a3§7/§a6§7]"),
-                HudLine.of("§fdarkjota §8(1/6) §e14.85s"),
-                HudLine.of("§fPeHenrii §8(2/6) §a15.23s"),
-                HudLine.of("§fckac10 §8(3/6) §b15.39s")
+                HudLine.of("§bdarkjota §8(1/6) §e14.85s"),
+                HudLine.of("§aPeHenrii §8(2/6) §a15.23s"),
+                HudLine.of("§bckac10 §8(3/6) §b15.39s")
         ));
     }
 
@@ -48,7 +48,7 @@ public class SupplyTimerWidget extends HudWidget {
             supplyState.startSuppliesPhase();
         }
 
-        subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
+        subscribe(SupplyPlaceEvent.class, this::onSupplyPlace);
 
         resetLocalState();
         updateDisplay();
@@ -63,12 +63,12 @@ public class SupplyTimerWidget extends HudWidget {
         pickupHistory.clear();
     }
 
-    private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
+    private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
         pickupHistory.add(new SupplyPickupEntry(
                 event.playerName(),
                 supplyState.getTimeColor(),
                 event.currentSupply(),
-                event.pickupAt()
+                event.placedAt()
         ));
 
         updateDisplay();

@@ -15,12 +15,11 @@ import java.util.stream.Collectors;
 public final class ScoreboardUtils {
 
     private static final MinecraftClient MC = MinecraftClient.getInstance();
-    private static final Pattern FORMATTING_PATTERN = Pattern.compile("§[0-9a-fk-or]");
     private static final Pattern AREA_SYMBOL_PATTERN = Pattern.compile("[⏣ф]");
 
     public static @NotNull String getTitle() {
         return getObjective()
-                .map(obj -> stripFormatting(obj.getDisplayName().getString()))
+                .map(obj -> StringUtils.stripFormatting(obj.getDisplayName().getString()))
                 .orElse("");
     }
 
@@ -36,22 +35,17 @@ public final class ScoreboardUtils {
 
     public static @NotNull Optional<String> findLine(@NotNull String containing) {
         return getLines().stream()
-                .filter(line -> stripFormatting(line).contains(containing))
+                .filter(line -> StringUtils.stripFormatting(line).contains(containing))
                 .findFirst();
     }
 
     public static @NotNull String getArea() {
         return findLine("⏣")
                 .or(() -> findLine("ф"))
-                .map(ScoreboardUtils::stripFormatting)
+                .map(StringUtils::stripFormatting)
                 .map(line -> AREA_SYMBOL_PATTERN.matcher(line).replaceAll(""))
                 .map(String::trim)
                 .orElse("");
-    }
-
-    public static @NotNull String stripFormatting(String text) {
-        if (text == null || text.isEmpty()) return "";
-        return FORMATTING_PATTERN.matcher(text).replaceAll("");
     }
 
     private static Optional<ScoreboardObjective> getObjective() {

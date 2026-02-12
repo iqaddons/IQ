@@ -24,7 +24,7 @@ public class PearlWaypointFeature extends KuudraFeature {
 
     private static final int AREA_CHECK_INTERVAL = 2;
 
-    private final WaypointConfigLoader configLoader;
+    private final WaypointConfigLoader configLoader = WaypointConfigLoader.get();
     private final AreaDetectionUtil areaDetection;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
@@ -37,9 +37,7 @@ public class PearlWaypointFeature extends KuudraFeature {
                 KuudraPhase.SUPPLIES
         );
 
-        this.configLoader = new WaypointConfigLoader();
         this.configLoader.load();
-
         this.areaDetection = new AreaDetectionUtil();
     }
 

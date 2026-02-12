@@ -1,5 +1,6 @@
 package net.iqaddons.mod.mixin;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
@@ -16,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+@Slf4j
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
 
@@ -46,12 +48,11 @@ public abstract class InGameHudMixin {
         ));
     }
 
-
-
     @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
     private void iq$onRenderTitleAndSubtitle(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (title == null || title.getString().isEmpty()) return;
-        if (subtitle == null || subtitle.getString().isEmpty()) return;
+        boolean hasTitle = title != null && !title.getString().isEmpty();
+        boolean hasSubtitle = subtitle != null && !subtitle.getString().isEmpty();
+        if (!hasTitle && !hasSubtitle) return;
 
         TitleReceivedEvent event = EventBus.post(
                 new TitleReceivedEvent(title, subtitle)

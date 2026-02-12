@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra;
+package net.iqaddons.mod.features.kuudra.miscellaneous;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HideDamageTitleFeature extends KuudraFeature {
 
-    private static final Pattern KUUDRA_DAMAGE_TITLE = Pattern.compile("^(?:☠\\s*)?[\\d.,]+[KMBT]?/[\\d.,]+[KMBT]?❤$");
+    private static final Pattern KUUDRA_DAMAGE_TITLE = Pattern.compile("^[^\\d]*[\\d.,]+[KMBT]?/[\\d.,]+[KMBT]?.?$");
 
     public HideDamageTitleFeature() {
         super(
@@ -30,8 +30,6 @@ public class HideDamageTitleFeature extends KuudraFeature {
 
     private void onTitleReceived(@NotNull TitleReceivedEvent event) {
         if (KUUDRA_DAMAGE_TITLE.matcher(event.getStrippedMessage()).matches()) {
-            log.info("Cancelled damage title: {}", event.getStrippedMessage());
-
             event.setCancelled(true);
         }
     }

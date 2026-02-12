@@ -1,0 +1,13 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "iq:widgets/kuudra_icon.png",
+      "ascent": 12,
+      "height": 18,
+      "chars": [
+        "\uE000"
+      ]
+    }
+  ]
+}

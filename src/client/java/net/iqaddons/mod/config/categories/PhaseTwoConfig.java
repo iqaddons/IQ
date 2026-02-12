@@ -10,6 +10,13 @@ import java.awt.*;
 )
 public class PhaseTwoConfig {
 
+    @ConfigEntry(
+            id = "luckyBuild",
+            translation = "Lucky Build Things"
+    )
+    @Comment("Give you some extra luck during the build phase ❤")
+    public static boolean luckyBuild = true;
+
     @ConfigOption.Separator("Build Waypoints")
     @ConfigEntry(
             id = "buildHelper",
@@ -105,4 +112,12 @@ public class PhaseTwoConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Use a different color for freshers teammates")
     public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+
+    @ConfigOption.Separator("Ballista Sounds")
+    @ConfigEntry(
+            id = "replaceBallistaBuildSound",
+            translation = "Replace Ballista Build Sound"
+    )
+    @Comment("Replace the default ballista build sound while in build phase")
+    public static boolean replaceBallistaBuildSound = false;
 }

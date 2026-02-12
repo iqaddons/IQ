@@ -1,5 +1,8 @@
 {
   "key.category.minecraft.iq": "IQ Addons",
   "key.iq.open-config": "Open Config",
-  "iq.sound.pb_new_record": "New Personal Best"
+  "iq.sound.pb_new_record": "New Personal Best",
+  "iq.sound.ballista_build": "Ballista Build",
+  "iq.sound.lucky_build": "Lucky Build",
+  "iq.sound.lucky_build_end": "Lucky Build Ending"
 }

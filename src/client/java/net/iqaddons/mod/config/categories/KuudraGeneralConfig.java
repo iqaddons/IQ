@@ -17,6 +17,10 @@ public class KuudraGeneralConfig {
     @Comment("Automatically requeue a Kuudra run after boss death.")
     public static boolean autoRequeue = false;
 
+    @ConfigEntry(
+            id = "requeueDelay",
+            translation = "Auto Requeue Delay"
+    )
     @Comment("Delay in ticks before auto-requeue (1-50)")
     @ConfigOption.Range(min = 1, max = 50)
     @ConfigOption.Slider
@@ -26,8 +30,22 @@ public class KuudraGeneralConfig {
             id = "kuudraProfitTracker",
             translation = "Kuudra Profit Tracker"
     )
-    @Comment("Track your profit/loss after each Kuudra run (W.I.P)")
+    @Comment("Track your profit/loss after each Kuudra run and display it")
     public static boolean kuudraProfitTracker = false;
+
+    @ConfigEntry(
+            id = "chestCounterTracker",
+            translation = "Chest Counter Tracker"
+    )
+    @Comment("Track Kuudra runs toward your 60 chest cap")
+    public static boolean chestCounterTracker = true;
+
+    @ConfigEntry(
+            id = "chestCounterPartyAnnouncements",
+            translation = "Chest Counter Party Announcements"
+    )
+    @Comment("Send 10-run and cap reminders to party chat")
+    public static boolean chestCounterPartyAnnouncements = true;
 
     @ConfigEntry(
             id = "customSplits",

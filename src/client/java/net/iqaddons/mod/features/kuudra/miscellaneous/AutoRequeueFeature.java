@@ -1,8 +1,9 @@
-package net.iqaddons.mod.features.kuudra;
+package net.iqaddons.mod.features.kuudra.miscellaneous;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
@@ -33,12 +34,48 @@ public class AutoRequeueFeature extends Feature {
     @Override
     protected void onActivate() {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(ClientTickEvent.class, this::onClientTick);
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
     }
 
+    private void onClientTick(@NotNull ClientTickEvent event) {
+        if (pendingRequeueTicks < 0) return;
+        if (!event.isInGame()) return;
+
+        if (pendingRequeueTicks > 0) {
+            pendingRequeueTicks--;
+            if (pendingRequeueTicks > 0) return;
+        }
+
+        if (downtimeRequested) {
+            log.debug("Skipping auto-requeue because DT was requested before command execution");
+            pendingRequeueTicks = -1;
+            return;
+        }
+
+        if (mc.player == null || mc.player.networkHandler == null) {
+            log.debug("Skipping auto-requeue because player context is not ready");
+            return;
+        }
+
+        if (mc.world == null || mc.currentScreen != null) {
+            log.debug("Auto-requeue pending, waiting for world/screen to be ready");
+            return;
+        }
+
+        pendingRequeueTicks = -1;
+        mc.player.networkHandler.sendChatCommand("instancerequeue");
+        MessageUtil.INFO.sendMessage("§aAuto Requeue: executing §f/instancerequeue§a.");
+        log.info("Executed auto-requeue command");
+    }
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.contains("You are not allowed to use that command as a spectator!")) {
+            pendingRequeueTicks = 15;
+            return;
+        }
+
         Matcher matcher = PARTY_DT_PATTERN.matcher(message);
         if (!matcher.find()) return;
 
@@ -54,7 +91,7 @@ public class AutoRequeueFeature extends Feature {
             pendingRequeueTicks = -1;
         }
 
-        MessageUtil.WARNING.sendMessage(String.format("Auto Requeue Cancelled: %s requested DT (&f%s&e).",
+        MessageUtil.WARNING.sendMessage(String.format("Auto Requeue Cancelled: %s requested DT (§f%s§e).",
                 playerName, downtimeReason));
         MessageUtil.showTitle("§c§lDT requested", "§eAuto Requeue Cancelled", 5, 45, 10);
         log.info("DT detected from {}. Auto requeue blocked. reason={}", playerName, downtimeReason);
@@ -74,42 +111,23 @@ public class AutoRequeueFeature extends Feature {
         }
 
         if (event.isRunCompleted() && pendingRequeueTicks >= 0) {
-            if (mc.player == null || mc.player.networkHandler == null) return;
-
-            pendingRequeueTicks--;
-            if (pendingRequeueTicks > 0) return;
-
-            pendingRequeueTicks = -1;
-
-            if (downtimeRequested) {
-                log.info("Skipping auto-requeue because DT was requested before command execution");
-                return;
-            }
-
-            if (mc.world == null || mc.currentScreen != null) {
-                log.debug("Skipping auto-requeue because player context is not ready");
-                return;
-            }
-
-            mc.player.networkHandler.sendChatCommand("instancerequeue");
-            MessageUtil.sendFormattedMessage("&aAuto Requeue: executado &f/instancerequeue&a.");
-            log.info("Executed auto-requeue command");
+            log.debug("Run completed phase detected while auto-requeue is pending");
         }
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        if (!event.completed()) {
+        if (!event.isCompleted() && !event.isFailed()) {
             pendingRequeueTicks = -1;
             return;
         }
 
         if (downtimeRequested) {
-            MessageUtil.WARNING.sendMessage(String.format("DT detected. Auto Requeue will not be executed. (%s)",
+            MessageUtil.WARNING.sendMessage(String.format("DT detected. Auto Requeue will not be executed. (§f%s§e)",
                     downtimeReason != null
                             ? downtimeReason
                             : "No reason provided")
             );
-            MessageUtil.showTitle("&cSem requeue", "&eDT detectado", 5, 45, 10);
+            MessageUtil.showTitle("§c§lREQUEUE CANCELLED", "§eDT Detected", 5, 45, 10);
             pendingRequeueTicks = -1;
             return;
         }

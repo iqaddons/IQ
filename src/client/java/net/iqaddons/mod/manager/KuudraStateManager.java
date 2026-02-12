@@ -13,7 +13,6 @@ import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.kuudra.validator.KuudraStateValidator;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
-import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -67,19 +66,24 @@ public final class KuudraStateManager extends SubscriptionOwner {
             contextRef.compareAndSet(current, validated);
             log.trace("Validation passed for phase {}", current.phase());
         } else {
-            forceReset("Validation failures: " + result.reason());
+            forceReset(KuudraRunEndEvent.EndReason.OTHER);
         }
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.contains("DEFEAT") && isInKuudra()) {
+            forceReset(KuudraRunEndEvent.EndReason.DEFEATED);
+            return;
+        }
+
         KuudraPhase detected = KuudraPhase.fromMessage(message);
         if (detected == null) return;
         log.debug("Detected phase trigger in chat: {} -> {}", message.substring(0, Math.min(50, message.length())), detected);
 
         if (detected == KuudraPhase.NONE) {
             if (isInKuudra()) {
-                forceReset("Exit message detected: " + StringUtils.getShortMessage(message));
+                forceReset(KuudraRunEndEvent.EndReason.OTHER);
             }
 
             return;
@@ -87,19 +91,19 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         setPhase(detected);
         if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
-            forceReset("Server transfer detected: " + StringUtils.getShortMessage(message));
+            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
         }
     }
 
     private void onSkyBlockAreaChange(@NotNull SkyblockAreaChangeEvent event) {
         if (!event.newArea().contains(KUUDRA_AREA_ID) && isInKuudra()) {
             log.info("Detected leaving Kuudra area (now in: {})", event.newArea());
-            forceReset("Left Kuudra area -> " + event.newArea());
+            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
         }
 
         if (!event.onSkyBlock() && isInKuudra()) {
             log.info("Detected leaving SkyBlock");
-            forceReset("Left SkyBlock");
+            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
         }
     }
 
@@ -123,7 +127,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
         KuudraContext current = contextRef.get();
         if (current.phase() == newPhase) return false;
         if (newPhase == KuudraPhase.NONE) {
-            return handleRunEnd(current, "Phase set to NONE");
+            return handleRunEnd(current, KuudraRunEndEvent.EndReason.OTHER);
         }
 
         if ((current.phase() == KuudraPhase.NONE || current.phase() == KuudraPhase.COMPLETED)
@@ -134,7 +138,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
         return performPhaseTransition(current, newPhase);
     }
 
-    public void forceReset(@NotNull String reason) {
+    public void forceReset(@NotNull KuudraRunEndEvent.EndReason reason) {
         KuudraContext current = contextRef.get();
         if (current.phase() == KuudraPhase.NONE) {
             return;
@@ -179,7 +183,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
         return true;
     }
 
-    private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull String reason) {
+    private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull KuudraRunEndEvent.EndReason reason) {
         if (current.phase().isInRun()) {
             phaseDurations.put(current.phase(), current.phaseDuration());
         }
@@ -200,7 +204,6 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         EventBus.post(new KuudraRunEndEvent(
                 reason,
-                previousPhase == KuudraPhase.COMPLETED,
                 totalDuration,
                 Map.copyOf(phaseDurations)
         ));
@@ -242,6 +245,10 @@ public final class KuudraStateManager extends SubscriptionOwner {
                 phaseDuration.toMillis()
         ));
 
+        if (newPhase == KuudraPhase.COMPLETED) {
+            return handleRunEnd(current, KuudraRunEndEvent.EndReason.COMPLETED);
+        }
+
         return true;
     }
 
@@ -269,5 +276,9 @@ public final class KuudraStateManager extends SubscriptionOwner {
         }
 
         return instance;
+    }
+
+    public static boolean isInitialized() {
+        return instance != null;
     }
 }

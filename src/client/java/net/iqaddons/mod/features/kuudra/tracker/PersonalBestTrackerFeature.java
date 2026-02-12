@@ -1,4 +1,4 @@
-package net.iqaddons.mod.features.kuudra;
+package net.iqaddons.mod.features.kuudra.tracker;
 
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
@@ -32,7 +32,7 @@ public class PersonalBestTrackerFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        if (!event.completed()) return;
+        if (!event.isCompleted()) return;
 
         long runMillis = event.totalDuration().toMillis();
         if (runMillis <= 0) return;

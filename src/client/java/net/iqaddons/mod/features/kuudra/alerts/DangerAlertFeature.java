@@ -50,7 +50,7 @@ public class DangerAlertFeature extends KuudraFeature {
 
         if (currentDangerLevel != null) {
             if (currentDangerLevel.shouldJump()) {
-                MessageUtil.showTitle("§e§lJUMP!", "", 0, 10, 5);
+                MessageUtil.showTitle("", "§e§lJUMP!", 0, 10, 5);
 
                 mc.world.playSound(
                         mc.player, mc.player.getBlockPos(),
@@ -58,7 +58,7 @@ public class DangerAlertFeature extends KuudraFeature {
                         SoundCategory.PLAYERS, 2.0f, 2.0f
                 );
             } else {
-                MessageUtil.showTitle("§c§lDANGER", "", 0, 10, 5);
+                MessageUtil.showTitle("", "§c§lDANGER", 0, 10, 5);
             }
         }
     }
