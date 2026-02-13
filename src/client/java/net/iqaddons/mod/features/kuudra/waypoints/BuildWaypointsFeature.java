@@ -118,7 +118,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
             var progressColor = getColorForProgress(pile.progress);
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawStyledWithBeam(Box.from(beaconPos), 25, true,
+            event.drawStyledWithBeam(Box.from(beaconPos), 25, false,
                     progressColor.withOpacity(0.6f), WorldRenderUtils.RenderStyle.BOTH
             );
 

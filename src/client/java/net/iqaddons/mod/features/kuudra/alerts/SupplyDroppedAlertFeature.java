@@ -19,6 +19,14 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        subscribe(SupplyDropEvent.class, event -> MessageUtil.showTitle("§c§lDropped", "", 0, 15, 5));
+        subscribe(SupplyDropEvent.class, event -> {
+            var player = mc.player;
+            if (player == null) return;
+            if (!event.playerName().equalsIgnoreCase(player.getName().getString())) {
+                return;
+            }
+
+            MessageUtil.showTitle("§c§lDropped", "", 0, 15, 5);
+        });
     }
 }

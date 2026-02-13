@@ -184,9 +184,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     }
 
     private @NotNull List<HudLine> getCurrentRenderableLines() {
-        if (lines.isEmpty() && !exampleLines.isEmpty() && HudManager.get().isEditorOpen()) {
+        if (HudManager.get().isEditorOpen() && !exampleLines.isEmpty()) {
             return exampleLines;
         }
+
+        if (lines.isEmpty() && !exampleLines.isEmpty()) {
+            return exampleLines;
+        }
+
         return lines;
     }
 
@@ -252,13 +257,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         var textRenderer = mc.textRenderer;
         if (textRenderer == null) return;
 
-        List<HudLine> renderLines;
-        if (!exampleLines.isEmpty()) {
-            renderLines = lines.isEmpty() ? exampleLines : lines;
-        } else {
-            renderLines = lines;
-        }
-
+        List<HudLine> renderLines = getCurrentRenderableLines();
         if (renderLines.isEmpty()) {
             renderEmptyPlaceholder(context, textRenderer);
             return;

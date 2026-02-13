@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.TitleReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyProgressEvent;
@@ -14,8 +14,6 @@ import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class SupplyProgressWidget extends HudWidget {
 
@@ -39,7 +37,7 @@ public class SupplyProgressWidget extends HudWidget {
         setEnabledSupplier(() -> PhaseOneConfig.supplyProgressDisplay);
         setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.SUPPLIES);
 
-        setExampleLines(List.of(progressLine));
+        setExampleLines(HudLine.of("§8[§a|||||||||||||§f|||||||§8] §b69%§r"));
     }
 
     @Override
@@ -50,10 +48,11 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        subscribe(TitleReceivedEvent.class, event -> {
+        subscribe(ClientTickEvent.class, event -> {
             if (currentProgress.isEmpty()) return;
             clearProgress();
         });
+
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
 

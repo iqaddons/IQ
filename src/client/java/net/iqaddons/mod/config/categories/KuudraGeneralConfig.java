@@ -1,9 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.model.profit.CrimsonFaction;
 
 @Category(
         value = "Kuudra Utilities"
@@ -32,6 +30,39 @@ public class KuudraGeneralConfig {
     )
     @Comment("Track your profit/loss after each Kuudra run and display it")
     public static boolean kuudraProfitTracker = false;
+
+    @ConfigEntry(
+            id = "crimsonIsleFaction",
+            translation = "Crimson Isle Faction"
+    )
+    @ConfigOption.Select
+    @Comment("Set your Crimson Isle faction for better profit calculations")
+    public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
+
+
+    @ConfigEntry(
+            id = "armorValueType",
+            translation = "Armor Value Type"
+    )
+    @ConfigOption.Select
+    @Comment("Choose whether to value armor based on its salvage value or auction house value in the profit tracker")
+    public static ArmorValueType armorValueType = ArmorValueType.SALVAGE;
+
+    @ConfigEntry(
+            id = "kuudraPetBonus",
+            translation = "Kuudra Pet Bonus"
+    )
+    @ConfigOption.Range(min = 0, max = 20)
+    @ConfigOption.Slider
+    @Comment("Calculate the bonus from your Kuudra pet level in the profit tracker")
+    public static int kuudraPetBonus = 0;
+
+    @ConfigEntry(
+            id = "chestValueWidget",
+            translation = "Chest Value Display"
+    )
+    @Comment("Display the value of each chest you open in an overlay")
+    public static boolean chestValueWidget = true;
 
     @ConfigEntry(
             id = "chestCounterTracker",
@@ -81,4 +112,8 @@ public class KuudraGeneralConfig {
     )
     @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
+
+    public enum ArmorValueType {
+        SALVAGE, AUCTION
+    }
 }

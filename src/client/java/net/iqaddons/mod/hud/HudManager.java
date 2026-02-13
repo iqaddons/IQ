@@ -10,6 +10,7 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -109,24 +110,21 @@ public final class HudManager {
     }
 
     private void onHudRender(@NotNull HudRenderEvent event) {
-        if (mc.player == null) return;
-        if (mc.options.hudHidden) return;
-        if (mc.currentScreen instanceof HudEditScreen) return;
-        if (mc.options.playerListKey.isPressed()) return;
+        if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         double[] mousePos = getScaledMousePosition();
-        for (HudWidget widget : widgets) {
-            updateWidgetActivation(widget);
+        renderWidgets(event.drawContext(), mousePos[0], mousePos[1], event.tickDelta());
+    }
 
-            if (widget.isActive()) {
-                widget.render(event.drawContext(), mousePos[0], mousePos[1], event.tickDelta());
-            }
-        }
+    public void renderOnHandledScreen(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
+        if (!(mc.currentScreen instanceof HandledScreen<?>)) return;
+
+        renderWidgets(context, mouseX, mouseY, delta);
     }
 
     public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         for (HudWidget widget : widgets) {
-            //if (!widget.getEnabledSupplier().getAsBoolean()) return;
+            if (!widget.getEnabledSupplier().getAsBoolean()) return;
 
             widget.renderExample(context, mouseX, mouseY, delta);
         }
@@ -139,6 +137,21 @@ public final class HudManager {
             widget.activate();
         } else if (!shouldBeActive && widget.isActive()) {
             widget.deactivate();
+        }
+    }
+
+    private void renderWidgets(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+        if (mc.player == null) return;
+        if (mc.options.hudHidden) return;
+        if (mc.currentScreen instanceof HudEditScreen) return;
+        if (mc.options.playerListKey.isPressed()) return;
+
+        for (HudWidget widget : widgets) {
+            updateWidgetActivation(widget);
+
+            if (widget.isActive()) {
+                widget.render(context, mouseX, mouseY, delta);
+            }
         }
     }
 

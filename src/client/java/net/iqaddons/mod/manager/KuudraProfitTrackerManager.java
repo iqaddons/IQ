@@ -2,8 +2,8 @@ package net.iqaddons.mod.manager;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.model.profit.ChestData;
-import net.iqaddons.mod.model.profit.ChestType;
+import net.iqaddons.mod.model.profit.chest.data.ChestData;
+import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.data.DataKey;
@@ -145,7 +145,6 @@ public final class KuudraProfitTrackerManager {
         data.keyCostCoins += record.keyCost();
         data.pricedItems += Math.max(0, record.pricedItems());
         data.essence += Math.max(0, record.essence());
-        data.teeth += Math.max(0, record.teeth());
     }
 
     private void updateReroll(@NotNull ProfitData data, boolean shard, long rerollCost) {

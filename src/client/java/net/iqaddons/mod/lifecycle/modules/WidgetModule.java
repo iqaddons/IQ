@@ -18,7 +18,7 @@ public class WidgetModule implements LifecycleComponent {
                 new CustomSplitsWidget(), new FreshCountdownWidget(),
                 new KuudraHealthWidget(), new FreshersTimerWidget(),
                 new SupplyProgressWidget(), new ChestCounterWidget(),
-                new KuudraProfitTrackerWidget()
+                new KuudraProfitTrackerWidget(), new ChestValueWidget()
         );
     }
 
