@@ -10,6 +10,7 @@ import java.awt.*;
 public class PhaseOneConfig {
 
     @ConfigOption.Separator("Supply Widgets")
+
     @ConfigEntry(
             id = "supplyTimers",
             translation = "Supply Times"
@@ -49,6 +50,8 @@ public class PhaseOneConfig {
     @Comment("Adjust the size of supply waypoint boxes")
     public static float supplyWaypointBoxSize = 1.0f;
 
+    @ConfigOption.Separator("Pearl Waypoints")
+
     @ConfigEntry(
             id = "pearlWaypoints",
             translation = "Pearl Waypoints"
@@ -74,6 +77,8 @@ public class PhaseOneConfig {
     @Comment("Adjust the displayed supply tick percentage below pearl waypoints to match your ping (0 ~= 160-200ms)")
     public static int pearlWaypointsTimerDelay = 0;
 
+    @ConfigOption.Separator("Pile Waypoints")
+
     @ConfigEntry(
             id = "pileWaypoints",
             translation = "Pile Waypoints"
@@ -96,6 +101,8 @@ public class PhaseOneConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Customize the beacon color of no-pre supply pile (mainly useful for Square).")
     public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
+
+    @ConfigOption.Separator("Supply Alerts")
 
     @ConfigEntry(
             id = "supplyRecoverMessage",

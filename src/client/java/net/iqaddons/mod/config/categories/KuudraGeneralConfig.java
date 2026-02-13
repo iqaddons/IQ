@@ -9,6 +9,8 @@ import net.iqaddons.mod.utils.TextColor;
 )
 public class KuudraGeneralConfig {
 
+    @ConfigOption.Separator("Kuudra Requeuing")
+
     @ConfigEntry(
             id = "autoRequeue",
             translation = "Auto Requeue"
@@ -76,6 +78,8 @@ public class KuudraGeneralConfig {
     @Comment("Calculate the bonus from your Kuudra pet level in the profit tracker")
     public static int kuudraPetBonus = 0;
 
+    @ConfigOption.Separator("Widgets")
+
     @ConfigEntry(
             id = "chestValueWidget",
             translation = "Chest Value Display"
@@ -103,6 +107,8 @@ public class KuudraGeneralConfig {
     )
     @Comment("Send 10-run and cap reminders to party chat")
     public static boolean chestCounterPartyAnnouncements = true;
+
+    @ConfigOption.Separator("Custom Splits")
 
     @ConfigEntry(
             id = "customSplits",
@@ -191,11 +197,20 @@ public class KuudraGeneralConfig {
         public static TextColor worst = TextColor.DARK_RED;
     }
 
+    @ConfigOption.Separator("Notifications")
+
+    @ConfigEntry(
+            id = "kuudraNotifications",
+            translation = "Kuudra Notifications"
+    )
+    @Comment("Show alerts for important Kuudra-related events like Ballista progress, Ichor Pool casts, and SOS reminder")
+    public static final KuudraNotifications kuudraNotifications = new KuudraNotifications();
+
     @ConfigEntry(
             id = "manaDrainNotify",
             translation = "Mana Drain Notify"
     )
-    @Comment(" Send the amount of mana drained to party chat")
+    @Comment("Send the amount of mana drained to party chat")
     public static boolean manaDrainNotify = true;
 
     @ConfigEntry(
@@ -204,13 +219,6 @@ public class KuudraGeneralConfig {
     )
     @Comment("Track your best Kuudra run and notify when you beat your PB")
     public static boolean personalBestTracker = true;
-
-    @ConfigEntry(
-            id = "kuudraNotifications",
-            translation = "Kuudra Notifications"
-    )
-    @Comment("Show alerts for important Kuudra-related events like Ballista progress, Ichor Pool casts, and SOS reminder")
-    public static KuudraNotifications kuudraNotifications = new KuudraNotifications();
 
     @ConfigObject
     public static class KuudraNotifications {
@@ -285,6 +293,8 @@ public class KuudraGeneralConfig {
         @Comment("Show an alert when a supply is dropped")
         public static boolean supplyDropped = true;
     }
+
+    @ConfigOption.Separator("Visual")
 
     @ConfigEntry(
             id = "hideMobNametags",

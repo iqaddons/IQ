@@ -11,6 +11,13 @@ import java.awt.*;
 )
 public class PhaseThreeConfig {
 
+    @ConfigEntry(
+            id = "blockUselessPerks",
+            translation = "Block Useless Perks"
+    )
+    @Comment("Prevent purchasing useless perks")
+    public static boolean blockUselessPerks = true;
+
     @ConfigOption.Separator("Stun Widgets")
 
     @ConfigEntry(
@@ -44,8 +51,8 @@ public class PhaseThreeConfig {
         @ConfigEntry(id = "critical", translation = "0-25% Color")
         @ConfigOption.Color(alpha = true)
         public static int critical = new Color(255, 85, 85, 255).getRGB();
-    }
 
+    }
     @ConfigEntry(
             id = "kuudraHealthDisplay",
             translation = "Kuudra Health Display"
@@ -85,14 +92,8 @@ public class PhaseThreeConfig {
         @ConfigOption.Select
         @Comment("Change the style of the Kuudra hitbox")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
-    }
 
-    @ConfigEntry(
-            id = "blockUselessPerks",
-            translation = "Block Useless Perks"
-    )
-    @Comment("Prevent purchasing useless perks")
-    public static boolean blockUselessPerks = true;
+    }
 
     @ConfigOption.Separator("Stun Waypoints")
     @ConfigEntry(
