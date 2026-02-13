@@ -19,7 +19,7 @@ public class KuudraHealthFeature extends KuudraFeature {
         super(
                 "kuudraHealthDisplay",
                 "Kuudra Health Display",
-                () -> PhaseThreeConfig.kuudraHPBossbar,
+                () -> PhaseThreeConfig.kuudraHealth,
                 Stream.concat(
                         KuudraPhase.PRE_COMBAT_PHASES.stream(),
                         KuudraPhase.COMBAT_PHASES.stream()
@@ -42,7 +42,7 @@ public class KuudraHealthFeature extends KuudraFeature {
                 Text.literal(formatHealth(bossInfo.currentHealth())),
                 0.25f,
                 true,
-                getHealthColor(bossInfo.currentHealth())
+                RenderColor.fromArgb(getHealthColor(bossInfo.currentHealth()))
         );
     }
 
@@ -55,10 +55,10 @@ public class KuudraHealthFeature extends KuudraFeature {
         return String.format(Locale.ROOT, "%,.0f/100.000", currentHealth);
     }
 
-    private @NotNull RenderColor getHealthColor(float currentHealth) {
-        if (currentHealth > 75_000) return RenderColor.fromHex(0x55FF55);
-        if (currentHealth > 50_000) return RenderColor.fromHex(0xFFFF55);
-        if (currentHealth > 25_000) return RenderColor.fromHex(0xFFAA00);
-        return RenderColor.fromHex(0xFF5555);
+    private int getHealthColor(float currentHealth) {
+        if (currentHealth > 75_000) return PhaseThreeConfig.KuudraHealthColorConfig.high;
+        if (currentHealth > 50_000) return PhaseThreeConfig.KuudraHealthColorConfig.mid;
+        if (currentHealth > 25_000) return PhaseThreeConfig.KuudraHealthColorConfig.low;
+        return PhaseThreeConfig.KuudraHealthColorConfig.critical;
     }
 }

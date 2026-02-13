@@ -14,11 +14,37 @@ public class PhaseThreeConfig {
     @ConfigOption.Separator("Stun Widgets")
 
     @ConfigEntry(
-            id = "kuudraHPBossbar",
-            translation = "Kuudra HP Bossbar"
+            id = "kuudraHealth",
+            translation = "Kuudra Health"
     )
-    @Comment("Show Kuudra's HP in a custom bossbar")
-    public static boolean kuudraHPBossbar = true;
+    @Comment("Render Kuudra's health inside the Magma Cube")
+    public static boolean kuudraHealth = true;
+
+    @ConfigEntry(
+            id = "kuudraHealthColorConfig",
+            translation = "Kuudra Health Colors"
+    )
+    @Comment("Choose colors for each health range in the Kuudra Health Feature")
+    public static final KuudraHealthColorConfig kuudraHealthColorConfig = new KuudraHealthColorConfig();
+
+    @ConfigObject
+    public static class KuudraHealthColorConfig {
+        @ConfigEntry(id = "high", translation = "75%-100% Color")
+        @ConfigOption.Color(alpha = true)
+        public static int high = new Color(85, 255, 85, 255).getRGB();
+
+        @ConfigEntry(id = "mid", translation = "50%-75% Color")
+        @ConfigOption.Color(alpha = true)
+        public static int mid = new Color(255, 255, 85, 255).getRGB();
+
+        @ConfigEntry(id = "low", translation = "25-50% Color")
+        @ConfigOption.Color(alpha = true)
+        public static int low = new Color(255, 170, 0, 255).getRGB();
+
+        @ConfigEntry(id = "critical", translation = "0-25% Color")
+        @ConfigOption.Color(alpha = true)
+        public static int critical = new Color(255, 85, 85, 255).getRGB();
+    }
 
     @ConfigEntry(
             id = "kuudraHealthDisplay",
