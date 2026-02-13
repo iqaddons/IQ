@@ -1,7 +1,8 @@
-package net.iqaddons.mod.manager;
+package net.iqaddons.mod.manager.pricing;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.manager.IQPersistentDataStore;
 import net.iqaddons.mod.model.profit.chest.data.ChestData;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.model.profit.ProfitData;

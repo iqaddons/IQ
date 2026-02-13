@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
+import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.ScoreboardUtils;

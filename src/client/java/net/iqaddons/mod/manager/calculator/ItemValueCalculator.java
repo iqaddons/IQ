@@ -1,6 +1,6 @@
 package net.iqaddons.mod.manager.calculator;
 
-import net.iqaddons.mod.manager.ItemPriceManager;
+import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 

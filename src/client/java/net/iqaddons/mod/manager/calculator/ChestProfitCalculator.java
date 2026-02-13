@@ -1,7 +1,7 @@
 package net.iqaddons.mod.manager.calculator;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.manager.ItemPriceManager;
+import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.impl.GenericValueCalculator;
 import net.iqaddons.mod.model.profit.chest.data.ChestContents;
 import net.iqaddons.mod.utils.ChestProfitUtil;

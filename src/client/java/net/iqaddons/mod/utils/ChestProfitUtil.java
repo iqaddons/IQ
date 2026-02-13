@@ -1,7 +1,7 @@
 package net.iqaddons.mod.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.manager.ItemPriceManager;
+import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.ChestProfitCalculator;
 import net.iqaddons.mod.manager.calculator.impl.EnchantedBookValueCalculator;
 import net.iqaddons.mod.manager.calculator.impl.EssenceValueCalculator;

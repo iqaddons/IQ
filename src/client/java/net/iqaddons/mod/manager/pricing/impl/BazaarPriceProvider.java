@@ -1,4 +1,4 @@
-package net.iqaddons.mod.manager.pricing;
+package net.iqaddons.mod.manager.pricing.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.manager.pricing.PriceProvider;
 
 import java.io.IOException;
 import java.net.URI;

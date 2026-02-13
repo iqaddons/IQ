@@ -6,7 +6,7 @@ import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.manager.ChestCounterManager;
-import net.iqaddons.mod.manager.KuudraProfitTrackerManager;
+import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.manager.PersonalBestManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitScope;

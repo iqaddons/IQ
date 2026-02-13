@@ -1,11 +1,10 @@
-package net.iqaddons.mod.manager;
+package net.iqaddons.mod.manager.pricing;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
-import net.iqaddons.mod.manager.pricing.AuctionPriceProvider;
-import net.iqaddons.mod.manager.pricing.BazaarPriceProvider;
-import net.iqaddons.mod.manager.pricing.PriceProvider;
+import net.iqaddons.mod.manager.pricing.impl.AuctionPriceProvider;
+import net.iqaddons.mod.manager.pricing.impl.BazaarPriceProvider;
 import net.iqaddons.mod.model.profit.chest.type.ChestKeyType;
 import org.jetbrains.annotations.NotNull;
 
