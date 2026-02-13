@@ -32,15 +32,6 @@ public class CustomSplitsWidget extends HudWidget {
 
     private static final double[] OVERALL_THRESHOLDS = {53.0, 59.49, 65.0, 70.0, 80.0};
 
-    private static final Map<KuudraPhase, Double> PACE_BENCHMARKS = Map.of(
-            KuudraPhase.SUPPLIES, 23.5,
-            KuudraPhase.BUILD, 14.3,
-            KuudraPhase.EATEN, 5.0,
-            KuudraPhase.STUN, 0.0,
-            KuudraPhase.DPS, 3.5,
-            KuudraPhase.BOSS, 4.5
-    );
-
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final Map<KuudraPhase, Double> splits = new EnumMap<>(KuudraPhase.class);
 
@@ -193,10 +184,19 @@ public class CustomSplitsWidget extends HudWidget {
     }
 
     private double calculatePace() {
+        Map<KuudraPhase, Double> paceBenchmarks = Map.of(
+                KuudraPhase.SUPPLIES, KuudraGeneralConfig.CustomSplitsBenchmarks.supplies,
+                KuudraPhase.BUILD, KuudraGeneralConfig.CustomSplitsBenchmarks.build,
+                KuudraPhase.EATEN, KuudraGeneralConfig.CustomSplitsBenchmarks.eaten,
+                KuudraPhase.STUN, KuudraGeneralConfig.CustomSplitsBenchmarks.stun,
+                KuudraPhase.DPS, KuudraGeneralConfig.CustomSplitsBenchmarks.dps,
+                KuudraPhase.BOSS, KuudraGeneralConfig.CustomSplitsBenchmarks.boss
+        );
+
         double pace = 0.0;
         for (KuudraPhase phase : KuudraPhase.RUN_PHASES) {
             double currentTime = splits.getOrDefault(phase, 0.0);
-            double benchmark = PACE_BENCHMARKS.getOrDefault(phase, 0.0);
+            double benchmark = paceBenchmarks.getOrDefault(phase, 0.0);
 
             pace += Math.max(currentTime, benchmark);
         }

@@ -104,6 +104,47 @@ public class KuudraGeneralConfig {
     public static boolean customSplits = true;
 
     @ConfigEntry(
+            id = "customSplitsBenchmarks",
+            translation = "Custom Splits Benchmarks"
+    )
+    @Comment("Configure target split times used for pace in the Custom Splits widget")
+    public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
+
+    @ConfigObject
+    public static class CustomSplitsBenchmarks {
+
+        @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double supplies = 23.5;
+
+        @ConfigEntry(id = "build", translation = "Build Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double build = 14.3;
+
+        @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double eaten = 5.0;
+
+        @ConfigEntry(id = "stun", translation = "Stun Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double stun = 0.0;
+
+        @ConfigEntry(id = "dps", translation = "DPS Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double dps = 3.5;
+
+        @ConfigEntry(id = "boss", translation = "Boss Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double boss = 4.5;
+    }
+
+    @ConfigEntry(
             id = "manaDrainNotify",
             translation = "Mana Drain Notify"
     )
