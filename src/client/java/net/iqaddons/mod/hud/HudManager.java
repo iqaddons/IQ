@@ -54,13 +54,13 @@ public final class HudManager {
         EventBus.subscribe(HudRenderEvent.class, this::onHudRender);
 
         initialized = true;
-        log.info("HudManager initialized");
+        log.debug("HudManager initialized");
     }
 
     public void stop() {
         widgets.forEach(HudWidget::deactivate);
         configManager.shutdown();
-        log.info("HudManager shutdown");
+        log.debug("HudManager shutdown");
     }
 
     public void register(@NotNull HudWidget widget) {
@@ -124,7 +124,7 @@ public final class HudManager {
 
     public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         for (HudWidget widget : widgets) {
-            if (!widget.getEnabledSupplier().getAsBoolean()) return;
+            if (!widget.getEnabledSupplier().getAsBoolean()) continue;
 
             widget.renderExample(context, mouseX, mouseY, delta);
         }
