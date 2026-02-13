@@ -7,7 +7,6 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
-import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +19,6 @@ public class ChestCounterTrackerFeature extends Feature {
 
     private final ChestCounterManager manager = ChestCounterManager.get();
 
-    private int chestCount;
     private long lastRunTimestamp;
 
     public ChestCounterTrackerFeature() {
@@ -34,7 +32,7 @@ public class ChestCounterTrackerFeature extends Feature {
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(KuudraChestOpenEvent.class, this::onChestOpen);
-        resetRuntimeState();
+        resetState();
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
@@ -65,16 +63,8 @@ public class ChestCounterTrackerFeature extends Feature {
     }
 
     private void onChestOpen(@NotNull KuudraChestOpenEvent event) {
-        if (event.chestType() == ChestType.PAID) {
-            chestCount++;
-            int chests = manager.getChests();
-            if (chestCount >= 5 && chests >= ChestCounterManager.MAX_CHESTS) {
-                manager.reset();
-                resetRuntimeState();
-                MessageUtil.sendFormattedMessage("§fChest tracker reset automatically (chests opened).");
-                playLevelUp(1.0f);
-            }
-        }
+        int remaining = manager.decrement();
+        MessageUtil.INFO.sendMessage("§fChest tracker: §e" + remaining + "§8/" + ChestCounterManager.MAX_CHESTS);
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
@@ -88,8 +78,7 @@ public class ChestCounterTrackerFeature extends Feature {
         }
     }
 
-    private void resetRuntimeState() {
-        chestCount = 0;
+    private void resetState() {
         overlayVisible = false;
         lastRunTimestamp = 0L;
     }

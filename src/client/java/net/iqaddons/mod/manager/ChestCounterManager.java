@@ -40,6 +40,15 @@ public final class ChestCounterManager {
         return chests;
     }
 
+    public synchronized int decrement() {
+        if (chests > 0) {
+            chests--;
+            store.set(CHEST_COUNT_KEY, chests);
+        }
+
+        return chests;
+    }
+
     public synchronized void reset() {
         chests = 0;
         store.set(CHEST_COUNT_KEY, chests);
