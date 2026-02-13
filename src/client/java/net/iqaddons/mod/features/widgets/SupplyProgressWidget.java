@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.TitleReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyProgressEvent;
@@ -48,10 +48,11 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        subscribe(TitleReceivedEvent.class, event -> {
+        subscribe(ClientTickEvent.class, event -> {
             if (currentProgress.isEmpty()) return;
             clearProgress();
         });
+
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
 

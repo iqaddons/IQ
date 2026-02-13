@@ -35,7 +35,7 @@ public class SupplyTimerWidget extends HudWidget {
         setVisibilityCondition(() -> stateManager.phase().isInRun());
 
         setExampleLines(List.of(
-                HudLine.of("§e§lSupply Times §7[§a3§7/§a6§7]"),
+                HudLine.of("§e§lSupply Times §7[§a4§7/§a6§7]"),
                 HudLine.of("§bdarkjota §8(1/6) §f§l14.85s"),
                 HudLine.of("§aPeHenrii §8(2/6) §f§l15.23s"),
                 HudLine.of("§bckac10 §8(3/6) §f§l15.39s"),
