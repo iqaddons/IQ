@@ -1,18 +1,22 @@
 package net.iqaddons.mod.features.generic;
 
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.features.Feature;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
 
 @Slf4j
 public class WardrobeFeature extends Feature {
@@ -39,7 +43,7 @@ public class WardrobeFeature extends Feature {
         String title = event.getScreenTitle();
         if (!title.contains(WARDROBE_TITLE) || title.equals("container")) return;
 
-        int slotIndex = keyCodeToWardrobeSlot(event.getKeyCode());
+        int slotIndex = keyCodeToWardrobeSlot(event.getKeyCode(), event.getScanCode());
         if (slotIndex < 0) return;
 
         event.setCancelled(true);
@@ -56,15 +60,12 @@ public class WardrobeFeature extends Feature {
         log.debug("Wardrobe slot {} selected (container index {})", slotIndex - WARDROBE_SLOT_OFFSET + 1, slotIndex);
     }
 
-    private int keyCodeToWardrobeSlot(int keyCode) {
-        if (keyCode >= GLFW.GLFW_KEY_1 && keyCode <= GLFW.GLFW_KEY_9) {
-            int slot = keyCode - GLFW.GLFW_KEY_1;
-            return WARDROBE_SLOT_OFFSET + slot;
-        }
-
-        if (keyCode >= GLFW.GLFW_KEY_KP_1 && keyCode <= GLFW.GLFW_KEY_KP_9) {
-            int slot = keyCode - GLFW.GLFW_KEY_KP_1;
-            return WARDROBE_SLOT_OFFSET + slot;
+    private int keyCodeToWardrobeSlot(int keyCode, int scanCode) {
+        List<KeyBinding> wardrobeSlotKeys = IQKeyBindings.getWardrobeSlotKeys();
+        for (int slot = 0; slot < wardrobeSlotKeys.size(); slot++) {
+            if (wardrobeSlotKeys.get(slot).matchesKey(new KeyInput(keyCode, scanCode, 0))) {
+                return WARDROBE_SLOT_OFFSET + slot;
+            }
         }
 
         return -1;
