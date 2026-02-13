@@ -9,6 +9,7 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +68,7 @@ public class CustomSplitsWidget extends HudWidget {
         paceLine = HudLine.of("§fPace: §f0.00s");
 
         setEnabledSupplier(() -> KuudraGeneralConfig.customSplits);
-        setVisibilityCondition(stateManager::isInKuudra);
+        setVisibilityCondition(() -> ScoreboardUtils.getArea().startsWith("Kuudra's Hollow"));
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),

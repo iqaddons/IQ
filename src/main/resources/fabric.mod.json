@@ -3,7 +3,7 @@
   "id": "iqaddons",
   "version": "${version}",
   "name": "IQ",
-  "description": "IQ is a Hypixel SkyBlock mod made especially for Kuudra.\nWhile it includes a few general features, most of them are Kuudra-focused.",
+  "description": "IQ is an all-in-one Hypixel SkyBlock mod focused entirely on Kuudra.\nClean, optimized, basically everything you need for Kuudra in one place, without clutter.",
   "authors": [
     "PeHenrii",
     "DarkJota"
