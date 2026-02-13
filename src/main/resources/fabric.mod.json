@@ -35,6 +35,7 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
+    "resourcefulconfig": "*",
     "java": ">=21",
     "minecraft": "${minecraft_version}"
   }
