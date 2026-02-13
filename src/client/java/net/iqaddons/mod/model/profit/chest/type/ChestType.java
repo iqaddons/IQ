@@ -6,8 +6,9 @@ public enum ChestType {
 
     public static ChestType fromString(String str) {
         if (str == null) return UNKNOWN;
-        if (str.contains("Free Chest")) return FREE;
-        if (str.contains("Paid Chest")) return PAID;
+        String lower = str.toLowerCase();
+        if (lower.contains("free chest")) return FREE;
+        if (lower.contains("paid chest")) return PAID;
 
         return UNKNOWN;
     }

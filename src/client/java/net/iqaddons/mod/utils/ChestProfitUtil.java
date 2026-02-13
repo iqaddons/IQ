@@ -29,6 +29,8 @@ import java.util.*;
 public final class ChestProfitUtil {
 
     private static final ChestProfitCalculator CHEST_PROFIT_CALCULATOR;
+    private static final int BUY_SLOT = 31;
+    private static final int INFO_SLOT = 49;
 
     public static final Map<String, String> KUUDRA_DROPS_NAME_TO_API_ID = Map.of(
             "CRIMSON ESSENCE", "ESSENCE_CRIMSON",
@@ -126,7 +128,10 @@ public final class ChestProfitUtil {
 
         ChestContents contents = new ChestContents(chestItems, parseKeyType(slots));
         long grossValue = Math.max(0L, Math.round(CHEST_PROFIT_CALCULATOR.calculateTotalValue(contents)));
-        long keyCost = Math.max(0L, Math.round(priceManager.calculateKeyPrice(contents.keyType())));
+        long keyCost = Math.max(0L, chestType == ChestType.PAID
+                ? Math.round(priceManager.calculateKeyPrice(contents.keyType()))
+                : 0L
+        );
 
         return new ChestData(
                 chestType,
@@ -170,9 +175,8 @@ public final class ChestProfitUtil {
     }
 
     private static ChestKeyType parseKeyType(@NotNull List<Slot> slots) {
-        if (49 >= slots.size()) {
-            return ChestKeyType.UNKNOWN;
-        }
+        if (isFreeChest(slots)) return ChestKeyType.FREE;
+        if (INFO_SLOT >= slots.size()) return ChestKeyType.UNKNOWN;
 
         ItemStack infoStack = slots.get(49).getStack();
         if (infoStack == null || infoStack.isEmpty()) {
@@ -193,6 +197,21 @@ public final class ChestProfitUtil {
         }
 
         return ChestKeyType.UNKNOWN;
+    }
+
+    private static boolean isFreeChest(@NotNull List<Slot> slots) {
+        if (BUY_SLOT >= slots.size()) return false;
+        ItemStack buyStack = slots.get(BUY_SLOT).getStack();
+        if (buyStack == null || buyStack.isEmpty()) {
+            return false;
+        }
+
+        return getLoreLines(buyStack)
+                .stream()
+                .map(StringUtils::stripFormatting)
+                .map(String::toLowerCase)
+                .anyMatch(line -> line.contains("free")
+                        || line.contains("free reward chest"));
     }
 
     private static @Nullable String resolveItemId(@NotNull ItemStack stack) {
