@@ -34,6 +34,14 @@ public class KuudraGeneralConfig {
     public static boolean kuudraProfitTracker = false;
 
     @ConfigEntry(
+            id = "profitTrackerVisibility",
+            translation = "Profit Tracker Visibility"
+    )
+    @ConfigOption.Select
+    @Comment("Choose whether the profit tracker appears only in Kuudra-related areas or all the time")
+    public static ProfitTrackerVisibility profitTrackerVisibility = ProfitTrackerVisibility.KUUDRA_AREAS;
+
+    @ConfigEntry(
             id = "bazaarPricingMode",
             translation = "Bazaar Pricing Mode"
     )
@@ -122,6 +130,10 @@ public class KuudraGeneralConfig {
     )
     @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
+
+    public enum ProfitTrackerVisibility {
+        KUUDRA_AREAS, ALWAYS
+    }
 
     public enum BazaarPricingMode {
         INSTA_SELL, SELL_ORDER

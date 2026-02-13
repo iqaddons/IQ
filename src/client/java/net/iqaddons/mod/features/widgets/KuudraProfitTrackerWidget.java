@@ -46,7 +46,14 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         );
 
         setEnabledSupplier(() -> KuudraGeneralConfig.kuudraProfitTracker);
-        setVisibilityCondition(() -> ALLOWED_AREAS.contains(ScoreboardUtils.getArea()));
+        setVisibilityCondition(() -> {
+            if (KuudraGeneralConfig.profitTrackerVisibility == KuudraGeneralConfig.ProfitTrackerVisibility.ALWAYS) {
+                return true;
+            }
+
+            String area = ScoreboardUtils.getArea();
+            return ALLOWED_AREAS.stream().anyMatch(area::startsWith);
+        });
 
         setExampleLines(List.of(
                 HudLine.of("§e§lProfit Tracker §7(SESSION)"),
