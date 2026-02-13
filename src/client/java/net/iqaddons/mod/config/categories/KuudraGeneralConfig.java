@@ -207,6 +207,69 @@ public class KuudraGeneralConfig {
     @Comment("Alert when Kuudra phase changes")
     public static boolean kuudraPhaseAlert = true;
 
+
+    @ConfigEntry(
+            id = "kuudraNotifications",
+            translation = "Kuudra Notifications"
+    )
+    @Comment("Show alerts for important Kuudra-related events like Ballista progress, Ichor Pool casts, and SOS reminder")
+    public static KuudraNotifications kuudraNotifications = new KuudraNotifications();
+
+    @ConfigObject
+    public static class KuudraNotifications {
+
+        @ConfigEntry(
+                id = "kuudraNotificationBuildStarted",
+                translation = "Build Started Notification"
+        )
+        @Comment("Show an alert when Elle asks to build the Ballista")
+        public static boolean buildStarted = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationIchorUsed",
+                translation = "Ichor Used Notification"
+        )
+        @Comment("Show an alert when Ichor Pool is cast")
+        public static boolean ichorUsed = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationNoPre",
+                translation = "No Pre Notifications"
+        )
+        @Comment("Show alerts for No Pre party messages")
+        public static boolean noPre = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationSosReminder",
+                translation = "SOS Reminder Notification"
+        )
+        @Comment("Show an alert when stun starts in 4 seconds")
+        public static boolean sosReminder = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationBuildDone",
+                translation = "Build Done Notification"
+        )
+        @Comment("Show an alert when the Ballista is fully built")
+        public static boolean buildDone = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationSuppliesDone",
+                translation = "Supplies Done Notification"
+        )
+        @Comment("Show an alert when supply progress reaches 6/6")
+        public static boolean suppliesDone = true;
+
+        @ConfigEntry(
+                id = "kuudraNotificationCannonball",
+                translation = "Cannonball Notification"
+        )
+        @Comment("Show an alert when Human Cannonball is purchased")
+        public static boolean cannonBall = true;
+    }
+
+
+
     @ConfigEntry(
             id = "hideMobNametags",
             translation = "Hide Mob Nametags"
