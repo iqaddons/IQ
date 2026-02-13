@@ -151,8 +151,13 @@ public class WaypointConfigLoader {
             Integer hideForPre = obj.has("hideForPre") ? obj.get("hideForPre").getAsInt() : null;
             float size = obj.has("size") ? obj.get("size").getAsFloat() : PearlWaypoint.DEFAULT_SIZE;
             String label = obj.has("text") ? obj.get("text").getAsString() : "";
+            boolean alert = obj.has("alert") && obj.get("alert").getAsBoolean();
 
-            return Optional.of(new PearlWaypoint(target, color, standBlock, preSupply, hideForPre, size, label));
+            return Optional.of(new PearlWaypoint(
+                    target, color, standBlock,
+                    preSupply, hideForPre, size,
+                    label, alert)
+            );
         } catch (Exception e) {
             log.warn("Failed to parse waypoint", e);
             return Optional.empty();

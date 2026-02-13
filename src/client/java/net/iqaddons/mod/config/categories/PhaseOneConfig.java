@@ -77,6 +77,21 @@ public class PhaseOneConfig {
     @Comment("Adjust the displayed supply tick percentage below pearl waypoints to match your ping (0 ~= 160-200ms)")
     public static int pearlWaypointsTimerDelay = 0;
 
+    @ConfigEntry(
+            id = "pearlWaypointTimes",
+            translation = "Pearl Waypoint Type"
+    )
+    @ConfigOption.Select
+    @Comment("Choose if pearl waypoints render text, timer, or both")
+    public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.BOTH;
+
+    @ConfigEntry(
+            id = "pearlThrowAlert",
+            translation = "Pearl Throw Alert"
+    )
+    @Comment("Enable color/sound throw alerts for pearl waypoints with alert=true in config")
+    public static boolean pearlThrowAlert = true;
+
     @ConfigOption.Separator("Pile Waypoints")
 
     @ConfigEntry(
@@ -125,4 +140,9 @@ public class PhaseOneConfig {
     @Comment("Announce the position of the second supply in chat")
     public static boolean secondSupplyAlert = true;
 
+    public enum PearlWaypointType {
+        TEXT,
+        TIMER,
+        BOTH
+    }
 }

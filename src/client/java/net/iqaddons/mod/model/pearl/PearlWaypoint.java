@@ -11,7 +11,8 @@ public record PearlWaypoint(
         Integer preSupply,
         Integer hideForPre,
         float size,
-        @NotNull String label
+        @NotNull String label,
+        boolean alert
 ) {
 
     public static final float DEFAULT_SIZE = 0.4f;
