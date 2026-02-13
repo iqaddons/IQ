@@ -24,12 +24,22 @@ public class KuudraGeneralConfig {
     @ConfigOption.Slider
     public static int requeueDelay = 15;
 
+    @ConfigOption.Separator("Profit Tracking")
+
     @ConfigEntry(
             id = "kuudraProfitTracker",
             translation = "Kuudra Profit Tracker"
     )
     @Comment("Track your profit/loss after each Kuudra run and display it")
     public static boolean kuudraProfitTracker = false;
+
+    @ConfigEntry(
+            id = "bazaarPricingMode",
+            translation = "Bazaar Pricing Mode"
+    )
+    @ConfigOption.Select
+    @Comment("Choose if Bazaar prices use Insta Sell or Sell Order for chest value and profit tracking")
+    public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.INSTA_SELL;
 
     @ConfigEntry(
             id = "crimsonIsleFaction",
@@ -112,6 +122,10 @@ public class KuudraGeneralConfig {
     )
     @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
+
+    public enum BazaarPricingMode {
+        INSTA_SELL, SELL_ORDER
+    }
 
     public enum ArmorValueType {
         SALVAGE, AUCTION

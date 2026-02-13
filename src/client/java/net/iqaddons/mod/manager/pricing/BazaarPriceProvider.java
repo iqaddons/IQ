@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +24,10 @@ public class BazaarPriceProvider implements PriceProvider {
     private static final String BAZAAR_ENDPOINT = "https://api.hypixel.net/v2/skyblock/bazaar";
 
     private final HttpClient httpClient;
-    private final Map<String, Double> prices = new ConcurrentHashMap<>();
+
+    private final Map<String, Double> instaSellPrices = new ConcurrentHashMap<>();
+    private final Map<String, Double> sellOrderPrices = new ConcurrentHashMap<>();
+
     private final AtomicBoolean ready = new AtomicBoolean(false);
 
     public BazaarPriceProvider(HttpClient httpClient) {
@@ -32,7 +36,11 @@ public class BazaarPriceProvider implements PriceProvider {
 
     @Override
     public Optional<Double> getPrice(String itemId) {
-        return Optional.ofNullable(prices.get(itemId));
+        if (KuudraGeneralConfig.bazaarPricingMode == KuudraGeneralConfig.BazaarPricingMode.SELL_ORDER) {
+            return Optional.ofNullable(sellOrderPrices.get(itemId));
+        }
+
+        return Optional.ofNullable(instaSellPrices.get(itemId));
     }
 
     @Override
@@ -58,22 +66,25 @@ public class BazaarPriceProvider implements PriceProvider {
             for (Map.Entry<String, JsonElement> entry : products.entrySet()) {
                 JsonObject product = entry.getValue().getAsJsonObject();
                 JsonArray sellSummary = product.getAsJsonArray("sell_summary");
-                if (sellSummary == null || sellSummary.isEmpty()) {
-                    continue;
-                }
+                fetchBazaarProducts(entry, sellSummary, instaSellPrices);
 
-                JsonObject firstOrder = sellSummary.get(0).getAsJsonObject();
-                if (!firstOrder.has("pricePerUnit")) {
-                    continue;
-                }
-
-                double sellPrice = Math.max(0D, firstOrder.get("pricePerUnit").getAsDouble());
-                prices.put(entry.getKey(), sellPrice);
+                JsonArray buySummary = product.getAsJsonArray("buy_summary");
+                fetchBazaarProducts(entry, buySummary, sellOrderPrices);
             }
 
             ready.set(true);
         } catch (Exception e) {
             log.warn("Failed refreshing bazaar prices", e);
+        }
+    }
+
+    private void fetchBazaarProducts(Map.Entry<String, JsonElement> entry, JsonArray buySummary, Map<String, Double> sellOrderPrices) {
+        if (buySummary != null && !buySummary.isEmpty()) {
+            JsonObject firstBuy = buySummary.get(0).getAsJsonObject();
+            if (firstBuy.has("pricePerUnit")) {
+                double buyPrice = Math.max(0D, firstBuy.get("pricePerUnit").getAsDouble());
+                sellOrderPrices.put(entry.getKey(), buyPrice);
+            }
         }
     }
 
