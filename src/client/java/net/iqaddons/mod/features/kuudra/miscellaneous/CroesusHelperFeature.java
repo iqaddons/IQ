@@ -30,8 +30,8 @@ public class CroesusHelperFeature extends Feature {
                 .map(String::toLowerCase)
                 .anyMatch(line -> line.contains(OPENED_CHEST_LORE.toLowerCase()));
         if (hasOpenedChest) {
-            int left = event.x() + slot.x;
-            int top = event.y() + slot.y;
+            int left = slot.x;
+            int top = slot.y;
 
             event.drawContext().fill(left, top, left + 16, top + 16, 0x66FF0000);
         }
