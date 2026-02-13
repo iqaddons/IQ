@@ -116,5 +116,5 @@ public class PhaseThreeConfig {
     )
     @ConfigOption.Select
     @Comment("Change the block used for stun waypoints")
-    public static StunWaypointsFeature.StunWaypoint stunWaypointBlock = StunWaypointsFeature.StunWaypoint.BLOCK_2;
+    public static StunWaypointsFeature.StunWaypoint stunWaypointBlock = StunWaypointsFeature.StunWaypoint.LEFT_POD;
 }
