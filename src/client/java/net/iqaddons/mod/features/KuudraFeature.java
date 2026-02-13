@@ -94,7 +94,7 @@ public abstract class KuudraFeature extends Feature {
             subscriptionsStartIndex.set(subscriptionCount());
             int cycle = activationCount.incrementAndGet();
 
-            log.info("Kuudra activating {}: {} (cycle {})", getName(), reason, cycle);
+            log.debug("Kuudra activating {}: {} (cycle {})", getName(), reason, cycle);
             try {
                 onKuudraActivate();
             } catch (Exception e) {

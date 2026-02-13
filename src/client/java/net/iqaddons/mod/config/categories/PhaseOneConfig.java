@@ -57,6 +57,15 @@ public class PhaseOneConfig {
     public static float pearlWaypointsScale = 0.25f;
 
     @ConfigEntry(
+            id = "pearlWaypointsTimerDelay",
+            translation = "Pearl Waypoints Timer Delay"
+    )
+    @ConfigOption.Range(min = -4, max = 4)
+    @ConfigOption.Slider
+    @Comment("Adjust the displayed supply tick percentage below pearl waypoints to match your ping (0 ~= 160-200ms)")
+    public static int pearlWaypointsTimerDelay = 0;
+
+    @ConfigEntry(
             id = "pileWaypoints",
             translation = "Pile Waypoints"
     )

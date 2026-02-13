@@ -23,6 +23,11 @@ import java.util.List;
 public class PearlWaypointFeature extends KuudraFeature {
 
     private static final int AREA_CHECK_INTERVAL = 2;
+    private static final List<Integer> SUPPLY_TICK_PERCENTAGES = List.of(
+            5, 11, 17, 23, 29, 35, 41,
+            47, 53, 59, 65, 71, 77, 83,
+            89, 95, 100
+    );
 
     private final WaypointConfigLoader configLoader = WaypointConfigLoader.get();
     private final AreaDetectionUtil areaDetection;
@@ -55,12 +60,6 @@ public class PearlWaypointFeature extends KuudraFeature {
     @Override
     protected void onKuudraDeactivate() {
         areaDetection.reset();
-    }
-
-    public void reload() {
-        List<WaypointArea> areas = configLoader.reload();
-        areaDetection.setAreas(areas);
-        log.info("Reloaded pearl waypoints: {} areas", areas.size());
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
@@ -97,7 +96,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         event.drawFilled(targetBox, true, waypoint.color().withOpacity(80.0f));
         if (!waypoint.label().isEmpty()) {
             Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() - 1.5, target.getZ() - 0.5);
-            event.drawText(textPos, Text.literal(waypoint.label()),
+            event.drawText(textPos, Text.literal(getAdjustedPercentage(waypoint.label())),
                     PhaseOneConfig.pearlWaypointsScale, true,
                     RenderColor.white
             );
@@ -112,5 +111,27 @@ public class PearlWaypointFeature extends KuudraFeature {
 
             event.drawOutline(blockBox, true, waypoint.color());
         }
+    }
+
+    private @NotNull String getAdjustedPercentage(@NotNull String label) {
+        int baseValue;
+        try {
+            baseValue = Integer.parseInt(label);
+        } catch (NumberFormatException ignored) {
+            return label;
+        }
+
+        int currentIndex = SUPPLY_TICK_PERCENTAGES.indexOf(baseValue);
+        if (currentIndex < 0) {
+            return label;
+        }
+
+        int adjustedIndex = Math.clamp(
+                currentIndex + PhaseOneConfig.pearlWaypointsTimerDelay,
+                0,
+                SUPPLY_TICK_PERCENTAGES.size() - 1
+        );
+
+        return SUPPLY_TICK_PERCENTAGES.get(adjustedIndex) + "%";
     }
 }
