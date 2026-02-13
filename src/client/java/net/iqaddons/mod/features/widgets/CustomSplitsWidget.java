@@ -214,11 +214,11 @@ public class CustomSplitsWidget extends HudWidget {
     private @NotNull String getSplitColor(double time, double @NotNull [] thresholds) {
         if (time <= 0) return "§f";
 
-        if (time <= thresholds[0]) return "§f";
-        if (time <= thresholds[1]) return "§9";
-        if (time <= thresholds[2]) return "§a";
-        if (time <= thresholds[3]) return "§6";
-        if (time <= thresholds[4]) return "§c";
-        return "§4";
+        if (time <= thresholds[0]) return KuudraGeneralConfig.SplitColorConfig.best.code();
+        if (time <= thresholds[1]) return KuudraGeneralConfig.SplitColorConfig.great.code();
+        if (time <= thresholds[2]) return KuudraGeneralConfig.SplitColorConfig.good.code();
+        if (time <= thresholds[3]) return KuudraGeneralConfig.SplitColorConfig.slow.code();
+        if (time <= thresholds[4]) return KuudraGeneralConfig.SplitColorConfig.bad.code();
+        return KuudraGeneralConfig.SplitColorConfig.worst.code();
     }
 }

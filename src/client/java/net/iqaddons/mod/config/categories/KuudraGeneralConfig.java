@@ -2,6 +2,7 @@ package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
+import net.iqaddons.mod.utils.TextColor;
 
 @Category(
         value = "Kuudra Utilities"
@@ -142,6 +143,40 @@ public class KuudraGeneralConfig {
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
         public static double boss = 4.5;
+    }
+
+    @ConfigEntry(
+            id = "splitColorConfig",
+            translation = "Split Time Colors"
+    )
+    @Comment("Choose colors used by split time thresholds in the Custom Splits widget")
+    public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
+
+    @ConfigObject
+    public static class SplitColorConfig {
+        @ConfigEntry(id = "best", translation = "Best Time Color")
+        @ConfigOption.Select
+        public static TextColor best = TextColor.WHITE;
+
+        @ConfigEntry(id = "great", translation = "Great Time Color")
+        @ConfigOption.Select
+        public static TextColor great = TextColor.BLUE;
+
+        @ConfigEntry(id = "good", translation = "Good Time Color")
+        @ConfigOption.Select
+        public static TextColor good = TextColor.GREEN;
+
+        @ConfigEntry(id = "slow", translation = "Slow Time Color")
+        @ConfigOption.Select
+        public static TextColor slow = TextColor.GOLD;
+
+        @ConfigEntry(id = "bad", translation = "Bad Time Color")
+        @ConfigOption.Select
+        public static TextColor bad = TextColor.RED;
+
+        @ConfigEntry(id = "worst", translation = "Worst Time Color")
+        @ConfigOption.Select
+        public static TextColor worst = TextColor.DARK_RED;
     }
 
     @ConfigEntry(
