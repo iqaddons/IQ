@@ -51,6 +51,59 @@ public class Configuration {
     @Comment("Fix the fishing hook block when throw the rod")
     public static boolean fixFishingHook = true;
 
+    @ConfigEntry(
+            id = "partyCommands",
+            translation = "Party Commands"
+    )
+    @Comment("Enable commands that can be triggered from party chat messages")
+    public static final PartyCommands partyCommands = new PartyCommands();
+
+    @ConfigObject
+    public static class PartyCommands {
+        @ConfigEntry(
+                id = "partyCommandsEnabled",
+                translation = "Party Commands"
+        )
+        @Comment("Enable command triggers from party chat messages")
+        public static boolean enable = false;
+
+        @ConfigEntry(id = "partyCommandWarp", translation = "!warp (!w, !wp)")
+        @Comment("Run /party warp when someone sends !warp")
+        public static boolean warpCommand = true;
+
+        @ConfigEntry(id = "partyCommandTransfer", translation = "!pt (!ptme, !transfer)")
+        @Comment("Transfer party leadership to the player that requested it")
+        public static boolean transferCommand = true;
+
+        @ConfigEntry(id = "partyCommandPing", translation = "!ping")
+        @Comment("Send the requester's ping in party chat")
+        public static boolean partyCommandPing = true;
+
+        @ConfigEntry(id = "partyCommandAllInvite", translation = "!allinvite (!allinv, !invites)")
+        @Comment("Toggle all-invite with /party settings allinvite")
+        public static boolean allInviteCommand = true;
+
+        @ConfigEntry(id = "partyCommandTps", translation = "!tps")
+        @Comment("Send current server TPS to party chat")
+        public static boolean partyCommandTps = true;
+
+        @ConfigEntry(id = "partyCommandPromote", translation = "!promote")
+        @Comment("Promote the player that requested it")
+        public static boolean promoteCommand = true;
+
+        @ConfigEntry(id = "partyCommandKick", translation = "!kick <player>")
+        @Comment("Kick a target player from the party")
+        public static boolean partyCommandKick = true;
+
+        @ConfigEntry(id = "partyCommandKuudra", translation = "!t[1-5]")
+        @Comment("Start a Kuudra run")
+        public static boolean kuudraCommand = true;
+
+        @ConfigEntry(id = "partyCommandChests", translation = "!chests")
+        @Comment("Reply with your current chest counter progress")
+        public static boolean partyCommandChests = true;
+    }
+
     @ConfigOption.Separator("Wardrobe")
 
     @ConfigEntry(
