@@ -84,6 +84,13 @@ public class KuudraGeneralConfig {
     public static boolean chestValueWidget = true;
 
     @ConfigEntry(
+            id = "croesusHelper",
+            translation = "Croesus Helper"
+    )
+    @Comment("Highlight already-opened chests in Croesus and Vesuvius menus")
+    public static boolean croesusHelper = true;
+
+    @ConfigEntry(
             id = "chestCounterTracker",
             translation = "Chest Counter Tracker"
     )
