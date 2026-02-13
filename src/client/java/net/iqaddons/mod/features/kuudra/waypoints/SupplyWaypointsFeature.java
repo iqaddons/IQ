@@ -62,14 +62,15 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         if (supplies.isEmpty()) return;
 
         RenderColor color = RenderColor.fromArgb(PhaseOneConfig.supplyWaypointColor);
+        double halfBox = PhaseOneConfig.supplyWaypointBoxSize / 2.0;
         for (SupplyPosition supply : supplies) {
             Box crateBox = new Box(
-                    supply.position().x,
+                    supply.position().x + 0.5 - halfBox,
                     supply.position().y - 1,
-                    supply.position().z,
-                    supply.position().x + 1,
+                    supply.position().z + 0.5 - halfBox,
+                    supply.position().x + 0.5 + halfBox,
                     supply.position().y,
-                    supply.position().z + 1
+                    supply.position().z + 0.5 + halfBox
             );
 
             event.drawStyledWithBeam(crateBox, BEACON_HEIGHT, true, color, WorldRenderUtils.RenderStyle.BOTH);

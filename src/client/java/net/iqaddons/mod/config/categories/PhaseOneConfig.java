@@ -41,6 +41,15 @@ public class PhaseOneConfig {
     public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
 
     @ConfigEntry(
+            id = "supplyWaypointBoxSize",
+            translation = "Supply Waypoint Box Size"
+    )
+    @ConfigOption.Range(min = 1, max = 3)
+    @ConfigOption.Slider
+    @Comment("Adjust the size of supply waypoint boxes")
+    public static float supplyWaypointBoxSize = 1.0f;
+
+    @ConfigEntry(
             id = "pearlWaypoints",
             translation = "Pearl Waypoints"
     )
