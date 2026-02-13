@@ -124,17 +124,17 @@ public class KuudraGeneralConfig {
         @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        public static double supplies = 23.5;
+        public static double supplies = 22.5;
 
         @ConfigEntry(id = "build", translation = "Build Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        public static double build = 14.3;
+        public static double build = 12;
 
         @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        public static double eaten = 5.0;
+        public static double eaten = 4.3;
 
         @ConfigEntry(id = "stun", translation = "Stun Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
@@ -144,12 +144,17 @@ public class KuudraGeneralConfig {
         @ConfigEntry(id = "dps", translation = "DPS Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        public static double dps = 3.5;
+        public static double dps = 3.2;
+
+        @ConfigEntry(id = "skip", translation = "Skip Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        public static double skip = 4.6;
 
         @ConfigEntry(id = "boss", translation = "Boss Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        public static double boss = 4.5;
+        public static double boss = 1.9;
     }
 
     @ConfigEntry(

@@ -189,6 +189,7 @@ public class CustomSplitsWidget extends HudWidget {
                 KuudraPhase.BUILD, KuudraGeneralConfig.CustomSplitsBenchmarks.build,
                 KuudraPhase.EATEN, KuudraGeneralConfig.CustomSplitsBenchmarks.eaten,
                 KuudraPhase.STUN, KuudraGeneralConfig.CustomSplitsBenchmarks.stun,
+                KuudraPhase.SKIP, KuudraGeneralConfig.CustomSplitsBenchmarks.skip,
                 KuudraPhase.DPS, KuudraGeneralConfig.CustomSplitsBenchmarks.dps,
                 KuudraPhase.BOSS, KuudraGeneralConfig.CustomSplitsBenchmarks.boss
         );
