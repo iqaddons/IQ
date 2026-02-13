@@ -30,7 +30,7 @@ public class KuudraHealthWidget extends HudWidget {
         super(
                 "kuudraHealth",
                 "Kuudra Health",
-                10.0f, 280.0f,
+                440.0f, 2.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

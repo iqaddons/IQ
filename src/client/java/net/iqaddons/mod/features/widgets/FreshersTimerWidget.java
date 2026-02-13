@@ -25,7 +25,7 @@ public class FreshersTimerWidget extends HudWidget {
     public FreshersTimerWidget() {
         super("freshers_timer",
                 "Freshers Timer",
-                10.0f, 30,
+                8.5f, 230.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

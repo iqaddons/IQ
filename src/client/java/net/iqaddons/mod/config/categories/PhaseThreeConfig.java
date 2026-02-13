@@ -15,7 +15,7 @@ public class PhaseThreeConfig {
             id = "blockUselessPerks",
             translation = "Block Useless Perks"
     )
-    @Comment("Prevent purchasing useless perks")
+    @Comment("Prevent buying perks that provide no benefit for your run.")
     public static boolean blockUselessPerks = true;
 
     @ConfigOption.Separator("Stun Widgets")
@@ -24,14 +24,14 @@ public class PhaseThreeConfig {
             id = "kuudraHealth",
             translation = "Kuudra Health"
     )
-    @Comment("Render Kuudra's health inside the Magma Cube")
+    @Comment("Show Kuudra's real health inside the Magma Cube.")
     public static boolean kuudraHealth = true;
 
     @ConfigEntry(
             id = "kuudraHealthColorConfig",
             translation = "Kuudra Health Colors"
     )
-    @Comment("Choose colors for each health range in the Kuudra Health Feature")
+    @Comment("Customize the colors used for each Kuudra health range.")
     public static final KuudraHealthColorConfig kuudraHealthColorConfig = new KuudraHealthColorConfig();
 
     @ConfigObject
@@ -57,14 +57,14 @@ public class PhaseThreeConfig {
             id = "kuudraHealthDisplay",
             translation = "Kuudra Health Display"
     )
-    @Comment("Display Kuudra's health with health, percent & damage")
+    @Comment("Show HP and percentage in the health widget.")
     public static boolean kuudraHealthDisplay = true;
 
     @ConfigEntry(
             id = "kuudraHitbox",
             translation = "Kuudra Hitbox Config"
     )
-    @Comment("Configure Kuudra's hitbox rendering during the stun phase")
+    @Comment("Configure Kuudra's hitbox overlay during the run.")
     public static final KuudraHitbox kuudraHitbox = new KuudraHitbox();
 
     @ConfigObject
@@ -74,7 +74,7 @@ public class PhaseThreeConfig {
                 id = "kuudraHitbox",
                 translation = "Kuudra Hitbox"
         )
-        @Comment("Render Kuudra's hitbox during the stun phase")
+        @Comment("Show Kuudra's hitbox overlay.")
         public static boolean enabled = true;
 
         @ConfigEntry(
@@ -82,7 +82,7 @@ public class PhaseThreeConfig {
                 translation = "Kuudra Hitbox Color"
         )
         @ConfigOption.Color(alpha = true)
-        @Comment("Change Kuudra's hitbox color to something more visible")
+        @Comment("Change the hitbox color for better visibility.")
         public static int color = new Color(255, 2, 2, 231).getRGB();
 
         @ConfigEntry(
@@ -90,7 +90,7 @@ public class PhaseThreeConfig {
                 translation = "Kuudra Hitbox Style"
         )
         @ConfigOption.Select
-        @Comment("Change the style of the Kuudra hitbox")
+        @Comment("Choose how the hitbox is drawn (outline, filled, or both).")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
 
     }
@@ -100,15 +100,15 @@ public class PhaseThreeConfig {
             id = "stunWaypoints",
             translation = "Stun Waypoints"
     )
-    @Comment("Display waypoints for stun locations")
-    public static boolean stunWaypoints = false;
+    @Comment("Show waypoints for stun positions.")
+    public static boolean stunWaypoints = true;
 
     @ConfigEntry(
             id = "stunWaypointColor",
             translation = "Stun Waypoints Color"
     )
     @ConfigOption.Color(alpha = true)
-    @Comment("Change the color of the stun waypoints")
+    @Comment("Change the color of stun waypoints.")
     public static int stunWaypointColor = new Color(0, 245, 255, 200).getRGB();
 
     @ConfigEntry(
@@ -116,6 +116,6 @@ public class PhaseThreeConfig {
             translation = "Stun Waypoint Block"
     )
     @ConfigOption.Select
-    @Comment("Change the block used for stun waypoints")
+    @Comment("Choose which stun location marker to display.")
     public static StunWaypointsFeature.StunWaypoint stunWaypointBlock = StunWaypointsFeature.StunWaypoint.LEFT_POD;
 }

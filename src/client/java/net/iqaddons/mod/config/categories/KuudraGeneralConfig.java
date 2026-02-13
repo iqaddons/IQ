@@ -15,17 +15,17 @@ public class KuudraGeneralConfig {
             id = "autoRequeue",
             translation = "Auto Requeue"
     )
-    @Comment("Automatically requeue a Kuudra run after boss death.")
-    public static boolean autoRequeue = false;
+    @Comment("Automatically start a new Kuudra run after the boss is defeated.")
+    public static boolean autoRequeue = true;
 
     @ConfigEntry(
             id = "requeueDelay",
             translation = "Auto Requeue Delay"
     )
-    @Comment("Delay in ticks before auto-requeue (1-50)")
+    @Comment("Delay before requeueing (in ticks).")
     @ConfigOption.Range(min = 1, max = 50)
     @ConfigOption.Slider
-    public static int requeueDelay = 15;
+    public static int requeueDelay = 20;
 
     @ConfigOption.Separator("Profit Tracking")
 
@@ -33,15 +33,15 @@ public class KuudraGeneralConfig {
             id = "kuudraProfitTracker",
             translation = "Kuudra Profit Tracker"
     )
-    @Comment("Track your profit/loss after each Kuudra run and display it")
-    public static boolean kuudraProfitTracker = false;
+    @Comment("Track profit and loss after each Kuudra run and display it on screen.")
+    public static boolean kuudraProfitTracker = true;
 
     @ConfigEntry(
             id = "profitTrackerVisibility",
             translation = "Profit Tracker Visibility"
     )
     @ConfigOption.Select
-    @Comment("Choose whether the profit tracker appears only in Kuudra-related areas or all the time")
+    @Comment("Control when the profit tracker is visible.")
     public static ProfitTrackerVisibility profitTrackerVisibility = ProfitTrackerVisibility.KUUDRA_AREAS;
 
     @ConfigEntry(
@@ -49,7 +49,7 @@ public class KuudraGeneralConfig {
             translation = "Bazaar Pricing Mode"
     )
     @ConfigOption.Select
-    @Comment("Choose if Bazaar prices use Insta Sell or Sell Order for chest value and profit tracking")
+    @Comment("Choose how Bazaar prices are calculated for profit and chest value.")
     public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.INSTA_SELL;
 
     @ConfigEntry(
@@ -57,7 +57,7 @@ public class KuudraGeneralConfig {
             translation = "Crimson Isle Faction"
     )
     @ConfigOption.Select
-    @Comment("Set your Crimson Isle faction for better profit calculations")
+    @Comment("Select your Crimson Isle faction to improve profit calculations.")
     public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
 
 
@@ -66,7 +66,7 @@ public class KuudraGeneralConfig {
             translation = "Armor Value Type"
     )
     @ConfigOption.Select
-    @Comment("Choose whether to value armor based on its salvage value or auction house value in the profit tracker")
+    @Comment("Choose how armor value is calculated in the profit tracker.")
     public static ArmorValueType armorValueType = ArmorValueType.SALVAGE;
 
     @ConfigEntry(
@@ -75,7 +75,7 @@ public class KuudraGeneralConfig {
     )
     @ConfigOption.Range(min = 0, max = 20)
     @ConfigOption.Slider
-    @Comment("Calculate the bonus from your Kuudra pet level in the profit tracker")
+    @Comment("Apply your Kuudra pet level bonus to profit calculations.")
     public static int kuudraPetBonus = 0;
 
     @ConfigOption.Separator("Widgets")
@@ -84,28 +84,28 @@ public class KuudraGeneralConfig {
             id = "chestValueWidget",
             translation = "Chest Value Display"
     )
-    @Comment("Display the value of each chest you open in an overlay")
+    @Comment("Show the value of each chest when opened.")
     public static boolean chestValueWidget = true;
 
     @ConfigEntry(
             id = "croesusHelper",
             translation = "Croesus Helper"
     )
-    @Comment("Highlight already-opened chests in Croesus and Vesuvius menus")
+    @Comment("Highlight already opened chests in Croesus and Vesuvius menus.")
     public static boolean croesusHelper = true;
 
     @ConfigEntry(
             id = "chestCounterTracker",
             translation = "Chest Counter Tracker"
     )
-    @Comment("Track Kuudra runs toward your 60 chest cap")
+    @Comment("Track progress toward the 60 chest cap.")
     public static boolean chestCounterTracker = true;
 
     @ConfigEntry(
             id = "chestCounterPartyAnnouncements",
             translation = "Chest Counter Party Announcements"
     )
-    @Comment("Send 10-run and cap reminders to party chat")
+    @Comment("Send reminders to party chat at milestones and when nearing the cap.")
     public static boolean chestCounterPartyAnnouncements = true;
 
     @ConfigOption.Separator("Custom Splits")
@@ -114,14 +114,14 @@ public class KuudraGeneralConfig {
             id = "customSplits",
             translation = "Custom Splits"
     )
-    @Comment("Render a overlay with all the Kuudra phases times")
+    @Comment("Display an overlay with timings for each Kuudra phase.")
     public static boolean customSplits = true;
 
     @ConfigEntry(
             id = "customSplitsBenchmarks",
             translation = "Custom Splits Benchmarks"
     )
-    @Comment("Configure target split times used for pace in the Custom Splits widget")
+    @Comment("Set target split times used for pacing in the Custom Splits widget.")
     public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
 
     @ConfigObject
@@ -130,36 +130,43 @@ public class KuudraGeneralConfig {
         @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Supplies phase.")
         public static double supplies = 22.5;
 
         @ConfigEntry(id = "build", translation = "Build Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Build phase.")
         public static double build = 12;
 
         @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Eaten phase.")
         public static double eaten = 4.3;
 
         @ConfigEntry(id = "stun", translation = "Stun Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Stun phase.")
         public static double stun = 0.0;
 
         @ConfigEntry(id = "dps", translation = "DPS Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the DPS phase.")
         public static double dps = 3.2;
 
         @ConfigEntry(id = "skip", translation = "Skip Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Skip phase.")
         public static double skip = 4.6;
 
         @ConfigEntry(id = "boss", translation = "Boss Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Boss phase.")
         public static double boss = 1.9;
     }
 
@@ -167,7 +174,7 @@ public class KuudraGeneralConfig {
             id = "splitColorConfig",
             translation = "Split Time Colors"
     )
-    @Comment("Choose colors used by split time thresholds in the Custom Splits widget")
+    @Comment("Customize the colors used for split time performance thresholds.")
     public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
 
     @ConfigObject
@@ -203,22 +210,8 @@ public class KuudraGeneralConfig {
             id = "kuudraNotifications",
             translation = "Kuudra Notifications"
     )
-    @Comment("Show alerts for important Kuudra-related events like Ballista progress, Ichor Pool casts, and SOS reminder")
+    @Comment("Configure alerts for important Kuudra-related events.")
     public static final KuudraNotifications kuudraNotifications = new KuudraNotifications();
-
-    @ConfigEntry(
-            id = "manaDrainNotify",
-            translation = "Mana Drain Notify"
-    )
-    @Comment("Send the amount of mana drained to party chat")
-    public static boolean manaDrainNotify = true;
-
-    @ConfigEntry(
-            id = "personalBestTracker",
-            translation = "Personal Best Tracker"
-    )
-    @Comment("Track your best Kuudra run and notify when you beat your PB")
-    public static boolean personalBestTracker = true;
 
     @ConfigObject
     public static class KuudraNotifications {
@@ -227,72 +220,86 @@ public class KuudraGeneralConfig {
                 id = "kuudraNotificationBuildStarted",
                 translation = "Build Started Notification"
         )
-        @Comment("Show an alert when Elle asks to build the Ballista")
+        @Comment("Show an alert when Elle asks to build the Ballista.")
         public static boolean buildStarted = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationIchorUsed",
                 translation = "Ichor Used Notification"
         )
-        @Comment("Show an alert when Ichor Pool is cast")
+        @Comment("Show an alert when Ichor Pool is cast.")
         public static boolean ichorUsed = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationNoPre",
                 translation = "No Pre Notifications"
         )
-        @Comment("Show alerts for No Pre party messages")
+        @Comment("Show an alert for 'No Pre' party messages.")
         public static boolean noPre = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationSosReminder",
                 translation = "SOS Reminder Notification"
         )
-        @Comment("Show an alert when stun starts in 4 seconds")
+        @Comment("Show an alert 4 seconds before the stun phase begins.")
         public static boolean sosReminder = true;
 
         @ConfigEntry(
                 id = "kuudraPhaseAlert",
                 translation = "Phase Change Notification"
         )
-        @Comment("Show an alert when Kuudra phase changes")
+        @Comment("Show an alert when the Kuudra phase changes.")
         public static boolean phaseChange = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationBuildDone",
                 translation = "Build Done Notification"
         )
-        @Comment("Show an alert when the Ballista is fully built")
+        @Comment("Show an alert when the Ballista is fully built.")
         public static boolean buildDone = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationSuppliesDone",
                 translation = "Supplies Done Notification"
         )
-        @Comment("Show an alert when supply progress reaches 6/6")
+        @Comment("Show an alert when supplies reach 6/6.")
         public static boolean suppliesDone = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationCannonball",
                 translation = "Cannonball Notification"
         )
-        @Comment("Show an alert when Human Cannonball is purchased")
+        @Comment("Show an alert when Human Cannonball is purchased.")
         public static boolean cannonBall = true;
 
         @ConfigEntry(
                 id = "supplyPickingAlert",
                 translation = "Supply Already Picking Alert"
         )
-        @Comment("Alert when another player is already picking your supply")
+        @Comment("Show an alert if another player is already picking your supply.")
         public static boolean supplyPickingAlert = true;
 
         @ConfigEntry(
                 id = "supplyDroppedTitle",
                 translation = "Supply Dropped Notification"
         )
-        @Comment("Show an alert when a supply is dropped")
+        @Comment("Show an alert when a supply is dropped.")
         public static boolean supplyDropped = true;
     }
+
+    @ConfigEntry(
+            id = "manaDrainNotify",
+            translation = "Mana Drain Notify"
+    )
+    @Comment("Send the amount of mana drained to party chat.")
+    public static boolean manaDrainNotify = true;
+
+    @ConfigEntry(
+            id = "personalBestTracker",
+            translation = "Personal Best Tracker"
+    )
+    @Comment("Track your personal best Kuudra time and notify when beaten.")
+    public static boolean personalBestTracker = true;
 
     @ConfigOption.Separator("Visual")
 
@@ -300,15 +307,15 @@ public class KuudraGeneralConfig {
             id = "hideMobNametags",
             translation = "Hide Mob Nametags"
     )
-    @Comment("Prevent Kuudra mobs nametags from loading")
-    public static boolean hideMobNametags = false;
+    @Comment("Prevent loading nametags from Kuudra mobs.")
+    public static boolean hideMobNametags = true;
 
     @ConfigEntry(
             id = "hideKuudraBossBar",
             translation = "Hide Kuudra Boss Bar"
     )
-    @Comment("Hide Kuudra's vanilla boss bar during the run")
-    public static boolean hideKuudraBossBar = false;
+    @Comment("Hide Kuudra's vanilla boss bar during runs.")
+    public static boolean hideKuudraBossBar = true;
 
     public enum ProfitTrackerVisibility {
         KUUDRA_AREAS, ALWAYS

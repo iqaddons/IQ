@@ -45,7 +45,7 @@ public class PhaseTwoConfig {
             translation = "Fresh Countdown"
     )
     @Comment("Display a countdown timer of you fresh")
-    public static boolean freshCountdown = false;
+    public static boolean freshCountdown = true;
 
     @ConfigOption.Separator("Build Highlights")
     @ConfigEntry(
@@ -94,7 +94,7 @@ public class PhaseTwoConfig {
         )
         @ConfigOption.Select
         @Comment("Change the style of the Elle highlight")
-        public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.BOTH;
+        public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.OUTLINE;
     }
 
     @ConfigOption.Separator("Build Alerts")
@@ -119,5 +119,5 @@ public class PhaseTwoConfig {
             translation = "Replace Ballista Build Sound"
     )
     @Comment("Replace the default ballista build sound while in build phase")
-    public static boolean replaceBallistaBuildSound = false;
+    public static boolean replaceBallistaBuildSound = true;
 }

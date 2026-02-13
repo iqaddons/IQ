@@ -26,7 +26,7 @@ public class SupplyTimerWidget extends HudWidget {
         super(
                 "supplyTimer",
                 "Supply Timer",
-                10.0f, 10.0f,
+                8.5f, 115.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

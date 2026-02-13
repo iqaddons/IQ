@@ -14,7 +14,7 @@ public class PhaseFourConfig {
             id = "hideDamageTitle",
             translation = "Hide Kuudra Damage Title"
     )
-    @Comment("Hide Kuudra's default damage title (☠ 240M/240M❤)")
+    @Comment("Hide Kuudra's default damage title (e.g. ☠ 240M/240M❤).")
     public static boolean hideDamageTitle = true;
 
     @ConfigOption.Separator("Boss Alerts")
@@ -22,21 +22,21 @@ public class PhaseFourConfig {
             id = "kuudraDirectionAlert",
             translation = "Kuudra Direction Alert"
     )
-    @Comment("Alert which side Kuudra will appear on")
+    @Comment("Show an alert indicating which side Kuudra will spawn on.")
     public static boolean kuudraDirectionAlert = true;
 
     @ConfigEntry(
             id = "rendDamageAlert",
             translation = "Rend Damage"
     )
-    @Comment("Track when any teammate deals Rend Damage")
+    @Comment("Show an alert when any teammate deals Rend damage.")
     public static boolean rendDamageAlert = true;
 
     @ConfigEntry(
             id = "dangerZoneAlert",
             translation = "Danger Zone Alert"
     )
-    @Comment("Alert when you are in Tentacle's Danger Zone")
-    public static boolean dangerZoneAlert = true;
+    @Comment("Show an alert when you enter a tentacle's danger zone.")
+    public static boolean dangerZoneAlert = false;
 
 }

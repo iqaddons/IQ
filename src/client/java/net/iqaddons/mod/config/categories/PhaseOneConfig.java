@@ -15,22 +15,22 @@ public class PhaseOneConfig {
             id = "supplyTimers",
             translation = "Supply Times"
     )
-    @Comment("Display supply pickup times for all players")
+    @Comment("Show supply pickup times for each player.")
     public static boolean supplyTimers = true;
 
     @ConfigEntry(
             id = "supplyProgressDisplay",
             translation = "Supply Progress Display"
     )
-    @Comment("Hide supply progress title and render it as a movable widget")
-    public static boolean supplyProgressDisplay = false;
+    @Comment("Replace the default supply title with a movable widget.")
+    public static boolean supplyProgressDisplay = true;
 
     @ConfigOption.Separator("Supply Waypoints")
     @ConfigEntry(
             id = "supplyWaypoints",
             translation = "Supply Waypoints"
     )
-    @Comment("Draw a beacon at supply locations")
+    @Comment("Show waypoints at supply locations.")
     public static boolean supplyWaypoints = true;
 
     @ConfigEntry(
@@ -38,7 +38,7 @@ public class PhaseOneConfig {
             translation = "Supply Waypoint Color"
     )
     @ConfigOption.Color(alpha = true)
-    @Comment("Change the color of the supply waypoints")
+    @Comment("Change the color of supply waypoints.")
     public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
 
     @ConfigEntry(
@@ -47,8 +47,8 @@ public class PhaseOneConfig {
     )
     @ConfigOption.Range(min = 1, max = 3)
     @ConfigOption.Slider
-    @Comment("Adjust the size of supply waypoint boxes")
-    public static float supplyWaypointBoxSize = 1.0f;
+    @Comment("Adjust the size of supply waypoint boxes.")
+    public static float supplyWaypointBoxSize = 1.2f;
 
     @ConfigOption.Separator("Pearl Waypoints")
 
@@ -56,7 +56,7 @@ public class PhaseOneConfig {
             id = "pearlWaypoints",
             translation = "Pearl Waypoints"
     )
-    @Comment("Show pearl throw waypoints during the supply phase")
+    @Comment("Show pearl throw waypoints during the supply phase.")
     public static boolean pearlWaypoints = true;
 
     @ConfigEntry(
@@ -65,8 +65,8 @@ public class PhaseOneConfig {
     )
     @ConfigOption.Range(min = 0.01, max = 1)
     @ConfigOption.Slider
-    @Comment("Scale the text on pearl throw waypoints")
-    public static float pearlWaypointsScale = 0.25f;
+    @Comment("Adjust the size of the text displayed on pearl waypoints.")
+    public static float pearlWaypointsScale = 0.3f;
 
     @ConfigEntry(
             id = "pearlWaypointsTimerDelay",
@@ -74,7 +74,7 @@ public class PhaseOneConfig {
     )
     @ConfigOption.Range(min = -4, max = 4)
     @ConfigOption.Slider
-    @Comment("Adjust the displayed supply tick percentage below pearl waypoints to match your ping (0 ~= 160-200ms)")
+    @Comment("Adjust the waypoint timer to match your ping (0 ≈ 160–200ms).")
     public static int pearlWaypointsTimerDelay = 0;
 
     @ConfigEntry(
@@ -82,14 +82,14 @@ public class PhaseOneConfig {
             translation = "Pearl Waypoint Type"
     )
     @ConfigOption.Select
-    @Comment("Choose if pearl waypoints render text, timer, or both")
-    public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.BOTH;
+    @Comment("Choose what pearl waypoints display: text, timer, or both.")
+    public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER;
 
     @ConfigEntry(
             id = "pearlThrowAlert",
             translation = "Pearl Throw Alert"
     )
-    @Comment("Enable color/sound throw alerts for pearl waypoints with alert=true in config")
+    @Comment("Play a sound and highlight when it's time to throw a pearl.")
     public static boolean pearlThrowAlert = true;
 
     @ConfigOption.Separator("Pile Waypoints")
@@ -98,7 +98,7 @@ public class PhaseOneConfig {
             id = "pileWaypoints",
             translation = "Pile Waypoints"
     )
-    @Comment("Display beacons at all crate pile locations")
+    @Comment("Show waypoints at crate pile locations.")
     public static boolean pileWaypoints = true;
 
     @ConfigEntry(
@@ -106,7 +106,7 @@ public class PhaseOneConfig {
             translation = "Normal Pile Color"
     )
     @ConfigOption.Color(alpha = true)
-    @Comment("Customize the beacon color of standard supply piles.")
+    @Comment("Change the color of standard supply pile waypoints.")
     public static int normalPileColor = new Color(255, 255, 255, 52).getRGB();
 
     @ConfigEntry(
@@ -114,7 +114,7 @@ public class PhaseOneConfig {
             translation = "No Pre Pile Color"
     )
     @ConfigOption.Color(alpha = true)
-    @Comment("Customize the beacon color of no-pre supply pile (mainly useful for Square).")
+    @Comment("Change the color of no-pre supply pile waypoints.")
     public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
 
     @ConfigOption.Separator("Supply Alerts")
@@ -123,21 +123,21 @@ public class PhaseOneConfig {
             id = "supplyRecoverMessage",
             translation = "Custom Supply Recover Message"
     )
-    @Comment("Send a custom message when recover a supply")
+    @Comment("Send a custom message when recover a supply.")
     public static boolean supplyRecoverMessage = true;
 
     @ConfigEntry(
             id = "noPreAlert",
             translation = "Send No Pre Alert"
     )
-    @Comment("Send a message in party chat if you have no pre")
+    @Comment("Send a party chat message if you don't have a pre.")
     public static boolean noPreAlert = true;
 
     @ConfigEntry(
             id = "secondSupplyAlert",
             translation = "Second Supply Alert "
     )
-    @Comment("Announce the position of the second supply in chat")
+    @Comment("Announce the position of the second supply in chat.")
     public static boolean secondSupplyAlert = true;
 
     public enum PearlWaypointType {

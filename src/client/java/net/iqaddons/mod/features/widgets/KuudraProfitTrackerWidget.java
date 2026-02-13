@@ -40,7 +40,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     public KuudraProfitTrackerWidget() {
         super("kuudraProfitTrackerWidget",
                 "Profit Tracker",
-                10.0f, 50.0f,
+                815.0f, 30.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

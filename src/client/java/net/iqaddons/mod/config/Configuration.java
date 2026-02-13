@@ -29,10 +29,10 @@ public class Configuration {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     @ConfigButton(
-            title = "Open HUD Editor",
+            title = "HUD Editor",
             text = "OPEN"
     )
-    @Comment("Open the HUD Editor to customize your HUD elements")
+    @Comment("Open the HUD Editor to move and customize HUD elements.")
     public static final Runnable hudEditor = () -> {
         mc.execute(() -> HudManager.get().openEditor());
     };
@@ -41,66 +41,67 @@ public class Configuration {
             id = "partyJoinSound",
             translation = "Party Join Sound"
     )
-    @Comment("Play a sound when a player joins your party")
+    @Comment("Play a sound when someone joins your party.")
     public static boolean partyJoinSound = true;
 
     @ConfigEntry(
             id = "fixFishingHook",
             translation = "Fix Fishing Hook"
     )
-    @Comment("Fix the fishing hook block when throw the rod")
+    @Comment("Fix the fishing hook getting stuck when throwing the rod.")
     public static boolean fixFishingHook = true;
 
     @ConfigEntry(
             id = "partyCommands",
             translation = "Party Commands"
     )
-    @Comment("Enable commands that can be triggered from party chat messages")
+    @Comment("Configure commands triggered by party chat messages.")
     public static final PartyCommands partyCommands = new PartyCommands();
 
     @ConfigObject
     public static class PartyCommands {
+
         @ConfigEntry(
                 id = "partyCommandsEnabled",
-                translation = "Party Commands"
+                translation = "Enable Party Commands"
         )
-        @Comment("Enable command triggers from party chat messages")
-        public static boolean enable = false;
+        @Comment("Allow party chat messages to trigger commands.")
+        public static boolean enable = true;
 
         @ConfigEntry(id = "partyCommandWarp", translation = "!warp (!w, !wp)")
-        @Comment("Run /party warp when someone sends !warp")
+        @Comment("Run /party warp when someone sends !warp.")
         public static boolean warpCommand = true;
 
         @ConfigEntry(id = "partyCommandTransfer", translation = "!pt (!ptme, !transfer)")
-        @Comment("Transfer party leadership to the player that requested it")
+        @Comment("Transfer party leader to the requester.")
         public static boolean transferCommand = true;
 
         @ConfigEntry(id = "partyCommandPing", translation = "!ping")
-        @Comment("Send the requester's ping in party chat")
+        @Comment("Reply with the requester's ping in party chat.")
         public static boolean partyCommandPing = true;
 
         @ConfigEntry(id = "partyCommandAllInvite", translation = "!allinvite (!allinv, !invites)")
-        @Comment("Toggle all-invite with /party settings allinvite")
+        @Comment("Toggle /party settings allinvite when requested.")
         public static boolean allInviteCommand = true;
 
         @ConfigEntry(id = "partyCommandTps", translation = "!tps")
-        @Comment("Send current server TPS to party chat")
+        @Comment("Reply with the current server TPS in party chat.")
         public static boolean partyCommandTps = true;
 
         @ConfigEntry(id = "partyCommandPromote", translation = "!promote")
-        @Comment("Promote the player that requested it")
+        @Comment("Promote the requester.")
         public static boolean promoteCommand = true;
 
         @ConfigEntry(id = "partyCommandKick", translation = "!kick <player>")
-        @Comment("Kick a target player from the party")
+        @Comment("Kick the specified player from the party.")
         public static boolean partyCommandKick = true;
 
         @ConfigEntry(id = "partyCommandKuudra", translation = "!t[1-5]")
-        @Comment("Start a Kuudra run")
+        @Comment("Start a Kuudra run (Tier 1–5) when requested.")
         public static boolean kuudraCommand = true;
 
         @ConfigEntry(id = "partyCommandChests", translation = "!chests")
-        @Comment("Reply with your current chest counter progress")
+        @Comment("Reply with your current chest counter progress.")
         public static boolean partyCommandChests = true;
     }
 
@@ -112,20 +113,23 @@ public class Configuration {
     )
     @Comment("Enable keybind-based wardrobe slot selection")
     public static boolean wardrobeKeybinds = false;
+    @Comment("Enable wardrobe slot selection using keybinds. Configure slot keybinds in Options → Controls → Keybinds.")
+    public static boolean wardrobeKeybinds = true;
 
     @ConfigEntry(
             id = "wardrobeSound",
-            translation = "Wardrobe Sound"
+            translation = "Wardrobe Selection Sound"
     )
-    @Comment("Play a sound after selecting a wardrobe slot")
+    @Comment("Play a sound after selecting a wardrobe slot via keybind.")
     public static boolean wardrobeSound = true;
 
     @ConfigOption.Separator("Shared Waypoints")
+
     @ConfigEntry(
             id = "waypointConfig",
-            translation = "Shared Waypoints Config"
+            translation = "Shared Waypoints"
     )
-    @Comment("Configure the shared waypoints feature")
+    @Comment("Configure shared waypoint creation and rendering.")
     public static final Waypoints waypointConfig = new Waypoints();
 
     @ConfigObject
@@ -133,26 +137,27 @@ public class Configuration {
 
         @ConfigEntry(
                 id = "renderWaypoints",
-                translation = "Render Waypoints"
+                translation = "Enable Shared Waypoints"
         )
-        @Comment("Create waypoints from Patcher-formatted coordinates")
+        @Comment("Create and render waypoints from Patcher-formatted coordinates.")
         public static boolean activated = true;
 
         @ConfigEntry(
                 id = "waypointsDuration",
-                translation = "Waypoints Duration (seconds)"
+                translation = "Waypoint Duration (seconds)"
         )
-        @ConfigOption.Range(min = 1, max = 60)
+        @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Set a duration in seconds or 0 to disable.")
-        public static int duration = 1;
+        @Comment("How long waypoints stay on screen. Set to 0 to keep them until cleared/expired.")
+        public static int duration = 7;
 
         @ConfigEntry(
                 id = "waypointStyle",
-                translation = "Waypoint Style"
+                translation = "Render Style"
         )
         @ConfigOption.Select
-        @Comment("Change the style of the waypoint rendering")
+        @Comment("Choose how waypoints are displayed.")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.BOTH;
     }
+
 }

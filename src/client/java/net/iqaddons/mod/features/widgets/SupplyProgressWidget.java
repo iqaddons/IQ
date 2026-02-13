@@ -26,7 +26,7 @@ public class SupplyProgressWidget extends HudWidget {
         super(
                 "supplyProgress",
                 "Supply Progress",
-                10.0f, 120.0f,
+                430.0f, 360.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

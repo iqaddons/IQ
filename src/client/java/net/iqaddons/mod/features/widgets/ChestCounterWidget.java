@@ -25,7 +25,7 @@ public class ChestCounterWidget extends HudWidget {
 
     public ChestCounterWidget() {
         super("chestCounterWidget", "Chest Counter",
-                10.0f, 110.0f,
+                581.0f, 490.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );
