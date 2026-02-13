@@ -13,7 +13,7 @@ public class KuudraPhaseAlertFeature extends KuudraFeature {
         super(
                 "kuudraPhaseAlert",
                 "Kuudra Phase Alert",
-                () -> KuudraGeneralConfig.kuudraPhaseAlert,
+                () -> KuudraGeneralConfig.KuudraNotifications.phaseChange,
                 KuudraPhase.RUN_PHASES
         );
     }

@@ -47,6 +47,11 @@ public class KuudraNotificationsFeature extends KuudraFeature {
                     Pattern.compile("You purchased Human Cannonball!"),
                     "§e§lCANNONBALL",
                     () -> KuudraGeneralConfig.KuudraNotifications.cannonBall
+            ),
+            new KuudraNotificationRule(
+                    Pattern.compile("Someone else is currently trying to pick up these supplies!"),
+                "§c§lALREADY PICKING!",
+                    () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert
             )
     );
 
@@ -71,7 +76,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             var matcher = rule.pattern().matcher(message);
             if (!matcher.matches()) continue;
 
-            MessageUtil.showTitle(matcher.replaceAll(rule.titleTemplate()), "", 0, 20, 8);
+            MessageUtil.showTitle(matcher.replaceAll(rule.titleTemplate()), "", 8, 40, 12);
             return;
         }
     }

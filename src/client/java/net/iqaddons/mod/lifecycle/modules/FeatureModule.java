@@ -35,13 +35,13 @@ public class FeatureModule implements LifecycleComponent {
                 new PearlWaypointFeature(), new SupplyWaypointsFeature(), new PileWaypointsFeature(),
                 new NoPreAlertFeature(), new SecondSupplyAlertFeature(scheduler), new CustomSupplyMessageFeature(),
                 new ElleHighlightFeature(), new FreshAlertFeature(), new KuudraDirectionAlertFeature(),
-                new KuudraHitboxFeature(), new RendDamageAlertFeature(), new AlreadyPickingAlertFeature(),
-                new BuildWaypointsFeature(), new StunWaypointsFeature(), new ManaDrainAlertFeature(),
-                new BlockUselessPerksFeature(), new HideMobNametagsFeature(), new TeamHighlightFeature(),
-                new KuudraPhaseAlertFeature(), new DangerAlertFeature(), new KuudraHealthFeature(),
-                new HideDamageTitleFeature(), new SupplyDroppedAlertFeature(), new PersonalBestTrackerFeature(),
-                new AutoRequeueFeature(), new ChestCounterTrackerFeature(), new KuudraProfitTrackerFeature(),
-                new CroesusHelperFeature(), new HideKuudraBossBarFeature(), new KuudraNotificationsFeature()
+                new KuudraHitboxFeature(), new RendDamageAlertFeature(), new BuildWaypointsFeature(),
+                new StunWaypointsFeature(), new ManaDrainAlertFeature(), new BlockUselessPerksFeature(),
+                new HideMobNametagsFeature(), new TeamHighlightFeature(), new KuudraPhaseAlertFeature(),
+                new DangerAlertFeature(), new KuudraHealthFeature(), new HideDamageTitleFeature(),
+                new SupplyDroppedAlertFeature(), new PersonalBestTrackerFeature(), new AutoRequeueFeature(),
+                new ChestCounterTrackerFeature(), new KuudraProfitTrackerFeature(), new CroesusHelperFeature(),
+                new HideKuudraBossBarFeature(), new KuudraNotificationsFeature()
         );
 
         features.start();

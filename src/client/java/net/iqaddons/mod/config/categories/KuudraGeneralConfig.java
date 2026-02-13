@@ -201,14 +201,6 @@ public class KuudraGeneralConfig {
     public static boolean personalBestTracker = true;
 
     @ConfigEntry(
-            id = "kuudraPhaseAlert",
-            translation = "Phase Alert"
-    )
-    @Comment("Alert when Kuudra phase changes")
-    public static boolean kuudraPhaseAlert = true;
-
-
-    @ConfigEntry(
             id = "kuudraNotifications",
             translation = "Kuudra Notifications"
     )
@@ -247,6 +239,13 @@ public class KuudraGeneralConfig {
         public static boolean sosReminder = true;
 
         @ConfigEntry(
+                id = "kuudraPhaseAlert",
+                translation = "Phase Change Notification"
+        )
+        @Comment("Show an alert when Kuudra phase changes")
+        public static boolean phaseChange = true;
+
+        @ConfigEntry(
                 id = "kuudraNotificationBuildDone",
                 translation = "Build Done Notification"
         )
@@ -266,9 +265,21 @@ public class KuudraGeneralConfig {
         )
         @Comment("Show an alert when Human Cannonball is purchased")
         public static boolean cannonBall = true;
+
+        @ConfigEntry(
+                id = "supplyPickingAlert",
+                translation = "Supply Already Picking Alert"
+        )
+        @Comment("Alert when another player is already picking your supply")
+        public static boolean supplyPickingAlert = true;
+
+        @ConfigEntry(
+                id = "supplyDroppedTitle",
+                translation = "Supply Dropped Notification"
+        )
+        @Comment("Show an alert when a supply is dropped")
+        public static boolean supplyDropped = true;
     }
-
-
 
     @ConfigEntry(
             id = "hideMobNametags",

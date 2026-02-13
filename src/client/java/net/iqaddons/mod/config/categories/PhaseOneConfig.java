@@ -97,28 +97,6 @@ public class PhaseOneConfig {
     @Comment("Customize the beacon color of no-pre supply pile (mainly useful for Square).")
     public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
 
-    @ConfigOption.Separator("Supply Alerts")
-    @ConfigEntry(
-            id = "supplyPickingAlert",
-            translation = "Supply Already Picking Alert"
-    )
-    @Comment("Alert when another player is already picking your supply")
-    public static boolean supplyPickingAlert = true;
-
-    @ConfigEntry(
-            id = "noPreAlert",
-            translation = "No Pre Alert"
-    )
-    @Comment("Send a chat message if you have no pre")
-    public static boolean noPreAlert = true;
-
-    @ConfigEntry(
-            id = "secondSupplyAlert",
-            translation = "Second Supply Alert "
-    )
-    @Comment("Announce the position of the second supply in chat")
-    public static boolean secondSupplyAlert = true;
-
     @ConfigEntry(
             id = "supplyRecoverMessage",
             translation = "Custom Supply Recover Message"
@@ -127,10 +105,17 @@ public class PhaseOneConfig {
     public static boolean supplyRecoverMessage = true;
 
     @ConfigEntry(
-            id = "supplyDroppedTitle",
-            translation = "Supply Dropped Title"
+            id = "noPreAlert",
+            translation = "Send No Pre Alert"
     )
-    @Comment("Show a title when a supply is dropped")
-    public static boolean supplyDroppedTitle = true;
+    @Comment("Send a message in party chat if you have no pre")
+    public static boolean noPreAlert = true;
+
+    @ConfigEntry(
+            id = "secondSupplyAlert",
+            translation = "Second Supply Alert "
+    )
+    @Comment("Announce the position of the second supply in chat")
+    public static boolean secondSupplyAlert = true;
 
 }

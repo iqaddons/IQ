@@ -1,6 +1,6 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
-import net.iqaddons.mod.config.categories.PhaseOneConfig;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
@@ -12,7 +12,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
         super(
                 "supplyDroppedTitle",
                 "Supply Dropped Title",
-                () -> PhaseOneConfig.supplyDroppedTitle,
+                () -> KuudraGeneralConfig.KuudraNotifications.supplyDropped,
                 KuudraPhase.SUPPLIES
         );
     }
