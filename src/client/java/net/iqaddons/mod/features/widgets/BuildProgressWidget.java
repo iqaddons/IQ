@@ -105,7 +105,8 @@ public class BuildProgressWidget extends HudWidget {
                 }
             }
         }
-        return -1;
+
+        return 0;
     }
 
     private void updateDisplay() {
