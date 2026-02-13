@@ -214,6 +214,13 @@ public class KuudraGeneralConfig {
     @Comment("Prevent Kuudra mobs nametags from loading")
     public static boolean hideMobNametags = false;
 
+    @ConfigEntry(
+            id = "hideKuudraBossBar",
+            translation = "Hide Kuudra Boss Bar"
+    )
+    @Comment("Hide Kuudra's vanilla boss bar during the run")
+    public static boolean hideKuudraBossBar = false;
+
     public enum ProfitTrackerVisibility {
         KUUDRA_AREAS, ALWAYS
     }

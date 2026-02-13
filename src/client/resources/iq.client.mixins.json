@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "ArmorStandRendererMixin",
+    "BossBarHudMixin",
     "ChatHudMixin",
     "ClientTickMixin",
     "EntityGlowMixin",
