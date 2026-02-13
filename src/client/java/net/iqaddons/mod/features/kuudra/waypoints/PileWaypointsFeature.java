@@ -46,14 +46,11 @@ public class PileWaypointsFeature extends KuudraFeature {
 
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(WorldRenderEvent.class, this::onRender);
-
-        log.info("Pile waypoints activated");
     }
 
     @Override
     protected void onKuudraDeactivate() {
         supplyState.getRemainingPiles().clear();
-        log.info("Pile waypoints deactivated");
     }
 
     @Override
@@ -80,7 +77,9 @@ public class PileWaypointsFeature extends KuudraFeature {
 
         int missingPre = supplyState.getMissingPre();
         for (PileLocation pile : piles) {
-            RenderColor color = pile.isNoPrePile(missingPre) ? NO_PRE_COLOR : NORMAL_COLOR;
+            RenderColor color = pile.isNoPrePile(missingPre)
+                    ? RenderColor.fromArgb(PhaseOneConfig.noPrePileColor)
+                    : RenderColor.fromArgb(PhaseOneConfig.normalPileColor);
 
             event.drawStyledWithBeam(Box.from(pile.position()), BEACON_HEIGHT,
                     false, color, WorldRenderUtils.RenderStyle.BOTH

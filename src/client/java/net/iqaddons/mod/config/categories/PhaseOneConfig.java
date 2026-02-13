@@ -1,9 +1,6 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
 
 import java.awt.*;
 
@@ -65,6 +62,22 @@ public class PhaseOneConfig {
     )
     @Comment("Display beacons at all crate pile locations")
     public static boolean pileWaypoints = true;
+
+    @ConfigEntry(
+            id = "normalPileColor",
+            translation = "Normal Pile Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Customize the beacon color of standard supply piles.")
+    public static int normalPileColor = new Color(255, 255, 255, 52).getRGB();
+
+    @ConfigEntry(
+            id = "noPrePileColor",
+            translation = "No Pre Pile Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Customize the beacon color of no-pre supply pile (mainly useful for Square).")
+    public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
 
     @ConfigOption.Separator("Supply Alerts")
     @ConfigEntry(
