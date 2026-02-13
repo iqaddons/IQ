@@ -22,29 +22,31 @@ public class LuckyBuildFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        if (mc.getSoundManager() == null) {
-            return;
-        }
+        mc.execute(() -> {
+            if (mc.getSoundManager() == null) return;
 
-        mc.getSoundManager().play(PositionedSoundInstance.master(
-                SoundEvent.of(IQConstants.LUCKY_BUILD_SOUND),
-                1.0F,
-                3.0F)
-        );
+            mc.getSoundManager().play(PositionedSoundInstance.master(
+                    SoundEvent.of(IQConstants.LUCKY_BUILD_SOUND),
+                    1.0F,
+                    3.0F)
+            );
+        });
+
     }
 
 
     @Override
     protected void onKuudraDeactivate() {
-        if (mc.getSoundManager() == null) {
-            return;
-        }
+        mc.execute(() -> {
+            if (mc.getSoundManager() == null) return;
 
-        mc.getSoundManager().stopSounds(IQConstants.LUCKY_BUILD_SOUND, SoundCategory.MASTER);
-        mc.getSoundManager().play(PositionedSoundInstance.master(
-                SoundEvent.of(LUCKY_BUILD_SOUND_END),
-                1.0F,
-                2.0F
-        ));
+            mc.getSoundManager().stopSounds(IQConstants.LUCKY_BUILD_SOUND, SoundCategory.MASTER);
+            mc.getSoundManager().play(PositionedSoundInstance.master(
+                    SoundEvent.of(LUCKY_BUILD_SOUND_END),
+                    1.0F,
+                    2.0F
+            ));
+        });
+
     }
 }

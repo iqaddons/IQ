@@ -41,15 +41,16 @@ public class BallistaBuildSoundMixin {
         if (!PhaseTwoConfig.replaceBallistaBuildSound || !KuudraStateManager.isInitialized()) return;
         if (packet.getSound().matchesId(SoundEvents.BLOCK_ANVIL_LAND.id())) {
             MinecraftClient client = MinecraftClient.getInstance();
-            if (client.getSoundManager() == null) {
-                return;
-            }
 
-            client.getSoundManager().play(PositionedSoundInstance.master(
-                    SoundEvent.of(BALLISTA_BUILD_SOUND),
-                    packet.getPitch(),
-                    0.8F)
-            );
+            client.execute(() -> {
+                if (client.getSoundManager() == null) return;
+
+                client.getSoundManager().play(PositionedSoundInstance.master(
+                        SoundEvent.of(BALLISTA_BUILD_SOUND),
+                        packet.getPitch(),
+                        0.8F)
+                );
+            });
 
             ci.cancel();
         }
