@@ -14,11 +14,10 @@ public class WidgetModule implements LifecycleComponent {
         hudManager.initialize();
 
         hudManager.register(
-                new SupplyTimerWidget(), new BuildProgressWidget(),
-                new CustomSplitsWidget(), new FreshCountdownWidget(),
-                new KuudraHealthWidget(), new FreshersTimerWidget(),
-                new SupplyProgressWidget(), new ChestCounterWidget(),
-                new KuudraProfitTrackerWidget(), new ChestValueWidget()
+                new SupplyTimerWidget(), new BuildProgressWidget(), new CustomSplitsWidget(),
+                new FreshCountdownWidget(), new KuudraHealthWidget(), new FreshersTimerWidget(),
+                new SupplyProgressWidget(), new ChestCounterWidget(), new KuudraProfitTrackerWidget(),
+                new ChestValueWidget(), new BackboneWidget()
         );
     }
 

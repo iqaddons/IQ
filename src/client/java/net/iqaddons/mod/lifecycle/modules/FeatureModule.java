@@ -41,7 +41,7 @@ public class FeatureModule implements LifecycleComponent {
                 new DangerAlertFeature(), new KuudraHealthFeature(), new HideDamageTitleFeature(),
                 new SupplyDroppedAlertFeature(), new PersonalBestTrackerFeature(), new AutoRequeueFeature(),
                 new ChestCounterTrackerFeature(), new KuudraProfitTrackerFeature(), new CroesusHelperFeature(),
-                new HideKuudraBossBarFeature(), new KuudraNotificationsFeature()
+                new HideKuudraBossBarFeature(), new KuudraNotificationsFeature(), new BackboneAlertFeature()
         );
 
         features.start();

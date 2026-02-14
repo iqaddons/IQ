@@ -13,6 +13,7 @@
     "HandledScreenMixin",
     "HudClickMixin",
     "InGameHudMixin",
+    "ItemUseMixin",
     "WorldRendererMixin",
     "feature.BallistaBuildSoundMixin"
   ],

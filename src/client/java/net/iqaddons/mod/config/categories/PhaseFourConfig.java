@@ -33,6 +33,13 @@ public class PhaseFourConfig {
     public static boolean rendDamageAlert = true;
 
     @ConfigEntry(
+            id = "backboneAlert",
+            translation = "Backbone Alert"
+    )
+    @Comment("Track Bonemerang backbone timing with a HUD progress bar and Rend alert.")
+    public static boolean backboneAlert = true;
+
+    @ConfigEntry(
             id = "dangerZoneAlert",
             translation = "Danger Zone Alert"
     )
