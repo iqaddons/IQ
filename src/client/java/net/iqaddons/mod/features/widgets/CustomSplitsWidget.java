@@ -57,30 +57,30 @@ public class CustomSplitsWidget extends HudWidget {
         );
 
         titleLine = HudLine.of("§b§lKuudra Splits");
-        suppliesLine = HudLine.of("§fSupplies §f0.00s");
-        buildLine = HudLine.of("§fBuild: §f0.00s");
-        eatenLine = HudLine.of("§fEaten: §f0.00s");
-        stunLine = HudLine.of("§fStun: §f0.00s");
-        dpsLine = HudLine.of("§fDPS: §f0.00s");
-        skipLine = HudLine.of("§fSkip: §f0.00s");
-        bossLine = HudLine.of("§fBoss: §f0.00s");
-        overallLine = HudLine.of("§fOverall: §f0.00s");
-        paceLine = HudLine.of("§fPace: §f0.00s");
+        suppliesLine = HudLine.of("§7Supplies §f0.00s");
+        buildLine = HudLine.of("§7Build: §f0.00s");
+        eatenLine = HudLine.of("§7Eaten: §f0.00s");
+        stunLine = HudLine.of("§7Stun: §f0.00s");
+        dpsLine = HudLine.of("§7DPS: §f0.00s");
+        skipLine = HudLine.of("§7Skip: §f0.00s");
+        bossLine = HudLine.of("§7Boss: §f0.00s");
+        overallLine = HudLine.of("§7Overall: §f0.00s");
+        paceLine = HudLine.of("§7Pace: §f0.00s");
 
         setEnabledSupplier(() -> KuudraGeneralConfig.customSplits);
         setVisibilityCondition(() -> ScoreboardUtils.getArea().startsWith("Kuudra's Hollow"));
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),
-                HudLine.of("§fSupplies: §f22.45s"),
-                HudLine.of("§fBuild: §914.32s"),
-                HudLine.of("§fEaten: §a5.21s"),
-                HudLine.of("§fStun: §f0.53s"),
-                HudLine.of("§fDPS: §63.89s"),
-                HudLine.of("§fSkip: §f0.00s"),
-                HudLine.of("§fBoss: §c5.12s"),
-                HudLine.of("§fOverall: §a51.00s"),
-                HudLine.of("§fPace: §953.50s")
+                HudLine.of("§7Supplies: §f22.45s"),
+                HudLine.of("§7Build: §914.32s"),
+                HudLine.of("§7Eaten: §a5.21s"),
+                HudLine.of("§7Stun: §f0.53s"),
+                HudLine.of("§7DPS: §63.89s"),
+                HudLine.of("§7Skip: §f0.00s"),
+                HudLine.of("§7Boss: §c5.12s"),
+                HudLine.of("§7Overall: §a51.00s"),
+                HudLine.of("§7Pace: §953.50s")
         ));
     }
 
@@ -166,8 +166,8 @@ public class CustomSplitsWidget extends HudWidget {
         String overallColor = getSplitColor(overall, OVERALL_THRESHOLDS);
         String paceColor = getSplitColor(pace, OVERALL_THRESHOLDS);
 
-        overallLine.text(String.format("§fOverall: %s%s", overallColor, TimeUtils.formatTime(overall)));
-        paceLine.text(String.format("§fPace: %s%s", paceColor, TimeUtils.formatTime(pace)));
+        overallLine.text(String.format("§7Overall: %s%s", overallColor, TimeUtils.formatTime(overall)));
+        paceLine.text(String.format("§7Pace: %s%s", paceColor, TimeUtils.formatTime(pace)));
 
         markDimensionsDirty();
     }
@@ -175,7 +175,7 @@ public class CustomSplitsWidget extends HudWidget {
     private void updatePhaseLine(@NotNull HudLine line, @NotNull String label, @NotNull KuudraPhase phase) {
         double time = splits.getOrDefault(phase, 0.0);
         String color = getSplitColor(time, phase);
-        line.text(String.format("§f%s %s%s", label, color, TimeUtils.formatTime(time)));
+        line.text(String.format("§7%s %s%s", label, color, TimeUtils.formatTime(time)));
     }
 
     private double calculateOverall() {
