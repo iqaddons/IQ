@@ -168,6 +168,7 @@ public final class KuudraStateValidator {
         if (expected == detected) return true;
         if (expected.previous() == detected) return true;
         if (expected.next() == detected) return true;
+        if (expected == KuudraPhase.EATEN && detected == KuudraPhase.SUPPLIES) return true;
 
         return expected.isCombatPhase() && detected.isCombatPhase();
     }
