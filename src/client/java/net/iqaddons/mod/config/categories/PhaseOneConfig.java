@@ -1,6 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
 
@@ -139,6 +140,21 @@ public class PhaseOneConfig {
     )
     @Comment("Announce the position of the second supply in chat.")
     public static boolean secondSupplyAlert = true;
+
+    @ConfigEntry(
+            id = "supplyGiantHitboxAlert",
+            translation = "Supply Giant Hitbox Alert"
+    )
+    @Comment("Play a sound and highlight the giant in red when you recover supply inside its hitbox.")
+    public static boolean supplyGiantHitboxAlert = true;
+
+    @ConfigEntry(
+            id = "supplyGiantHitboxStyle",
+            translation = "Supply Giant Hitbox Style"
+    )
+    @ConfigOption.Select
+    @Comment("Choose how the giant hitbox highlight is rendered.")
+    public static WorldRenderUtils.RenderStyle supplyGiantHitboxStyle = WorldRenderUtils.RenderStyle.BOTH;
 
     public enum PearlWaypointType {
         TEXT,
