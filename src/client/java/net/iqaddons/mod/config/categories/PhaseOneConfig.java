@@ -93,6 +93,13 @@ public class PhaseOneConfig {
     @Comment("Play a sound and highlight when it's time to throw a pearl.")
     public static boolean pearlThrowAlert = true;
 
+    @ConfigEntry(
+            id = "dynamicPearlWaypoints",
+            translation = "Dynamic Pearl Waypoints"
+    )
+    @Comment("Make pearl waypoint positions follow your player movement.")
+    public static boolean dynamicPearlWaypoints = false;
+
     @ConfigOption.Separator("Pile Waypoints")
 
     @ConfigEntry(

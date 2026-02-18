@@ -117,7 +117,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull PearlWaypoint waypoint) {
-        Vec3d target = waypoint.target();
+        Vec3d target = getRenderTarget(waypoint);
         if (target.x == 0 && target.y == 0 && target.z == 0) return;
 
         float size = waypoint.size();
@@ -176,6 +176,19 @@ public class PearlWaypointFeature extends KuudraFeature {
     private boolean shouldRenderTimer() {
         return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER
                 || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.BOTH;
+    }
+
+    private @NotNull Vec3d getRenderTarget(@NotNull PearlWaypoint waypoint) {
+        Vec3d target = waypoint.target();
+        if (!PhaseOneConfig.dynamicPearlWaypoints || !waypoint.hasStandBlock() || mc.player == null) {
+            return target;
+        }
+
+        Vec3d standBlockCenter = waypoint.standBlock().add(0.5, 0.0, 0.5);
+        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3d offset = playerPos.subtract(standBlockCenter);
+
+        return target.add(offset.x, 0.0, offset.z);
     }
 
     private @NotNull String getAdjustedPercentage(@NotNull String label) {
