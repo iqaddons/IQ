@@ -71,6 +71,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (!isInSkyBlock()) return;
+
         String message = event.getStrippedMessage();
         if (message.contains("DEFEAT") && isInKuudra()) {
             forceReset(KuudraRunEndEvent.EndReason.DEFEATED);
@@ -117,6 +119,10 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     public boolean isInKuudra() {
         return contextRef.get().phase() != KuudraPhase.NONE;
+    }
+
+    public boolean isInSkyBlock() {
+        return contextRef.get().onSkyBlock();
     }
 
     public boolean isInRun() {
@@ -184,6 +190,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull KuudraRunEndEvent.EndReason reason) {
+        if (!isInSkyBlock()) return false;
         if (current.phase().isInRun()) {
             phaseDurations.put(current.phase(), current.phaseDuration());
         }
