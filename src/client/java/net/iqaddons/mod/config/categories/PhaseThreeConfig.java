@@ -112,6 +112,14 @@ public class PhaseThreeConfig {
     public static int stunWaypointColor = new Color(0, 245, 255, 200).getRGB();
 
     @ConfigEntry(
+            id = "stunWaypointStyle",
+            translation = "Stun Waypoint Style"
+    )
+    @ConfigOption.Select
+    @Comment("Choose how stun waypoints are drawn (outline, filled, or both).")
+    public static WorldRenderUtils.RenderStyle stunWaypointStyle = WorldRenderUtils.RenderStyle.OUTLINE;
+
+    @ConfigEntry(
             id = "stunWaypointBlock",
             translation = "Stun Waypoint Block"
     )

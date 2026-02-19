@@ -7,10 +7,10 @@ import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
@@ -19,11 +19,10 @@ import org.jetbrains.annotations.NotNull;
 public class StunWaypointsFeature extends KuudraFeature {
 
     private static final Vec3d ENTER_POS = new Vec3d(-161, 49, -186);
-
     private static final double EATEN_Y_THRESHOLD = 50.0;
 
-    private boolean stunPhase = false;
-    private boolean eaten = false;
+    private volatile boolean stunPhase = false;
+    private volatile boolean eaten = false;
 
     public StunWaypointsFeature() {
         super(
@@ -55,6 +54,19 @@ public class StunWaypointsFeature extends KuudraFeature {
         }
 
         if (msg.contains("destroyed one of Kuudra's pods!")) {
+            stunPhase = false;
+            eaten = false;
+        }
+    }
+
+    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.currentPhase() == KuudraPhase.STUN) {
+            stunPhase = true;
+            eaten = false;
+        } else if (event.currentPhase() == KuudraPhase.EATEN) {
+            stunPhase = false;
+            eaten = true;
+        } else {
             stunPhase = false;
             eaten = false;
         }
@@ -99,7 +111,7 @@ public class StunWaypointsFeature extends KuudraFeature {
 
         event.drawStyledBox(waypointBox, true,
                 RenderColor.fromArgb(PhaseThreeConfig.stunWaypointColor),
-                WorldRenderUtils.RenderStyle.BOTH
+                PhaseThreeConfig.stunWaypointStyle
         );
     }
 
