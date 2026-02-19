@@ -2,10 +2,7 @@ package net.iqaddons.mod.lifecycle.modules;
 
 import lombok.RequiredArgsConstructor;
 import net.iqaddons.mod.features.FeatureManager;
-import net.iqaddons.mod.features.generic.PartyCommandsFeature;
-import net.iqaddons.mod.features.generic.PartyJoinSoundFeature;
-import net.iqaddons.mod.features.generic.WardrobeFeature;
-import net.iqaddons.mod.features.generic.WaypointFeature;
+import net.iqaddons.mod.features.generic.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
 import net.iqaddons.mod.features.kuudra.miscellaneous.*;
 import net.iqaddons.mod.features.kuudra.tracker.ChestCounterTrackerFeature;
@@ -28,7 +25,7 @@ public class FeatureModule implements LifecycleComponent {
         features = new FeatureManager();
         features.register(
                 new PartyJoinSoundFeature(), new WaypointFeature(), new WardrobeFeature(),
-                new PartyCommandsFeature()
+                new PartyCommandsFeature(), new LimboAlertFeature()
         );
 
         features.register(

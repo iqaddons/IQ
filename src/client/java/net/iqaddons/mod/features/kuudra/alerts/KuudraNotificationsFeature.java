@@ -50,7 +50,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Someone else is currently trying to pick up these supplies!"),
-                "§c§lALREADY PICKING!",
+                    "§c§lALREADY PICKING!",
                     () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert
             )
     );
