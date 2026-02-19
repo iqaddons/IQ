@@ -311,6 +311,13 @@ public class KuudraGeneralConfig {
     public static boolean hideMobNametags = true;
 
     @ConfigEntry(
+            id = "hideUselessArmorStands",
+            translation = "Hide Useless Armor Stands"
+    )
+    @Comment("Hide armor stands used for visual effects that don't provide useful information.")
+    public static boolean hideUselessArmorStands = true;
+
+    @ConfigEntry(
             id = "hideKuudraBossBar",
             translation = "Hide Kuudra Boss Bar"
     )
