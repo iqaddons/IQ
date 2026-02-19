@@ -163,11 +163,8 @@ public class CustomSplitsWidget extends HudWidget {
         double overall = calculateOverall();
         double pace = calculatePace();
 
-        String overallColor = getSplitColor(overall, OVERALL_THRESHOLDS);
-        String paceColor = getSplitColor(pace, OVERALL_THRESHOLDS);
-
-        overallLine.text(String.format("§7Overall: %s%s", overallColor, TimeUtils.formatTime(overall)));
-        paceLine.text(String.format("§7Pace: %s%s", paceColor, TimeUtils.formatTime(pace)));
+        overallLine.text(String.format("§7Overall: %s%s",  getOverallColor(overall), TimeUtils.formatTime(overall)));
+        paceLine.text(String.format("§7Pace: %s%s",  getOverallColor(overall), TimeUtils.formatTime(pace)));
 
         markDimensionsDirty();
     }
@@ -222,5 +219,11 @@ public class CustomSplitsWidget extends HudWidget {
         if (time <= thresholds[3]) return KuudraGeneralConfig.SplitColorConfig.slow.code();
         if (time <= thresholds[4]) return KuudraGeneralConfig.SplitColorConfig.bad.code();
         return KuudraGeneralConfig.SplitColorConfig.worst.code();
+    }
+
+    private @NotNull String getOverallColor(double time) {
+        if (time <= 0) return "§f";
+        if (time >= 48.0 && time <= 59.0) return "§9";
+        return getSplitColor(time, OVERALL_THRESHOLDS);
     }
 }

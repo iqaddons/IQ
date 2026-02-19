@@ -96,7 +96,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     @Contract(pure = true)
     private static @NotNull String getTimeColor(double time) {
-        if (time <= 5) return "§f";
+        if (time <= 5) return "§9";
         if (time <= 7) return "§a";
         if (time <= 9) return "§6";
         return "§c";
