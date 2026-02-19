@@ -60,7 +60,7 @@ public class BackboneAlertFeature extends KuudraFeature {
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame() || !event.isNthTick(2)) return;
+        if (!event.isInGame()) return;
 
         BackboneAlertManager.BoneResult result = manager.tick();
         if (!result.triggerRendNow() || mc.player == null) {
