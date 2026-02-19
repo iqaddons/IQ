@@ -13,6 +13,7 @@ import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.kuudra.validator.KuudraStateValidator;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -21,8 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static net.iqaddons.mod.IQConstants.DEFAULT_CHECK_INTERVAL_TICKS;
-import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.*;
 
 @Slf4j
 public final class KuudraStateManager extends SubscriptionOwner {
@@ -121,8 +121,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
         return contextRef.get().phase() != KuudraPhase.NONE;
     }
 
-    public boolean isInSkyBlock() {
-        return contextRef.get().onSkyBlock();
+    private boolean isInSkyBlock() {
+        return ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
     }
 
     public boolean isInRun() {

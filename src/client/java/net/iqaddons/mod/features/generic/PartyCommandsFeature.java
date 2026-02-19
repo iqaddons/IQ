@@ -5,6 +5,8 @@ import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
+import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
+import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.PingUtils;
 import org.jetbrains.annotations.NotNull;
@@ -56,8 +58,9 @@ public class PartyCommandsFeature extends Feature {
             case "!kick" -> handleKick(parts);
             case "!t1", "!t2", "!t3", "!t4", "!t5" -> handleKuudraTier(command);
             case "!chests" -> sendChestProgress();
-            default -> {
-            }
+            case "!runs" -> sendRuns(parts);
+            case "!profit" -> sendProfit();
+            default -> {}
         }
     }
 
@@ -108,5 +111,42 @@ public class PartyCommandsFeature extends Feature {
         int current = ChestCounterManager.get().getChests();
         int limit = ChestCounterManager.MAX_CHESTS;
         MessageUtil.PARTY.sendMessage("[IQ] I am currently at " + current + "/" + limit + " of my chest limit.");
+    }
+
+    private void sendRuns(@NotNull String @NotNull [] parts) {
+        if (!Configuration.PartyCommands.partyCommandRuns) return;
+
+        if (parts.length > 1 && mc.player != null
+                && !parts[1].equalsIgnoreCase(mc.player.getGameProfile().name())) {
+            return;
+        }
+
+        ProfitData data = KuudraProfitTrackerManager.get().lifetime();
+        MessageUtil.PARTY.sendMessage(String.format(
+                "[IQ] Runs: %d (F:%d) | Avg: %.2fs",
+                data.runs, data.failedRuns, data.averageRunMillis() / 1000.0
+        ));
+    }
+
+    private void sendProfit() {
+        if (!Configuration.PartyCommands.partyCommandProfit) return;
+
+        ProfitData data = KuudraProfitTrackerManager.get().current();
+        MessageUtil.PARTY.sendMessage(String.format(
+                "[IQ] Profit: %s | Rate: %s/h | Runs: %d | Avg: %.2fs",
+                formatCoins(data.profit),
+                formatCoins(Math.max(0, data.hourlyRateCoins())),
+                data.runs,
+                data.averageRunMillis() / 1000.0
+        ));
+    }
+
+    private @NotNull String formatCoins(long coins) {
+        long abs = Math.abs(coins);
+        String prefix = coins < 0 ? "-" : "";
+        if (abs >= 1_000_000_000L) return String.format(Locale.ROOT, "%s%.2fb", prefix, abs / 1_000_000_000d);
+        if (abs >= 1_000_000L) return String.format(Locale.ROOT, "%s%.2fm", prefix, abs / 1_000_000d);
+        if (abs >= 1_000L) return String.format(Locale.ROOT, "%s%.1fk", prefix, abs / 1_000d);
+        return prefix + abs;
     }
 }

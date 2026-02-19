@@ -103,6 +103,14 @@ public class Configuration {
         @ConfigEntry(id = "partyCommandChests", translation = "!chests")
         @Comment("Reply with your current chest counter progress.")
         public static boolean partyCommandChests = true;
+
+        @ConfigEntry(id = "partyCommandRuns", translation = "!runs")
+        @Comment("Reply with your current run counter progress.")
+        public static boolean partyCommandRuns = true;
+
+        @ConfigEntry(id = "partyCommandProfit", translation = "!runs")
+        @Comment("Reply with your current profit counter progress.")
+        public static boolean partyCommandProfit = true;
     }
 
     @ConfigOption.Separator("Wardrobe")

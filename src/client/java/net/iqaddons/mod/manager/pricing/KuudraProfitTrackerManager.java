@@ -103,6 +103,10 @@ public final class KuudraProfitTrackerManager {
         return session.copy();
     }
 
+    public ProfitData current() {
+        return (currentScope == ProfitScope.SESSION) ? session() : lifetime();
+    }
+
     public synchronized void expireSessionIfNeeded() {
         if (isSessionExpired()) {
             session = new ProfitData();
