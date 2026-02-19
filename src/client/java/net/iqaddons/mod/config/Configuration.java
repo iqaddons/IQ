@@ -44,6 +44,10 @@ public class Configuration {
     @Comment("Play a sound when someone joins your party.")
     public static boolean partyJoinSound = true;
 
+    @ConfigEntry(id = "limboAlert", translation = "Limbo Alert")
+    @Comment("Send a alert when you being kicked into the limbo.")
+    public static boolean limboAlert = true;
+
     @ConfigEntry(
             id = "fixFishingHook",
             translation = "Fix Fishing Hook"
