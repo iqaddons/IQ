@@ -118,8 +118,9 @@ public class StunWaypointsFeature extends KuudraFeature {
     @Getter
     @RequiredArgsConstructor
     public enum StunWaypoint {
-        RIGHT_POD(new Vec3d(-168, 27, -169)),
-        LEFT_POD(new Vec3d(-153, 27, -173));
+        RIGHT_POD(new Vec3d(-168, 28, -168)),
+        LEFT_POD(new Vec3d(-154, 27, -173)),
+        BACK_POD(new Vec3d(-156, 28, -157)),;
 
         private final Vec3d pos;
     }
