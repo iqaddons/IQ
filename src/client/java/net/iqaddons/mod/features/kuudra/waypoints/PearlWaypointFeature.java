@@ -188,7 +188,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         Vec3d playerPos = mc.player.getEntityPos();
         Vec3d offset = playerPos.subtract(standBlockCenter);
 
-        return target.add(offset.x, 0.0, offset.z);
+        return target.subtract(offset.x, offset.y, offset.z);
     }
 
     private @NotNull String getAdjustedPercentage(@NotNull String label) {
