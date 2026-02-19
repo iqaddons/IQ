@@ -1,6 +1,8 @@
 package net.iqaddons.mod.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.IQConstants;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.ChestProfitCalculator;
 import net.iqaddons.mod.manager.calculator.impl.EnchantedBookValueCalculator;
@@ -19,11 +21,14 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static net.iqaddons.mod.IQConstants.CRIMSON_ESSENCE_ID;
 
 @Slf4j
 public final class ChestProfitUtil {
@@ -33,7 +38,7 @@ public final class ChestProfitUtil {
     private static final int INFO_SLOT = 49;
 
     public static final Map<String, String> KUUDRA_DROPS_NAME_TO_API_ID = Map.of(
-            "CRIMSON ESSENCE", "ESSENCE_CRIMSON",
+            "CRIMSON ESSENCE", CRIMSON_ESSENCE_ID,
             "KUUDRA TEETH", "KUUDRA_TEETH",
             "KISMET FEATHER", "KISMET_FEATHER",
             "WHEEL OF FATE", "WHEEL_OF_FATE"
@@ -41,7 +46,7 @@ public final class ChestProfitUtil {
 
     static {
         Map<String, ItemValueCalculator> calculators = new HashMap<>();
-        calculators.put("ESSENCE_CRIMSON", new EssenceValueCalculator());
+        calculators.put(CRIMSON_ESSENCE_ID, new EssenceValueCalculator());
         calculators.put("ENCHANTED_BOOK", new EnchantedBookValueCalculator());
 
         var salvageCalculator = new SalvageValueCalculator();
@@ -74,7 +79,25 @@ public final class ChestProfitUtil {
 
             chestItems.add(stack);
 
+            String itemId = resolveItemId(stack);
+            int quantity = Math.max(1, resolveItemQuantity(stack));
             double itemValue = CHEST_PROFIT_CALCULATOR.calculateItemValue(stack);
+
+            if (CRIMSON_ESSENCE_ID.equals(itemId)) {
+                int bonusQuantity = (int) Math.round(quantity * (KuudraGeneralConfig.kuudraPetBonus / 100.0));
+                if (bonusQuantity > 0) {
+                    double unitPrice = ItemPriceManager.get().getItemPrice(CRIMSON_ESSENCE_ID);
+                    double bonusValue = unitPrice * bonusQuantity;
+                    itemValue -= bonusValue;
+
+                    items.add(new ChestItemValue(
+                            Text.literal("§dCrimson Essence Bonus"),
+                            bonusQuantity,
+                            bonusValue
+                    ));
+                }
+            }
+
             items.add(new ChestItemValue(
                     stack.getName(),
                     Math.max(1, stack.getCount()),
@@ -117,7 +140,7 @@ public final class ChestProfitUtil {
 
             chestItems.add(stack);
             String itemId = resolveItemId(stack);
-            if ("ESSENCE_CRIMSON".equals(itemId)) {
+            if (CRIMSON_ESSENCE_ID.equals(itemId)) {
                 essence += resolveItemQuantity(stack);
             }
 

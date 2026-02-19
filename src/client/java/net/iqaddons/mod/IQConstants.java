@@ -8,6 +8,7 @@ public final class IQConstants {
 
     public static final String SKYBLOCK_AREA_ID = "SKYBLOCK";
     public static final String KUUDRA_AREA_ID = "Kuudra's Hollow";
+    public static final String CRIMSON_ESSENCE_ID = "ESSENCE_CRIMSON";
 
     public static final int DEFAULT_CHECK_INTERVAL_TICKS = 20;
 
