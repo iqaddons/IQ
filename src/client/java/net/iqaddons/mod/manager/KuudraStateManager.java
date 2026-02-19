@@ -230,6 +230,11 @@ public final class KuudraStateManager extends SubscriptionOwner {
             @NotNull KuudraPhase newPhase
     ) {
         KuudraPhase previousPhase = current.phase();
+        if (newPhase.getOrder() < previousPhase.getOrder()) {
+            log.warn("Ignoring backward phase transition: {} -> {}", previousPhase, newPhase);
+            return false;
+        }
+
         if (previousPhase == KuudraPhase.DPS && newPhase == KuudraPhase.STUN) {
             log.warn("Invalid phase transition: {} -> {}", previousPhase, newPhase);
             return false;
