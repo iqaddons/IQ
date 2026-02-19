@@ -275,14 +275,14 @@ public class HudEditScreen extends Screen {
 
         HudManager.get().saveConfig();
         HudManager.get().setEditorOpen(false);
-        log.info("HUD Editor closed, configurations saved");
+        log.debug("HUD Editor closed, configurations saved");
     }
 
     @Override
     public void init() {
         super.init();
         HudManager.get().setEditorOpen(true);
-        log.info("HUD Editor opened");
+        log.debug("HUD Editor opened");
     }
 
     @Override

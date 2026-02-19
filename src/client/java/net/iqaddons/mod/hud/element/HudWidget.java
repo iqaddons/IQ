@@ -360,11 +360,28 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         context.fill(x, y, x + 1, y + height, borderColor);
         context.fill(x + width - 1, y, x + width, y + height, borderColor);
 
+        String widgetName = displayName;
+        String widgetLocation = String.format("X: %.0f Y: %.0f", this.x, this.y);
+
+        int nameWidth = textRenderer.getWidth(widgetName);
+        int locationWidth = textRenderer.getWidth(widgetLocation);
+
+        int nameX = x + (width - nameWidth) / 2;
+        int locationX = x + (width - locationWidth) / 2;
+
         context.drawTextWithShadow(
                 textRenderer,
-                String.format("X: %.0f Y: %.0f Scale: %.1f", this.x, this.y, scale),
-                x,
+                widgetName,
+                nameX,
                 y - textRenderer.fontHeight - 2,
+                new Color(255, 255, 255, 220).getRGB()
+        );
+
+        context.drawTextWithShadow(
+                textRenderer,
+                widgetLocation,
+                locationX,
+                y + height + 2,
                 new Color(255, 255, 255, 200).getRGB()
         );
     }
