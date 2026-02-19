@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class AutoRequeueFeature extends Feature {
 
     private static final Pattern PARTY_DT_PATTERN = Pattern.compile(
-            "^(?:Party > |(?:\\[[^]]+] )?)(?:\\[[^]]+] )?([A-Za-z0-9_]+):\\s*[!.]dt(?:\\s+(.*))?$",
+            "^(?:Party >\\s*)?(?:\\[[^]]+]\\s*)?(?:\\[[^]]+]\\s*)?([A-Za-z0-9_]+):\\s*[!.]dt(?:\\s+(.*))?$",
             Pattern.CASE_INSENSITIVE
     );
 
@@ -40,6 +40,11 @@ public class AutoRequeueFeature extends Feature {
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
+        if (!isEnabled()) {
+            pendingRequeueTicks = -1;
+            return;
+        }
+
         if (pendingRequeueTicks < 0) return;
         if (!event.isInGame()) return;
 
@@ -70,6 +75,8 @@ public class AutoRequeueFeature extends Feature {
         log.info("Executed auto-requeue command");
     }
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (!isEnabled()) return;
+
         String message = event.getStrippedMessage();
         if (message.contains("You are not allowed to use that command as a spectator!")) {
             pendingRequeueTicks = 15;
@@ -116,6 +123,11 @@ public class AutoRequeueFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (!isEnabled()) {
+            pendingRequeueTicks = -1;
+            return;
+        }
+
         if (!event.isCompleted() && !event.isFailed()) {
             pendingRequeueTicks = -1;
             return;
