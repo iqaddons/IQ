@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,6 +34,13 @@ public abstract class InGameHudMixin {
     @Nullable
     private Text subtitle;
 
+    @Unique
+    private String iq$lastTitleMessage = "";
+    @Unique
+    private String iq$lastSubtitleMessage = "";
+    @Unique
+    private boolean iq$lastTitleCancelled;
+
     @Inject(method = "render", at = @At("TAIL"))
     private void iq$onRenderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (client.player == null) return;
@@ -52,13 +60,35 @@ public abstract class InGameHudMixin {
     private void iq$onRenderTitleAndSubtitle(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         boolean hasTitle = title != null && !title.getString().isEmpty();
         boolean hasSubtitle = subtitle != null && !subtitle.getString().isEmpty();
-        if (!hasTitle && !hasSubtitle) return;
+        if (!hasTitle && !hasSubtitle) {
+            iq$lastTitleMessage = "";
+            iq$lastSubtitleMessage = "";
+            iq$lastTitleCancelled = false;
+            return;
+        }
+
+        String currentTitleMessage = title == null ? "" : title.getString();
+        String currentSubtitleMessage = subtitle == null ? "" : subtitle.getString();
+        boolean isDuplicateTitle = currentTitleMessage.equals(iq$lastTitleMessage)
+                && currentSubtitleMessage.equals(iq$lastSubtitleMessage);
+
+        if (isDuplicateTitle) {
+            if (iq$lastTitleCancelled) {
+                ci.cancel();
+            }
+
+            return;
+        }
+
+        iq$lastTitleMessage = currentTitleMessage;
+        iq$lastSubtitleMessage = currentSubtitleMessage;
 
         TitleReceivedEvent event = EventBus.post(
                 new TitleReceivedEvent(title, subtitle)
         );
 
-        if (event.isCancelled()) {
+        iq$lastTitleCancelled = event.isCancelled();
+        if (iq$lastTitleCancelled) {
             ci.cancel();
         }
     }

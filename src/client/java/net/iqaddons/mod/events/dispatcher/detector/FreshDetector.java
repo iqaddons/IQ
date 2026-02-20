@@ -8,6 +8,7 @@ import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -20,7 +21,7 @@ public class FreshDetector {
 
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    public void detect(ChatReceivedEvent event, String message, Consumer<Event> postEvent) {
+    public void detect(ChatReceivedEvent event, @NotNull String message, Consumer<Event> postEvent) {
         int buildProgress = getBuildingProgress();
         if (message.contains(FRESH_TOOLS_MESSAGE)) {
             ClientPlayerEntity player = client.player;

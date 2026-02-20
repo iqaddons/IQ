@@ -12,8 +12,6 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -50,17 +48,17 @@ public class SupplyProgressWidget extends HudWidget {
         clearLines();
         addLine(progressLine);
 
-        subscribe(ClientTickEvent.class, event -> {
-            if (currentProgress.isEmpty()) return;
-            clearProgress();
-        });
-
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
-
         subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
-    }
 
+        subscribe(ClientTickEvent.class, event -> {
+            if (currentProgress.isEmpty()) return;
+            if (!event.isNthTick(40)) return;
+
+            clearProgress();
+        });
+    }
 
     private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
         currentProgress = event.getProgressText();
@@ -70,11 +68,6 @@ public class SupplyProgressWidget extends HudWidget {
         if (event.getCurrentProgress() == 100) {
             clearProgress();
             MessageUtil.showAlert("§a§lSUPPLY PICKED UP!", 40);
-            mc.world.playSound(
-                    mc.player, mc.player.getBlockPos(),
-                    SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
-                    SoundCategory.PLAYERS, 2.0f, 1.0f
-            );
         }
 
         event.setCancelled(true);
