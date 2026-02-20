@@ -134,7 +134,6 @@ public final class KuudraProfitTrackerManager {
         data.runs++;
         if (failed) data.failedRuns++;
         if (runMillis > 0) data.totalRunMillis += runMillis;
-
     }
 
     private void updateChest(@NotNull ProfitData data, @NotNull ChestData record) {

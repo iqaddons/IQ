@@ -25,6 +25,10 @@ public record KuudraRunEndEvent(
         return reason == EndReason.DEFEATED;
     }
 
+    public boolean isUnexpectedlyEnded() {
+        return reason == EndReason.DISCONNECTED || reason == EndReason.OTHER;
+    }
+
     public enum EndReason {
         COMPLETED,
         DEFEATED,

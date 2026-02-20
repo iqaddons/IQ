@@ -41,6 +41,8 @@ public class KuudraProfitTrackerFeature extends Feature {
     }
 
     private void onKuudraRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (event.isUnexpectedlyEnded()) return;
+
         manager.onRunEnd(event.totalDuration().toMillis(), event.isFailed());
     }
 
