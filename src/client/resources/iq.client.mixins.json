@@ -7,7 +7,6 @@
     "ArmorStandRendererMixin",
     "BossBarHudMixin",
     "ChatHudMixin",
-    "ClientTickMixin",
     "EntityGlowMixin",
     "EntityMixin",
     "HandledScreenMixin",
@@ -24,6 +23,7 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "ClientConnectionMixin",
     "EntityGlowMixin",
     "feature.FishingBooberFixMixin"
   ]
