@@ -11,6 +11,7 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.TextColor;
 import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -101,7 +102,6 @@ public class CustomSplitsWidget extends HudWidget {
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
 
         updateDisplay();
-        log.info("Custom Splits Widget activated");
     }
 
     private void loadExistingSplits() {
@@ -153,27 +153,39 @@ public class CustomSplitsWidget extends HudWidget {
     }
 
     private void updateDisplay() {
-        updatePhaseLine(suppliesLine, "Supplies:", KuudraPhase.SUPPLIES);
-        updatePhaseLine(buildLine, "Build:", KuudraPhase.BUILD);
-        updatePhaseLine(eatenLine, "Eaten:", KuudraPhase.EATEN);
-        updatePhaseLine(stunLine, "Stun:", KuudraPhase.STUN);
-        updatePhaseLine(dpsLine, "DPS:", KuudraPhase.DPS);
-        updatePhaseLine(skipLine, "Skip:", KuudraPhase.SKIP);
-        updatePhaseLine(bossLine, "Boss:", KuudraPhase.BOSS);
+        updatePhaseLine(suppliesLine, "Supplies", KuudraPhase.SUPPLIES);
+        updatePhaseLine(buildLine, "Build", KuudraPhase.BUILD);
+        updatePhaseLine(eatenLine, "Eaten", KuudraPhase.EATEN);
+        updatePhaseLine(stunLine, "Stun", KuudraPhase.STUN);
+        updatePhaseLine(dpsLine, "DPS", KuudraPhase.DPS);
+        updatePhaseLine(skipLine, "Skip", KuudraPhase.SKIP);
+        updatePhaseLine(bossLine, "Boss", KuudraPhase.BOSS);
 
         double overall = calculateOverall();
-        double pace = calculatePace();
+        overallLine.text(String.format("%sOverall: %s%s",
+                KuudraGeneralConfig.SplitColorConfig.overall.code(),
+                getOverallColor(overall),
+                TimeUtils.formatTime(overall))
+        );
 
-        overallLine.text(String.format("§7Overall: %s%s",  getOverallColor(overall), TimeUtils.formatTime(overall)));
-        paceLine.text(String.format("§7Pace: %s%s",  getOverallColor(overall), TimeUtils.formatTime(pace)));
+        double pace = calculatePace();
+        paceLine.text(String.format("%sPace: %s%s",
+                KuudraGeneralConfig.SplitColorConfig.pace.code(),
+                getOverallColor(pace),
+                TimeUtils.formatTime(pace))
+        );
 
         markDimensionsDirty();
     }
 
     private void updatePhaseLine(@NotNull HudLine line, @NotNull String label, @NotNull KuudraPhase phase) {
         double time = splits.getOrDefault(phase, 0.0);
-        String color = getSplitColor(time, phase);
-        line.text(String.format("§7%s %s%s", label, color, TimeUtils.formatTime(time)));
+
+        line.text(String.format("%s%s: %s%s",
+                getPhaseColor(label), label,
+                getSplitColor(time, phase),
+                TimeUtils.formatTime(time))
+        );
     }
 
     private double calculateOverall() {
@@ -214,12 +226,25 @@ public class CustomSplitsWidget extends HudWidget {
     private @NotNull String getSplitColor(double time, double @NotNull [] thresholds) {
         if (time <= 0) return "§f";
 
-        if (time <= thresholds[0]) return KuudraGeneralConfig.SplitColorConfig.best.code();
-        if (time <= thresholds[1]) return KuudraGeneralConfig.SplitColorConfig.great.code();
-        if (time <= thresholds[2]) return KuudraGeneralConfig.SplitColorConfig.good.code();
-        if (time <= thresholds[3]) return KuudraGeneralConfig.SplitColorConfig.slow.code();
-        if (time <= thresholds[4]) return KuudraGeneralConfig.SplitColorConfig.bad.code();
-        return KuudraGeneralConfig.SplitColorConfig.worst.code();
+        if (time <= thresholds[0]) return TextColor.WHITE.code();
+        if (time <= thresholds[1]) return TextColor.BLUE.code();
+        if (time <= thresholds[2]) return TextColor.GREEN.code();
+        if (time <= thresholds[3]) return TextColor.GOLD.code();
+        if (time <= thresholds[4]) return TextColor.RED.code();
+        return TextColor.DARK_RED.code();
+    }
+
+    private String getPhaseColor(@NotNull String label) {
+        return switch (label) {
+            case "Supplies" -> KuudraGeneralConfig.SplitColorConfig.supplies.code();
+            case "Build" -> KuudraGeneralConfig.SplitColorConfig.build.code();
+            case "Eaten" -> KuudraGeneralConfig.SplitColorConfig.eaten.code();
+            case "Stun" -> KuudraGeneralConfig.SplitColorConfig.stun.code();
+            case "DPS" -> KuudraGeneralConfig.SplitColorConfig.dps.code();
+            case "Skip" -> KuudraGeneralConfig.SplitColorConfig.skip.code();
+            case "Boss" -> KuudraGeneralConfig.SplitColorConfig.boss.code();
+            default -> "§8";
+        };
     }
 
     private @NotNull String getOverallColor(double time) {

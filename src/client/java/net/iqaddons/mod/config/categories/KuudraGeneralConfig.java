@@ -119,9 +119,9 @@ public class KuudraGeneralConfig {
 
     @ConfigEntry(
             id = "customSplitsBenchmarks",
-            translation = "Custom Splits Benchmarks"
+            translation = "Pace Custom Splits"
     )
-    @Comment("Set target split times used for pacing in the Custom Splits widget.")
+    @Comment("Set the split timings that are used to calculate the pace feature.")
     public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
 
     @ConfigObject
@@ -174,34 +174,46 @@ public class KuudraGeneralConfig {
             id = "splitColorConfig",
             translation = "Split Time Colors"
     )
-    @Comment("Customize the colors used for split time performance thresholds.")
+    @Comment("Customize the color of each phase of Custom Splits.")
     public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
 
     @ConfigObject
     public static class SplitColorConfig {
-        @ConfigEntry(id = "best", translation = "Best Time Color")
+        @ConfigEntry(id = "supplies", translation = "Supplies Text Color")
         @ConfigOption.Select
-        public static TextColor best = TextColor.WHITE;
+        public static TextColor supplies = TextColor.GRAY;
 
-        @ConfigEntry(id = "great", translation = "Great Time Color")
+        @ConfigEntry(id = "build", translation = "Build Text Color")
         @ConfigOption.Select
-        public static TextColor great = TextColor.BLUE;
+        public static TextColor build = TextColor.GRAY;
 
-        @ConfigEntry(id = "good", translation = "Good Time Color")
+        @ConfigEntry(id = "eaten", translation = "Eaten Text Color")
         @ConfigOption.Select
-        public static TextColor good = TextColor.GREEN;
+        public static TextColor eaten = TextColor.GRAY;
 
-        @ConfigEntry(id = "slow", translation = "Slow Time Color")
+        @ConfigEntry(id = "stun", translation = "Stun Text Color")
         @ConfigOption.Select
-        public static TextColor slow = TextColor.GOLD;
+        public static TextColor stun = TextColor.GRAY;
 
-        @ConfigEntry(id = "bad", translation = "Bad Time Color")
+        @ConfigEntry(id = "dps", translation = "DPS Text Color")
         @ConfigOption.Select
-        public static TextColor bad = TextColor.RED;
+        public static TextColor dps = TextColor.GRAY;
 
-        @ConfigEntry(id = "worst", translation = "Worst Time Color")
+        @ConfigEntry(id = "skip", translation = "Skip Text Color")
         @ConfigOption.Select
-        public static TextColor worst = TextColor.DARK_RED;
+        public static TextColor skip = TextColor.GRAY;
+
+        @ConfigEntry(id = "boss", translation = "Boss Text Color")
+        @ConfigOption.Select
+        public static TextColor boss = TextColor.GRAY;
+
+        @ConfigEntry(id = "overall", translation = "Overall Text Color")
+        @ConfigOption.Select
+        public static TextColor overall = TextColor.GRAY;
+
+        @ConfigEntry(id = "pace", translation = "Pace Text Color")
+        @ConfigOption.Select
+        public static TextColor pace = TextColor.GRAY;
     }
 
     @ConfigOption.Separator("Notifications")

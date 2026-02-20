@@ -83,8 +83,7 @@ public class BuildProgressWidget extends HudWidget {
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame()) return;
-        if (!event.isNthTick(10)) return;
+        if (!event.isInGame() || !event.isNthTick(5)) return;
 
         int newProgress = getBuildProgress();
         if (newProgress >= 0 && newProgress != currentProgress) {
