@@ -40,7 +40,7 @@ public class FreshersTimerWidget extends HudWidget {
         });
 
         setExampleLines(List.of(
-                HudLine.of("§b§lFresh Timers §7[2]"),
+                HudLine.of("§b§lFresh Timers §8[§e2§8]"),
                 HudLine.of("§bckac10 §8- §f§l5.23s"),
                 HudLine.of("§aPeHenrii §8- §a§l7.85s")
         ));
@@ -77,7 +77,7 @@ public class FreshersTimerWidget extends HudWidget {
     private void updateDisplay() {
         clearLines();
         int freshers = freshEntries.size();
-        addLine(HudLine.of(String.format("§b§lFresh Timers %s[%d]",
+        addLine(HudLine.of(String.format("§b§lFresh Timers §8[%s%d§8]",
                 getFresherCountColor(freshers), freshers))
         );
 

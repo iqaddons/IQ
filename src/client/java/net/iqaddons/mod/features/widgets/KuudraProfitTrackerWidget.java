@@ -27,7 +27,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
 
     private final KuudraProfitTrackerManager tracker = KuudraProfitTrackerManager.get();
 
-    private final HudLine title = HudLine.of("§e§lProfit Tracker §7(SESSION)");
+    private final HudLine title = HudLine.of("§b§lProfit Tracker §8(SESSION)");
     private final HudLine netProfit = HudLine.of("§fProfit: §a+0");
     private final HudLine runs = HudLine.of("§fRuns: §70 §8(§c0F§8)");
     private final HudLine chests = HudLine.of("§fChests: §f0 §8(§e0P§8/§a0F§8)");
@@ -56,7 +56,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         });
 
         setExampleLines(List.of(
-                HudLine.of("§e§lProfit Tracker §7(SESSION)"),
+                HudLine.of("§b§lProfit Tracker §8(SESSION)"),
                 HudLine.of("§fProfit: §a+12.5m"),
                 HudLine.of("§fRuns: §715 §8(§c1F§8)"),
                 HudLine.of("§fChests: §f9 §8(§e9P§8/§a0F§8)"),
@@ -87,7 +87,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 ? tracker.lifetime()
                 : tracker.session();
 
-        title.text("§e§lProfit Tracker §7(" + scope.name() + ")");
+        title.text("§b§lProfit Tracker §8(" + scope.name() + ")");
 
         String sign = data.profit >= 0 ? "§a+" : "§c-";
         netProfit.text("§fProfit: " + sign + formatCoins(Math.abs(data.profit)));

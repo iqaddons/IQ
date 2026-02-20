@@ -42,7 +42,7 @@ public class SupplyTimerWidget extends HudWidget {
         });
 
         setExampleLines(List.of(
-                HudLine.of("§e§lSupply Times §7[§a4§7/§a6§7]"),
+                HudLine.of("§b§lSupply Times §8[§a4§8/§a6§8]"),
                 HudLine.of("§bdarkjota §8(1/6) §f§l14.85s"),
                 HudLine.of("§aPeHenrii §8(2/6) §f§l15.23s"),
                 HudLine.of("§bckac10 §8(3/6) §f§l15.39s"),
@@ -91,7 +91,7 @@ public class SupplyTimerWidget extends HudWidget {
         }
 
         addLine(HudLine.of(String.format(
-                "§e§lSupply Times §7[%s%d§7/§a6§7]",
+                "§b§lSupply Times §8[%s%d§8/§a6§8]",
                 totalCollected >= 6 ? "§a" : "§e",
                 totalCollected
         )));
