@@ -23,6 +23,6 @@ public class KuudraPhaseAlertFeature extends KuudraFeature {
         var currentPhase = event.currentPhase();
         if (!currentPhase.isActive()) return;
 
-        MessageUtil.showTitle("§6§l" + event.currentPhase().name(), "", 0, 25, 1);
+        MessageUtil.showAlert("§6§l" + currentPhase.name(), 25);
     }
 }

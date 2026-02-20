@@ -1,11 +1,13 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
 
+@Slf4j
 public class SupplyDroppedAlertFeature extends KuudraFeature {
 
     public SupplyDroppedAlertFeature() {
@@ -26,7 +28,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
                 return;
             }
 
-            MessageUtil.showTitle("§c§lDropped", "", 0, 15, 5);
+            MessageUtil.showAlert("§c§lDROPPED", 15);
         });
     }
 }

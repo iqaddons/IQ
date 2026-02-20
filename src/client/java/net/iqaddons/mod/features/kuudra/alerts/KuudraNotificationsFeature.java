@@ -76,7 +76,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             var matcher = rule.pattern().matcher(message);
             if (!matcher.matches()) continue;
 
-            MessageUtil.showTitle(matcher.replaceAll(rule.titleTemplate()), "", 8, 40, 12);
+            MessageUtil.showAlert(matcher.replaceAll(rule.titleTemplate), 40);
             return;
         }
     }

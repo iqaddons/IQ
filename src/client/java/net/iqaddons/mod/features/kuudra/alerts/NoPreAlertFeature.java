@@ -75,7 +75,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (message.contains(ELLE_NOT_AGAIN_MESSAGE)) {
             if (kuudraState.phase() == KuudraPhase.SUPPLIES) {
                 mc.execute(this::performSupplyCheck);
-                log.info("Triggered no-pre check from Elle's 'Not again!' message");
+                log.debug("Triggered no-pre check from Elle's 'Not again!' message");
             }
 
             return;
@@ -106,7 +106,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         int currentMissingPre = supplyState.getMissingPre();
         if (currentMissingPre != missingPreValue) {
             supplyState.setMissingPre(missingPreValue);
-            log.info("Detected missing pre from party chat: {} (value: {})",
+            log.debug("Detected missing pre from party chat: {} (value: {})",
                     pileName, missingPreValue);
         }
     }
@@ -119,7 +119,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (detected) {
             PreSpot preSpot = supplyState.getDetectedPreSpot();
             if (preSpot != null) {
-                log.info("Locked pre spot from Elle head-over message: {}", preSpot.getDisplayName());
+                log.debug("Locked pre spot from Elle head-over message: {}", preSpot.getDisplayName());
             }
         }
     }
@@ -142,7 +142,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         supplyState.updateSupplyPositions(supplies);
-        log.info("Updated supply positions: {} supplies found", supplies.size());
+        log.debug("Updated supply positions: {} supplies found", supplies.size());
     }
 
     private void performSupplyCheck() {
@@ -165,29 +165,29 @@ public class NoPreAlertFeature extends KuudraFeature {
             }
         }
 
-        log.info("Detected pre spot: {}", preSpot.getDisplayName());
+        log.debug("Detected pre spot: {}", preSpot.getDisplayName());
         updateSupplyPositions();
 
         boolean hasPre = supplyState.hasPreSupply();
         if (!hasPre) {
             supplyState.setMissingPre(preSpot.getMissingPreValue());
             MessageUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!");
-            log.info("No pre supply detected for {}, announced to party", preSpot.getDisplayName());
+            log.debug("No pre supply detected for {}, announced to party", preSpot.getDisplayName());
         }
 
         if (preSpot.hasSecondaryLocation()) {
             Boolean hasSecondary = supplyState.hasSecondarySupply();
             if (hasSecondary != null && !hasSecondary) {
                 MessageUtil.PARTY.sendMessage("No " + preSpot.getSecondaryName() + "!");
-                log.info("No secondary supply detected for {}, announced to party",
+                log.debug("No secondary supply detected for {}, announced to party",
                         preSpot.getSecondaryName());
             } else if (hasSecondary != null) {
-                log.info("Secondary supply found for {}", preSpot.getSecondaryName());
+                log.debug("Secondary supply found for {}", preSpot.getSecondaryName());
             }
         }
 
         if (hasPre) {
-            log.info("Pre supply found for {}", preSpot.getDisplayName());
+            log.debug("Pre supply found for {}", preSpot.getDisplayName());
         }
     }
 }

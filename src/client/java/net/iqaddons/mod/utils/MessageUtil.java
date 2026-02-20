@@ -1,6 +1,8 @@
 package net.iqaddons.mod.utils;
 
 import lombok.RequiredArgsConstructor;
+import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.impl.HudNotificationEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -65,5 +67,9 @@ public enum MessageUtil {
         mc.inGameHud.setTitle(title);
         mc.inGameHud.setSubtitle(subtitle);
         mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
+    }
+
+    public static void showAlert(String message, int durationTicks) {
+        EventBus.post(new HudNotificationEvent(message, durationTicks));
     }
 }

@@ -76,7 +76,6 @@ public class FreshCountdownWidget extends HudWidget {
     private void updateDisplay() {
         long elapsed = System.currentTimeMillis() - freshStartTime;
         long remaining = FRESH_DURATION_MS - elapsed;
-
         if (remaining <= 0) {
             freshActive = false;
             return;
@@ -84,7 +83,7 @@ public class FreshCountdownWidget extends HudWidget {
 
         countdownLine.text(getCountdownColor(remaining) + TimeUtils.formatTime(remaining));
         markDimensionsDirty();
-        log.info("Fresh countdown updated: {}s remaining", remaining);
+        log.debug("Fresh countdown updated: {}s remaining", remaining);
     }
 
     private @NotNull String getCountdownColor(double remaining) {

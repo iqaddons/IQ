@@ -46,7 +46,7 @@ public class KuudraDirectionAlertFeature extends KuudraFeature {
         if (direction != UNKNOWN && direction != currentDirection) {
             currentDirection = direction;
 
-            MessageUtil.showTitle(direction.getFormattedName(), "", 6, 65, 15);
+            MessageUtil.showAlert(direction.getFormattedName(), 40);
             log.debug("Kuudra spawn direction alert: {}", direction.getName());
         }
     }

@@ -1,5 +1,6 @@
 package net.iqaddons.mod.features.widgets;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
@@ -15,6 +16,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
+@Slf4j
 public class SupplyProgressWidget extends HudWidget {
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
@@ -67,7 +69,7 @@ public class SupplyProgressWidget extends HudWidget {
 
         if (event.getCurrentProgress() == 100) {
             clearProgress();
-            MessageUtil.showTitle("§a§lSUPPLY PICKED UP!", "", 10, 40, 10);
+            MessageUtil.showAlert("§a§lSUPPLY PICKED UP!", 40);
             mc.world.playSound(
                     mc.player, mc.player.getBlockPos(),
                     SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
