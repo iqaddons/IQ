@@ -45,7 +45,7 @@ public class BallistaBuildSoundMixin {
             client.execute(() -> {
                 if (client.getSoundManager() == null) return;
 
-                client.getSoundManager().play(PositionedSoundInstance.master(
+                client.getSoundManager().play(PositionedSoundInstance.ambient(
                         SoundEvent.of(BALLISTA_BUILD_SOUND),
                         packet.getPitch(),
                         0.8F)

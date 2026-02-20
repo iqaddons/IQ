@@ -59,7 +59,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
-        if (!event.isNthTick(5)) return;
+        if (!event.isNthTick(2)) return;
 
         List<BuildPile> newPiles = EntityDetectorUtil.getAllArmorStands()
                 .stream()

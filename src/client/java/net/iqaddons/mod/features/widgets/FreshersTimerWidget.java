@@ -106,6 +106,7 @@ public class FreshersTimerWidget extends HudWidget {
     @Contract(pure = true)
     private @NotNull String getFresherCountColor(int count) {
         return switch (count) {
+            case 0 -> "§c";
             case 1 -> "§6";
             case 2 -> "§e";
             case 3 -> "§a";
