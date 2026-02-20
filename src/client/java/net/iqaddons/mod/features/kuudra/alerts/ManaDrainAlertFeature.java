@@ -22,9 +22,9 @@ public class ManaDrainAlertFeature extends KuudraFeature {
 
     public ManaDrainAlertFeature() {
         super(
-                "manaDrainNotify",
-                "Mana Drain Notify",
-                () -> KuudraGeneralConfig.manaDrainNotify,
+                "abilityAnnounceManaDrain",
+                "Ability Announce: Mana Drain",
+                () -> KuudraGeneralConfig.AbilityAnnounce.manaDrain,
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -42,7 +42,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
         String manaAmount = matcher.group(1);
         int affectedPlayers = countAffectedPlayers();
 
-        MessageUtil.PARTY.sendMessage("Used %s mana on %d players!".formatted(manaAmount, affectedPlayers));
+        MessageUtil.PARTY.sendMessage("[IQ] Used %s mana on %d players!".formatted(manaAmount, affectedPlayers));
         log.debug("Mana drain: {} mana on {} players", manaAmount, affectedPlayers);
     }
 

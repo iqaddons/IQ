@@ -79,7 +79,7 @@ public final class ItemPriceManager {
 
     public double calculateKeyPrice(ChestKeyType key) {
         if (key == ChestKeyType.FREE || key == ChestKeyType.UNKNOWN) {
-            log.info("Attempted to calculate price for key type {}. Returning 0.", key);
+            log.debug("Attempted to calculate price for key type {}. Returning 0.", key);
             return 0D;
         }
 

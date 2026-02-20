@@ -81,9 +81,7 @@ public final class ChestInteractionDetector {
 
     public void detect(@NotNull ChatReceivedEvent event, long tickCount, @NotNull Consumer<Event> postEvent) {
         String message = event.getStrippedMessage();
-        log.info("Received chat message: {}", message);
         if (!PAID_CHEST_REWARDS_MESSAGE.contains(message) && !FREE_CHEST_REWARDS_MESSAGE.contains(message)) return;
-        log.info("Detected chest open message: {}", message);
 
         windowStates.values().stream()
                 .filter(state -> state.pendingOpen != null)
