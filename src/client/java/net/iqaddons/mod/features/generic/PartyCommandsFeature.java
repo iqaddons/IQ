@@ -8,7 +8,7 @@ import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.iqaddons.mod.utils.PingUtils;
+import net.iqaddons.mod.utils.ServerUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -94,14 +94,14 @@ public class PartyCommandsFeature extends Feature {
     private void sendPing() {
         if (!Configuration.PartyCommands.partyCommandPing || mc.player == null || mc.player.networkHandler == null) return;
 
-        var averagePing = PingUtils.getAveragePing();
+        var averagePing = ServerUtils.getAveragePing();
         MessageUtil.PARTY.sendMessage(String.format("[IQ] %,dms", averagePing.toMillis()));
     }
 
     private void sendTps() {
         if (!Configuration.PartyCommands.partyCommandTps || mc.world == null) return;
 
-        float tps = mc.world.getTickManager().getTickRate();
+        float tps = ServerUtils.getAverageTps();
         MessageUtil.PARTY.sendMessage(String.format(Locale.ROOT, "[IQ] %.1f", tps));
     }
 

@@ -3,10 +3,12 @@ package net.iqaddons.mod.mixin;
 import io.netty.channel.ChannelHandlerContext;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.utils.ServerUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
+import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,6 +21,10 @@ public class ClientConnectionMixin {
     private void iq$onPacketReceive(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
             EventBus.post(ClientTickEvent.create(MinecraftClient.getInstance()));
+        }
+
+        if (packet instanceof WorldTimeUpdateS2CPacket) {
+            ServerUtils.onWorldTimeUpdate();
         }
     }
 }
