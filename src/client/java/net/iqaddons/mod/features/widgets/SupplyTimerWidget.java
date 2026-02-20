@@ -99,7 +99,6 @@ public class SupplyTimerWidget extends HudWidget {
         if (pickupHistory.isEmpty()) {
             long elapsed = supplyState.getElapsedTimeMillis();
             if (elapsed > 0) {
-                clearLines();
                 addLine(HudLine.of("§7No placed supplies yet..."));
             }
 
