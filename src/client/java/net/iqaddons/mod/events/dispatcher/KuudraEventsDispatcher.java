@@ -21,7 +21,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     private final SupplyStateManager supplyStateManager = SupplyStateManager.get();
 
-    private final ChestInteractionDetector chestInteractionDetector = new ChestInteractionDetector();
+    private final ChestInteractionDetector chestDetector = new ChestInteractionDetector();
     private final SupplyDetector supplyDetector = new SupplyDetector(supplyStateManager);
     private final FreshDetector freshDetector = new FreshDetector();
 
@@ -40,7 +40,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     private void onClientTick(@NotNull ClientTickEvent event) {
         lastTickCount = event.tickCount();
-        chestInteractionDetector.evictExpired(lastTickCount);
+        chestDetector.evictExpired(lastTickCount);
 
         if (!event.isInGame() || !event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) {
             return;
@@ -77,17 +77,21 @@ public class KuudraEventsDispatcher extends EventDispatcher {
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
-        if (!onSkyBlock || isOutOfKuudra()) return;
+        if (!onSkyBlock) return;
 
         String message = event.getStrippedMessage();
-        supplyDetector.detect(event, message, EventBus::post);
-        freshDetector.detect(event, message, EventBus::post);
+        chestDetector.detect(event, lastTickCount, EventBus::post);
+
+        if (!isOutOfKuudra()) {
+            supplyDetector.detect(event, message, EventBus::post);
+            freshDetector.detect(event, message, EventBus::post);
+        }
     }
 
     private void onScreenClick(@NotNull ScreenClickEvent event) {
         if (!onSkyBlock) return;
 
-        chestInteractionDetector.detect(event, lastTickCount, EventBus::post);
+        chestDetector.detect(event, lastTickCount, EventBus::post);
     }
 
     private void onTitleReceived(TitleReceivedEvent event) {

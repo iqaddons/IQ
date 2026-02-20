@@ -2,6 +2,7 @@ package net.iqaddons.mod.events.dispatcher.detector;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestOpenEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
@@ -14,6 +15,9 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -25,6 +29,9 @@ public final class ChestInteractionDetector {
     private static final int REROLL_SLOT = 50;
     private static final int SHARD_REROLL_SLOT = 51;
     private static final long WINDOW_STATE_TTL_TICKS = 20L * 60L * 5L;
+
+    private static final String PAID_CHEST_REWARDS_MESSAGE = "PAID CHEST REWARDS";
+    private static final String FREE_CHEST_REWARDS_MESSAGE = "FREE CHEST REWARDS";
 
     private final Map<Integer, ChestWindowState> windowStates = new ConcurrentHashMap<>();
 
@@ -64,11 +71,35 @@ public final class ChestInteractionDetector {
         if (!isBuyAction(slot.getStack())) return;
 
         state.bought = true;
-        postEvent.accept(new KuudraChestOpenEvent(
-                windowId, title,
-                handler.slots, chestType)
+        state.pendingOpen = new PendingChestOpen(
+                windowId,
+                title,
+                new ArrayList<>(handler.slots),
+                chestType
         );
     }
+
+    public void detect(@NotNull ChatReceivedEvent event, long tickCount, @NotNull Consumer<Event> postEvent) {
+        String message = event.getStrippedMessage();
+        log.info("Received chat message: {}", message);
+        if (!PAID_CHEST_REWARDS_MESSAGE.contains(message) && !FREE_CHEST_REWARDS_MESSAGE.contains(message)) return;
+        log.info("Detected chest open message: {}", message);
+
+        windowStates.values().stream()
+                .filter(state -> state.pendingOpen != null)
+                .max(Comparator.comparingLong(left -> left.lastInteractionTick))
+                .ifPresent(state -> {
+                    state.lastInteractionTick = tickCount;
+                    postEvent.accept(new KuudraChestOpenEvent(
+                            state.pendingOpen.windowId(),
+                            state.pendingOpen.title(),
+                            state.pendingOpen.slots(),
+                            state.pendingOpen.chestType()
+                    ));
+                    state.pendingOpen = null;
+                });
+    }
+
 
     public void evictExpired(long tickCount) {
         int before = windowStates.size();
@@ -108,6 +139,14 @@ public final class ChestInteractionDetector {
         private boolean rerolled;
         private boolean shardRerolled;
         private boolean bought;
+        private PendingChestOpen pendingOpen;
         private long lastInteractionTick;
     }
+
+    private record PendingChestOpen(
+            int windowId,
+            @NotNull String title,
+            @NotNull List<Slot> slots,
+            @NotNull ChestType chestType
+    ) {}
 }
