@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.IQConstants;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.HudNotificationEvent;
 import net.iqaddons.mod.hud.component.HudLine;
@@ -64,10 +65,12 @@ public class KuudraNotificationsWidget extends HudWidget {
         currentNotification = event.text();
         ticksRemaining = Math.max(event.durationTicks(), 1);
 
-        mc.player.playSound(
-                SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
-                2.0f, 1.0f
-        );
+        if (KuudraGeneralConfig.kuudraNotificationsSound) {
+            mc.player.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
+                    2.0f, 1.0f
+            );
+        }
 
         updateDisplay();
     }

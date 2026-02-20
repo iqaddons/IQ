@@ -300,6 +300,13 @@ public class KuudraGeneralConfig {
     }
 
     @ConfigEntry(
+            id = "kuudraNotificationsSound",
+            translation = "Kuudra Notifications Sound"
+    )
+    @Comment("Play a sound when a Kuudra notification is shown.")
+    public static boolean kuudraNotificationsSound = true;
+
+    @ConfigEntry(
             id = "manaDrainNotify",
             translation = "Mana Drain Notify"
     )
