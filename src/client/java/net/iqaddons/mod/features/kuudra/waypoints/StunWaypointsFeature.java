@@ -7,7 +7,6 @@ import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
-import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.RenderColor;
@@ -29,7 +28,8 @@ public class StunWaypointsFeature extends KuudraFeature {
                 "stunWaypoints",
                 "Stun Waypoints",
                 () -> PhaseThreeConfig.stunWaypoints,
-                KuudraPhase.BUILD, KuudraPhase.STUN, KuudraPhase.EATEN
+                KuudraPhase.BUILD, KuudraPhase.STUN,
+                KuudraPhase.EATEN, KuudraPhase.DPS
         );
     }
 
@@ -54,19 +54,6 @@ public class StunWaypointsFeature extends KuudraFeature {
         }
 
         if (msg.contains("destroyed one of Kuudra's pods!")) {
-            stunPhase = false;
-            eaten = false;
-        }
-    }
-
-    protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
-        if (event.currentPhase() == KuudraPhase.STUN) {
-            stunPhase = true;
-            eaten = false;
-        } else if (event.currentPhase() == KuudraPhase.EATEN) {
-            stunPhase = false;
-            eaten = true;
-        } else {
             stunPhase = false;
             eaten = false;
         }
