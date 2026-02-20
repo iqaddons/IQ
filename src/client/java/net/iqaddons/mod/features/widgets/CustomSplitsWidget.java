@@ -1,6 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
@@ -68,7 +69,7 @@ public class CustomSplitsWidget extends HudWidget {
         paceLine = HudLine.of("§7Pace: §f0.00s");
 
         setEnabledSupplier(() -> KuudraGeneralConfig.customSplits);
-        setVisibilityCondition(() -> ScoreboardUtils.getArea().startsWith("Kuudra's Hollow"));
+        setVisibilityCondition(() -> ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID));
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),

@@ -8,6 +8,7 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.SupplyStateManager;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,7 +18,6 @@ import java.util.List;
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {
 
-    private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     private final List<SupplyPickupEntry> pickupHistory = Collections.synchronizedList(new ArrayList<>());
@@ -32,7 +32,14 @@ public class SupplyTimerWidget extends HudWidget {
         );
 
         setEnabledSupplier(() -> PhaseOneConfig.supplyTimers);
-        setVisibilityCondition(() -> stateManager.phase().isInRun());
+        setVisibilityCondition(() -> {
+            var phase = KuudraStateManager.get().phase();
+            return KuudraPhase.isOneOf(
+                    KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
+                    KuudraPhase.DPS, KuudraPhase.SKIP, KuudraPhase.BOSS,
+                    KuudraPhase.COMPLETED
+            ).test(phase);
+        });
 
         setExampleLines(List.of(
                 HudLine.of("§e§lSupply Times §7[§a4§7/§a6§7]"),
@@ -92,6 +99,7 @@ public class SupplyTimerWidget extends HudWidget {
         if (pickupHistory.isEmpty()) {
             long elapsed = supplyState.getElapsedTimeMillis();
             if (elapsed > 0) {
+                clearLines();
                 addLine(HudLine.of("§7No placed supplies yet..."));
             }
 

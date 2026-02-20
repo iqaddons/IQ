@@ -35,7 +35,7 @@ public class FreshersTimerWidget extends HudWidget {
             var phase = KuudraStateManager.get().phase();
             return KuudraPhase.isOneOf(
                     KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.DPS,
-                    KuudraPhase.SKIP, KuudraPhase.BOSS
+                    KuudraPhase.SKIP, KuudraPhase.BOSS, KuudraPhase.COMPLETED
             ).test(phase);
         });
 
@@ -76,8 +76,9 @@ public class FreshersTimerWidget extends HudWidget {
 
     private void updateDisplay() {
         clearLines();
-        addLine(HudLine.of(String.format("§b§lFresh Timers §7[%d]",
-                freshEntries.size()))
+        int freshers = freshEntries.size();
+        addLine(HudLine.of(String.format("§b§lFresh Timers %s[%d]",
+                getFresherCountColor(freshers), freshers))
         );
 
         if (freshEntries.isEmpty()) {
@@ -95,11 +96,21 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     @Contract(pure = true)
-    private static @NotNull String getTimeColor(double time) {
+    private @NotNull String getTimeColor(double time) {
         if (time <= 5) return "§9";
         if (time <= 7) return "§a";
         if (time <= 9) return "§6";
         return "§c";
+    }
+
+    @Contract(pure = true)
+    private @NotNull String getFresherCountColor(int count) {
+        return switch (count) {
+            case 1 -> "§6";
+            case 2 -> "§e";
+            case 3 -> "§a";
+            default -> "§b";
+        };
     }
 
     private record PlayerFreshedEntry(

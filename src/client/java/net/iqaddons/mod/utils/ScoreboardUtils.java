@@ -48,6 +48,10 @@ public final class ScoreboardUtils {
                 .orElse("");
     }
 
+    public static boolean isInArea(@NotNull String areaName) {
+        return getArea().startsWith(areaName);
+    }
+
     private static Optional<ScoreboardObjective> getObjective() {
         if (MC.world == null) return Optional.empty();
 
