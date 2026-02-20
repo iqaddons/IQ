@@ -7,6 +7,7 @@ import net.iqaddons.mod.utils.MessageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
@@ -76,7 +77,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             var matcher = rule.pattern().matcher(message);
             if (!matcher.matches()) continue;
 
-            MessageUtil.showAlert(matcher.replaceAll(rule.titleTemplate), 40);
+            MessageUtil.showAlert(matcher.replaceAll(rule.titleTemplate).toUpperCase(Locale.ROOT), 40);
             return;
         }
     }
