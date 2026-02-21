@@ -36,8 +36,8 @@ public class SupplyTimerWidget extends HudWidget {
             var phase = KuudraStateManager.get().phase();
             return KuudraPhase.isOneOf(
                     KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
-                    KuudraPhase.DPS, KuudraPhase.SKIP, KuudraPhase.BOSS,
-                    KuudraPhase.COMPLETED
+                    KuudraPhase.STUN,  KuudraPhase.DPS, KuudraPhase.SKIP,
+                    KuudraPhase.BOSS, KuudraPhase.COMPLETED
             ).test(phase);
         });
 
