@@ -15,9 +15,10 @@ import java.util.List;
 
 public class IQKeyBindings {
 
-    private static KeyBinding.Category IQ_CATEGORY = KeyBinding.Category.create(Identifier.of("iq"));
+    private static final KeyBinding.Category IQ_CATEGORY = KeyBinding.Category.create(Identifier.of("iq"));
 
     private static KeyBinding openConfigKey;
+    private static KeyBinding openWardrobeKey;
     private static List<KeyBinding> wardrobeSlotKeys = List.of();
 
     public static void register() {
@@ -25,6 +26,13 @@ public class IQKeyBindings {
                 "key.iq.open-config",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
+                IQ_CATEGORY
+        ));
+
+        openWardrobeKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.iq.open-wardrobe",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
                 IQ_CATEGORY
         ));
 
@@ -43,6 +51,12 @@ public class IQKeyBindings {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openConfigKey.wasPressed()) {
                 openConfigScreen(client);
+            }
+
+            while (openWardrobeKey.wasPressed()) {
+                if (client.player != null && client.player.networkHandler != null) {
+                    client.player.networkHandler.sendChatCommand("wd");
+                }
             }
         });
     }
