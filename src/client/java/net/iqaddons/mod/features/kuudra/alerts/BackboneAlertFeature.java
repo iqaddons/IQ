@@ -7,7 +7,6 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.BackboneAlertManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
@@ -67,10 +66,9 @@ public class BackboneAlertFeature extends KuudraFeature {
             return;
         }
 
-        mc.getSoundManager().play(PositionedSoundInstance.master(
-                SoundEvents.GOAT_HORN_SOUNDS.getFirst().value(),
-                0.8f,
-                1.0f
-        ));
+        mc.player.playSound(
+                SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
+                2.0f, 1.0f
+        );
     }
 }
