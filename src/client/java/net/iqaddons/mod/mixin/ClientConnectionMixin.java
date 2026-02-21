@@ -10,6 +10,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,10 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
 
+    @Unique
+    private static final MinecraftClient client = MinecraftClient.getInstance();
+
     @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"))
     private void iq$onPacketReceive(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
-            EventBus.post(ClientTickEvent.create(MinecraftClient.getInstance()));
+            client.execute(() -> EventBus.post(ClientTickEvent.create(client)));
         }
 
         if (packet instanceof WorldTimeUpdateS2CPacket) {
