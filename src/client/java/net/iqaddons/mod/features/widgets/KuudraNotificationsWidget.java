@@ -24,10 +24,10 @@ public class KuudraNotificationsWidget extends HudWidget {
         super(
                 "kuudra_notifications",
                 "Kuudra Notifications",
-                440f,
-                280f,
+                0f,
+                80f,
                 1.0f,
-                HudAnchor.TOP_LEFT
+                HudAnchor.TOP_CENTER
         );
 
         notificationLine = HudLine.of("§c§lNOTIFICATION")
