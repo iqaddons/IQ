@@ -16,7 +16,7 @@
 [![GitHub Downloads](https://img.shields.io/github/downloads/pehenrii/IQ/total?style=for-the-badge&logo=github&label=Downloads&color=2ea043)](https://github.com/pehenrii/IQ/releases)
 [![Made with Java](https://img.shields.io/badge/Made%20With-Java%2021-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org)
 [![Fabric](https://img.shields.io/badge/Fabric-1.21.x-DBD0B4?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA)](https://fabricmc.net)
-[![License](https://img.shields.io/github/license/pehenrii/IQ?style=for-the-badge&color=blue)](https://github.com/pehenrii/IQ/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/pehenrii/IQ?style=for-the-badge&color=blue)](https://github.com/pehenrii/IQ/blob/master/LICENSE)
 
 </div>
 
