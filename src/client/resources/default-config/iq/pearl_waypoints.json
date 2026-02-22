@@ -523,6 +523,27 @@
           "size": 1.0,
           "text": "77",
           "alert": true
+        },
+        {
+          "_comment": "Sky Shop Waypoint",
+          "coords": [
+            -97,
+            163,
+            -112
+          ],
+          "rgb": [
+            255,
+            0,
+            0
+          ],
+          "block": [
+            -86,
+            78,
+            -129
+          ],
+          "size": 1.0,
+          "text": "11",
+          "alert": true
         }
       ]
     },
@@ -556,6 +577,27 @@
           ],
           "size": 1.3,
           "text": "71",
+          "alert": true
+        },
+        {
+          "_comment": "Sky Long Shop Waypoint",
+          "coords": [
+            -97,
+            153.5,
+            -113
+          ],
+          "rgb": [
+            255,
+            0,
+            0
+          ],
+          "block": [
+            -76,
+            77.5,
+            -137
+          ],
+          "size": 1.3,
+          "text": "11",
           "alert": true
         }
       ]
@@ -641,6 +683,27 @@
           "size": 1.25,
           "text": "77",
           "alert": true
+        },
+        {
+          "_comment": "Sky Border Shop Bottom Waypoint",
+          "coords": [
+            -97,
+            154,
+            -111
+          ],
+          "rgb": [
+            255,
+            0,
+            0
+          ],
+          "block": [
+            -71,
+            77,
+            -137
+          ],
+          "size": 1.25,
+          "text": "11",
+          "alert": true
         }
       ]
     },
@@ -675,9 +738,31 @@
           "size": 1.2,
           "text": "65",
           "alert": true
+        },
+        {
+          "_comment": "Double Pearl Shop Waypoint",
+          "coords": [
+            -74,
+            152,
+            -134
+          ],
+          "rgb": [
+            255,
+            0,
+            255
+          ],
+          "block": [
+            -68,
+            77,
+            -123
+          ],
+          "size": 1.2,
+          "text": "11",
+          "alert": true
         }
       ]
     },
+
     {
       "name": "equals",
       "pos1": [
