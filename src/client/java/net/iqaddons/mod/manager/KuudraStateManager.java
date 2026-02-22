@@ -101,6 +101,11 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onSkyBlockAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        if (event.newArea().isBlank()) {
+            log.debug("Ignoring blank area update while tracking Kuudra state");
+            return;
+        }
+
         if (!event.newArea().contains(KUUDRA_AREA_ID) && isInKuudra()) {
             log.info("Detected leaving Kuudra area (now in: {})", event.newArea());
             forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
@@ -135,6 +140,11 @@ public final class KuudraStateManager extends SubscriptionOwner {
     public boolean setPhase(@NotNull KuudraPhase newPhase) {
         KuudraContext current = contextRef.get();
         if (current.phase() == newPhase) return false;
+        if (current.phase() == KuudraPhase.NONE && newPhase != KuudraPhase.SUPPLIES) {
+            log.warn("Ignoring phase transition while no run is active: {} -> {}", current.phase(), newPhase);
+            return false;
+        }
+
         if (newPhase == KuudraPhase.NONE) {
             return handleRunEnd(current, KuudraRunEndEvent.EndReason.OTHER);
         }
