@@ -40,6 +40,13 @@ public class PhaseFourConfig {
     public static boolean backboneAlert = true;
 
     @ConfigEntry(
+            id = "backboneAlertSound",
+            translation = "Backbone Alert Sound"
+    )
+    @Comment("Play a sound when the Backbone Alert is active.")
+    public static boolean backboneAlertSound = true;
+
+    @ConfigEntry(
             id = "dangerZoneAlert",
             translation = "Danger Zone Alert"
     )

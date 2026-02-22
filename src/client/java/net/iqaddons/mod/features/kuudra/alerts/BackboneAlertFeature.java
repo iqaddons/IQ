@@ -66,9 +66,11 @@ public class BackboneAlertFeature extends KuudraFeature {
             return;
         }
 
-        mc.player.playSound(
-                SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
-                2.0f, 1.0f
-        );
+        if (PhaseFourConfig.backboneAlertSound) {
+            mc.player.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
+                    2.0f, 1.0f
+            );
+        }
     }
 }
