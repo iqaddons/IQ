@@ -1,6 +1,7 @@
 package net.iqaddons.mod;
 
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
+import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.iqaddons.mod.config.Configuration;
@@ -19,6 +20,14 @@ public class IQKeyBindings {
 
     private static KeyBinding openConfigKey;
     private static KeyBinding openWardrobeKey;
+
+    @Getter
+    private static KeyBinding advanceCroesusPageKey;
+
+    @Getter
+    private static KeyBinding goBackCroesusPageKey;
+
+    @Getter
     private static List<KeyBinding> wardrobeSlotKeys = List.of();
 
     public static void register() {
@@ -26,6 +35,20 @@ public class IQKeyBindings {
                 "key.iq.open-config",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
+                IQ_CATEGORY
+        ));
+
+        advanceCroesusPageKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.iq.advance-croesus-page",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_RIGHT,
+                IQ_CATEGORY
+        ));
+
+        goBackCroesusPageKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "key.iq.go-back-croesus-page",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT,
                 IQ_CATEGORY
         ));
 
@@ -67,10 +90,6 @@ public class IQKeyBindings {
                         .withParent(null)
                         .build()
         );
-    }
-
-    public static @NotNull List<KeyBinding> getWardrobeSlotKeys() {
-        return wardrobeSlotKeys;
     }
 
     private static @NotNull KeyBinding registerWardrobeSlotKey(int slotNumber, int defaultKeyCode) {

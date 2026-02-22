@@ -2,11 +2,8 @@
   "key.category.minecraft.iq": "IQ Addons",
   "key.iq.open-config": "Open Config",
   "key.iq.open-wardrobe": "Open Wardrobe",
-  "iq.sound.pb_new_record": "New Personal Best",
-  "iq.sound.ballista_build": "Ballista Build",
-  "iq.sound.lucky_build": "Lucky Build",
-  "iq.sound.lucky_build_end": "Lucky Build Ending",
-  "key.category.category.iq.keybinds": "IQ Addons",
+  "key.iq.advance-croesus-page": "Advance Croesus Page",
+  "key.iq.go-back-croesus-page": "Go back Croesus Page",
   "key.iq.wardrobe-slot-1": "Wardrobe Slot 1",
   "key.iq.wardrobe-slot-2": "Wardrobe Slot 2",
   "key.iq.wardrobe-slot-3": "Wardrobe Slot 3",
@@ -15,5 +12,9 @@
   "key.iq.wardrobe-slot-6": "Wardrobe Slot 6",
   "key.iq.wardrobe-slot-7": "Wardrobe Slot 7",
   "key.iq.wardrobe-slot-8": "Wardrobe Slot 8",
-  "key.iq.wardrobe-slot-9": "Wardrobe Slot 9"
+  "key.iq.wardrobe-slot-9": "Wardrobe Slot 9",
+  "iq.sound.pb_new_record": "New Personal Best",
+  "iq.sound.ballista_build": "Ballista Build",
+  "iq.sound.lucky_build": "Lucky Build",
+  "iq.sound.lucky_build_end": "Lucky Build Ending"
 }
