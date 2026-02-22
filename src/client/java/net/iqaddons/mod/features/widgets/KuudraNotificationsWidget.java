@@ -27,7 +27,7 @@ public class KuudraNotificationsWidget extends HudWidget {
                 0f,
                 80f,
                 1.0f,
-                HudAnchor.TOP_CENTER
+                HudAnchor.CENTER
         );
 
         notificationLine = HudLine.of("§c§lNOTIFICATION")
@@ -38,7 +38,7 @@ public class KuudraNotificationsWidget extends HudWidget {
                 ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)
         );
 
-        setExampleLines(HudLine.of("§e§lSOS REMINDER"));
+        setExampleLines(HudLine.of("§e§lNOTIFICATIONS"));
     }
 
     @Override
@@ -92,6 +92,6 @@ public class KuudraNotificationsWidget extends HudWidget {
         if (ticksRemaining <= 0) return;
 
         notificationLine.text(currentNotification);
-        markDimensionsDirty();
+        //markDimensionsDirty();
     }
 }

@@ -3,13 +3,16 @@ package net.iqaddons.mod.events.dispatcher;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.dispatcher.detector.ChestInteractionDetector;
+import net.iqaddons.mod.events.dispatcher.detector.DirectionDetector;
 import net.iqaddons.mod.events.dispatcher.detector.FreshDetector;
 import net.iqaddons.mod.events.dispatcher.detector.SupplyDetector;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
+import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
@@ -19,11 +22,12 @@ import static net.iqaddons.mod.IQConstants.*;
 @Slf4j
 public class KuudraEventsDispatcher extends EventDispatcher {
 
-    private final SupplyStateManager supplyStateManager = SupplyStateManager.get();
+    private KuudraStateManager kuudraStateManager;
 
     private final ChestInteractionDetector chestDetector = new ChestInteractionDetector();
-    private final SupplyDetector supplyDetector = new SupplyDetector(supplyStateManager);
+    private final SupplyDetector supplyDetector = new SupplyDetector(SupplyStateManager.get());
     private final FreshDetector freshDetector = new FreshDetector();
+    private final DirectionDetector directionDetector = new DirectionDetector();
 
     private volatile boolean onSkyBlock = false;
     private volatile String currentArea = "";
@@ -32,10 +36,13 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     @Override
     public void start() {
+        kuudraStateManager = KuudraStateManager.get();
+
         subscribe(ClientTickEvent.class, this::onClientTick);
         subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(ScreenClickEvent.class, this::onScreenClick);
         subscribe(TitleReceivedEvent.class, this::onTitleReceived);
+        subscribe(KuudraPhaseChangeEvent.class, this::onKuudraPhaseChange);
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
@@ -46,33 +53,37 @@ public class KuudraEventsDispatcher extends EventDispatcher {
             return;
         }
 
-        boolean wasOnSkyBlock = onSkyBlock;
-        onSkyBlock = ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
-        if (wasOnSkyBlock != onSkyBlock) {
-            EventBus.post(new SkyblockAreaChangeEvent(
-                    onSkyBlock, currentArea,
-                    onSkyBlock ? "joined" : "left")
-            );
+        directionDetector.detect(event, kuudraStateManager.context(), EventBus::post);
 
-            log.info("SkyBlock status: {}", onSkyBlock ? "joined" : "left");
-        }
+        {
+            boolean wasOnSkyBlock = onSkyBlock;
+            onSkyBlock = ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
+            if (wasOnSkyBlock != onSkyBlock) {
+                EventBus.post(new SkyblockAreaChangeEvent(
+                        onSkyBlock, currentArea,
+                        onSkyBlock ? "joined" : "left")
+                );
 
-        if (!onSkyBlock) {
-            if (!currentArea.isEmpty()) {
-                currentArea = "";
+                log.info("SkyBlock status: {}", onSkyBlock ? "joined" : "left");
             }
 
-            return;
-        }
+            if (!onSkyBlock) {
+                if (!currentArea.isEmpty()) {
+                    currentArea = "";
+                }
 
-        String newArea = ScoreboardUtils.getArea();
-        if (!newArea.equals(currentArea)) {
-            String previousArea = currentArea;
-            currentArea = newArea;
+                return;
+            }
 
-            EventBus.post(new SkyblockAreaChangeEvent(
-                    onSkyBlock, previousArea, newArea));
-            log.info("Area: {} -> {}", previousArea, newArea);
+            String newArea = ScoreboardUtils.getArea();
+            if (!newArea.equals(currentArea)) {
+                String previousArea = currentArea;
+                currentArea = newArea;
+
+                EventBus.post(new SkyblockAreaChangeEvent(
+                        onSkyBlock, previousArea, newArea));
+                log.info("Area: {} -> {}", previousArea, newArea);
+            }
         }
     }
 
@@ -98,6 +109,10 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         if (!onSkyBlock || isOutOfKuudra()) return;
 
         supplyDetector.detectProgress(event, EventBus::post);
+    }
+
+    private void onKuudraPhaseChange(KuudraPhaseChangeEvent event) {
+        directionDetector.reset();
     }
 
     private boolean isOutOfKuudra() {

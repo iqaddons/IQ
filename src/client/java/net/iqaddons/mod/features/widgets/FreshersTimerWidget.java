@@ -32,7 +32,7 @@ public class FreshersTimerWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
         setVisibilityCondition(() -> {
-            var phase = KuudraStateManager.get().phase();
+            var phase = kuudraManager.phase();
             return KuudraPhase.isOneOf(
                     KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.STUN,
                     KuudraPhase.DPS, KuudraPhase.SKIP, KuudraPhase.BOSS,
