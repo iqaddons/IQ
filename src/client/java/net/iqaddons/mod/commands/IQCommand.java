@@ -12,6 +12,7 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -36,6 +37,11 @@ public class IQCommand {
                         .then(literal("reload").executes(ctx -> {
                             mc.send(() -> WaypointConfigLoader.get().reload());
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fPearl Waypoints reloaded."));
+                            return 1;
+                        }))
+                        .then(literal("discord").executes(ctx -> {
+                            Util.getOperatingSystem().open("https://discord.gg/HdhXhCWcW9");
+                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fOpening IQ Discord invite..."));
                             return 1;
                         }))
                         .then(literal("resetchests").executes(ctx -> {
