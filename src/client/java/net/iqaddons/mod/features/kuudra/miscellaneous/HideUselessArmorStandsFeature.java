@@ -46,7 +46,7 @@ public class HideUselessArmorStandsFeature extends KuudraFeature {
         for (HiddenArmorStandType type : selected) {
             if (type == HiddenArmorStandType.OTHERS) continue;
             if (type.getArea() != null && type.getArea().contains(state.x, state.z)) {
-                return true;
+                return state.displayName == null;
             }
         }
 
