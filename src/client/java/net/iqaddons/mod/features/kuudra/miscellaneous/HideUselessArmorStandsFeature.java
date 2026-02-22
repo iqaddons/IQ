@@ -80,8 +80,8 @@ public class HideUselessArmorStandsFeature extends KuudraFeature {
     @Getter
     @RequiredArgsConstructor
     public enum HiddenArmorStandType {
-        BUILD(BoundingBox2D.fromCorners(-109, -96, -91, -116)),
-        RIGHT_CANNON(BoundingBox2D.fromCorners(-126, -114, -132, -108)),
+        BUILD(BoundingBox2D.fromCorners(-113, -96, -91, -116)),
+        RIGHT_CANNON(BoundingBox2D.fromCorners(-126, -115, -132, -108)),
         LEFT_CANNON(BoundingBox2D.fromCorners(-67, -105, -72, -100)),
         SHOP(BoundingBox2D.fromCorners(-98, -129, -93, -132)),
         OTHERS;
