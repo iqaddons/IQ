@@ -48,12 +48,11 @@ public class KuudraEventsDispatcher extends EventDispatcher {
     private void onClientTick(@NotNull ClientTickEvent event) {
         lastTickCount = event.tickCount();
         chestDetector.evictExpired(lastTickCount);
+        directionDetector.detect(event, kuudraStateManager.context(), EventBus::post);
 
         if (!event.isInGame() || !event.isNthTick(DEFAULT_CHECK_INTERVAL_TICKS)) {
             return;
         }
-
-        directionDetector.detect(event, kuudraStateManager.context(), EventBus::post);
 
         {
             boolean wasOnSkyBlock = onSkyBlock;

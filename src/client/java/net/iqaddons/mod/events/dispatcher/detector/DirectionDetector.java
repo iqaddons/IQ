@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraDirectionChangeEvent;
-import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import org.jetbrains.annotations.NotNull;
