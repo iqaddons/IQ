@@ -83,6 +83,18 @@ Multiple alert systems to keep you informed:
 - **No Pre Alert** — Automatically announces missing pre supplies to party chat
 - **Already Picking Alert** — Shows title when someone else is picking your supply
 - **Second Supply Alert** — Announces second supply position (Shop/X Cannon/Square)
+- **Supply Recover Message** — Sends your custom chat message when you recover a supply
+- **Supply Giant Hitbox Alert** — Highlights and alerts when you recover inside giant hitbox
+</details>
+
+<details>
+<summary><b>📈 Supply Progress Widget</b></summary>
+<br>
+Replaces the default supply title with a clean, movable widget.
+
+- Live 0/6 progress updates
+- Better visibility than vanilla title spam
+- Fully HUD-editable position
 </details>
 
 ---
@@ -125,6 +137,12 @@ Shows beacon beams at build piles with progress-based colors.
 <summary><b>👤 Elle Highlight</b></summary>
 <br>
 Draws a visible hitbox around Elle during the build phase for easy tracking.
+</details>
+
+<details>
+<summary><b>🔊 Ballista Build Sound Replace</b></summary>
+<br>
+Replaces the default Ballista build sound during Phase 2 with IQ custom audio.
 </details>
 
 ---
@@ -196,6 +214,18 @@ Alerts when you're standing on tentacle danger zones.
 - Audio notification
 </details>
 
+<details>
+<summary><b>🦴 Backbone Alert</b></summary>
+<br>
+Tracks Bonemerang backbone timing with on-screen progress and Rend sync alert.
+</details>
+
+<details>
+<summary><b>🙈 Hide Kuudra Damage Title</b></summary>
+<br>
+Hides the vanilla Kuudra damage title (e.g. ☠ 240M/240M❤) for a cleaner boss screen.
+</details>
+
 ---
 
 ### General Features
@@ -236,6 +266,98 @@ Plays a notification sound when someone joins your party.
 <summary><b>🔇 Hide Mob Nametags</b></summary>
 <br>
 Prevents Kuudra mob nametags from rendering, reducing visual clutter.
+</details>
+
+<details>
+<summary><b>🏆 Personal Best Tracker</b></summary>
+<br>
+Tracks your best Kuudra run time and notifies you when you beat your PB.
+</details>
+
+<details>
+<summary><b>💰 Kuudra Profit Tracker</b></summary>
+<br>
+Calculates profit/loss per run with configurable pricing logic.
+
+- Bazaar and Auction-aware pricing
+- Includes keys, essence, books, armor and pet bonus adjustments
+- Hourly rate and session tracking
+</details>
+
+<details>
+<summary><b>🧰 Chest Utilities</b></summary>
+<br>
+Utility set for chest-focused runs.
+
+- **Chest Value Display** — Shows chest value when opening reward chests
+- **Chest Counter Tracker** — Tracks progress toward the 60 chest cap
+- **Chest Counter Party Reminders** — Optional milestone/cap announcements in party chat
+- **Croesus Helper** — Highlights already opened chests in Croesus/Vesuvius menus
+</details>
+
+<details>
+<summary><b>🔁 Auto Requeue</b></summary>
+<br>
+Automatically queues the next Kuudra run after boss completion with configurable delay.
+</details>
+
+<details>
+<summary><b>📣 Kuudra Notifications</b></summary>
+<br>
+Centralized event notifications for key run moments.
+
+- Build started / build done
+- Supplies done
+- Ichor used
+- Cannonball purchased
+- No pre reminder
+- SOS (pre-stun) reminder
+- Phase change alerts
+- Optional notification sound
+</details>
+
+<details>
+<summary><b>🪄 Ability Announce</b></summary>
+<br>
+Announces selected ability casts in party chat.
+
+- Spirit Spark
+- Hollowed Rush
+- Raging Wind
+- Ichor Pool
+- Mana Drain
+</details>
+
+<details>
+<summary><b>🎮 Party Commands</b></summary>
+<br>
+Supports chat-based party commands triggered by `!` messages.
+
+- Warp / transfer / promote / kick shortcuts
+- Quick joininstance commands (`!t1` to `!t5`)
+- Ping and TPS replies
+- Share runs, chest progress, and profit stats in party chat
+</details>
+
+<details>
+<summary><b>👔 Wardrobe Keybinds</b></summary>
+<br>
+Lets you swap Wardrobe sets instantly using configurable keybinds with optional sound feedback.
+</details>
+
+<details>
+<summary><b>🚨 Limbo Alert</b></summary>
+<br>
+Detects SkyBlock limbo kicks and alerts your party automatically.
+</details>
+
+<details>
+<summary><b>🧹 Extra Visual Cleanup</b></summary>
+<br>
+Additional clutter-reduction options for cleaner gameplay.
+
+- Hide Kuudra vanilla boss bar
+- Hide selected useless armor stands
 </details>
 
 ---
