@@ -1,6 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.features.kuudra.miscellaneous.HideUselessArmorStandsFeature;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 import net.iqaddons.mod.utils.TextColor;
 
@@ -377,7 +378,9 @@ public class KuudraGeneralConfig {
             translation = "Hide Useless Armor Stands"
     )
     @Comment("Hide armor stands used for visual effects that don't provide useful information.")
-    public static boolean hideUselessArmorStands = true;
+    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[] {
+            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD
+    };
 
     @ConfigEntry(
             id = "hideKuudraBossBar",

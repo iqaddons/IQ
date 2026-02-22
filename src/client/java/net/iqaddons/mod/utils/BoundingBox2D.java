@@ -1,12 +1,16 @@
 package net.iqaddons.mod.utils;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+
 public record BoundingBox2D(
         double minX,
         double minZ,
         double maxX,
         double maxZ
 ) {
-    public static BoundingBox2D fromCorners(double x1, double z1, double x2, double z2) {
+    @Contract("_, _, _, _ -> new")
+    public static @NotNull BoundingBox2D fromCorners(double x1, double z1, double x2, double z2) {
         return new BoundingBox2D(
                 Math.min(x1, x2),
                 Math.min(z1, z2),
