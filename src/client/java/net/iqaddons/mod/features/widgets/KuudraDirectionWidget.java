@@ -1,5 +1,6 @@
 package net.iqaddons.mod.features.widgets;
 
+import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraDirectionChangeEvent;
 import net.iqaddons.mod.hud.component.HudLine;
@@ -9,6 +10,7 @@ import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import org.jetbrains.annotations.NotNull;
 
+@Slf4j
 public class KuudraDirectionWidget extends HudWidget {
 
     private final HudLine directionLine = HudLine.of("§a§lFRONT");
@@ -34,19 +36,15 @@ public class KuudraDirectionWidget extends HudWidget {
     @Override
     protected void onActivate() {
         clearLines();
-        addLine(directionLine);
+        addLines(directionLine);
 
         subscribe(KuudraDirectionChangeEvent.class, this::onDirectionChange);
     }
 
     private void onDirectionChange(@NotNull KuudraDirectionChangeEvent event) {
-        var oldDirection = event.oldDirection();
         var newDirection = event.newDirection();
 
-        if (oldDirection == newDirection) directionLine.text("");
-        else {
-            directionLine.text(newDirection.getFormattedName());
-            markDimensionsDirty();
-        }
+        directionLine.text(newDirection.getFormattedName());
+        markDimensionsDirty();
     }
 }
