@@ -5,6 +5,7 @@ import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraDirectionChangeEvent;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,10 +21,17 @@ public class DirectionDetector {
     public void detect(@NotNull ClientTickEvent event, KuudraContext context, Consumer<Event> postEvent) {
         if (!event.isInGame()) return;
 
-        var bossInfo = context.bossInfo();
-        if (!bossInfo.isAlive()) return;
+        var phase = context.phase();
+        if (phase != KuudraPhase.SKIP && phase != KuudraPhase.BOSS) return;
 
-        var direction = KuudraLocationUtil.getDirection(bossInfo.bossEntity());
+        var bossInfo = context.bossInfo();
+        var kuudraEntity = bossInfo.isAlive()
+                ? bossInfo.bossEntity()
+                : KuudraLocationUtil.findKuudra().orElse(null);
+
+        if (kuudraEntity == null || !kuudraEntity.isAlive()) return;
+
+        var direction = KuudraLocationUtil.getDirection(kuudraEntity);
         if (direction != UNKNOWN && direction != currentDirection) {
             postEvent.accept(new KuudraDirectionChangeEvent(
                     currentDirection,
