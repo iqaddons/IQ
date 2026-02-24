@@ -112,7 +112,7 @@ public class Configuration {
         @Comment("Reply with your current run counter progress.")
         public static boolean partyCommandRuns = true;
 
-        @ConfigEntry(id = "partyCommandProfit", translation = "!runs")
+        @ConfigEntry(id = "partyCommandProfit", translation = "!profit")
         @Comment("Reply with your current profit counter progress.")
         public static boolean partyCommandProfit = true;
     }
