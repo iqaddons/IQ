@@ -1,6 +1,9 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import com.teamresourceful.resourcefulconfig.api.annotations.Category;
+import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
@@ -140,6 +143,15 @@ public class PhaseOneConfig {
     )
     @Comment("Send a party chat message if you don't have a pre.")
     public static boolean noPreAlert = true;
+
+    @ConfigEntry(
+            id = "noPreAlertDelayMs",
+            translation = "No Pre Alert Delay (ms)"
+    )
+    @ConfigOption.Range(min = 0, max = 3000)
+    @ConfigOption.Slider
+    @Comment("Delay before sending the \"No Pre\" message after Elle's warning.")
+    public static int noPreAlertDelayMs = 0;
 
     @ConfigEntry(
             id = "secondSupplyAlert",
