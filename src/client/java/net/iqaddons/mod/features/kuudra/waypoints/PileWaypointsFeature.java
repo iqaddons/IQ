@@ -85,10 +85,12 @@ public class PileWaypointsFeature extends KuudraFeature {
                     false, color, WorldRenderUtils.RenderStyle.BOTH
             );
 
-            event.drawText(pile.position().add(0, 2.5, 0),
-                    Text.literal(pile.name()), 0.05f,
-                    true, color.withOpacity(100)
-            );
+            if (PhaseOneConfig.pileWaypointNames) {
+                event.drawText(pile.position().add(0, 2.5, 0),
+                        Text.literal(pile.name()), 0.05f,
+                        true, color.withOpacity(100)
+                );
+            }
         }
     }
 }

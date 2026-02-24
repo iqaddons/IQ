@@ -137,6 +137,13 @@ public class PhaseOneConfig {
     public static boolean pileWaypoints = true;
 
     @ConfigEntry(
+            id = "pileWaypointNames",
+            translation = "Pile Waypoint Names"
+    )
+    @Comment("Show or hide pile name labels above waypoints.")
+    public static boolean pileWaypointNames = true;
+
+    @ConfigEntry(
             id = "normalPileColor",
             translation = "Normal Pile Color"
     )
