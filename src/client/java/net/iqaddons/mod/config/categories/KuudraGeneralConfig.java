@@ -51,7 +51,7 @@ public class KuudraGeneralConfig {
     )
     @ConfigOption.Select
     @Comment("Choose how Bazaar prices are calculated for profit and chest value.")
-    public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.INSTA_SELL;
+    public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.SELL_ORDER;
 
     @ConfigEntry(
             id = "crimsonIsleFaction",
@@ -77,7 +77,7 @@ public class KuudraGeneralConfig {
     @ConfigOption.Range(min = 0, max = 20)
     @ConfigOption.Slider
     @Comment("Apply your Kuudra pet level bonus to profit calculations.")
-    public static int kuudraPetBonus = 0;
+    public static int kuudraPetBonus = 20;
 
     @ConfigOption.Separator("Widgets")
 
@@ -124,52 +124,16 @@ public class KuudraGeneralConfig {
     )
     @Comment("Set the split timings that are used to calculate the pace feature.")
     public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
-
-    @ConfigObject
-    public static class CustomSplitsBenchmarks {
-
-        @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Supplies phase.")
-        public static double supplies = 22.5;
-
-        @ConfigEntry(id = "build", translation = "Build Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Build phase.")
-        public static double build = 12;
-
-        @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Eaten phase.")
-        public static double eaten = 4.3;
-
-        @ConfigEntry(id = "stun", translation = "Stun Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Stun phase.")
-        public static double stun = 0.0;
-
-        @ConfigEntry(id = "dps", translation = "DPS Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the DPS phase.")
-        public static double dps = 3.2;
-
-        @ConfigEntry(id = "skip", translation = "Skip Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Skip phase.")
-        public static double skip = 4.6;
-
-        @ConfigEntry(id = "boss", translation = "Boss Benchmark")
-        @ConfigOption.Range(min = 0, max = 60)
-        @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Boss phase.")
-        public static double boss = 1.9;
-    }
+    @ConfigEntry(
+            id = "hideUselessArmorStands",
+            translation = "Hide Useless Armor Stands"
+    )
+    @Comment("Hide armor stands used for visual effects that don't provide useful information.")
+    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[] {
+            HideUselessArmorStandsFeature.HiddenArmorStandType.SHOP,
+            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD,
+            HideUselessArmorStandsFeature.HiddenArmorStandType.OTHERS
+    };
 
     @ConfigEntry(
             id = "splitColorConfig",
@@ -373,14 +337,51 @@ public class KuudraGeneralConfig {
     @Comment("Prevent loading nametags from Kuudra mobs.")
     public static boolean hideMobNametags = true;
 
-    @ConfigEntry(
-            id = "hideUselessArmorStands",
-            translation = "Hide Useless Armor Stands"
-    )
-    @Comment("Hide armor stands used for visual effects that don't provide useful information.")
-    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[] {
-            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD
-    };
+    @ConfigObject
+    public static class CustomSplitsBenchmarks {
+
+        @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Supplies phase.")
+        public static double supplies = 22.5;
+
+        @ConfigEntry(id = "build", translation = "Build Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Build phase.")
+        public static double build = 12;
+
+        @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Eaten phase.")
+        public static double eaten = 4.125;
+
+        @ConfigEntry(id = "stun", translation = "Stun Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Stun phase.")
+        public static double stun = 0.0;
+
+        @ConfigEntry(id = "dps", translation = "DPS Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the DPS phase.")
+        public static double dps = 3.5;
+
+        @ConfigEntry(id = "skip", translation = "Skip Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Skip phase.")
+        public static double skip = 4.6;
+
+        @ConfigEntry(id = "boss", translation = "Boss Benchmark")
+        @ConfigOption.Range(min = 0, max = 60)
+        @ConfigOption.Slider
+        @Comment("Target time (seconds) for the Boss phase.")
+        public static double boss = 1.875;
+    }
 
     @ConfigEntry(
             id = "hideKuudraBossBar",

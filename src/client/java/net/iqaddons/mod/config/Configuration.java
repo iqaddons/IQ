@@ -174,7 +174,7 @@ public class Configuration {
         )
         @ConfigOption.Select
         @Comment("Choose how waypoints are displayed.")
-        public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.BOTH;
+        public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
     }
 
 

@@ -52,7 +52,7 @@ public class PhaseOneConfig {
     @ConfigOption.Range(min = 1, max = 3)
     @ConfigOption.Slider
     @Comment("Adjust the size of supply waypoint boxes.")
-    public static float supplyWaypointBoxSize = 1.2f;
+    public static float supplyWaypointBoxSize = 1.0f;
 
     @ConfigOption.Separator("Pearl Waypoints")
 
@@ -87,7 +87,7 @@ public class PhaseOneConfig {
     @ConfigOption.Range(min = 0.2, max = 2)
     @ConfigOption.Slider
     @Comment("Fallback size for pearl waypoints (set override below to use it).")
-    public static float pearlWaypointSize = 0.8f;
+    public static float pearlWaypointSize = 1.0f;
 
     @ConfigEntry(
             id = "overridePearlWaypointVisuals",
@@ -125,7 +125,7 @@ public class PhaseOneConfig {
             translation = "Dynamic Pearl Waypoints"
     )
     @Comment("Make pearl waypoint positions follow your player movement.")
-    public static boolean dynamicPearlWaypoints = false;
+    public static boolean dynamicPearlWaypoints = true;
 
     @ConfigOption.Separator("Pile Waypoints")
 

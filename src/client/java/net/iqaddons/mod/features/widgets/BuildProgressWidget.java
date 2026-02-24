@@ -35,7 +35,7 @@ public class BuildProgressWidget extends HudWidget {
         super(
                 "buildProgress",
                 "Build Progress",
-                430.0f, 360.0f,
+                430.0f, 385.0f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

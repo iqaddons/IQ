@@ -11,8 +11,6 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class BackboneWidget extends HudWidget {
 
     private final BackboneAlertManager manager = BackboneAlertManager.get();
@@ -21,9 +19,9 @@ public class BackboneWidget extends HudWidget {
         super(
                 "backbone_alert",
                 "Backbone Alert",
-                440f,
-                300f,
-                1.0f,
+                336.5f,
+                272.5f,
+                2.3f,
                 HudAnchor.TOP_LEFT
         );
 

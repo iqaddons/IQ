@@ -52,7 +52,7 @@ public class CustomSplitsWidget extends HudWidget {
         super(
                 "customSplits",
                 "Custom Splits",
-                8.5f, 6.0f,
+                6.5f, 6.5f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

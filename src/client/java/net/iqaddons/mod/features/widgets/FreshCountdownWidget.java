@@ -28,7 +28,7 @@ public class FreshCountdownWidget extends HudWidget {
         super(
                 "freshCountdown",
                 "Fresh Countdown",
-                460.0f, 130.0f,
+                460.0f, 90.0f,
                 1.5f,
                 HudAnchor.TOP_LEFT
         );
