@@ -73,6 +73,30 @@ public class PhaseOneConfig {
     public static float pearlWaypointsScale = 0.3f;
 
     @ConfigEntry(
+            id = "pearlWaypointColor",
+            translation = "Pearl Waypoint Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Fallback color for pearl waypoints (set override below to use it).")
+    public static int pearlWaypointColor = new Color(0, 255, 255, 110).getRGB();
+
+    @ConfigEntry(
+            id = "pearlWaypointSize",
+            translation = "Pearl Waypoint Size"
+    )
+    @ConfigOption.Range(min = 0.2, max = 2)
+    @ConfigOption.Slider
+    @Comment("Fallback size for pearl waypoints (set override below to use it).")
+    public static float pearlWaypointSize = 0.8f;
+
+    @ConfigEntry(
+            id = "overridePearlWaypointVisuals",
+            translation = "Override Pearl Visuals"
+    )
+    @Comment("Use configured pearl color/size instead of per-pre values from the waypoint file.")
+    public static boolean overridePearlWaypointVisuals = false;
+
+    @ConfigEntry(
             id = "pearlWaypointsTimerDelay",
             translation = "Pearl Waypoints Timer Delay"
     )

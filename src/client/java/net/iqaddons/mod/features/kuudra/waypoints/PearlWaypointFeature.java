@@ -120,7 +120,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         Vec3d target = getRenderTarget(waypoint);
         if (target.x == 0 && target.y == 0 && target.z == 0) return;
 
-        float size = waypoint.size();
+        float size = PhaseOneConfig.overridePearlWaypointVisuals ? PhaseOneConfig.pearlWaypointSize : waypoint.size();
         float half = size / 2f;
 
         Box targetBox = new Box(
@@ -128,7 +128,11 @@ public class PearlWaypointFeature extends KuudraFeature {
                 target.getX() + half - 0.5, target.getY() + size, target.getZ() + half - 0.5
         );
 
-        event.drawFilled(targetBox, true, waypoint.color().withOpacity(80.0f));
+        RenderColor waypointColor = PhaseOneConfig.overridePearlWaypointVisuals
+                ? RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor)
+                : waypoint.color();
+
+        event.drawFilled(targetBox, true, waypointColor.withOpacity(80.0f));
         if (!waypoint.label().isEmpty()) {
             String adjustedLabel = getAdjustedPercentage(waypoint.label());
             int targetIndex = getAdjustedTargetIndex(adjustedLabel);
@@ -164,7 +168,7 @@ public class PearlWaypointFeature extends KuudraFeature {
                     block.getX() + 1, block.getY() + 1, block.getZ() + 1
             );
 
-            event.drawOutline(blockBox, true, waypoint.color());
+            event.drawOutline(blockBox, true, waypointColor);
         }
     }
 
