@@ -11,6 +11,7 @@ import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.model.kuudra.KuudraBossInfo;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.kuudra.KuudraTier;
 import net.iqaddons.mod.model.kuudra.validator.KuudraStateValidator;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
@@ -21,11 +22,15 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static net.iqaddons.mod.IQConstants.*;
 
 @Slf4j
 public final class KuudraStateManager extends SubscriptionOwner {
+
+    private static final Pattern KUUDRA_TIER_PATTERN = Pattern.compile("\\(T([1-5])\\)");
 
     private static KuudraStateManager instance;
 
@@ -54,6 +59,15 @@ public final class KuudraStateManager extends SubscriptionOwner {
         }
 
         KuudraContext current = contextRef.get();
+        if (current.phase().isInRun() && current.tier() == KuudraTier.UNKNOWN && event.isNthTick(10)) {
+            detectTier().ifPresent(tier -> {
+                KuudraContext updated = current.withTier(tier);
+                if (contextRef.compareAndSet(current, updated)) {
+                    log.info("Detected Kuudra tier during run: {}", tier.getDisplayName());
+                }
+            });
+        }
+
         if (current.phase().isCombatPhase() || current.phase() == KuudraPhase.BOSS) {
             performBossScan(current);
         } else if (event.isNthTick(2)) {
@@ -190,8 +204,15 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         KuudraLocationUtil.invalidateCache();
 
-        KuudraContext newContext = KuudraContext.entering();
+        KuudraTier tier = detectTier().orElse(KuudraTier.UNKNOWN);
+        KuudraContext newContext = KuudraContext.entering(tier);
         KuudraContext old = contextRef.getAndSet(newContext);
+
+        if (tier != KuudraTier.UNKNOWN) {
+            log.info("Starting Kuudra run on tier {}", tier.getDisplayName());
+        } else {
+            log.debug("Starting Kuudra run with unknown tier (scoreboard tier not found)");
+        }
 
         phaseDurations.clear();
         EventBus.post(new KuudraPhaseChangeEvent(
@@ -296,6 +317,15 @@ public final class KuudraStateManager extends SubscriptionOwner {
         if (!current.bossInfo().equals(nextBossInfo)) {
             contextRef.compareAndSet(current, current.withBossInfo(nextBossInfo));
         }
+    }
+
+    private @NotNull Optional<KuudraTier> detectTier() {
+        String area = ScoreboardUtils.getArea();
+        Matcher matcher = KUUDRA_TIER_PATTERN.matcher(area);
+        if (!matcher.find()) return Optional.empty();
+
+        int tierLevel = Integer.parseInt(matcher.group(1));
+        return KuudraTier.fromLevel(tierLevel);
     }
 
     public static KuudraStateManager get() {
