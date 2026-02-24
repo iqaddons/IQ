@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.kuudra.waypoints;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
+import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
@@ -50,6 +51,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(WorldRenderEvent.class, this::onRender);
+        subscribe(ArmorStandRenderEvent.class, this::onArmorStandRender);
     }
 
     @Override
@@ -70,6 +72,18 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
         buildPiles.clear();
         buildPiles.addAll(newPiles);
+    }
+
+    private void onArmorStandRender(@NotNull ArmorStandRenderEvent event) {
+        if (!PhaseTwoConfig.hideDefaultBuildPileText) return;
+
+        var state = event.getRenderState();
+        if (state == null || state.displayName == null) return;
+
+        String stripped = state.displayName.getString().replaceAll("§.", "");
+        if (stripped.contains("PROGRESS:") && stripped.contains("%")) {
+            event.setCancelled(true);
+        }
     }
 
     private boolean isProgressStand(@NotNull ArmorStandEntity stand) {

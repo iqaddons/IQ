@@ -25,6 +25,13 @@ public class PhaseTwoConfig {
     @Comment("Render some helpful holograms during the build phase")
     public static boolean buildHelper = true;
 
+    @ConfigEntry(
+            id = "hideDefaultBuildPileText",
+            translation = "Hide Default Build Pile Text"
+    )
+    @Comment("Hide Kuudra's default pile progress holograms while IQ build overlay is active.")
+    public static boolean hideDefaultBuildPileText = false;
+
     @ConfigOption.Separator("Build Widgets")
     @ConfigEntry(
             id = "buildProgressOverlay",
