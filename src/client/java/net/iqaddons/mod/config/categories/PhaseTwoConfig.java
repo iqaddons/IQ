@@ -54,28 +54,54 @@ public class PhaseTwoConfig {
     @Comment("Display a countdown timer of you fresh")
     public static boolean freshCountdown = true;
 
+    @ConfigEntry(
+            id = "elleHighlightConfig",
+            translation = "Elle Highlight Config"
+    )
+    @Comment("Configure the Elle highlight feature.")
+    public static final ElleConfig elleConfig = new ElleConfig();
     @ConfigOption.Separator("Build Highlights")
     @ConfigEntry(
             id = "teamHighlight",
             translation = "Team Highlight"
     )
-    @Comment("Highlight teammates and show freshers during the build phase")
+    @Comment("Highlight teammates and show freshers during the build phase.")
     public static boolean teamHighlight = true;
-
     @ConfigEntry(
             id = "teamHighlightColor",
             translation = "Team Hightlight Color"
     )
     @ConfigOption.Color(alpha = true)
-    @Comment("Change the color of the teammate highlight")
+    @Comment("Change the color of the teammate highlight.")
     public static int teamHighlightColor = new Color(67, 179, 29, 209).getRGB();
+    @ConfigOption.Separator("Build Alerts")
+    @ConfigEntry(
+            id = "freshMessage",
+            translation = "Fresh Message"
+    )
+    @Comment("Send a party message when you fresh.")
+    public static boolean freshMessage = true;
+    @ConfigEntry(
+            id = "teamHighlightFreshColor",
+            translation = "Team Highlight Fresh Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Use a different color for freshers teammates.")
+    public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+    @ConfigOption.Separator("Ballista Sounds")
 
     @ConfigEntry(
-            id = "elleHighlightConfig",
-            translation = "Elle Highlight Config"
+            id = "cleanBallistaBuildSounds",
+            translation = "Clean Ballista Build Sounds"
     )
-    @Comment("Configure the Elle highlight feature")
-    public static final ElleConfig elleConfig = new ElleConfig();
+    @Comment("Disable most of sounds during build for a cleaner audio experience.")
+    public static boolean cleanBallistaSounds = true;
+    @ConfigEntry(
+            id = "replaceBallistaBuildSound",
+            translation = "Replace Ballista Build Sound"
+    )
+    @Comment("Replace the default ballista build sound while in build phase.")
+    public static boolean replaceBallistaBuildSound = true;
 
     @ConfigObject
     public static class ElleConfig {
@@ -84,7 +110,7 @@ public class PhaseTwoConfig {
                 id = "elleHighlight",
                 translation = "Elle Highlight"
         )
-        @Comment("Draw a box around Elle during the build phase")
+        @Comment("Draw a box around Elle during the build phase.")
         public static boolean elleHighlight = true;
 
         @ConfigEntry(
@@ -92,7 +118,7 @@ public class PhaseTwoConfig {
                 translation = "Elle Highlight Color"
         )
         @ConfigOption.Color(alpha = true)
-        @Comment("Change the color of the Elle highlight")
+        @Comment("Change the color of the Elle highlight.")
         public static int elleHighlightColor = new Color(255, 83, 83, 171).getRGB();
 
         @ConfigEntry(
@@ -100,31 +126,7 @@ public class PhaseTwoConfig {
                 translation = "Elle Highlight Style"
         )
         @ConfigOption.Select
-        @Comment("Change the style of the Elle highlight")
+        @Comment("Change the style of the Elle highlight.")
         public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.OUTLINE;
     }
-
-    @ConfigOption.Separator("Build Alerts")
-    @ConfigEntry(
-            id = "freshMessage",
-            translation = "Fresh Message"
-    )
-    @Comment("Send a party message when you fresh")
-    public static boolean freshMessage = true;
-
-    @ConfigEntry(
-            id = "teamHighlightFreshColor",
-            translation = "Team Highlight Fresh Color"
-    )
-    @ConfigOption.Color(alpha = true)
-    @Comment("Use a different color for freshers teammates")
-    public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
-
-    @ConfigOption.Separator("Ballista Sounds")
-    @ConfigEntry(
-            id = "replaceBallistaBuildSound",
-            translation = "Replace Ballista Build Sound"
-    )
-    @Comment("Replace the default ballista build sound while in build phase")
-    public static boolean replaceBallistaBuildSound = true;
 }

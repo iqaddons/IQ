@@ -335,8 +335,4 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         return instance;
     }
-
-    public static boolean isInitialized() {
-        return instance != null;
-    }
 }
