@@ -14,7 +14,8 @@
     "InGameHudMixin",
     "ItemUseMixin",
     "WorldRendererMixin",
-    "feature.BallistaBuildSoundMixin"
+    "feature.BallistaBuildSoundMixin",
+    "feature.HollowWandPlayerInteractMixin"
   ],
   "injectors": {
     "defaultRequire": 1

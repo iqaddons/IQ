@@ -53,4 +53,11 @@ public class PhaseFourConfig {
     @Comment("Show an alert when you enter a tentacle's danger zone.")
     public static boolean dangerZoneAlert = false;
 
+    @ConfigEntry(
+            id = "hollowWandNoPlayerInteract",
+            translation = "Block Hollow Wand Player Interact"
+    )
+    @Comment("In Boss Fight, prevent Hollow Wand from interacting with players to avoid 1.21 inconsistency.")
+    public static boolean hollowWandNoPlayerInteract = true;
+
 }
