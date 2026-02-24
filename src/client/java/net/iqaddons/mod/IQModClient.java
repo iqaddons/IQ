@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.dispatcher.KuudraEventsDispatcher;
+import net.iqaddons.mod.integration.DiscordRPCIntegration;
 import net.iqaddons.mod.lifecycle.LifecycleComponent;
 import net.iqaddons.mod.lifecycle.modules.FeatureModule;
 import net.iqaddons.mod.lifecycle.modules.KuudraModule;
@@ -53,6 +55,12 @@ public class IQModClient implements ClientModInitializer {
 
         IQKeyBindings.register();
         registerCommands();
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            components.forEach(LifecycleComponent::stop);
+
+            DiscordRPCIntegration.INSTANCE.shutdown();
+        });
 
         log.info("IQ Mod has been initialized!");
     }

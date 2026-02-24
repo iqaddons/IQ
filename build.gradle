@@ -27,17 +27,26 @@ repositories {
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
 
+    maven {
+        name = "FDD Maven"
+        url = "https://maven.firstdark.dev/releases"
+    }
+
+    maven { url = "https://repo.hypixel.net/repository/Hypixel/" }
     maven { url = "https://maven.terraformersmc.com/releases" }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:${project.resourcefulconfig_version}")
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+    implementation 'net.hypixel:mod-api:1.0.1'
+    implementation include("dev.firstdark.discordrpc:discord-rpc:${project.discord_rpc_version}")
 
     compileOnly "org.projectlombok:lombok:1.18.38"
     annotationProcessor "org.projectlombok:lombok:1.18.38"

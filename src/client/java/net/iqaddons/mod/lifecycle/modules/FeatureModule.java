@@ -39,7 +39,7 @@ public class FeatureModule implements LifecycleComponent {
                 new PersonalBestTrackerFeature(), new AutoRequeueFeature(), new ChestCounterTrackerFeature(),
                 new KuudraProfitTrackerFeature(), new CroesusHelperFeature(), new HideKuudraBossBarFeature(),
                 new KuudraNotificationsFeature(), new BackboneAlertFeature(), new SupplyGiantHitboxAlertFeature(),
-                new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature()
+                new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature(), new DiscordRPCFeature()
         );
 
         features.start();

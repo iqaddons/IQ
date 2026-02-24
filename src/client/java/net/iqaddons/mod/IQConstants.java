@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 public final class IQConstants {
 
+    public static final long DISCORD_RPC_ID = 1475218086348197898L;
+
     public static final String SKYBLOCK_AREA_ID = "SKYBLOCK";
     public static final String KUUDRA_AREA_ID = "Kuudra's Hollow";
     public static final String CRIMSON_ESSENCE_ID = "ESSENCE_CRIMSON";

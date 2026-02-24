@@ -41,13 +41,28 @@ public class WardrobeFeature extends Feature {
 
     private void onScreenKeyPress(@NotNull ScreenKeyPressEvent event) {
         String title = event.getScreenTitle();
-        if (!title.contains(WARDROBE_TITLE) || title.equals("container")) return;
+        if (!title.contains(WARDROBE_TITLE)) return;
 
         int slotIndex = keyCodeToWardrobeSlot(event.getKeyCode(), event.getScanCode());
         if (slotIndex < 0) return;
 
+        var screenBefore = mc.currentScreen;
+
         event.setCancelled(true);
         clickWardrobeSlot(slotIndex);
+
+        if (Configuration.wardrobeAutoClose && screenBefore instanceof HandledScreen<?>) {
+            mc.execute(() -> {
+                if (mc.player == null) return;
+
+                mc.execute(() -> {
+                    if (mc.currentScreen == screenBefore) {
+                        mc.player.closeHandledScreen();
+                    }
+                });
+            });
+        }
+
 
         if (Configuration.wardrobeSound) {
             mc.world.playSound(
@@ -73,11 +88,12 @@ public class WardrobeFeature extends Feature {
 
     private void clickWardrobeSlot(int slotIndex) {
         ClientPlayerEntity player = mc.player;
-        if (player == null) return;
-
+        if (player == null || mc.interactionManager == null) return;
         if (!(mc.currentScreen instanceof HandledScreen<?> handledScreen)) return;
 
         ScreenHandler handler = handledScreen.getScreenHandler();
+        if (slotIndex < 0 || slotIndex >= handler.slots.size()) return;
+
         mc.interactionManager.clickSlot(
                 handler.syncId,
                 slotIndex,
