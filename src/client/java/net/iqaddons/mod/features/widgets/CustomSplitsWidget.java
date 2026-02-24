@@ -19,7 +19,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-
 @Slf4j
 public class CustomSplitsWidget extends HudWidget {
 
@@ -27,10 +26,10 @@ public class CustomSplitsWidget extends HudWidget {
             KuudraPhase.SUPPLIES, new double[]{22.5, 24.7, 26.5, 28.0, 30.0},
             KuudraPhase.BUILD, new double[]{13.5, 15.0, 17.0, 19.0, 20.0},
             KuudraPhase.EATEN, new double[]{4.0, 5.3, 5.7, 6.0, 7.0},
-            KuudraPhase.STUN, new double[]{0.0, 0.1, 0.3, 0.8, 1.0},
+            KuudraPhase.STUN, new double[]{0.0, 0.0, 0.1, 0.3, 0.8},
             KuudraPhase.DPS, new double[]{3.0, 3.6, 3.8, 4.2, 4.5},
             KuudraPhase.SKIP, new double[]{3.0, 4.2, 4.5, 4.8, 5.3},
-            KuudraPhase.BOSS, new double[]{3.0, 4.2, 4.6, 5.0, 5.4}
+            KuudraPhase.BOSS, new double[]{1.8, 2.3, 2.8, 3.3, 4.0}
     );
 
     private static final double[] OVERALL_THRESHOLDS = {53.0, 59.49, 65.0, 70.0, 80.0};
