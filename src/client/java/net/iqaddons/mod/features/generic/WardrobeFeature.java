@@ -51,19 +51,6 @@ public class WardrobeFeature extends Feature {
         event.setCancelled(true);
         clickWardrobeSlot(slotIndex);
 
-        if (Configuration.wardrobeAutoClose && screenBefore instanceof HandledScreen<?>) {
-            mc.execute(() -> {
-                if (mc.player == null) return;
-
-                mc.execute(() -> {
-                    if (mc.currentScreen == screenBefore) {
-                        mc.player.closeHandledScreen();
-                    }
-                });
-            });
-        }
-
-
         if (Configuration.wardrobeSound) {
             mc.world.playSound(
                     mc.player, mc.player.getBlockPos(),

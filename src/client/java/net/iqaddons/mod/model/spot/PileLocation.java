@@ -13,10 +13,10 @@ public record PileLocation(
 
     public static final List<PileLocation> DEFAULT_PILES = List.of(
             new PileLocation("Shop", new Vec3d(-98, 78.125, -112.9375), 7),
-            new PileLocation("X Cannon", new Vec3d(-110, 78.125, -106), 2),
-            new PileLocation("Slash", new Vec3d(-106, 78.125, -99.0625), 4),
             new PileLocation("Triangle", new Vec3d(-94, 78.125, -106), 6),
-            new PileLocation("Equals", new Vec3d(-98, 78.125, -99.0625), 5),
+            new PileLocation("Equals", new Vec3d(-106, 78.125, -99.0625), 5),
+            new PileLocation("Slash", new Vec3d(-98, 78.125, -99.0625), 4),
+            new PileLocation("X Cannon", new Vec3d(-110, 78.125, -106), 2),
             new PileLocation("X", new Vec3d(-106, 78.125, -112.9375), 1)
     );
 

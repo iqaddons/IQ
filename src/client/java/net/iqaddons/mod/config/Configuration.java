@@ -127,13 +127,6 @@ public class Configuration {
     public static boolean wardrobeKeybinds = true;
 
     @ConfigEntry(
-            id = "wadrobeAutoClose",
-            translation = "Wardrobe Auto-Close"
-    )
-    @Comment("Automatically close the wardrobe screen after selecting a slot with a keybind.")
-    public static boolean wardrobeAutoClose = true;
-
-    @ConfigEntry(
             id = "wardrobeSound",
             translation = "Wardrobe Selection Sound"
     )
