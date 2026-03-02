@@ -56,6 +56,13 @@ public class Configuration {
     public static boolean fixFishingHook = true;
 
     @ConfigEntry(
+            id = "muteFishingCastSound",
+            translation = "Mute Fishing Cast Sound"
+    )
+    @Comment("Disable the sound played when casting a fishing rod.")
+    public static boolean muteFishingCastSound = false;
+
+    @ConfigEntry(
             id = "partyCommands",
             translation = "Party Commands"
     )
