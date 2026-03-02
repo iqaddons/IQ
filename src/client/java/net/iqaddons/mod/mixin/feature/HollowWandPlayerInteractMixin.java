@@ -1,8 +1,6 @@
 package net.iqaddons.mod.mixin.feature;
 
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
-import net.iqaddons.mod.manager.KuudraStateManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,6 +10,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,11 +35,9 @@ public class HollowWandPlayerInteractMixin {
         }
 
         if (!PhaseFourConfig.hollowWandNoPlayerInteract
-                || KuudraStateManager.get().phase() != KuudraPhase.BOSS
                 || !isCrosshairOnPlayer(client.crosshairTarget)
-                || !isHollowWand(client.player.getMainHandStack())) {
-            return;
-        }
+                || !isHollowWand(client.player.getMainHandStack())
+        ) return;
 
         client.player.networkHandler.sendPacket(new PlayerActionC2SPacket(
                 PlayerActionC2SPacket.Action.START_DESTROY_BLOCK,
@@ -58,15 +55,15 @@ public class HollowWandPlayerInteractMixin {
         cir.setReturnValue(false);
     }
 
+    @Unique
     private boolean isCrosshairOnPlayer(HitResult hitResult) {
         return hitResult instanceof EntityHitResult entityHitResult
                 && entityHitResult.getEntity() instanceof PlayerEntity;
     }
 
-    private boolean isHollowWand(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return false;
-        }
+    @Unique
+    private boolean isHollowWand(@NotNull ItemStack stack) {
+        if (stack.isEmpty()) return false;
 
         String itemName = StringUtils.stripFormatting(stack.getName().getString()).toLowerCase(Locale.ROOT);
         return itemName.contains("hollow wand");
