@@ -6,7 +6,6 @@
   "client": [
     "ArmorStandRendererMixin",
     "BossBarHudMixin",
-    "ChatHudMixin",
     "EntityGlowMixin",
     "EntityMixin",
     "HandledScreenMixin",

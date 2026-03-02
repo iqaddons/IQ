@@ -2,13 +2,16 @@ package net.iqaddons.mod.mixin;
 
 import io.netty.channel.ChannelHandlerContext;
 import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.utils.ServerUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
+import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,10 +24,18 @@ public class ClientConnectionMixin {
     @Unique
     private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"))
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void iq$onPacketReceive(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
             client.execute(() -> EventBus.post(ClientTickEvent.create(client)));
+        }
+
+        if (packet instanceof GameMessageS2CPacket(Text content, boolean overlay) && !overlay) {
+            var event = EventBus.post(new ChatReceivedEvent(content));
+            if (event.isCancelled()) {
+                ci.cancel();
+                return;
+            }
         }
 
         if (packet instanceof WorldTimeUpdateS2CPacket) {

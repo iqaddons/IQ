@@ -6,8 +6,8 @@ import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.manager.ChestCounterManager;
-import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.manager.PersonalBestManager;
+import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.minecraft.client.MinecraftClient;
@@ -58,7 +58,7 @@ public class IQCommand {
                                 .then(literal("reset")
                                         .then(literal("session").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.SESSION)))
                                         .then(literal("lifetime").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.LIFETIME)))
-                                        .then(literal("all").executes(ctx -> resetProfitTrackerAll(ctx.getSource())))))
+                                        .executes(ctx -> resetProfitTrackerAll(ctx.getSource()))))
 
         );
     }
@@ -84,12 +84,8 @@ public class IQCommand {
 
     private static int resetProfitTracker(@NotNull FabricClientCommandSource source, @NotNull ProfitScope scope) {
         KuudraProfitTrackerManager manager = KuudraProfitTrackerManager.get();
-
-        if (scope == ProfitScope.SESSION) {
-            manager.resetSession();
-        } else {
-            manager.resetLifetime();
-        }
+        if (scope == ProfitScope.SESSION) manager.resetSession();
+        else manager.resetLifetime();
 
         source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker §e" + scope.name() + "§f data reset."));
         return 1;
