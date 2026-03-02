@@ -69,7 +69,7 @@ public class HudEditScreen extends Screen {
 
         List<String> helpLines = List.of(
                 "§e[Drag]§7 Move element",
-                "§e[Scroll]§7 Scale",
+                "§e[Scroll / + / -]§7 Scale",
                 "§e[Arrows]§7 Fine-tune position",
                 "§e[G]§7 Toggle grid | §e[S]§7 Toggle snap",
                 "§e[R]§7 Reset selected | §e[ESC]§7 Save & close"
@@ -155,14 +155,7 @@ public class HudEditScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (selectedElement != null) {
-            float newScale = selectedElement.getScale() + (float) verticalAmount * SCALE_STEP;
-            newScale = Math.clamp(newScale, HudElementConfig.MIN_SCALE, HudElementConfig.MAX_SCALE);
-
-            selectedElement.setScale(newScale);
-            if (selectedElement instanceof HudWidget widget) {
-                HudManager.get().getConfigManager().saveFromWidget(widget);
-            }
-
+            adjustSelectedScale((float) (verticalAmount * SCALE_STEP));
             return true;
         }
 
@@ -195,6 +188,14 @@ public class HudEditScreen extends Screen {
                 }
                 case GLFW.GLFW_KEY_R -> {
                     resetSelectedElement();
+                    return true;
+                }
+                case GLFW.GLFW_KEY_KP_ADD, GLFW.GLFW_KEY_EQUAL -> {
+                    adjustSelectedScale(SCALE_STEP);
+                    return true;
+                }
+                case GLFW.GLFW_KEY_KP_SUBTRACT, GLFW.GLFW_KEY_MINUS -> {
+                    adjustSelectedScale(-SCALE_STEP);
                     return true;
                 }
             }
@@ -238,6 +239,18 @@ public class HudEditScreen extends Screen {
         HudManager.get().getConfigManager().removeConfig(id);
 
         log.info("Reset element to defaults: {}", id);
+    }
+
+    private void adjustSelectedScale(float scaleDelta) {
+        if (selectedElement == null) return;
+
+        float newScale = selectedElement.getScale() + scaleDelta;
+        newScale = Math.clamp(newScale, HudElementConfig.MIN_SCALE, HudElementConfig.MAX_SCALE);
+
+        selectedElement.setScale(newScale);
+        if (selectedElement instanceof HudWidget widget) {
+            HudManager.get().getConfigManager().saveFromWidget(widget);
+        }
     }
 
     private @Nullable HudElement findElementAt(double mouseX, double mouseY) {
