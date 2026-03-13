@@ -26,6 +26,15 @@ public class PhaseTwoConfig {
     public static boolean buildHelper = true;
 
     @ConfigEntry(
+            id = "buildWaypointsOpacity",
+            translation = "Build Helper Opacity"
+    )
+    @ConfigOption.Range(min = 0, max = 1)
+    @ConfigOption.Slider
+    @Comment("Change the opacity of the build helper holograms.")
+    public static float buildHelperOpacity = 0.5f;
+
+    @ConfigEntry(
             id = "hideDefaultBuildPileText",
             translation = "Hide Default Build Pile Text"
     )
