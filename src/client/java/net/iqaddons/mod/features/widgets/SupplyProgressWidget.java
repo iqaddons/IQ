@@ -67,7 +67,7 @@ public class SupplyProgressWidget extends HudWidget {
 
         if (event.getCurrentProgress() == 100) {
             clearProgress();
-            MessageUtil.showAlert("§a§lSUPPLY PICKED UP!", 40);
+            MessageUtil.showAlert("§a§lPICKED UP", 40);
         }
 
         event.setCancelled(true);

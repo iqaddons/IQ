@@ -3,6 +3,7 @@ package net.iqaddons.mod.features.kuudra.alerts;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
+import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.utils.MessageUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
-                    "§b§lICHOR USED",
+                    "§b§lICHOR",
                     () -> KuudraGeneralConfig.KuudraNotifications.ichorUsed
             ),
             new KuudraNotificationRule(
@@ -30,7 +31,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
                     () -> KuudraGeneralConfig.KuudraNotifications.noPre
             ),
             new KuudraNotificationRule(
-                    Pattern.compile("Starting in 4 seconds\\."),
+                    Pattern.compile(".*Starting in 4 seconds\\.{1,3}.*"),
                     "§e§lSOS REMINDER",
                     () -> KuudraGeneralConfig.KuudraNotifications.sosReminder
             ),
@@ -40,8 +41,8 @@ public class KuudraNotificationsFeature extends KuudraFeature {
                     () -> KuudraGeneralConfig.KuudraNotifications.buildDone
             ),
             new KuudraNotificationRule(
-                    Pattern.compile(".*\\(6/6\\)"),
-                    "§a§lSUPPLIES DONE",
+                    Pattern.compile(".*\\((\\d+/\\d+)\\)"),
+                    "§b§lSUPPLIES $1",
                     () -> KuudraGeneralConfig.KuudraNotifications.suppliesDone
             ),
             new KuudraNotificationRule(
@@ -60,7 +61,8 @@ public class KuudraNotificationsFeature extends KuudraFeature {
         super(
                 "kuudraNotifications",
                 "Kuudra Notifications",
-                () -> NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled)
+                () -> NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled) &&
+                        KuudraStateManager.get().isInKuudra()
         );
     }
 
