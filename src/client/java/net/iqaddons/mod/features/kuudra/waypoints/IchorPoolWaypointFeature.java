@@ -1,6 +1,6 @@
 package net.iqaddons.mod.features.kuudra.waypoints;
 
-import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.Feature;
@@ -31,7 +31,7 @@ public class IchorPoolWaypointFeature extends Feature {
         super(
                 "ichorPoolArea",
                 "Ichor Pool Area",
-                () -> KuudraGeneralConfig.AbilityAnnounce.ichorPool
+                () -> PhaseFourConfig.ichorPoolArea
         );
     }
 
