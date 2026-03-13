@@ -31,7 +31,7 @@ public class WaypointFeature extends Feature {
 
     public WaypointFeature() {
         super("waypoints", "Waypoints",
-                () -> Configuration.Waypoints.activated
+                () -> Configuration.Waypoints.enabled
         );
     }
 
@@ -57,7 +57,7 @@ public class WaypointFeature extends Feature {
             var distance = waypoint.distanceFrom(player.getEntityPos());
             var distanceColor = getDistanceColor(distance);
 
-            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(0.30f), Configuration.Waypoints.style);
+            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(Configuration.Waypoints.opacity), Configuration.Waypoints.style);
             event.drawText(waypoint.position(),
                     waypoint.playerName(),
                     0.1f, true,
