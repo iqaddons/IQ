@@ -44,6 +44,9 @@ public class PearlWaypointFeature extends KuudraFeature {
     private int lastSupplyProgressIndex = -1;
     private long supplyProgressStartMs = -1L;
 
+    private Vec3d dynamicReferencePlayerPos;
+    private Float dynamicReferenceYaw;
+
     public PearlWaypointFeature() {
         super(
                 "pearlWaypoints",
@@ -147,16 +150,24 @@ public class PearlWaypointFeature extends KuudraFeature {
             }
 
             long remainingTimerMs = shouldRenderTimer() ? getRemainingTimerMs(targetIndex) : -1L;
-            if (remainingTimerMs > 0) {
-                double timerYOffset = shouldRenderText() ? -3.9 : -1.5;
-                float scale = shouldRenderText()
-                        ? PhaseOneConfig.pearlWaypointsScale * 0.85f
-                        : PhaseOneConfig.pearlWaypointsScale;
+            double timerYOffset = shouldRenderText() ? -3.9 : -1.5;
+            float scale = shouldRenderText()
+                    ? PhaseOneConfig.pearlWaypointsScale * 0.85f
+                    : PhaseOneConfig.pearlWaypointsScale;
 
-                Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
+            Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
+            if (remainingTimerMs > 0) {
                 event.drawText(timerPos, Text.literal(remainingTimerMs + "ms"),
                         scale, true,
                         getPearlTimerColor(remainingTimerMs)
+                );
+            } else {
+                event.drawText(timerPos, Text.literal("READY")
+                                .styled(style -> style
+                                        .withBold(true)
+                                        .withColor(5636095)),
+                        scale, true,
+                        labelColor
                 );
             }
         }
@@ -188,11 +199,39 @@ public class PearlWaypointFeature extends KuudraFeature {
             return target;
         }
 
-        Vec3d standBlockCenter = waypoint.standBlock().add(0.5, 0.0, 0.5);
         Vec3d playerPos = mc.player.getEntityPos();
-        Vec3d offset = playerPos.subtract(standBlockCenter);
+        float playerYaw = mc.player.getYaw();
 
-        return target.subtract(offset.x, offset.y, offset.z);
+        if (dynamicReferencePlayerPos == null || dynamicReferenceYaw == null) {
+            dynamicReferencePlayerPos = playerPos;
+            dynamicReferenceYaw = playerYaw;
+        }
+
+        Vec3d referenceForward = getHorizontalForward(dynamicReferenceYaw);
+        Vec3d referenceRight = getHorizontalRight(dynamicReferenceYaw);
+        Vec3d deltaFromReference = playerPos.subtract(dynamicReferencePlayerPos);
+
+        double strafeDelta = deltaFromReference.dotProduct(referenceRight);
+        double forwardDelta = deltaFromReference.dotProduct(referenceForward);
+        double verticalDelta = deltaFromReference.y;
+
+        Vec3d currentForward = getHorizontalForward(playerYaw);
+        Vec3d currentRight = getHorizontalRight(playerYaw);
+        Vec3d dynamicOffset = currentRight.multiply(strafeDelta)
+                .add(currentForward.multiply(forwardDelta))
+                .add(0.0, verticalDelta, 0.0);
+
+        return target.subtract(dynamicOffset);
+    }
+
+    private @NotNull Vec3d getHorizontalForward(float yawDegrees) {
+        double yawRadians = Math.toRadians(yawDegrees);
+        return new Vec3d(-Math.sin(yawRadians), 0.0, Math.cos(yawRadians)).normalize();
+    }
+
+    private @NotNull Vec3d getHorizontalRight(float yawDegrees) {
+        double yawRadians = Math.toRadians(yawDegrees);
+        return new Vec3d(Math.cos(yawRadians), 0.0, Math.sin(yawRadians)).normalize();
     }
 
     private @NotNull String getAdjustedPercentage(@NotNull String label) {
@@ -256,9 +295,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         }
 
         int currentIndex = lastSupplyProgressIndex;
-        if (currentIndex < 0) {
-            return RenderColor.white;
-        }
+        if (currentIndex < 0) return RenderColor.white;
 
         int ticksRemaining = targetIndex - currentIndex;
         if (ticksRemaining == 0) {
@@ -279,7 +316,6 @@ public class PearlWaypointFeature extends KuudraFeature {
 
     private int getProgressIndex(int progress) {
         if (progress <= 0) return -1;
-
         for (int i = 0; i < SUPPLY_TICK_PERCENTAGES.size(); i++) {
             if (SUPPLY_TICK_PERCENTAGES.get(i) >= progress) {
                 return i;
@@ -322,5 +358,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         lastSupplyProgress = 0;
         lastSupplyProgressIndex = -1;
         supplyProgressStartMs = -1L;
+        dynamicReferencePlayerPos = null;
+        dynamicReferenceYaw = null;
     }
 }
