@@ -5,47 +5,56 @@ import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.EntityHitResult;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Locale;
 
-@Mixin(PlayerEntity.class)
+@Mixin(ClientPlayerInteractionManager.class)
 public class HollowWandPlayerInteractMixin {
 
-    @Inject(method = "canInteractWithEntity", at = @At("HEAD"), cancellable = true, require = 0)
-    private void iq$blockHollowWandPlayerEntityInteract(Entity entity, double additionalRange, CallbackInfoReturnable<Boolean> cir) {
-        if (shouldBlockInteraction(entity)) {
-            cir.setReturnValue(false);
-        }
-    }
+    @Unique
+    private static final MinecraftClient client = MinecraftClient.getInstance();
 
-    @Inject(method = "interact", at = @At("HEAD"), cancellable = true, require = 0)
-    private void iq$blockHollowWandPlayerInteract(Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-        if (hand == Hand.MAIN_HAND && shouldBlockInteraction(entity)) {
+    @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true, require = 0)
+    private void iq$blockHollowWandPlayerInteract(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        if (shouldBlockInteraction(player, entity, hand)) {
             cir.setReturnValue(ActionResult.PASS);
         }
     }
 
-    private boolean shouldBlockInteraction(Entity entity) {
-        if (!(entity instanceof PlayerEntity)) {
+    @Inject(method = "interactEntityAtLocation", at = @At("HEAD"), cancellable = true, require = 0)
+    private void iq$blockHollowWandPlayerInteractAtLocation(PlayerEntity player, Entity entity, EntityHitResult hitResult, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        if (shouldBlockInteraction(player, entity, hand)) {
+            cir.setReturnValue(ActionResult.PASS);
+        }
+    }
+
+    @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true, require = 0)
+    private void iq$blockHollowWandPlayerAttack(PlayerEntity player, Entity target, CallbackInfo ci) {
+        if (shouldBlockInteraction(player, target, Hand.MAIN_HAND)) {
+            ci.cancel();
+        }
+    }
+
+    @Unique
+    private boolean shouldBlockInteraction(PlayerEntity player, Entity entity, Hand hand) {
+        if (hand != Hand.MAIN_HAND || !(entity instanceof PlayerEntity)) {
             return false;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.player == null || client.world == null || client.interactionManager == null) {
-            return false;
-        }
-
-        PlayerEntity self = (PlayerEntity) (Object) this;
-        if (self != client.player) {
+        if (client.player == null || client.world == null || client.interactionManager == null || player != client.player) {
             return false;
         }
 
@@ -53,7 +62,7 @@ public class HollowWandPlayerInteractMixin {
             return false;
         }
 
-        ItemStack stack = client.player.getMainHandStack();
+        ItemStack stack = player.getMainHandStack();
         if (stack.isEmpty()) {
             return false;
         }
