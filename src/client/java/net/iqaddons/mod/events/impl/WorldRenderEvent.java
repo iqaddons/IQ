@@ -32,6 +32,14 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawOutline(matrices, consumer, camera, box, throughWalls, color);
     }
 
+    public void drawFilledCircle(Vec3d center, float radius, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawFilledCircle(matrices, consumer, camera, center, radius, segments, throughWalls, color);
+    }
+
+    public void drawCircleOutline(Vec3d center, float radius, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawCircleOutline(matrices, consumer, camera, center, radius, segments, throughWalls, color);
+    }
+
     public void drawStyledBox(@NotNull Box box, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
         WorldRenderUtils.drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
     }

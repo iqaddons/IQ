@@ -124,16 +124,6 @@ public class KuudraGeneralConfig {
     )
     @Comment("Set the split timings that are used to calculate the pace feature.")
     public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
-    @ConfigEntry(
-            id = "hideUselessArmorStands",
-            translation = "Hide Useless Armor Stands"
-    )
-    @Comment("Hide armor stands used for visual effects that don't provide useful information.")
-    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[] {
-            HideUselessArmorStandsFeature.HiddenArmorStandType.SHOP,
-            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD,
-            HideUselessArmorStandsFeature.HiddenArmorStandType.OTHERS
-    };
 
     @ConfigEntry(
             id = "splitColorConfig",
@@ -329,6 +319,17 @@ public class KuudraGeneralConfig {
     public static boolean personalBestTracker = true;
 
     @ConfigOption.Separator("Visual")
+
+    @ConfigEntry(
+            id = "hideUselessArmorStands",
+            translation = "Hide Useless Armor Stands"
+    )
+    @Comment("Hide armor stands used for visual effects that don't provide useful information.")
+    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[]{
+            HideUselessArmorStandsFeature.HiddenArmorStandType.SHOP,
+            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD,
+            HideUselessArmorStandsFeature.HiddenArmorStandType.OTHERS
+    };
 
     @ConfigEntry(
             id = "hideMobNametags",
