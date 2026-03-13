@@ -19,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 @Slf4j
 @Getter
@@ -30,12 +28,6 @@ public class IQModClient implements ClientModInitializer {
     private static IQModClient instance;
 
     public static MinecraftClient mc = MinecraftClient.getInstance();
-
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "IQ-Mod-Scheduler");
-        t.setDaemon(true);
-        return t;
-    });
 
     private Configurator configurator;
 
@@ -50,7 +42,7 @@ public class IQModClient implements ClientModInitializer {
 
         initializeModules(
                 new KuudraModule(), new KuudraEventsDispatcher(),
-                new FeatureModule(scheduler), new WidgetModule()
+                new FeatureModule(), new WidgetModule()
         );
 
         IQKeyBindings.register();
