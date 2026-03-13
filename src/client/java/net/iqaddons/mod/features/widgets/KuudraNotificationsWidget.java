@@ -30,7 +30,7 @@ public class KuudraNotificationsWidget extends HudWidget {
                 HudAnchor.CENTER
         );
 
-        notificationLine = HudLine.of("§c§lNOTIFICATION")
+        notificationLine = HudLine.of("§c§lLOADING NOTIFICATIONS..")
                 .showWhen(() -> !currentNotification.isEmpty());
 
         setEnabledSupplier(() -> true);
