@@ -91,7 +91,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         for (SupplyPosition supply : supplies) {
             String alert = getSecondSupplyAlert(supply);
             if (alert != null) {
-                mc.execute(() -> MessageUtil.PARTY.sendMessage(alert));
+                mc.execute(() -> MessageUtil.PARTY.sendMessage("[IQ] " + alert));
                 return;
             }
         }
