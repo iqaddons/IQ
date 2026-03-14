@@ -24,7 +24,7 @@ public class CustomSplitsWidget extends HudWidget {
 
     private static final Map<KuudraPhase, double[]> PHASE_THRESHOLDS = Map.of(
             KuudraPhase.SUPPLIES, new double[]{22.5, 24.7, 26.5, 28.0, 30.0},
-            KuudraPhase.BUILD, new double[]{13.5, 15.0, 17.0, 19.0, 20.0},
+            KuudraPhase.BUILD, new double[]{12, 15.0, 17.0, 19.0, 20.0},
             KuudraPhase.EATEN, new double[]{4.0, 5.3, 5.7, 6.0, 7.0},
             KuudraPhase.STUN, new double[]{0.0, 0.0, 0.1, 0.3, 0.8},
             KuudraPhase.DPS, new double[]{3.0, 3.6, 3.8, 4.2, 4.5},
