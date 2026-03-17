@@ -133,7 +133,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
             Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
             event.drawStyledWithBeam(Box.from(beaconPos), 25, false,
-                    progressColor.withOpacity(0.6f), WorldRenderUtils.RenderStyle.BOTH
+                    progressColor.withOpacity(PhaseTwoConfig.buildHelperOpacity), WorldRenderUtils.RenderStyle.BOTH
             );
 
             Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);

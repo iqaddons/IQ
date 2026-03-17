@@ -1,9 +1,11 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
+import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
-import net.iqaddons.mod.features.KuudraFeature;
+import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.MessageUtil;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
-public class KuudraNotificationsFeature extends KuudraFeature {
+public class KuudraNotificationsFeature extends Feature {
 
     private static final List<KuudraNotificationRule> NOTIFICATION_RULES = List.of(
             new KuudraNotificationRule(
@@ -21,7 +23,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
-                    "§b§lICHOR USED",
+                    "§b§lICHOR",
                     () -> KuudraGeneralConfig.KuudraNotifications.ichorUsed
             ),
             new KuudraNotificationRule(
@@ -30,7 +32,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
                     () -> KuudraGeneralConfig.KuudraNotifications.noPre
             ),
             new KuudraNotificationRule(
-                    Pattern.compile("Starting in 4 seconds\\."),
+                    Pattern.compile(".*Starting in 4 seconds\\.{1,3}.*"),
                     "§e§lSOS REMINDER",
                     () -> KuudraGeneralConfig.KuudraNotifications.sosReminder
             ),
@@ -40,8 +42,8 @@ public class KuudraNotificationsFeature extends KuudraFeature {
                     () -> KuudraGeneralConfig.KuudraNotifications.buildDone
             ),
             new KuudraNotificationRule(
-                    Pattern.compile(".*\\(6/6\\)"),
-                    "§a§lSUPPLIES DONE",
+                    Pattern.compile(".*\\((\\d+/\\d+)\\)"),
+                    "§b§lSUPPLIES $1",
                     () -> KuudraGeneralConfig.KuudraNotifications.suppliesDone
             ),
             new KuudraNotificationRule(
@@ -60,12 +62,13 @@ public class KuudraNotificationsFeature extends KuudraFeature {
         super(
                 "kuudraNotifications",
                 "Kuudra Notifications",
-                () -> NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled)
+                () -> NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled) &&
+                        ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)
         );
     }
 
     @Override
-    protected void onKuudraActivate() {
+    protected void onActivate() {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
     }
 
@@ -77,7 +80,7 @@ public class KuudraNotificationsFeature extends KuudraFeature {
             var matcher = rule.pattern().matcher(message);
             if (!matcher.matches()) continue;
 
-            MessageUtil.showAlert(matcher.replaceAll(rule.titleTemplate).toUpperCase(Locale.ROOT), 40);
+            MessageUtil.showAlert(matcher.replaceAll(rule.titleTemplate).toUpperCase(Locale.ROOT), 60);
             return;
         }
     }

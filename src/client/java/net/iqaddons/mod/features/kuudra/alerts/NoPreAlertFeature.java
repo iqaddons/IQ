@@ -1,7 +1,6 @@
 package net.iqaddons.mod.features.kuudra.alerts;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
@@ -19,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,18 +74,8 @@ public class NoPreAlertFeature extends KuudraFeature {
 
         if (message.contains(ELLE_NOT_AGAIN_MESSAGE)) {
             if (kuudraState.phase() == KuudraPhase.SUPPLIES) {
-                int delayMs = Math.max(0, PhaseOneConfig.noPreAlertDelayMs);
-                if (delayMs == 0) {
-                    mc.execute(this::performSupplyCheck);
-                } else {
-                    IQModClient.get().getScheduler().schedule(
-                            () -> mc.execute(this::performSupplyCheck),
-                            delayMs,
-                            TimeUnit.MILLISECONDS
-                    );
-                }
-
-                log.debug("Triggered no-pre check from Elle's 'Not again!' message (delay={}ms)", delayMs);
+                mc.execute(this::performSupplyCheck);
+                log.debug("Triggered no-pre check from Elle's 'Not again!' message");
             }
 
             return;

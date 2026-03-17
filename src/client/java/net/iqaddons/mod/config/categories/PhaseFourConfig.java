@@ -54,10 +54,10 @@ public class PhaseFourConfig {
     public static boolean dangerZoneAlert = false;
 
     @ConfigEntry(
-            id = "hollowWandNoPlayerInteract",
-            translation = "Block Hollow Wand Player Interact"
+            id = "ichorPoolArea",
+            translation = "Render Ichor Pool Area"
     )
-    @Comment("In Boss Fight, prevent Hollow Wand from interacting with players to avoid 1.21 inconsistency.")
-    public static boolean hollowWandNoPlayerInteract = true;
+    @Comment("Render the area of effect of the ichor pools on the ground.")
+    public static boolean ichorPoolArea = true;
 
 }

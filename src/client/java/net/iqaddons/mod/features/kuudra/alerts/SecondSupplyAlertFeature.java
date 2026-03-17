@@ -15,8 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
 import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
@@ -36,17 +34,13 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
-    private final ScheduledExecutorService scheduler;
-
-    public SecondSupplyAlertFeature(ScheduledExecutorService scheduler) {
+    public SecondSupplyAlertFeature() {
         super(
                 "secondSupplyAlert",
                 "Second Supply Alert",
                 () -> PhaseOneConfig.secondSupplyAlert,
                 KuudraPhase.SUPPLIES
         );
-
-        this.scheduler = scheduler;
     }
 
     @Override
@@ -87,7 +81,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         }
 
         if (message.contains(ELLE_NOT_AGAIN_MESSAGE)) {
-            scheduler.schedule(this::checkSecondSupply, 1000, TimeUnit.MILLISECONDS);
+            mc.execute(this::checkSecondSupply);
         }
     }
 
@@ -97,7 +91,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         for (SupplyPosition supply : supplies) {
             String alert = getSecondSupplyAlert(supply);
             if (alert != null) {
-                mc.execute(() -> MessageUtil.PARTY.sendMessage(alert));
+                mc.execute(() -> MessageUtil.PARTY.sendMessage("[IQ] " + alert));
                 return;
             }
         }

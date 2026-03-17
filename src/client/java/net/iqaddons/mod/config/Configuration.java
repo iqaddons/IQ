@@ -157,7 +157,7 @@ public class Configuration {
                 translation = "Enable Shared Waypoints"
         )
         @Comment("Create and render waypoints from Patcher-formatted coordinates.")
-        public static boolean activated = true;
+        public static boolean enabled = true;
 
         @ConfigEntry(
                 id = "waypointsDuration",
@@ -167,6 +167,15 @@ public class Configuration {
         @ConfigOption.Slider
         @Comment("How long waypoints stay on screen. Set to 0 to keep them until cleared/expired.")
         public static int duration = 7;
+
+        @ConfigEntry(
+                id = "waypointOpacity",
+                translation = "Waypoint Opacity"
+        )
+        @ConfigOption.Range(min = 0, max = 1)
+        @ConfigOption.Slider
+        @Comment("Opacity of waypoint renders.")
+        public static float opacity = 0.8f;
 
         @ConfigEntry(
                 id = "waypointStyle",

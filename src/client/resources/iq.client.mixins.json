@@ -14,8 +14,7 @@
     "ItemUseMixin",
     "WorldRendererMixin",
     "feature.BallistaBuildSoundMixin",
-    "feature.FishingCastSoundMixin",
-    "feature.HollowWandPlayerInteractMixin"
+    "feature.FishingCastSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

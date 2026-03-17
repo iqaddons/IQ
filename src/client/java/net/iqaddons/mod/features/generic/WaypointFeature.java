@@ -10,7 +10,6 @@ import net.iqaddons.mod.model.WaypointData;
 import net.iqaddons.mod.utils.TextFormatUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.tracking.WaypointTracker;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.Contract;
@@ -23,15 +22,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class WaypointFeature extends Feature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private final List<WaypointData> waypoints = new CopyOnWriteArrayList<>();
 
     private static final int EXPIRATION_CHECK_INTERVAL = 20;
 
     public WaypointFeature() {
         super("waypoints", "Waypoints",
-                () -> Configuration.Waypoints.activated
+                () -> Configuration.Waypoints.enabled
         );
     }
 
@@ -57,7 +54,7 @@ public class WaypointFeature extends Feature {
             var distance = waypoint.distanceFrom(player.getEntityPos());
             var distanceColor = getDistanceColor(distance);
 
-            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(0.30f), Configuration.Waypoints.style);
+            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(Configuration.Waypoints.opacity), Configuration.Waypoints.style);
             event.drawText(waypoint.position(),
                     waypoint.playerName(),
                     0.1f, true,

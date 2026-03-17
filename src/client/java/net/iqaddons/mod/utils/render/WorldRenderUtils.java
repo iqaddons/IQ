@@ -63,6 +63,86 @@ public class WorldRenderUtils {
         matrices.pop();
     }
 
+    public static void drawFilledCircle(
+            @NotNull MatrixStack matrices,
+            VertexConsumerProvider.Immediate consumer,
+            @NotNull Camera camera,
+            @NotNull Vec3d center,
+            float radius,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+
+        matrices.push();
+
+        Vec3d camPos = camera.getPos();
+        matrices.translate(-camPos.x, -camPos.y, -camPos.z);
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleFilledNoCull : Layers.CircleFilled
+        );
+
+        for (int i = 0; i < segments; i++) {
+            double angle1 = (Math.PI * 2.0) * i / segments;
+            double angle2 = (Math.PI * 2.0) * (i + 1) / segments;
+
+            float x1 = (float) (center.x + Math.cos(angle1) * radius);
+            float z1 = (float) (center.z + Math.sin(angle1) * radius);
+
+            float x2 = (float) (center.x + Math.cos(angle2) * radius);
+            float z2 = (float) (center.z + Math.sin(angle2) * radius);
+
+            buffer.vertex(entry, (float) center.x, (float) center.y, (float) center.z)
+                    .color(color.r, color.g, color.b, color.a);
+            buffer.vertex(entry, x1, (float) center.y, z1)
+                    .color(color.r, color.g, color.b, color.a);
+            buffer.vertex(entry, x2, (float) center.y, z2)
+                    .color(color.r, color.g, color.b, color.a);
+        }
+
+        matrices.pop();
+    }
+
+    public static void drawCircleOutline(
+            @NotNull MatrixStack matrices,
+            VertexConsumerProvider.Immediate consumer,
+            @NotNull Camera camera,
+            @NotNull Vec3d center,
+            float radius,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+
+        matrices.push();
+
+        Vec3d camPos = camera.getPos();
+        matrices.translate(-camPos.x, -camPos.y, -camPos.z);
+
+        MatrixStack.Entry entry = matrices.peek();
+
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleOutlineNoCull : Layers.CircleOutline
+        );
+
+        for (int i = 0; i <= segments; i++) {
+            double angle = (Math.PI * 2.0) * i / segments;
+            float x = (float) (center.x + Math.cos(angle) * radius);
+            float y = (float) center.y;
+            float z = (float) (center.z + Math.sin(angle) * radius);
+
+            buffer.vertex(entry, x, y, z)
+                    .color(color.r, color.g, color.b, color.a);
+        }
+
+        matrices.pop();
+    }
+
     public static void drawText(
             @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
             @NotNull Camera camera, @NotNull Vec3d pos, Text text,
@@ -188,6 +268,7 @@ public class WorldRenderUtils {
         );
     }
 
+
     public enum RenderStyle {
         SOLID, OUTLINE, BOTH;
     }
@@ -224,6 +305,40 @@ public class WorldRenderUtils {
                 .withFragmentShader("core/position_color")
                 .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
                 .build());
+
+        public static final RenderPipeline circleFilledNoCull = RenderPipelines.register(
+                RenderPipeline.builder(filledSnippet)
+                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_filled_no_cull"))
+                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                        .build()
+        );
+
+        public static final RenderPipeline circleFilledCull = RenderPipelines.register(
+                RenderPipeline.builder(filledSnippet)
+                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_filled_cull"))
+                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                        .build()
+        );
+
+        public static final RenderPipeline circleOutlineNoCull = RenderPipelines.register(
+                RenderPipeline.builder(outlineSnippet)
+                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_outline_no_cull"))
+                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINE_STRIP)
+                        .withVertexShader("core/position_color")
+                        .withFragmentShader("core/position_color")
+                        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                        .build()
+        );
+
+        public static final RenderPipeline circleOutlineCull = RenderPipelines.register(
+                RenderPipeline.builder(outlineSnippet)
+                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_outline_cull"))
+                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINE_STRIP)
+                        .withVertexShader("core/position_color")
+                        .withFragmentShader("core/position_color")
+                        .build()
+        );
     }
 
     public static class Parameters {
@@ -278,6 +393,42 @@ public class WorldRenderUtils {
                 false,
                 false,
                 Pipelines.lineNoCull,
+                Parameters.lines.build(false)
+        );
+
+        public static final RenderLayer.MultiPhase CircleFilled = RenderLayer.of(
+                "iqaddons_circle_filled",
+                RenderLayer.DEFAULT_BUFFER_SIZE,
+                false,
+                true,
+                Pipelines.circleFilledCull,
+                Parameters.filled.build(false)
+        );
+
+        public static final RenderLayer.MultiPhase CircleFilledNoCull = RenderLayer.of(
+                "iqaddons_circle_filled_no_cull",
+                RenderLayer.DEFAULT_BUFFER_SIZE,
+                false,
+                true,
+                Pipelines.circleFilledNoCull,
+                Parameters.filled.build(false)
+        );
+
+        public static final RenderLayer.MultiPhase CircleOutline = RenderLayer.of(
+                "iqaddons_circle_outline",
+                RenderLayer.DEFAULT_BUFFER_SIZE,
+                false,
+                false,
+                Pipelines.circleOutlineCull,
+                Parameters.lines.build(false)
+        );
+
+        public static final RenderLayer.MultiPhase CircleOutlineNoCull = RenderLayer.of(
+                "iqaddons_circle_outline_no_cull",
+                RenderLayer.DEFAULT_BUFFER_SIZE,
+                false,
+                false,
+                Pipelines.circleOutlineNoCull,
                 Parameters.lines.build(false)
         );
     }

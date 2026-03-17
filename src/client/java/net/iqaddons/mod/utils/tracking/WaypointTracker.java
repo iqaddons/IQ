@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class WaypointTracker {
 
     private static final Pattern COORDS_PATTERN = Pattern.compile(
-            "x:\\s*(-?\\d+),\\s*y:\\s*(-?\\d+),\\s*z:\\s*(-?\\d+)(.*)$",
+            "x:\\s*(-?\\d+(?:\\.\\d+)?),\\s*y:\\s*(-?\\d+(?:\\.\\d+)?),\\s*z:\\s*(-?\\d+(?:\\.\\d+)?)(.*)$",
             Pattern.CASE_INSENSITIVE
     );
 

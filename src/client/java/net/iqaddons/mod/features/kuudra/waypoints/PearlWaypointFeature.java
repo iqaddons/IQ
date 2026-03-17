@@ -457,9 +457,4 @@ public class PearlWaypointFeature extends KuudraFeature {
 
         return (READY_FALLBACK_Y_OFFSET * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
     }
-
-    private boolean isLocalPlayer(@NotNull String playerName) {
-        return mc.player != null && playerName.equalsIgnoreCase(mc.player.getName().getString());
-    }
 }
-

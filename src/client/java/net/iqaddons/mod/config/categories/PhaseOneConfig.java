@@ -235,15 +235,6 @@ public class PhaseOneConfig {
     public static boolean noPreAlert = true;
 
     @ConfigEntry(
-            id = "noPreAlertDelayMs",
-            translation = "No Pre Alert Delay (ms)"
-    )
-    @ConfigOption.Range(min = 0, max = 3000)
-    @ConfigOption.Slider
-    @Comment("Delay before sending the \"No Pre\" message after Elle's warning.")
-    public static int noPreAlertDelayMs = 0;
-
-    @ConfigEntry(
             id = "secondSupplyAlert",
             translation = "Second Supply Alert "
     )
