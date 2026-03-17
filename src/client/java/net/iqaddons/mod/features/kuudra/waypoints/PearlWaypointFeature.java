@@ -436,6 +436,14 @@ public class PearlWaypointFeature extends KuudraFeature {
         return (long) targetIndex * SUPPLY_STEP_TIME_MS;
     }
 
+    private boolean isLocalPlayer(String playerName) {
+        if (mc.player == null || playerName == null || playerName.isBlank()) {
+            return false;
+        }
+
+        return playerName.equalsIgnoreCase(mc.player.getName().getString());
+    }
+
     private void resetState() {
         lastSupplyProgress = 0;
         lastSupplyProgressIndex = -1;

@@ -71,7 +71,7 @@ public class PhaseOneConfig {
             title = "Make Your Own Waypoints",
             text = "OPEN"
     )
-    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file. " +
+    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file." +
              "Save the file and run /iq reload to apply changes.")
     @SuppressWarnings("unused")
     public static final Runnable makeYourOwnPearls = () -> {
@@ -106,7 +106,8 @@ public class PhaseOneConfig {
             id = "useGlobalPearlWaypointSize",
             translation = "Use Global Pearl Waypoint Box Size"
     )
-    @Comment("When enabled, all pearl waypoints will use the global 'Pearl Waypoint Box Size' value and will ignore the values above. When disabled, each waypoint will use its individual size from the JSON config file.")
+    @Comment("When enabled, all pearl waypoints will use the global 'Pearl Waypoint Box Size' value." +
+            "When disabled, each waypoint will use its individual size from the JSON config file.")
     public static boolean useGlobalPearlWaypointSize = false;
 
     @ConfigEntry(
