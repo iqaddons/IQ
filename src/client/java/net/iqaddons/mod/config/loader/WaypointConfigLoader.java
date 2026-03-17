@@ -113,7 +113,16 @@ public class WaypointConfigLoader {
                 parseWaypoint(wpElement.getAsJsonObject()).ifPresent(waypoints::add);
             }
 
-            return Optional.of(new WaypointArea(name, bounds, waypoints));
+            Boolean invertForwardBackward = parseNullableBoolean(obj, "invertForwardBackward");
+            Boolean invertLeftRight = parseNullableBoolean(obj, "invertLeftRight");
+
+            return Optional.of(new WaypointArea(
+                    name,
+                    bounds,
+                    waypoints,
+                    invertForwardBackward,
+                    invertLeftRight
+            ));
         } catch (Exception e) {
             log.warn("Failed to parse waypoint area", e);
             return Optional.empty();
@@ -162,6 +171,19 @@ public class WaypointConfigLoader {
             log.warn("Failed to parse waypoint", e);
             return Optional.empty();
         }
+    }
+
+    private Boolean parseNullableBoolean(JsonObject obj, String key) {
+        if (!obj.has(key)) {
+            return false;
+        }
+
+        JsonElement element = obj.get(key);
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+
+        return element.getAsBoolean();
     }
 
     private @NotNull Path getConfigPath() {

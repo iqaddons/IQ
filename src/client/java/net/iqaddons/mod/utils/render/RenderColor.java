@@ -64,6 +64,7 @@ public class RenderColor {
     }
 
     public RenderColor withOpacity(float opacityPercent) {
-        return new RenderColor(this.r, this.g, this.b, opacityPercent);
+        float alpha = opacityPercent > 1.0f ? opacityPercent / 100.0f : opacityPercent;
+        return new RenderColor(this.r, this.g, this.b, alpha);
     }
 }

@@ -2,6 +2,7 @@ package net.iqaddons.mod.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.hud.HudManager;
@@ -15,6 +16,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -39,6 +42,17 @@ public class IQCommand {
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fPearl Waypoints reloaded."));
                             return 1;
                         }))
+                          .then(literal("pearls").executes(ctx -> {
+                              try {
+                                  Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
+                                  Files.createDirectories(configDir);
+                                  Util.getOperatingSystem().open(configDir.toFile());
+                                  ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fOpening pearl waypoints config folder..."));
+                              } catch (Exception e) {
+                                  ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§cFailed to open config folder."));
+                              }
+                              return 1;
+                          }))
                         .then(literal("discord").executes(ctx -> {
                             Util.getOperatingSystem().open("https://discord.gg/HdhXhCWcW9");
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fOpening IQ Discord invite..."));
@@ -101,7 +115,7 @@ public class IQCommand {
         PersonalBestManager personalBestManager = PersonalBestManager.get();
         if (!personalBestManager.hasPersonalBest()) {
             source.sendFeedback(Text.literal("§d§l[IQ] §r§7No Personal Best recorded yet."));
-            return 1;
+            return 0;
         }
 
         source.sendFeedback(Text.literal("§d§l[IQ] §r§aYour Kuudra PB: §f" + formatSeconds(personalBestManager.getBestTimeMillis())));

@@ -2,13 +2,16 @@ package net.iqaddons.mod.model.pearl;
 
 import net.iqaddons.mod.utils.BoundingBox2D;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public record WaypointArea(
         @NotNull String name,
         @NotNull BoundingBox2D bounds,
-        @NotNull List<PearlWaypoint> waypoints
+        @NotNull List<PearlWaypoint> waypoints,
+        @Nullable Boolean invertForwardBackward,
+        @Nullable Boolean invertLeftRight
 ) {
     public WaypointArea {
         waypoints = List.copyOf(waypoints);

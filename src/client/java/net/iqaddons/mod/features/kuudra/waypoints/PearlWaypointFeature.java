@@ -6,6 +6,8 @@ import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyProgressEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.SupplyStateManager;
@@ -29,6 +31,13 @@ public class PearlWaypointFeature extends KuudraFeature {
     private static final int AREA_CHECK_INTERVAL = 2;
     private static final int SUPPLY_STEP_TIME_MS = 300;
     private static final int TIMER_UPDATE_STEP_MS = 5;
+    private static final double PEARL_LABEL_Y_OFFSET = -1.1;
+    private static final double TIMER_Y_OFFSET_WITH_TEXT = -3.9;
+    private static final double TIMER_Y_OFFSET_ONLY = -1.5;
+    private static final double READY_FALLBACK_Y_OFFSET = 0.3;
+    private static final double READY_Y_OFFSET_MULTIPLIER = 1.3;
+    private static final double READY_EXTRA_Y_OFFSET = 0.7;
+    private static final long READY_RESET_TIMEOUT_MS = 900L;
     private static final List<Integer> SUPPLY_TICK_PERCENTAGES = List.of(
             5, 11, 17, 23, 29, 35, 41,
             47, 53, 59, 65, 71, 77, 83,
@@ -43,6 +52,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     private int lastSupplyProgress = 0;
     private int lastSupplyProgressIndex = -1;
     private long supplyProgressStartMs = -1L;
+    private long lastSupplyProgressUpdateMs = -1L;
 
     public PearlWaypointFeature() {
         super(
@@ -64,7 +74,17 @@ public class PearlWaypointFeature extends KuudraFeature {
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(WorldRenderEvent.class, this::onRender);
         subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
-        subscribe(SupplyDropEvent.class, event -> resetState());
+        subscribe(SupplyDropEvent.class, event -> {
+            if (isLocalPlayer(event.playerName())) {
+                resetState();
+            }
+        });
+        subscribe(SupplyPlaceEvent.class, event -> {
+            if (isLocalPlayer(event.playerName())) {
+                resetState();
+            }
+        });
+        subscribe(SupplyPickupEvent.class, event -> resetState());
 
         resetState();
         log.info("Pearl waypoints activated with {} areas", areas.size());
@@ -81,6 +101,13 @@ public class PearlWaypointFeature extends KuudraFeature {
         if (event.isNthTick(AREA_CHECK_INTERVAL)) {
             areaDetection.update();
         }
+
+        if (lastSupplyProgressIndex >= 0
+                && lastSupplyProgressUpdateMs > 0
+                && System.currentTimeMillis() - lastSupplyProgressUpdateMs > READY_RESET_TIMEOUT_MS
+        ) {
+            resetState();
+        }
     }
 
     private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
@@ -89,6 +116,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         lastSupplyProgressIndex = getProgressIndex(lastSupplyProgress);
 
         long now = System.currentTimeMillis();
+        lastSupplyProgressUpdateMs = now;
         if (lastSupplyProgress <= 0) {
             supplyProgressStartMs = now;
         } else if (supplyProgressStartMs < 0 && lastSupplyProgressIndex >= 0) {
@@ -108,19 +136,31 @@ public class PearlWaypointFeature extends KuudraFeature {
         WaypointArea area = areaDetection.getCurrentArea();
         if (area == null) return;
 
+        Vec3d commonStandBlockCenter = null;
+        for (PearlWaypoint waypoint : area.waypoints()) {
+            if (waypoint.hasStandBlock()) {
+                commonStandBlockCenter = waypoint.standBlock().add(0.5, 0.5, 0.5);
+                break;
+            }
+        }
+
         int missingPre = supplyState.getMissingPre();
         for (PearlWaypoint waypoint : area.waypoints()) {
             if (!waypoint.shouldShow(missingPre)) continue;
 
-            renderWaypoint(event, waypoint);
+            renderWaypoint(event, area, waypoint, commonStandBlockCenter);
         }
     }
 
-    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull PearlWaypoint waypoint) {
-        Vec3d target = getRenderTarget(waypoint);
+    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
+        Vec3d target = getRenderTarget(area, waypoint, commonStandBlockCenter);
         if (target.x == 0 && target.y == 0 && target.z == 0) return;
 
-        float size = PhaseOneConfig.overridePearlWaypointVisuals ? PhaseOneConfig.pearlWaypointSize : waypoint.size();
+        float adjustedScale = PhaseOneConfig.pearlWaypointsScale;
+
+        float size = PhaseOneConfig.useGlobalPearlWaypointSize
+                ? PhaseOneConfig.pearlWaypointSize
+                : waypoint.size();
         float half = size / 2f;
 
         Box targetBox = new Box(
@@ -128,30 +168,77 @@ public class PearlWaypointFeature extends KuudraFeature {
                 target.getX() + half - 0.5, target.getY() + size, target.getZ() + half - 0.5
         );
 
-        RenderColor waypointColor = PhaseOneConfig.overridePearlWaypointVisuals
-                ? RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor)
-                : waypoint.color();
+        RenderColor waypointColor = waypoint.color();
+        if (waypointColor.a == 0.0f) {
+            waypointColor = RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor);
+        }
 
-        event.drawFilled(targetBox, true, waypointColor.withOpacity(80.0f));
+        int targetIndex = -1;
+        boolean isReady = false;
         if (!waypoint.label().isEmpty()) {
             String adjustedLabel = getAdjustedPercentage(waypoint.label());
-            int targetIndex = getAdjustedTargetIndex(adjustedLabel);
+            targetIndex = getAdjustedTargetIndex(adjustedLabel);
+
+            // Change to green if it's time to throw the pearl
+            if (PhaseOneConfig.pearlThrowAlert && waypoint.alert() && targetIndex >= 0 && lastSupplyProgress > 0) {
+                int currentIndex = lastSupplyProgressIndex;
+                if (currentIndex >= 0) {
+                    int ticksRemaining = targetIndex - currentIndex;
+                    if (ticksRemaining <= 0) {
+                        waypointColor = new RenderColor(0, 255, 0, 0xff);
+                        isReady = true;
+                    }
+                }
+            }
+        }
+
+        switch (PhaseOneConfig.pearlWaypointRenderStyle) {
+            case SOLID:
+                event.drawFilled(targetBox, true, waypointColor.withOpacity(80.0f));
+                break;
+            case OUTLINE:
+                event.drawOutline(targetBox, true, waypointColor);
+                break;
+            case BOTH:
+                RenderColor fillColor = new RenderColor(
+                        (int) (waypointColor.r * 255.0f),
+                        (int) (waypointColor.g * 255.0f),
+                        (int) (waypointColor.b * 255.0f),
+                        153
+                );
+                RenderColor outlineColor = new RenderColor(
+                        (int) (waypointColor.r * 255.0f),
+                        (int) (waypointColor.g * 255.0f),
+                        (int) (waypointColor.b * 255.0f),
+                        255
+                );
+                event.drawFilled(targetBox, true, fillColor);
+                event.drawOutline(targetBox, true, outlineColor);
+                break;
+            case NONE:
+                // do nothing
+                break;
+        }
+
+        if (!waypoint.label().isEmpty()) {
+            String adjustedLabel = getAdjustedPercentage(waypoint.label());
+            String displayLabel = adjustedLabel.replace("%", "");
             RenderColor labelColor = getAlertColor(waypoint, targetIndex);
 
             if (shouldRenderText()) {
-                Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() - 1.5, target.getZ() - 0.5);
-                event.drawText(textPos, Text.literal(adjustedLabel),
-                        PhaseOneConfig.pearlWaypointsScale, true,
+                Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() + PEARL_LABEL_Y_OFFSET, target.getZ() - 0.5);
+                event.drawText(textPos, Text.literal(displayLabel),
+                        adjustedScale, true,
                         labelColor
                 );
             }
 
             long remainingTimerMs = shouldRenderTimer() ? getRemainingTimerMs(targetIndex) : -1L;
             if (remainingTimerMs > 0) {
-                double timerYOffset = shouldRenderText() ? -3.9 : -1.5;
+                double timerYOffset = shouldRenderText() ? TIMER_Y_OFFSET_WITH_TEXT : TIMER_Y_OFFSET_ONLY;
                 float scale = shouldRenderText()
-                        ? PhaseOneConfig.pearlWaypointsScale * 0.85f
-                        : PhaseOneConfig.pearlWaypointsScale;
+                        ? adjustedScale * 0.85f
+                        : adjustedScale;
 
                 Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
                 event.drawText(timerPos, Text.literal(remainingTimerMs + "ms"),
@@ -170,6 +257,12 @@ public class PearlWaypointFeature extends KuudraFeature {
 
             event.drawOutline(blockBox, true, waypointColor);
         }
+
+        if (isReady) {
+            double readyYOffset = getReadyYOffset();
+            Vec3d readyPos = new Vec3d(target.getX() - 0.5, target.getY() + size + readyYOffset, target.getZ() - 0.5);
+            event.drawText(readyPos, Text.literal("READY"), adjustedScale, true, new RenderColor(0, 255, 0, 0xff));
+        }
     }
 
     private boolean shouldRenderText() {
@@ -182,17 +275,42 @@ public class PearlWaypointFeature extends KuudraFeature {
                 || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.BOTH;
     }
 
-    private @NotNull Vec3d getRenderTarget(@NotNull PearlWaypoint waypoint) {
+    private @NotNull Vec3d getRenderTarget(@NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
         Vec3d target = waypoint.target();
-        if (!PhaseOneConfig.dynamicPearlWaypoints || !waypoint.hasStandBlock() || mc.player == null) {
+        if (!PhaseOneConfig.dynamicPearlWaypoints || commonStandBlockCenter == null || mc.player == null) {
             return target;
         }
 
-        Vec3d standBlockCenter = waypoint.standBlock().add(0.5, 0.0, 0.5);
-        Vec3d playerPos = mc.player.getEntityPos();
-        Vec3d offset = playerPos.subtract(standBlockCenter);
+        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        Vec3d offset = playerPos.subtract(commonStandBlockCenter);
 
-        return target.subtract(offset.x, offset.y, offset.z);
+        Boolean invertForwardBackward = area.invertForwardBackward();
+        Boolean invertLeftRight = area.invertLeftRight();
+
+        double heightAdjustment = 0.0;
+        if (invertForwardBackward != null) {
+            double forwardBackwardDirection = invertForwardBackward ? -1.0 : 1.0;
+            heightAdjustment = offset.z
+                    * PhaseOneConfig.dynamicPearlWaypointHeightAdjustmentFactor
+                    * forwardBackwardDirection;
+        }
+
+        double lateralHeightAdjustment = 0.0;
+        if (invertLeftRight != null) {
+            double leftRightDirection = invertLeftRight ? -1.0 : 1.0;
+            lateralHeightAdjustment = -offset.x
+                    * PhaseOneConfig.dynamicPearlWaypointLeftRightAdjustmentFactor
+                    * leftRightDirection;
+        }
+        Vec3d adjustedOffset = new Vec3d(
+                0.0,
+                (offset.y * PhaseOneConfig.dynamicPearlWaypointYMultiplier)
+                        + heightAdjustment
+                        + lateralHeightAdjustment,
+                0.0
+        );
+
+        return target.subtract(adjustedOffset);
     }
 
     private @NotNull String getAdjustedPercentage(@NotNull String label) {
@@ -322,5 +440,26 @@ public class PearlWaypointFeature extends KuudraFeature {
         lastSupplyProgress = 0;
         lastSupplyProgressIndex = -1;
         supplyProgressStartMs = -1L;
+        lastSupplyProgressUpdateMs = -1L;
+    }
+
+    private double getReadyYOffset() {
+        double baseOffset;
+         if (shouldRenderTimer()) {
+            baseOffset = Math.abs(shouldRenderText() ? TIMER_Y_OFFSET_WITH_TEXT : TIMER_Y_OFFSET_ONLY);
+            return (baseOffset * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
+         }
+
+         if (shouldRenderText()) {
+            baseOffset = Math.abs(PEARL_LABEL_Y_OFFSET);
+            return (baseOffset * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
+         }
+
+        return (READY_FALLBACK_Y_OFFSET * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
+    }
+
+    private boolean isLocalPlayer(@NotNull String playerName) {
+        return mc.player != null && playerName.equalsIgnoreCase(mc.player.getName().getString());
     }
 }
+

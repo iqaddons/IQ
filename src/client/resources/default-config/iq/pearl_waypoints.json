@@ -1,4 +1,35 @@
 {
+  "_comment": "Pearl Waypoints config - edit this file to customize your own waypoint setup.",
+  "_howToUse": [
+    "This file is valid JSON. Do not use // or /* */ comments. Use keys like _comment or _guide if you want to leave notes.",
+    "After editing this file, save it and run /iq reload. You do NOT need to restart the game.",
+    "Each object inside 'areas' is one player area. When your player is inside that area, its waypoints are used.",
+    "pos1 and pos2 are the 2 corners of the area in [x, z] format.",
+    "waypoints is the list of pearls shown for that area. Each waypoint uses [x, y, z] coordinates.",
+    "invertForwardBackward controls forward/backward dynamic pearl movement in that area: false = normal, true = inverted, null = disabled in this area.",
+    "invertLeftRight controls left/right dynamic pearl movement in that area: false = normal, true = inverted, null = disabled in this area."
+  ],
+  "_fieldGuide": {
+    "areaFields": {
+      "name": "Area name. Can be anything useful for you.",
+      "pos1": "First corner of the area in [x, z].",
+      "pos2": "Second corner of the area in [x, z].",
+      "invertForwardBackward": "Optional. true = invert, false = normal, null = disable this dynamic movement in the area.",
+      "invertLeftRight": "Optional. true = invert, false = normal, null = disable this dynamic movement in the area.",
+      "waypoints": "List of waypoint objects used while you are inside this area."
+    },
+    "waypointFields": {
+      "_comment": "Optional note to remind yourself what the waypoint is.",
+      "coords": "Waypoint position in [x, y, z].",
+      "rgb": "Waypoint color in [red, green, blue]. Example: [0, 255, 255].",
+      "block": "Optional stand/block reference in [x, y, z]. Helps dynamic waypoint positioning.",
+      "size": "Box size of the waypoint. Example: 0.5, 1.0, 1.4.",
+      "text": "Text/timing label shown on the waypoint. Usually values like 11, 35, 53, 65, 77.",
+      "alert": "true = enable READY/alert behavior for this waypoint, false = disable it.",
+      "pre": "Optional. Show this waypoint only for a specific pre number.",
+      "hideForPre": "Optional. Hide this waypoint for a specific pre number."
+    }
+  },
   "areas": [
     {
       "name": "square safe",

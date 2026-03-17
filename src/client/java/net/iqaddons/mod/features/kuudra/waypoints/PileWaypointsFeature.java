@@ -26,9 +26,6 @@ public class PileWaypointsFeature extends KuudraFeature {
     private static final int UPDATE_INTERVAL_TICKS = 5;
     private static final int BEACON_HEIGHT = 40;
 
-    private static final RenderColor NORMAL_COLOR = new RenderColor(1.0f, 1.0f, 1.0f, 0.28f);
-    private static final RenderColor NO_PRE_COLOR = new RenderColor(0.0f, 1.0f, 0.0f, 0.40f);
-
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     public PileWaypointsFeature() {
@@ -94,5 +91,3 @@ public class PileWaypointsFeature extends KuudraFeature {
         }
     }
 }
-
-

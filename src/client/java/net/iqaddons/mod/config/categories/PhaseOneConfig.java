@@ -3,9 +3,14 @@ package net.iqaddons.mod.config.categories;
 import com.teamresourceful.resourcefulconfig.api.annotations.Category;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigButton;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Util;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.awt.*;
 
 @Category(
@@ -55,13 +60,54 @@ public class PhaseOneConfig {
     public static float supplyWaypointBoxSize = 1.0f;
 
     @ConfigOption.Separator("Pearl Waypoints")
-
     @ConfigEntry(
             id = "pearlWaypoints",
             translation = "Pearl Waypoints"
     )
     @Comment("Show pearl throw waypoints during the supply phase.")
     public static boolean pearlWaypoints = true;
+
+    @ConfigButton(
+            title = "Make Your Own Waypoints",
+            text = "OPEN"
+    )
+    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file. " +
+             "Save the file and run /iq reload to apply changes.")
+    @SuppressWarnings("unused")
+    public static final Runnable makeYourOwnPearls = () -> {
+        try {
+            Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
+            Files.createDirectories(configDir);
+            Util.getOperatingSystem().open(configDir.toFile());
+        } catch (Exception e) {
+            // Silently fail
+        }
+    };
+
+
+    @ConfigEntry(
+            id = "pearlWaypointColor",
+            translation = "Pearl Waypoint Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Color for pearl waypoints. This color is used for all waypoints unless custom colors are set per-waypoint in the JSON config.")
+    public static int pearlWaypointColor = new Color(0, 255, 255, 110).getRGB();
+
+    @ConfigEntry(
+            id = "pearlWaypointSize",
+            translation = "Pearl Waypoint Box Size"
+    )
+    @ConfigOption.Range(min = 0.2, max = 5)
+    @ConfigOption.Slider
+    @Comment("Global size for the pearl waypoint box (supply marker).")
+    public static float pearlWaypointSize = 1.0f;
+
+    @ConfigEntry(
+            id = "useGlobalPearlWaypointSize",
+            translation = "Use Global Pearl Waypoint Box Size"
+    )
+    @Comment("When enabled, all pearl waypoints will use the global 'Pearl Waypoint Box Size' value and will ignore the values above. When disabled, each waypoint will use its individual size from the JSON config file.")
+    public static boolean useGlobalPearlWaypointSize = false;
 
     @ConfigEntry(
             id = "pearlWaypointsScale",
@@ -71,30 +117,6 @@ public class PhaseOneConfig {
     @ConfigOption.Slider
     @Comment("Adjust the size of the text displayed on pearl waypoints.")
     public static float pearlWaypointsScale = 0.3f;
-
-    @ConfigEntry(
-            id = "pearlWaypointColor",
-            translation = "Pearl Waypoint Color"
-    )
-    @ConfigOption.Color(alpha = true)
-    @Comment("Fallback color for pearl waypoints (set override below to use it).")
-    public static int pearlWaypointColor = new Color(0, 255, 255, 110).getRGB();
-
-    @ConfigEntry(
-            id = "pearlWaypointSize",
-            translation = "Pearl Waypoint Size"
-    )
-    @ConfigOption.Range(min = 0.2, max = 2)
-    @ConfigOption.Slider
-    @Comment("Fallback size for pearl waypoints (set override below to use it).")
-    public static float pearlWaypointSize = 1.0f;
-
-    @ConfigEntry(
-            id = "overridePearlWaypointVisuals",
-            translation = "Override Pearl Visuals"
-    )
-    @Comment("Use configured pearl color/size instead of per-pre values from the waypoint file.")
-    public static boolean overridePearlWaypointVisuals = false;
 
     @ConfigEntry(
             id = "pearlWaypointsTimerDelay",
@@ -114,18 +136,55 @@ public class PhaseOneConfig {
     public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER;
 
     @ConfigEntry(
+            id = "pearlWaypointRenderStyle",
+            translation = "Pearl Waypoint Render Style"
+    )
+    @ConfigOption.Select
+    @Comment("Choose how pearl waypoints are rendered: solid, outline, both, or none.")
+    public static PearlWaypointRenderStyle pearlWaypointRenderStyle = PearlWaypointRenderStyle.SOLID;
+
+    @ConfigEntry(
             id = "pearlThrowAlert",
             translation = "Pearl Throw Alert"
     )
     @Comment("Play a sound and highlight when it's time to throw a pearl.")
     public static boolean pearlThrowAlert = true;
 
+    @ConfigOption.Separator("Dynamic Waypoints")
+
     @ConfigEntry(
             id = "dynamicPearlWaypoints",
             translation = "Dynamic Pearl Waypoints"
     )
-    @Comment("Make pearl waypoint positions follow your player movement.")
+    @Comment("Make pearl waypoint height follow your player movement.")
     public static boolean dynamicPearlWaypoints = true;
+
+    @ConfigEntry(
+            id = "dynamicPearlWaypointYMultiplier",
+            translation = "Dynamic Pearl Waypoint Y Multiplier"
+    )
+    @ConfigOption.Range(min = 0.0, max = 10.0)
+    @ConfigOption.Slider
+    @Comment("Multiplier for the player's vertical movement when adjusting waypoint height.")
+    public static double dynamicPearlWaypointYMultiplier = 1.0;
+
+    @ConfigEntry(
+            id = "dynamicPearlWaypointHeightAdjustmentFactor",
+            translation = "Dynamic Pearl Waypoint Height Adjustment Factor"
+    )
+    @ConfigOption.Range(min = 0.0, max = 10.0)
+    @ConfigOption.Slider
+    @Comment("Extra height adjustment based on your forward/backward movement.")
+    public static double dynamicPearlWaypointHeightAdjustmentFactor = 1.0;
+
+    @ConfigEntry(
+            id = "dynamicPearlWaypointLeftRightAdjustmentFactor",
+            translation = "Dynamic Pearl Waypoint Left Right Adjustment Factor"
+    )
+    @ConfigOption.Range(min = 0.0, max = 10.0)
+    @ConfigOption.Slider
+    @Comment("Extra height adjustment based on your left/right movement.")
+    public static double dynamicPearlWaypointLeftRightAdjustmentFactor = 1.0;
 
     @ConfigOption.Separator("Pile Waypoints")
 
@@ -210,5 +269,12 @@ public class PhaseOneConfig {
         TEXT,
         TIMER,
         BOTH
+    }
+
+    public enum PearlWaypointRenderStyle {
+        SOLID,
+        OUTLINE,
+        BOTH,
+        NONE
     }
 }
