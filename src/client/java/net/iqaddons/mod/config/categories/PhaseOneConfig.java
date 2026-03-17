@@ -69,7 +69,7 @@ public class PhaseOneConfig {
 
     @ConfigButton(
             title = "Make Your Own Waypoints",
-            text = "OPEN"
+            text = "OPEN!"
     )
     @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file." +
              "Save the file and run /iq reload to apply changes.")
