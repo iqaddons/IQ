@@ -29,6 +29,7 @@ public final class SupplyStateManager {
     private volatile PreSpot detectedPreSpot = null;
     private volatile boolean preSpotLocked = false;
     private volatile Instant suppliesPhaseStart = null;
+    private volatile Long lastNoPreCheckAtMillis = null;
     private volatile int missingPre = 0;
     private volatile int suppliesCollected = 0;
     private volatile int currentSupplyProgress = 0;
@@ -41,6 +42,16 @@ public final class SupplyStateManager {
     public void updateSupplyPositions(@NotNull List<SupplyPosition> positions) {
         activeSupplies.clear();
         activeSupplies.addAll(positions);
+    }
+
+    public void markNoPreCheckCompleted() {
+        lastNoPreCheckAtMillis = System.currentTimeMillis();
+        log.debug("No pre check completed at {}", lastNoPreCheckAtMillis);
+    }
+
+    @Contract(pure = true)
+    public @Nullable Long getLastNoPreCheckAtMillis() {
+        return lastNoPreCheckAtMillis;
     }
 
     @Contract(pure = true)
@@ -117,6 +128,7 @@ public final class SupplyStateManager {
         detectedPreSpot = null;
         preSpotLocked = false;
         suppliesPhaseStart = null;
+        lastNoPreCheckAtMillis = null;
 
         missingPre = 0;
         suppliesCollected = 0;
@@ -147,11 +159,11 @@ public final class SupplyStateManager {
 
     private int getTimeTier() {
         long time = getElapsedTimeMillis();
-        if (time < 20000) return 0;
-        if (time < 24000) return 1;
+        if (time < 19000) return 0;
+        if (time < 23000) return 1;
         if (time < 26000) return 2;
-        if (time < 27500) return 3;
-        if (time < 29000) return 4;
+        if (time < 29500) return 3;
+        if (time < 32000) return 4;
         return 5;
     }
 

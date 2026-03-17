@@ -1,10 +1,6 @@
 package net.iqaddons.mod.config.categories;
 
-import com.teamresourceful.resourcefulconfig.api.annotations.Category;
-import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigButton;
-import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
+import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -69,10 +65,9 @@ public class PhaseOneConfig {
 
     @ConfigButton(
             title = "Make Your Own Waypoints",
-            text = "OPEN!"
+            text = "OPEN"
     )
-    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file." +
-             "Save the file and run /iq reload to apply changes.")
+    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file.\nSave the file and run /iq reload to apply changes.")
     @SuppressWarnings("unused")
     public static final Runnable makeYourOwnPearls = () -> {
         try {
@@ -95,20 +90,12 @@ public class PhaseOneConfig {
 
     @ConfigEntry(
             id = "pearlWaypointSize",
-            translation = "Pearl Waypoint Box Size"
+            translation = "Pearl Waypoint Box Size Adjustment"
     )
-    @ConfigOption.Range(min = 0.2, max = 5)
+    @ConfigOption.Range(min = -5, max = 5)
     @ConfigOption.Slider
-    @Comment("Global size for the pearl waypoint box (supply marker).")
-    public static float pearlWaypointSize = 1.0f;
-
-    @ConfigEntry(
-            id = "useGlobalPearlWaypointSize",
-            translation = "Use Global Pearl Waypoint Box Size"
-    )
-    @Comment("When enabled, all pearl waypoints will use the global 'Pearl Waypoint Box Size' value." +
-            "When disabled, each waypoint will use its individual size from the JSON config file.")
-    public static boolean useGlobalPearlWaypointSize = false;
+    @Comment("Adjusts all JSON waypoint sizes by 10% per step. \n0 = no change (use JSON base sizes).")
+    public static int pearlWaypointSize = 0;
 
     @ConfigEntry(
             id = "pearlWaypointsScale",
@@ -125,7 +112,7 @@ public class PhaseOneConfig {
     )
     @ConfigOption.Range(min = -4, max = 4)
     @ConfigOption.Slider
-    @Comment("Adjust the waypoint timer to match your ping (0 ≈ 160–200ms with Kuudra Heart Talisman).")
+    @Comment("Adjust the waypoint timer to match your ping, each step changes 1 progress tick.")
     public static int pearlWaypointsTimerDelay = 0;
 
     @ConfigEntry(
@@ -133,8 +120,8 @@ public class PhaseOneConfig {
             translation = "Pearl Waypoint Type"
     )
     @ConfigOption.Select
-    @Comment("Choose what pearl waypoints display: text, timer, or both.")
-    public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER;
+    @Comment("Choose what pearl waypoints display: timer in milliseconds, timer in seconds, or static text.")
+    public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER_MS;
 
     @ConfigEntry(
             id = "pearlWaypointRenderStyle",
@@ -143,6 +130,7 @@ public class PhaseOneConfig {
     @ConfigOption.Select
     @Comment("Choose how pearl waypoints are rendered: solid, outline, both, or none.")
     public static PearlWaypointRenderStyle pearlWaypointRenderStyle = PearlWaypointRenderStyle.SOLID;
+
 
     @ConfigEntry(
             id = "pearlThrowAlert",
@@ -157,35 +145,53 @@ public class PhaseOneConfig {
             id = "dynamicPearlWaypoints",
             translation = "Dynamic Pearl Waypoints"
     )
-    @Comment("Make pearl waypoint height follow your player movement.")
+    @Comment("Makes pearl waypoints move up or down based on your position so the marker stays more accurate while doing supplies.")
     public static boolean dynamicPearlWaypoints = true;
 
     @ConfigEntry(
-            id = "dynamicPearlWaypointYMultiplier",
-            translation = "Dynamic Pearl Waypoint Y Multiplier"
+            id = "dynamicPearlWaypointConfig",
+            translation = "Dynamic Pearl Waypoint Config"
     )
-    @ConfigOption.Range(min = 0.0, max = 10.0)
-    @ConfigOption.Slider
-    @Comment("Multiplier for the player's vertical movement when adjusting waypoint height.")
-    public static double dynamicPearlWaypointYMultiplier = 1.0;
+    @Comment("Advanced tuning for Dynamic Pearl Waypoints. If you do not know what these values do, it is recommended to leave them unchanged.")
+    public static final DynamicPearlWaypointSettings dynamicPearlWaypointConfig = new DynamicPearlWaypointSettings();
 
-    @ConfigEntry(
-            id = "dynamicPearlWaypointHeightAdjustmentFactor",
-            translation = "Dynamic Pearl Waypoint Height Adjustment Factor"
-    )
-    @ConfigOption.Range(min = 0.0, max = 10.0)
-    @ConfigOption.Slider
-    @Comment("Extra height adjustment based on your forward/backward movement.")
-    public static double dynamicPearlWaypointHeightAdjustmentFactor = 1.0;
+    @ConfigObject
+    public static class DynamicPearlWaypointSettings {
+        @ConfigEntry(
+                id = "dynamicPearlWaypointOverride",
+                translation = "Override Dynamic Pearl Values"
+        )
+        @Comment("Enables the custom values below. If this is disabled, IQ will use the recommended built-in values. If you do not know what you are doing, do not change these settings.")
+        @SuppressWarnings("unused")
+        public boolean dynamicPearlWaypointOverride = false;
 
-    @ConfigEntry(
-            id = "dynamicPearlWaypointLeftRightAdjustmentFactor",
-            translation = "Dynamic Pearl Waypoint Left Right Adjustment Factor"
-    )
-    @ConfigOption.Range(min = 0.0, max = 10.0)
-    @ConfigOption.Slider
-    @Comment("Extra height adjustment based on your left/right movement.")
-    public static double dynamicPearlWaypointLeftRightAdjustmentFactor = 1.0;
+        @ConfigEntry(
+                id = "dynamicPearlWaypointYMultiplier",
+                translation = "Dynamic Pearl Waypoint Y Multiplier"
+        )
+        @ConfigOption.Range(min = 0.0, max = 2.0)
+        @ConfigOption.Slider
+        @Comment("Controls how much your vertical movement changes the waypoint height. Recommended default: 0.81. Only used when Override Dynamic Pearl Values is enabled.")
+        public double dynamicPearlWaypointYMultiplier = 0.81;
+
+        @ConfigEntry(
+                id = "dynamicPearlWaypointHeightAdjustmentFactor",
+                translation = "Dynamic Pearl Waypoint Height Adjustment Factor"
+        )
+        @ConfigOption.Range(min = 0.0, max = 2.0)
+        @ConfigOption.Slider
+        @Comment("Controls how much forward and backward movement changes waypoint height. Recommended default: 0.31. Only used when Override Dynamic Pearl Values is enabled.")
+        public double dynamicPearlWaypointHeightAdjustmentFactor = 0.31;
+
+        @ConfigEntry(
+                id = "dynamicPearlWaypointLeftRightAdjustmentFactor",
+                translation = "Dynamic Pearl Waypoint Left Right Adjustment Factor"
+        )
+        @ConfigOption.Range(min = 0.0, max = 2.0)
+        @ConfigOption.Slider
+        @Comment("Controls how much left and right movement changes waypoint height. Recommended default: 0.63. Only used when Override Dynamic Pearl Values is enabled.")
+        public double dynamicPearlWaypointLeftRightAdjustmentFactor = 0.63;
+    }
 
     @ConfigOption.Separator("Pile Waypoints")
 
@@ -237,7 +243,7 @@ public class PhaseOneConfig {
 
     @ConfigEntry(
             id = "secondSupplyAlert",
-            translation = "Second Supply Alert "
+            translation = "Second Supply Alert"
     )
     @Comment("Announce the position of the second supply in chat.")
     public static boolean secondSupplyAlert = true;
@@ -258,9 +264,9 @@ public class PhaseOneConfig {
     public static WorldRenderUtils.RenderStyle supplyGiantHitboxStyle = WorldRenderUtils.RenderStyle.BOTH;
 
     public enum PearlWaypointType {
-        TEXT,
-        TIMER,
-        BOTH
+        TIMER_MS,
+        TIMER_SECONDS,
+        TEXT_STATIC,
     }
 
     public enum PearlWaypointRenderStyle {

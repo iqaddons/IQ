@@ -120,7 +120,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
 
-            int lineWidth = textRenderer.getWidth(line.getText());
+            int lineWidth = line.getWidth(textRenderer);
             currentLineWidth += lineWidth;
 
             if (line.hasLineBreak()) {
@@ -305,7 +305,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 currentY += textRenderer.fontHeight + 1;
                 currentX = scaledX;
             } else {
-                currentX += textRenderer.getWidth(line.getText());
+                currentX += line.getWidth(textRenderer);
             }
         }
 
@@ -410,7 +410,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 currentY += textRenderer.fontHeight + 1;
                 currentX = scaledX;
             } else {
-                currentX += textRenderer.getWidth(line.getText());
+                currentX += line.getWidth(textRenderer);
             }
         }
 

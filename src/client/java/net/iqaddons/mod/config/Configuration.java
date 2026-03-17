@@ -130,7 +130,8 @@ public class Configuration {
             id = "wardrobeKeybinds",
             translation = "Wardrobe Keybinds"
     )
-    @Comment("Enable wardrobe slot selection using keybinds. Configure slot keybinds in Options → Controls → Keybinds.")
+    @Comment("Enable wardrobe slot selection using keybinds.\n" +
+            "Configure slot keybinds in Options → Controls → Keybinds.")
     public static boolean wardrobeKeybinds = true;
 
     @ConfigEntry(

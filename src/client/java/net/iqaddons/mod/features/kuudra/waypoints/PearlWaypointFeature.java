@@ -24,6 +24,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 public class PearlWaypointFeature extends KuudraFeature {
@@ -119,7 +120,10 @@ public class PearlWaypointFeature extends KuudraFeature {
         lastSupplyProgressUpdateMs = now;
         if (lastSupplyProgress <= 0) {
             supplyProgressStartMs = now;
-        } else if (supplyProgressStartMs < 0 && lastSupplyProgressIndex >= 0) {
+        } else if (lastSupplyProgressIndex >= 0
+                && (supplyProgressStartMs < 0 || previousIndex != lastSupplyProgressIndex)
+        ) {
+            // Re-anchor on each server tick transition to keep timer and READY state in sync.
             supplyProgressStartMs = now - getTargetTimeMs(lastSupplyProgressIndex);
         }
 
@@ -158,9 +162,9 @@ public class PearlWaypointFeature extends KuudraFeature {
 
         float adjustedScale = PhaseOneConfig.pearlWaypointsScale;
 
-        float size = PhaseOneConfig.useGlobalPearlWaypointSize
-                ? PhaseOneConfig.pearlWaypointSize
-                : waypoint.size();
+        int sizeAdjustmentSteps = Math.clamp(PhaseOneConfig.pearlWaypointSize, -5, 5);
+        double sizeMultiplier = 1.0 + (sizeAdjustmentSteps * 0.1);
+        float size = (float) Math.max(0.05, waypoint.size() * sizeMultiplier);
         float half = size / 2f;
 
         Box targetBox = new Box(
@@ -174,9 +178,10 @@ public class PearlWaypointFeature extends KuudraFeature {
         }
 
         int targetIndex = -1;
+        String adjustedLabel = waypoint.label();
         boolean isReady = false;
         if (!waypoint.label().isEmpty()) {
-            String adjustedLabel = getAdjustedPercentage(waypoint.label());
+            adjustedLabel = getAdjustedPercentage(waypoint.label());
             targetIndex = getAdjustedTargetIndex(adjustedLabel);
 
             // Change to green if it's time to throw the pearl
@@ -221,7 +226,6 @@ public class PearlWaypointFeature extends KuudraFeature {
         }
 
         if (!waypoint.label().isEmpty()) {
-            String adjustedLabel = getAdjustedPercentage(waypoint.label());
             String displayLabel = adjustedLabel.replace("%", "");
             RenderColor labelColor = getAlertColor(waypoint, targetIndex);
 
@@ -241,9 +245,9 @@ public class PearlWaypointFeature extends KuudraFeature {
                         : adjustedScale;
 
                 Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
-                event.drawText(timerPos, Text.literal(remainingTimerMs + "ms"),
+                event.drawText(timerPos, Text.literal(formatTimerText(remainingTimerMs)),
                         scale, true,
-                        getPearlTimerColor(remainingTimerMs)
+                        getPearlTimerColor(remainingTimerMs, targetIndex)
                 );
             }
         }
@@ -266,13 +270,12 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private boolean shouldRenderText() {
-        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TEXT
-                || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.BOTH;
+        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TEXT_STATIC;
     }
 
     private boolean shouldRenderTimer() {
-        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER
-                || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.BOTH;
+        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_MS
+                || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS;
     }
 
     private @NotNull Vec3d getRenderTarget(@NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
@@ -291,26 +294,31 @@ public class PearlWaypointFeature extends KuudraFeature {
         if (invertForwardBackward != null) {
             double forwardBackwardDirection = invertForwardBackward ? -1.0 : 1.0;
             heightAdjustment = offset.z
-                    * PhaseOneConfig.dynamicPearlWaypointHeightAdjustmentFactor
+                    * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointHeightAdjustmentFactor
                     * forwardBackwardDirection;
         }
 
+        Vec3d adjustedOffset = getVec3d(invertLeftRight, offset, heightAdjustment);
+
+        return target.subtract(adjustedOffset);
+    }
+
+    private static @NotNull Vec3d getVec3d(Boolean invertLeftRight, Vec3d offset, double heightAdjustment) {
         double lateralHeightAdjustment = 0.0;
         if (invertLeftRight != null) {
             double leftRightDirection = invertLeftRight ? -1.0 : 1.0;
             lateralHeightAdjustment = -offset.x
-                    * PhaseOneConfig.dynamicPearlWaypointLeftRightAdjustmentFactor
+                    * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointLeftRightAdjustmentFactor
                     * leftRightDirection;
         }
         Vec3d adjustedOffset = new Vec3d(
                 0.0,
-                (offset.y * PhaseOneConfig.dynamicPearlWaypointYMultiplier)
+                (offset.y * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointYMultiplier)
                         + heightAdjustment
                         + lateralHeightAdjustment,
                 0.0
         );
-
-        return target.subtract(adjustedOffset);
+        return adjustedOffset;
     }
 
     private @NotNull String getAdjustedPercentage(@NotNull String label) {
@@ -324,13 +332,19 @@ public class PearlWaypointFeature extends KuudraFeature {
         int currentIndex = SUPPLY_TICK_PERCENTAGES.indexOf(baseValue);
         if (currentIndex < 0) return label;
 
+        int effectiveDelay = getEffectiveDelayOffset();
         int adjustedIndex = Math.clamp(
-                currentIndex + PhaseOneConfig.pearlWaypointsTimerDelay,
+                currentIndex + effectiveDelay,
                 0,
                 SUPPLY_TICK_PERCENTAGES.size() - 1
         );
 
         return SUPPLY_TICK_PERCENTAGES.get(adjustedIndex) + "%";
+    }
+
+    private int getEffectiveDelayOffset() {
+        int manualDelayMs = PhaseOneConfig.pearlWaypointsTimerDelay * SUPPLY_STEP_TIME_MS;
+        return Math.round((float) manualDelayMs / SUPPLY_STEP_TIME_MS);
     }
 
     private int getAdjustedTargetIndex(@NotNull String adjustedLabel) {
@@ -344,16 +358,35 @@ public class PearlWaypointFeature extends KuudraFeature {
         }
     }
 
-    private @NotNull RenderColor getPearlTimerColor(long remainingMs) {
-        if (remainingMs <= 50) return new RenderColor(85, 255, 85, 0xff);
-        if (remainingMs <= 1000) return new RenderColor(144, 255, 144, 0xff);
-        if (remainingMs <= 2000) return new RenderColor(255, 255, 0, 0xff);
-        if (remainingMs <= 3500) return new RenderColor(255, 165, 0, 0xff);
+    private @NotNull String formatTimerText(long remainingMs) {
+        if (PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS) {
+            return String.format(Locale.ROOT, "%.1fs", remainingMs / 1000.0);
+        }
+        return remainingMs + "ms";
+    }
+
+    private @NotNull RenderColor getPearlTimerColor(long remainingMs, int targetIndex) {
+        long targetTimeMs = getTargetTimeMs(targetIndex);
+        if (remainingMs <= 0 || targetTimeMs <= 0) {
+            return RenderColor.white;
+        }
+
+        double elapsedRatio = 1.0 - ((double) remainingMs / (double) targetTimeMs);
+        elapsedRatio = Math.clamp(elapsedRatio, 0.0, 1.0);
+
+        if (elapsedRatio >= 0.75) return new RenderColor(85, 255, 85, 0xff);
+        if (elapsedRatio >= 0.50) return new RenderColor(255, 255, 0, 0xff);
+        if (elapsedRatio >= 0.25) return new RenderColor(255, 165, 0, 0xff);
         return new RenderColor(255, 85, 85, 0xff);
     }
 
     private long getRemainingTimerMs(int targetIndex) {
         if (targetIndex < 0 || lastSupplyProgressIndex < 0 || supplyProgressStartMs < 0) {
+            return -1L;
+        }
+
+        // Timer must disappear exactly when the waypoint turns green/READY.
+        if (lastSupplyProgressIndex >= targetIndex) {
             return -1L;
         }
 
@@ -453,16 +486,18 @@ public class PearlWaypointFeature extends KuudraFeature {
 
     private double getReadyYOffset() {
         double baseOffset;
-         if (shouldRenderTimer()) {
+        if (shouldRenderTimer()) {
             baseOffset = Math.abs(shouldRenderText() ? TIMER_Y_OFFSET_WITH_TEXT : TIMER_Y_OFFSET_ONLY);
             return (baseOffset * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
-         }
+        }
 
-         if (shouldRenderText()) {
+        if (shouldRenderText()) {
             baseOffset = Math.abs(PEARL_LABEL_Y_OFFSET);
             return (baseOffset * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
-         }
+        }
 
         return (READY_FALLBACK_Y_OFFSET * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
     }
 }
+
+

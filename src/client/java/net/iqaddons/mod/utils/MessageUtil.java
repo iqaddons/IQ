@@ -5,6 +5,7 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudNotificationEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,6 +71,10 @@ public enum MessageUtil {
     }
 
     public static void showAlert(String message, int durationTicks) {
-        EventBus.post(new HudNotificationEvent(message, durationTicks));
+        mc.execute(() -> EventBus.post(new HudNotificationEvent(message, durationTicks)));
+    }
+
+    public static void showAlert(String message, int durationTicks, SoundEvent soundEvent) {
+        mc.execute(() -> EventBus.post(new HudNotificationEvent(message, durationTicks, soundEvent)));
     }
 }

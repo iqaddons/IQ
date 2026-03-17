@@ -5,6 +5,8 @@ import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
+import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
@@ -23,7 +25,7 @@ import java.util.Map;
 public class CustomSplitsWidget extends HudWidget {
 
     private static final Map<KuudraPhase, double[]> PHASE_THRESHOLDS = Map.of(
-            KuudraPhase.SUPPLIES, new double[]{22.5, 24.7, 26.5, 28.0, 30.0},
+            KuudraPhase.SUPPLIES, new double[]{21.5, 24.7, 26.5, 28.0, 30.0},
             KuudraPhase.BUILD, new double[]{12, 15.0, 17.0, 19.0, 20.0},
             KuudraPhase.EATEN, new double[]{4.0, 5.3, 5.7, 6.0, 7.0},
             KuudraPhase.STUN, new double[]{0.0, 0.0, 0.1, 0.3, 0.8},
@@ -99,6 +101,8 @@ public class CustomSplitsWidget extends HudWidget {
 
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
+        subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
+        subscribe(KuudraRunEndEvent.class, this::onRunEnd);
 
         updateDisplay();
     }
@@ -133,6 +137,23 @@ public class CustomSplitsWidget extends HudWidget {
         }
 
         updateDisplay();
+    }
+
+    private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(IQConstants.KUUDRA_AREA_ID);
+        if (stillInKuudraInstance) {
+            return;
+        }
+
+        resetSplits();
+        updateDisplay();
+    }
+
+    private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (event.isUnexpectedlyEnded()) {
+            resetSplits();
+            updateDisplay();
+        }
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

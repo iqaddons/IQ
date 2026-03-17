@@ -25,7 +25,7 @@ public class LimboAlertFeature extends Feature {
 
         String message = event.getStrippedMessage();
         if (message.contains(LIMBO_MESSAGE)) {
-            MessageUtil.PARTY.sendMessage("[IQ] I was kicked from the game!");
+            MessageUtil.PARTY.sendMessage("[IQ] Kicked, will be back in 60s probably.");
 
             mc.player.playSound(
                     net.minecraft.sound.SoundEvents.ENTITY_ENDER_DRAGON_GROWL,

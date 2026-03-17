@@ -3,11 +3,13 @@ package net.iqaddons.mod.features.kuudra.alerts;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.SupplyPosition;
+import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
@@ -17,10 +19,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
-import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
 
 @Slf4j
 public class SecondSupplyAlertFeature extends KuudraFeature {
+
+    private static final int SUPPLY_SCAN_INTERVAL_TICKS = 2;
+    private static final long NO_PRE_FALLBACK_DELAY_MS = 10_000L;
+    private static final long SECOND_ALERT_DELAY_MS = 500L;
 
     private static final Vec3d TRIANGLE_ZONE = new Vec3d(-67.5, 77, -122.5);
     private static final Vec3d X_ZONE = new Vec3d(-134.5, 77, -138.5);
@@ -30,6 +35,12 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private volatile boolean inTriangle = false;
     private volatile boolean inX = false;
     private volatile boolean inSlash = false;
+    private volatile boolean secondSupplyCheckCompleted = false;
+    private volatile boolean carrierScheduleAttempted = false;
+    private volatile boolean timedScheduleAttempted = false;
+
+    private volatile Long scheduledCheckAtMillis = null;
+    private volatile String scheduledTrigger = null;
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
@@ -47,6 +58,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     protected void onKuudraActivate() {
         resetState();
         subscribe(ChatReceivedEvent.class, this::onChat);
+        subscribe(ClientTickEvent.class, this::onTick);
     }
 
     @Override
@@ -64,29 +76,63 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
         if (message.contains(ELLE_HEAD_OVER_MESSAGE)) {
-            if (mc.player == null) return;
+            detectZoneFromPlayerPosition();
+        }
+    }
 
-            Vec3d playerPos = mc.player.getEntityPos();
-            if (isNear(playerPos, TRIANGLE_ZONE)) {
-                inTriangle = true;
-                log.debug("Player detected in Triangle zone");
-            } else if (isNear(playerPos, X_ZONE)) {
-                inX = true;
-                log.debug("Player detected in X zone");
-            } else if (isNear(playerPos, SLASH_ZONE)) {
-                inSlash = true;
-                log.debug("Player detected in Slash zone");
+    private void onTick(@NotNull ClientTickEvent event) {
+        if (!event.isInGame() || !event.isNthTick(SUPPLY_SCAN_INTERVAL_TICKS)) return;
+        if (secondSupplyCheckCompleted || currentPhase() != KuudraPhase.SUPPLIES) return;
+
+        detectZoneFromPlayerPosition();
+        syncScheduleWithNoPreAlert();
+
+        if (scheduledCheckAtMillis == null) {
+            List<SupplyPosition> supplies = updateSupplyPositions();
+            if (!carrierScheduleAttempted && !supplies.isEmpty()) {
+                carrierScheduleAttempted = true;
+                scheduleSecondSupplyCheck(System.currentTimeMillis() + SECOND_ALERT_DELAY_MS,
+                        "supplier giant spawn fallback");
+            } else if (!timedScheduleAttempted && supplyState.getElapsedTimeMillis() >= NO_PRE_FALLBACK_DELAY_MS) {
+                timedScheduleAttempted = true;
+                scheduleSecondSupplyCheck(System.currentTimeMillis() + SECOND_ALERT_DELAY_MS,
+                        "10.0s fallback timer");
             }
-            return;
         }
 
-        if (message.contains(ELLE_NOT_AGAIN_MESSAGE)) {
-            mc.execute(this::checkSecondSupply);
+        if (scheduledCheckAtMillis != null && System.currentTimeMillis() >= scheduledCheckAtMillis) {
+            secondSupplyCheckCompleted = true;
+            String trigger = scheduledTrigger != null ? scheduledTrigger : "scheduled delay";
+            mc.execute(() -> {
+                checkSecondSupply();
+                log.debug("Triggered second-supply check from {}", trigger);
+            });
+        }
+    }
+
+    private void syncScheduleWithNoPreAlert() {
+        Long noPreCheckAtMillis = supplyState.getLastNoPreCheckAtMillis();
+        if (noPreCheckAtMillis == null) return;
+
+        scheduleSecondSupplyCheck(noPreCheckAtMillis + SECOND_ALERT_DELAY_MS,
+                "No Pre Alert + 0.5s");
+    }
+
+    private void scheduleSecondSupplyCheck(long scheduledAtMillis, @NotNull String trigger) {
+        if (scheduledCheckAtMillis == null || scheduledCheckAtMillis != scheduledAtMillis) {
+            scheduledCheckAtMillis = scheduledAtMillis;
+            scheduledTrigger = trigger;
+            log.debug("Scheduled second-supply check from {} at {}", trigger, scheduledAtMillis);
         }
     }
 
     private void checkSecondSupply() {
-        List<SupplyPosition> supplies = supplyState.getActiveSupplies();
+        List<SupplyPosition> supplies = updateSupplyPositions();
+
+        if (!hasTrackedZone()) {
+            log.debug("Skipping second-supply alert because player zone could not be determined");
+            return;
+        }
 
         for (SupplyPosition supply : supplies) {
             String alert = getSecondSupplyAlert(supply);
@@ -95,6 +141,40 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
                 return;
             }
         }
+    }
+
+    private @NotNull List<SupplyPosition> updateSupplyPositions() {
+        List<SupplyPosition> supplies = EntityDetectorUtil.getSupplyCarriers().stream()
+                .map(giant -> SupplyPosition.fromGiant(
+                        giant.getX(),
+                        giant.getZ(),
+                        giant.getYaw(),
+                        giant.getId()
+                ))
+                .toList();
+
+        supplyState.updateSupplyPositions(supplies);
+        return supplies;
+    }
+
+    private void detectZoneFromPlayerPosition() {
+        if (mc.player == null || hasTrackedZone()) return;
+
+        Vec3d playerPos = mc.player.getEntityPos();
+        if (isNear(playerPos, TRIANGLE_ZONE)) {
+            inTriangle = true;
+            log.debug("Player detected in Triangle zone");
+        } else if (isNear(playerPos, X_ZONE)) {
+            inX = true;
+            log.debug("Player detected in X zone");
+        } else if (isNear(playerPos, SLASH_ZONE)) {
+            inSlash = true;
+            log.debug("Player detected in Slash zone");
+        }
+    }
+
+    private boolean hasTrackedZone() {
+        return inTriangle || inX || inSlash;
     }
 
     private @Nullable String getSecondSupplyAlert(@NotNull SupplyPosition supply) {
@@ -132,5 +212,10 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         inTriangle = false;
         inX = false;
         inSlash = false;
+        secondSupplyCheckCompleted = false;
+        carrierScheduleAttempted = false;
+        timedScheduleAttempted = false;
+        scheduledCheckAtMillis = null;
+        scheduledTrigger = null;
     }
 }

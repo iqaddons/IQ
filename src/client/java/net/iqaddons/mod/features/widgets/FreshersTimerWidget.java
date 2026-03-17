@@ -2,7 +2,10 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
+import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
@@ -15,12 +18,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+
 @Slf4j
 public class FreshersTimerWidget extends HudWidget {
 
     private final List<PlayerFreshedEntry> freshEntries = Collections.synchronizedList(new ArrayList<>());
 
     private final KuudraStateManager kuudraManager = KuudraStateManager.get();
+    private volatile boolean persistUntilInstanceChange = false;
 
     public FreshersTimerWidget() {
         super("freshers_timer",
@@ -33,11 +39,12 @@ public class FreshersTimerWidget extends HudWidget {
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
         setVisibilityCondition(() -> {
             var phase = kuudraManager.phase();
-            return KuudraPhase.isOneOf(
+            boolean inTrackedPhases = KuudraPhase.isOneOf(
                     KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.STUN,
                     KuudraPhase.DPS, KuudraPhase.SKIP, KuudraPhase.BOSS,
                     KuudraPhase.COMPLETED
             ).test(phase);
+            return inTrackedPhases || persistUntilInstanceChange;
         });
 
         setExampleLines(List.of(
@@ -50,8 +57,14 @@ public class FreshersTimerWidget extends HudWidget {
     @Override
     protected void onActivate() {
         subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
+        subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
+        subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
+        subscribe(KuudraRunEndEvent.class, this::onRunEnd);
 
-        freshEntries.clear();
+        if (kuudraManager.phase() == KuudraPhase.BUILD) {
+            beginNewRunWindow();
+        }
+
         updateDisplay();
     }
 
@@ -72,6 +85,37 @@ public class FreshersTimerWidget extends HudWidget {
                 context.phaseDuration().toMillis())
         );
 
+        updateDisplay();
+    }
+
+    private void beginNewRunWindow() {
+        persistUntilInstanceChange = true;
+        freshEntries.clear();
+    }
+
+    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.currentPhase() == KuudraPhase.BUILD) {
+            beginNewRunWindow();
+            updateDisplay();
+        }
+    }
+
+    private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (event.isUnexpectedlyEnded()) {
+            persistUntilInstanceChange = false;
+            freshEntries.clear();
+            updateDisplay();
+        }
+    }
+
+    private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
+        if (stillInKuudraInstance) {
+            return;
+        }
+
+        persistUntilInstanceChange = false;
+        freshEntries.clear();
         updateDisplay();
     }
 
@@ -111,6 +155,7 @@ public class FreshersTimerWidget extends HudWidget {
             case 1 -> "§6";
             case 2 -> "§e";
             case 3 -> "§a";
+            case 4 -> "§9";
             default -> "§b";
         };
     }
