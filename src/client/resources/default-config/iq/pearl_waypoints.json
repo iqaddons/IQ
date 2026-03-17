@@ -30,970 +30,143 @@
       "hideForPre": "Optional. Hide this waypoint for a specific pre number."
     }
   },
-  "areas": [
+  "areas":[
     {
-      "name": "square safe",
-      "pos1": [
-        -142,
-        -88
-      ],
-      "pos2": [
-        -135,
-        -82
-      ],
-      "waypoints": [
-        {
-          "_comment": "Tri Waypoint",
-          "coords": [
-            -93,
-            115,
-            -105
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "pre": 6,
-          "size": 0.8,
-          "text": "41",
-          "alert": true
-        },
-        {
-          "_comment": "X Waypoint",
-          "coords": [
-            -105,
-            99,
-            -112
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "size": 0.6,
-          "pre": 1,
-          "text": "59",
-          "alert": true
-        },
-        {
-          "_comment": "Shop Waypoint",
-          "coords": [
-            -97,
-            115,
-            -112
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "size": 0.8,
-          "pre": 7,
-          "text": "41",
-          "alert": true
-        },
-        {
-          "_comment": "Equals Waypoint",
-          "coords": [
-            -97,
-            101,
-            -98
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "size": 0.6,
-          "pre": 4,
-          "text": "59",
-          "alert": true
-        },
-        {
-          "_comment": "Slash Waypoint",
-          "coords": [
-            -68,
-            105,
-            -111
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "size": 1.0,
-          "pre": 5,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "X Cannon Waypoint",
-          "coords": [
-            -62,
-            110,
-            -133
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -142,
-            77,
-            -87
-          ],
-          "size": 1.2,
-          "pre": 2,
-          "text": "65",
-          "alert": true
-        }
+      "name":"x",
+      "pos1":[-150,-170],
+      "pos2":[-123,-134],
+      "invertLeftRight": true,
+      "waypoints":[
+        {"_comment":"Double Pearl Square Waypoint","coords":[-140,125,-92],"rgb":[0,255,255],"block":[-135,77,-139],"size":1.4,"text":"35","alert":true},
+        {"_comment":"Flat X Waypoint","coords":[-106, 92, -113],"rgb":[0,255,255],"size":0.6,"text":"53","alert":true}
       ]
     },
     {
-      "name": "square top",
-      "pos1": [
-        -143,
-        -93
-      ],
-      "pos2": [
-        -135,
-        -88
-      ],
-      "waypoints": [
-        {
-          "_comment": "Tri Waypoint",
-          "coords": [
-            -93,
-            107,
-            -105
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 0.7,
-          "pre": 6,
-          "text": "41",
-          "alert": true
-        },
-        {
-          "_comment": "X Waypoint",
-          "coords": [
-            -50,
-            117,
-            -148
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 1.2,
-          "pre": 1,
-          "text": "53",
-          "alert": true
-        },
-        {
-          "_comment": "Shop Waypoint",
-          "coords": [
-            -97,
-            105,
-            -112
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 0.7,
-          "pre": 7,
-          "text": "41",
-          "alert": true
-        },
-        {
-          "_comment": "Equals Waypoint",
-          "coords": [
-            -26,
-            127,
-            -112
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 1.2,
-          "pre": 4,
-          "text": "53",
-          "alert": true
-        },
-        {
-          "_comment": "Slash Waypoint",
-          "coords": [
-            -41,
-            108,
-            -114
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 1.0,
-          "pre": 5,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "X Cannon Waypoint",
-          "coords": [
-            -45,
-            108,
-            -137
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "block": [
-            -141,
-            78,
-            -91
-          ],
-          "size": 1.0,
-          "pre": 2,
-          "text": "65",
-          "alert": true
-        }
+      "name":"slash",
+      "pos1":[-108,-80],
+      "pos2":[-118,-66],
+      "invertForwardBackward": true,
+      "invertLeftRight": null,
+      "waypoints":[
+        {"_comment":"Flat Slash Waypoint","coords":[-97, 88.3, -98],"rgb":[0,255,255],"block":[-114,77,-69],"size":0.6,"text":"65","alert":true},
+        {"_comment":"Double Pearl Square Waypoint","coords":[-127,120,-78],"rgb":[0,255,255],"size":1.0,"hideForPre":3,"text":"17","alert":true},
+        {"_comment":"Double Pearl X Cannon Waypoint","coords":[-125,125,-105],"rgb":[0,255,255],"size":1.0,"hideForPre":2,"text":"41","alert":true}
       ]
     },
     {
-      "name": "x cannon",
-      "pos1": [
-        -126,
-        -104
-      ],
-      "pos2": [
-        -140,
-        -120
-      ],
-      "waypoints": [
-        {
-          "_comment": "Top X Cannon Waypoint",
-          "coords": [
-            -109,
-            163,
-            -105
-          ],
-          "rgb": [
-            255,
-            135,
-            0
-          ],
-          "block": [
-            -131,
-            78,
-            -115
-          ],
-          "size": 1.2,
-          "text": "11",
-          "alert": false
-        },
-        {
-          "_comment": "Flat X Cannon Waypoint",
-          "coords": [
-            -96,
-            84.6,
-            -99.6
-          ],
-          "rgb": [
-            255,
-            135,
-            0
-          ],
-          "size": 0.5,
-          "text": "77",
-          "alert": true
-        }
+      "name":"equals",
+      "pos1":[-80,-108],
+      "pos2":[-45,-65],
+      "waypoints":[
+        {"_comment":"Flat Equals Waypoint","coords":[-106, 96, -98.3],"rgb":[0,255,255],"block":[-66,76,-87],"size":0.5,"text":"53","alert":true},
+        {"_comment":"Double Pearl Left Shop Waypoint","coords":[-89,145,-125],"rgb":[0,255,255],"size":1.0,"text":"29","alert":false},
+        {"_comment":"Double Pearl Right Shop Waypoint","coords":[-77,135,-136],"rgb":[0,255,255],"size":1.0,"text":"29","alert":false}
       ]
     },
     {
-      "name": "x",
-      "pos1": [
-        -150,
-        -170
-      ],
-      "pos2": [
-        -123,
-        -134
-      ],
-      "waypoints": [
-        {
-          "_comment": "Double Pearl Square Waypoint",
-          "coords": [
-            -143,
-            149,
-            -69
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "size": 1.2,
-          "text": "35",
-          "alert": false
-        },
-        {
-          "_comment": "Flat X Waypoint",
-          "coords": [
-            -49,
-            120,
-            -62
-          ],
-          "rgb": [
-            255,
-            222,
-            89
-          ],
-          "block": [
-            -135,
-            77,
-            -139
-          ],
-          "size": 1.4,
-          "text": "59",
-          "alert": true
-        }
+      "name":"triangle",
+      "pos1":[-80,-126],
+      "pos2":[-50,-109],
+      "waypoints":[
+        {"_comment":"Flat Tri Waypoint","coords":[-93, 86.4, -105],"rgb":[0,255,255],"block":[-68,77,-123],"size":0.5,"text":"65","alert":true},
+        {"_comment":"Double Pearl Shop Waypoint","coords":[-74,152,-134],"rgb":[0,255,255],"size":1.2,"text":"11","alert":true}
       ]
     },
     {
-      "name": "stair",
-      "pos1": [
-        -126,
-        -120
-      ],
-      "pos2": [
-        -138,
-        -124
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Stair Waypoint",
-          "coords": [
-            -109,
-            87.15,
-            -105
-          ],
-          "rgb": [
-            155,
-            190,
-            237
-          ],
-          "block": [
-            -135,
-            76,
-            -124
-          ],
-          "size": 0.5,
-          "text": "65",
-          "alert": true
-        }
+      "name":"x cannon",
+      "pos1":[-126,-104],
+      "pos2":[-140,-120],
+      "invertForwardBackward": null,
+      "invertLeftRight": null,
+      "waypoints":[
+        {"_comment":"Top X Cannon Waypoint","coords":[-109,163,-105],"rgb":[0,255,255],"block":[-131,78,-115],"size":1.2,"text":"11","alert":false},
+        {"_comment":"Flat X Cannon Waypoint","coords":[-110, 82.1, -105.6],"rgb":[0,255,255],"size":0.4,"text":"77","alert":true}
       ]
     },
     {
-      "name": "coal",
-      "pos1": [
-        -129,
-        -127
-      ],
-      "pos2": [
-        -138,
-        -133
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Coal Waypoint",
-          "coords": [
-            -109,
-            88.5,
-            -105
-          ],
-          "rgb": [
-            255,
-            20,
-            147
-          ],
-          "block": [
-            -135,
-            78,
-            -129
-          ],
-          "size": 0.6,
-          "text": "65",
-          "alert": true
-        }
+      "name":"xc stair",
+      "pos1":[-126,-120],
+      "pos2":[-138,-124],
+      "waypoints":[
+        {"_comment":"Flat Stair Waypoint","coords":[-110, 87, -106],"rgb":[0,255,255],"block":[-136,76,-124],"size":0.5,"text":"65","alert":true}
       ]
     },
     {
-      "name": "coal left",
-      "pos1": [
-        -132,
-        -128
-      ],
-      "pos2": [
-        -138,
-        -124
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Coal Variation Waypoint Variation",
-          "coords": [
-            -109,
-            88,
-            -105
-          ],
-          "rgb": [
-            255,
-            20,
-            147
-          ],
-          "block": [
-            -137,
-            78,
-            -126
-          ],
-          "size": 0.6,
-          "text": "65",
-          "alert": true
-        }
+      "name":"xc coal",
+      "pos1":[-129,-127],
+      "pos2":[-138,-133],
+      "waypoints":[
+        {"_comment":"Flat Coal Waypoint","coords":[-110, 88, -106],"rgb":[0,255,255],"block":[-135,78,-129], "size":0.5,"text":"65","alert":true}
       ]
     },
     {
-      "name": "shop close",
-      "pos1": [
-        -94,
-        -123
-      ],
-      "pos2": [
-        -72,
-        -131
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Close Shop Waypoint",
-          "coords": [
-            -138,
-            89.1,
-            -60
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -86,
-            78,
-            -129
-          ],
-          "size": 1.0,
-          "text": "77",
-          "alert": true
-        },
-        {
-          "_comment": "Sky Shop Waypoint",
-          "coords": [
-            -97,
-            163,
-            -112
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -86,
-            78,
-            -129
-          ],
-          "size": 1.0,
-          "text": "11",
-          "alert": true
-        }
+      "name":"xc coal left",
+      "pos1":[-132,-128],
+      "pos2":[-138,-124],
+      "waypoints":[
+        {"_comment":"Flat Coal Variation Waypoint Variation","coords":[-110, 87.5, -106],"rgb":[0,255,255],"block":[-137,78,-126],"size":0.5,"text":"65","alert":true}
       ]
     },
     {
-      "name": "shop long",
-      "pos1": [
-        -73,
-        -142
-      ],
-      "pos2": [
-        -80,
-        -132
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Long Shop Waypoint",
-          "coords": [
-            -144,
-            106.5,
-            -60
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -76,
-            77.5,
-            -137
-          ],
-          "size": 1.3,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "Sky Long Shop Waypoint",
-          "coords": [
-            -97,
-            153.5,
-            -113
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -76,
-            77.5,
-            -137
-          ],
-          "size": 1.3,
-          "text": "11",
-          "alert": true
-        }
+      "name":"square top",
+      "pos1":[-143,-93],
+      "pos2":[-135,-88],
+      "waypoints":[
+        {"_comment":"Tri Waypoint","coords":[-93,107,-105],"rgb":[0,255,255],"block":[-141,78,-91],"size":0.7,"pre":6,"text":"35","alert":true},
+        {"_comment":"Shop Waypoint","coords":[-97,105,-112],"rgb":[0,255,255],"size":0.7,"pre":7,"text":"35","alert":true},
+        {"_comment":"X Waypoint","coords":[-105,94,-112],"rgb":[0,255,255],"size":0.6,"pre":1,"text":"53","alert":true},
+        {"_comment":"Slash Waypoint","coords":[-97,97,-98],"rgb":[0,255,255],"size":0.6,"pre":4,"text":"53","alert":true},
+        {"_comment":"Equals Waypoint","coords":[-106, 89.1, -97.75],"rgb":[0,255,255],"size":0.6,"pre":5,"text":"59","alert":true},
+        {"_comment":"X Cannon Waypoint","coords":[-111, 88.2, -104.1],"rgb":[0,255,255],"size":0.6,"pre":2,"text":"59","alert":true}
       ]
     },
     {
-      "name": "shop border",
-      "pos1": [
-        -75,
-        -131
-      ],
-      "pos2": [
-        -70,
-        -135
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Border Shop Waypoint",
-          "coords": [
-            -138,
-            102,
-            -78
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "size": 1.25,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "Sky Shop Waypoint",
-          "coords": [
-            -97,
-            159,
-            -112
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -71,
-            79,
-            -135
-          ],
-          "size": 1.0,
-          "text": "11",
-          "alert": true
-        }
+      "name":"square bottom",
+      "pos1":[-144,-88],
+      "pos2":[-135,-82],
+      "waypoints":[
+        {"_comment":"Tri Waypoint","coords":[-93,115,-105],"rgb":[0,255,255],"block":[-142,77,-87],"pre":6,"size":0.8,"text":"35","alert":true},
+        {"_comment":"Shop Waypoint","coords":[-97,115,-112],"rgb":[0,255,255],"size":0.8,"pre":7,"text":"35","alert":true},
+        {"_comment":"X Waypoint","coords":[-105,99,-112],"rgb":[0,255,255],"size":0.6,"pre":1,"text":"53","alert":true},
+        {"_comment":"Slash Waypoint","coords":[-97,101.5,-98],"rgb":[0,255,255],"size":0.6,"pre":4,"text":"53","alert":true},
+        {"_comment":"Equals Waypoint","coords":[-106, 91.7, -97.75],"rgb":[0,255,255],"size":0.6,"pre":5,"text":"53","alert":true},
+        {"_comment":"X Cannon Waypoint","coords":[-110, 91, -104.3],"rgb":[0,255,255],"size":0.6,"pre":2,"text":"59","alert":true}
       ]
     },
     {
-      "name": "shop border bottom",
-      "pos1": [
-        -69,
-        -138
-      ],
-      "pos2": [
-        -72,
-        -135
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Border Shop Bottom Waypoint",
-          "coords": [
-            -135,
-            105,
-            -78
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -71,
-            77,
-            -137
-          ],
-          "size": 1.25,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "Sky Border Shop Bottom Waypoint",
-          "coords": [
-            -97,
-            154,
-            -111
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "block": [
-            -71,
-            77,
-            -137
-          ],
-          "size": 1.25,
-          "text": "11",
-          "alert": true
-        }
+      "name":"shop close",
+      "pos1":[-94,-123],
+      "pos2":[-72,-131],
+      "waypoints":[
+        {"_comment":"Flat Close Shop Waypoint","coords":[-97, 81.8, -111.9375],"rgb":[0,255,255],"block":[-86,78,-129],"size":0.3  ,"text":"77","alert":true},
+        {"_comment":"Sky Shop Waypoint","coords":[-97,163,-112],"rgb":[0,255,255],"size":1.0,"text":"11","alert":true}
       ]
     },
     {
-      "name": "tri",
-      "pos1": [
-        -80,
-        -126
-      ],
-      "pos2": [
-        -50,
-        -109
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Tri Waypoint",
-          "coords": [
-            -149,
-            103.3,
-            -68.5
-          ],
-          "rgb": [
-            255,
-            0,
-            255
-          ],
-          "block": [
-            -68,
-            77,
-            -123
-          ],
-          "size": 1.2,
-          "text": "71",
-          "alert": true
-        },
-        {
-          "_comment": "Double Pearl Shop Waypoint",
-          "coords": [
-            -74,
-            152,
-            -134
-          ],
-          "rgb": [
-            255,
-            0,
-            255
-          ],
-          "block": [
-            -68,
-            77,
-            -123
-          ],
-          "size": 1.2,
-          "text": "11",
-          "alert": true
-        }
-      ]
-    },
-
-    {
-      "name": "equals",
-      "pos1": [
-        -80,
-        -108
-      ],
-      "pos2": [
-        -45,
-        -65
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Equals Waypoint",
-          "coords": [
-            -167,
-            124,
-            -118
-          ],
-          "rgb": [
-            0,
-            255,
-            0
-          ],
-          "block": [
-            -66,
-            76,
-            -87
-          ],
-          "size": 1.4,
-          "text": "53",
-          "alert": true
-        },
-        {
-          "_comment": "Double Pearl Left Shop Waypoint",
-          "coords": [
-            -89,
-            140,
-            -129
-          ],
-          "rgb": [
-            0,
-            80,
-            255
-          ],
-          "size": 1.0,
-          "text": "29",
-          "alert": false
-        },
-        {
-          "_comment": "Double Pearl Right Shop Waypoint",
-          "coords": [
-            -77,
-            135,
-            -136
-          ],
-          "rgb": [
-            255,
-            0,
-            0
-          ],
-          "size": 1.0,
-          "text": "29",
-          "alert": false
-        }
+      "name":"shop long",
+      "pos1":[-73,-142],
+      "pos2":[-80,-132],
+      "waypoints":[
+        {"_comment":"Flat Long Shop Waypoint","coords":[-97, 87.5, -111.9375],"rgb":[0,255,255],"block":[-76,77.5,-137],"size":0.5,"text":"65","alert":true},
+        {"_comment":"Sky Long Shop Waypoint","coords":[-97,153.5,-113],"rgb":[0,255,255],"size":1.3,"text":"11","alert":true}
       ]
     },
     {
-      "name": "slash bottom",
-      "pos1": [
-        -108,
-        -80
-      ],
-      "pos2": [
-        -114,
-        -66
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Slash Waypoint",
-          "coords": [
-            -63.5,
-            110,
-            -162
-          ],
-          "rgb": [
-            0,
-            0,
-            139
-          ],
-          "block": [
-            -114,
-            77,
-            -69
-          ],
-          "size": 1.5,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "Double Pearl Square Waypoint",
-          "coords": [
-            -136,
-            147,
-            -84
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "size": 1.0,
-          "hideForPre": 3,
-          "text": "17",
-          "alert": false
-        },
-        {
-          "_comment": "Double Pearl X Cannon Waypoint",
-          "coords": [
-            -133,
-            157,
-            -131
-          ],
-          "rgb": [
-            255,
-            135,
-            0
-          ],
-          "size": 1.4,
-          "hideForPre": 2,
-          "text": "41",
-          "alert": false
-        }
+      "name":"shop border",
+      "pos1":[-75,-131],
+      "pos2":[-70,-135],
+      "waypoints":[
+        {"_comment":"Flat Border Shop Waypoint","coords":[-97, 88.8, -111.9375],"rgb":[0,255,255],"block":[-71,79,-135],"size":0.5,"text":"65","alert":true},
+        {"_comment":"Sky Shop Waypoint","coords":[-97,159,-112],"rgb":[0,255,255],"size":1.0,"text":"11","alert":true}
       ]
     },
     {
-      "name": "slash top",
-      "pos1": [
-        -117,
-        -80
-      ],
-      "pos2": [
-        -114,
-        -66
-      ],
-      "waypoints": [
-        {
-          "_comment": "Flat Slash Waypoint Variation",
-          "coords": [
-            -98.25,
-            88,
-            -96
-          ],
-          "rgb": [
-            0,
-            0,
-            139
-          ],
-          "block": [
-            -115,
-            77.5,
-            -70
-          ],
-          "size": 0.5,
-          "text": "65",
-          "alert": true
-        },
-        {
-          "_comment": "Double Pearl Square Waypoint",
-          "coords": [
-            -135,
-            147,
-            -84
-          ],
-          "rgb": [
-            0,
-            255,
-            255
-          ],
-          "size": 1.0,
-          "hideForPre": 3,
-          "text": "17",
-          "alert": false
-        },
-        {
-          "_comment": "Double Pearl X Cannon Waypoint",
-          "coords": [
-            -133,
-            157,
-            -125
-          ],
-          "rgb": [
-            255,
-            135,
-            0
-          ],
-          "size": 1.4,
-          "hideForPre": 2,
-          "text": "41",
-          "alert": false
-        }
+      "name":"shop border bottom",
+      "pos1":[-69,-138],
+      "pos2":[-72,-135],
+      "waypoints":[
+        {"_comment":"Flat Border Shop Bottom Waypoint","coords":[-97, 89.5, -111.9375],"rgb":[0,255,255],"block":[-71,77,-137],"size":0.5,"text":"65","alert":true},
+        {"_comment":"Sky Border Shop Bottom Waypoint","coords":[-97,154,-111],"rgb":[0,255,255],"size":1.25,"text":"11","alert":true}
       ]
     }
   ]
