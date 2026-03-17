@@ -6,8 +6,6 @@ import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.BackboneAlertManager;
-import net.iqaddons.mod.manager.KuudraStateManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,9 +24,7 @@ public class BackboneWidget extends HudWidget {
         );
 
         setEnabledSupplier(() -> PhaseFourConfig.backboneAlert);
-        setVisibilityCondition(() -> KuudraStateManager.get().phase() == KuudraPhase.BOSS &&
-                (manager.getTicksRemaining() > 0 || manager.isRendActive())
-        );
+        setVisibilityCondition(() -> (manager.getTicksRemaining() > 0 || manager.isRendActive()));
 
         setExampleLines(HudLine.of("§8[§c||||||||§7||||||||||||§8] §b40%"));
     }

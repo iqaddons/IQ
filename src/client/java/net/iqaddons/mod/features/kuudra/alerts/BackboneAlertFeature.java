@@ -3,16 +3,15 @@ package net.iqaddons.mod.features.kuudra.alerts;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.ItemUseEvent;
-import net.iqaddons.mod.features.KuudraFeature;
+import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.BackboneAlertManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 
-public class BackboneAlertFeature extends KuudraFeature {
+public class BackboneAlertFeature extends Feature {
 
     private static final int BACKBONE_TICKS = 22;
     private static final int BACKBONE_COOLDOWN_TICKS = 32;
@@ -23,13 +22,12 @@ public class BackboneAlertFeature extends KuudraFeature {
         super(
                 "backboneAlert",
                 "Backbone Alert",
-                () -> PhaseFourConfig.backboneAlert,
-                KuudraPhase.BOSS
+                () -> PhaseFourConfig.backboneAlert
         );
     }
 
     @Override
-    protected void onKuudraActivate() {
+    protected void onActivate() {
         subscribe(ItemUseEvent.class, this::onItemUse);
         subscribe(ClientTickEvent.class, this::onTick);
 
@@ -37,7 +35,7 @@ public class BackboneAlertFeature extends KuudraFeature {
     }
 
     @Override
-    protected void onKuudraDeactivate() {
+    protected void onDeactivate() {
         manager.reset();
     }
 
