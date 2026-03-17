@@ -6,6 +6,7 @@ import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
+import net.minecraft.sound.SoundEvents;
 
 @Slf4j
 public class SupplyDroppedAlertFeature extends KuudraFeature {
@@ -28,7 +29,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
                 return;
             }
 
-            MessageUtil.showAlert("§c§lDROPPED", 15);
+            MessageUtil.showAlert("§c§lDROPPED", 15, SoundEvents.BLOCK_ANVIL_LAND);
         });
     }
 }

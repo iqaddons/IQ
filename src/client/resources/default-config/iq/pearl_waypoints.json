@@ -23,7 +23,7 @@
       "coords": "Waypoint position in [x, y, z].",
       "rgb": "Waypoint color in [red, green, blue]. Example: [0, 255, 255].",
       "block": "Optional stand/block reference in [x, y, z]. Helps dynamic waypoint positioning.",
-      "size": "Box size of the waypoint. Example: 0.5, 1.0, 1.4.",
+      "size": "Base box size of the waypoint. Example: 0.5, 1.0, 1.4. The config option 'Pearl Waypoint Box Size Adjustment' applies +/-10% per step on top of this base value.",
       "text": "Text/timing label shown on the waypoint. Usually values like 11, 35, 53, 65, 77.",
       "alert": "true = enable READY/alert behavior for this waypoint, false = disable it.",
       "pre": "Optional. Show this waypoint only for a specific pre number.",
