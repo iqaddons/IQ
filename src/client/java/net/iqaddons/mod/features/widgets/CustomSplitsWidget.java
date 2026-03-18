@@ -34,7 +34,7 @@ public class CustomSplitsWidget extends HudWidget {
             KuudraPhase.BOSS, new double[]{1.8, 2.3, 2.8, 3.3, 4.0}
     );
 
-    private static final double[] OVERALL_THRESHOLDS = {53.0, 59.49, 65.0, 70.0, 80.0};
+    private static final double[] OVERALL_THRESHOLDS = {51.0, 59.49, 65.0, 70.0, 80.0};
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final Map<KuudraPhase, Double> splits = new EnumMap<>(KuudraPhase.class);
