@@ -1,4 +1,3 @@
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,13 +71,12 @@ public class KuudraNotificationsWidget extends HudWidget {
         fadeState = FadeState.FADING_IN;
         markDimensionsDirty();
 
+        if (mc.player != null) {
             var soundEvent = event.soundEvent() != null
                     ? event.soundEvent()
                     : SoundEvents.BLOCK_NOTE_BLOCK_PLING.value();
-        if (mc.player != null && KuudraGeneralConfig.kuudraNotificationsSound) {
-                    soundEvent,
-                    2.0f, 1.0f
-            );
+
+            mc.player.playSound(soundEvent, 2.0f, 1.0f);
         }
     }
 

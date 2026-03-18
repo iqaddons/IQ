@@ -50,6 +50,13 @@ public class PhaseTwoConfig {
     public static boolean buildProgressOverlay = true;
 
     @ConfigEntry(
+            id = "simpleBuildProgressOverlay",
+            translation = "Simple Build Progress Overlay"
+    )
+    @Comment("Display only the build percent as a compact single-line widget")
+    public static boolean simpleBuildProgressOverlay = false;
+
+    @ConfigEntry(
             id = "freshTimers",
             translation = "Fresh Times"
     )

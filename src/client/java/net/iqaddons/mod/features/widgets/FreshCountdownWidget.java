@@ -3,7 +3,9 @@ package net.iqaddons.mod.features.widgets;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
+import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
@@ -11,6 +13,8 @@ import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
+
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 
 @Slf4j
 public class FreshCountdownWidget extends HudWidget {
@@ -51,11 +55,13 @@ public class FreshCountdownWidget extends HudWidget {
 
         subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
         subscribe(ClientTickEvent.class, this::onTick);
+        subscribe(KuudraRunEndEvent.class, this::onRunEnd);
+        subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
     }
 
     @Override
     protected void onDeactivate() {
-        freshActive = false;
+        resetFreshState();
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
@@ -73,17 +79,37 @@ public class FreshCountdownWidget extends HudWidget {
         updateDisplay();
     }
 
+    private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (event.isUnexpectedlyEnded()) {
+            resetFreshState();
+        }
+    }
+
+    private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
+        if (!stillInKuudraInstance) {
+            resetFreshState();
+        }
+    }
+
     private void updateDisplay() {
         long elapsed = System.currentTimeMillis() - freshStartTime;
         long remaining = FRESH_DURATION_MS - elapsed;
         if (remaining <= 0) {
-            freshActive = false;
+            resetFreshState();
             return;
         }
 
         countdownLine.text(getCountdownColor(remaining) + TimeUtils.formatTime(remaining));
         markDimensionsDirty();
         log.debug("Fresh countdown updated: {}s remaining", remaining);
+    }
+
+    private void resetFreshState() {
+        freshActive = false;
+        freshStartTime = 0;
+        countdownLine.text(getCountdownColor(FRESH_DURATION_MS) + TimeUtils.formatTime(FRESH_DURATION_MS));
+        markDimensionsDirty();
     }
 
     private @NotNull String getCountdownColor(double remaining) {

@@ -88,9 +88,14 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        String message = event.getStrippedMessage();
+        if (isInKuudra() && isInstanceTransferMessage(message)) {
+            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
+            return;
+        }
+
         if (!isInSkyBlock()) return;
 
-        String message = event.getStrippedMessage();
         if (message.contains("DEFEAT") && isInKuudra()) {
             forceReset(KuudraRunEndEvent.EndReason.DEFEATED);
             return;
@@ -102,16 +107,15 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         if (detected == KuudraPhase.NONE) {
             if (isInKuudra()) {
-                forceReset(KuudraRunEndEvent.EndReason.OTHER);
+                forceReset(isInstanceTransferMessage(message)
+                        ? KuudraRunEndEvent.EndReason.DISCONNECTED
+                        : KuudraRunEndEvent.EndReason.OTHER);
             }
 
             return;
         }
 
         setPhase(detected);
-        if (message.contains("Sending to server") || message.contains("Starting in 5 seconds...")) {
-            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
-        }
     }
 
     private void onSkyBlockAreaChange(@NotNull SkyblockAreaChangeEvent event) {
@@ -214,6 +218,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
             log.debug("Starting Kuudra run with unknown tier (scoreboard tier not found)");
         }
 
+        SupplyStateManager.get().reset();
         phaseDurations.clear();
         EventBus.post(new KuudraPhaseChangeEvent(
                 old.phase(),
@@ -225,7 +230,6 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull KuudraRunEndEvent.EndReason reason) {
-        if (!isInSkyBlock()) return false;
         if (current.phase().isInRun()) {
             phaseDurations.put(current.phase(), current.phaseDuration());
         }
@@ -235,6 +239,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         contextRef.set(KuudraContext.empty());
         KuudraLocationUtil.invalidateCache();
+        SupplyStateManager.get().reset();
 
         Duration totalDuration = phaseDurations.values().stream()
                 .reduce(Duration.ZERO, Duration::plus);
@@ -254,6 +259,10 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         phaseDurations.clear();
         return true;
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server") || message.contains("Starting in 5 seconds...");
     }
 
     private boolean performPhaseTransition(
