@@ -1,8 +1,8 @@
-package net.iqaddons.mod.features.widgets;
+package net.iqaddons.mod.utils;
 
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,16 +11,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@UtilityClass
 public final class BuildProgressOverlayUtil {
 
 	private static final Pattern PROGRESS_PATTERN = Pattern.compile("Building Progress:?\\s*(\\d+)%");
-	private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\)");
+    private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
 
 	private static boolean lastClassicEnabled = PhaseTwoConfig.buildProgressOverlay;
 	private static boolean lastSimpleEnabled = PhaseTwoConfig.simpleBuildProgressOverlay;
-
-	private BuildProgressOverlayUtil() {
-	}
 
 	public static boolean isClassicOverlayEnabled() {
 		syncOverlayModes();
@@ -45,7 +43,6 @@ public final class BuildProgressOverlayUtil {
 			} else if (simpleChanged && !classicChanged) {
 				PhaseTwoConfig.buildProgressOverlay = false;
 			} else {
-				// Fallback for stale config states: keep the original widget enabled.
 				PhaseTwoConfig.simpleBuildProgressOverlay = false;
 			}
 		}
@@ -63,7 +60,6 @@ public final class BuildProgressOverlayUtil {
 
 			Matcher progressMatcher = PROGRESS_PATTERN.matcher(stripped);
 			Matcher buildersMatcher = BUILDERS_PATTERN.matcher(stripped);
-
 			if (!progressMatcher.find()) continue;
 
 			try {
@@ -78,7 +74,9 @@ public final class BuildProgressOverlayUtil {
 		return null;
 	}
 
-	public record BuildProgressData(int progress, int builders) {
-	}
+    public record BuildProgressData(
+            int progress,
+            int builders
+    ) {
+    }
 }
-
