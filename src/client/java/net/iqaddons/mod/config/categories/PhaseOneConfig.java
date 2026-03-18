@@ -119,7 +119,7 @@ public class PhaseOneConfig {
     )
     @ConfigOption.Range(min = -4, max = 4)
     @ConfigOption.Slider
-    @Comment("Adjust the waypoint timer to match your ping, each step changes 1 progress tick.")
+    @Comment("Adjust the waypoint timer to match your ping, each step changes 1 progress tick. \n0 = 160-200ms with Kuudra's Heart (Tier 3 Talisman)")
     public static int pearlWaypointsTimerDelay = 0;
 
     @ConfigEntry(
