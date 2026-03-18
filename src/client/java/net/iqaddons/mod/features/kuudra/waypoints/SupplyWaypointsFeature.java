@@ -12,6 +12,7 @@ import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.entity.mob.GiantEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,16 +65,25 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         RenderColor color = RenderColor.fromArgb(PhaseOneConfig.supplyWaypointColor);
         double halfBox = PhaseOneConfig.supplyWaypointBoxSize / 2.0;
         for (SupplyPosition supply : supplies) {
-            Box crateBox = new Box(
+            event.drawStyledWithBeam(new Box(
                     supply.position().x + 0.5 - halfBox,
                     supply.position().y - 1,
-                    supply.position().z + 0.5 - halfBox,
+                    supply.position().z + 1.5 - halfBox,
                     supply.position().x + 0.5 + halfBox,
                     supply.position().y,
-                    supply.position().z + 0.5 + halfBox
-            );
+                    supply.position().z + 1.5 + halfBox
+            ), BEACON_HEIGHT, true, color, WorldRenderUtils.RenderStyle.BOTH);
 
-            event.drawStyledWithBeam(crateBox, BEACON_HEIGHT, true, color, WorldRenderUtils.RenderStyle.BOTH);
+            if (PhaseOneConfig.supplyHitBox) {
+                EntityDetectorUtil.getEntitiesOfType(
+                                ZombieEntity.class,
+                                zombie -> zombie.squaredDistanceTo(supply.position()) < 9)
+                        .forEach(zombie ->
+                                event.drawStyledHitbox(
+                                        zombie, false,
+                                        color, WorldRenderUtils.RenderStyle.BOTH)
+                        );
+            }
         }
     }
 }

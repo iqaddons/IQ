@@ -1,13 +1,13 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
-import net.iqaddons.mod.utils.render.WorldRenderUtils;
-
 import net.fabricmc.loader.api.FabricLoader;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.util.Util;
+
+import java.awt.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.awt.*;
 
 @Category(
         value = "Phase 1 - Supplies"
@@ -54,6 +54,13 @@ public class PhaseOneConfig {
     @ConfigOption.Slider
     @Comment("Adjust the size of supply waypoint boxes.")
     public static float supplyWaypointBoxSize = 1.0f;
+
+    @ConfigEntry(
+            id = "supplyHitBox",
+            translation = "Supply Interaction Box"
+    )
+    @Comment("Displays the interaction points where you can pick up the supply.")
+    public static boolean supplyHitBox = true;
 
     @ConfigOption.Separator("Pearl Waypoints")
     @ConfigEntry(
