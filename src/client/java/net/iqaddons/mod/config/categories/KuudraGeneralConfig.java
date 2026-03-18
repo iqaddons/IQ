@@ -275,28 +275,28 @@ public class KuudraGeneralConfig {
                 id = "abilityAnnounceSpiritSpark",
                 translation = "Spirit Spark"
         )
-        @Comment("Send \"Casting Spell: Spirit Spark!\" in party chat.")
+        @Comment("Send \"Spirit Spark Casted!\" in party chat.")
         public static boolean spiritSpark = true;
 
         @ConfigEntry(
                 id = "abilityAnnounceHollowedRush",
                 translation = "Hollowed Rush"
         )
-        @Comment("Send \"Casting Spell: Hollowed Rush!\" in party chat.")
+        @Comment("Send \"Hollowed Rush Casted!\" in party chat.")
         public static boolean hollowedRush = true;
 
         @ConfigEntry(
                 id = "abilityAnnounceRagingWind",
                 translation = "Raging Wind"
         )
-        @Comment("Send \"Casting Spell: Raging Wind!\" in party chat.")
+        @Comment("Send \"Raging Wind Casted!\" in party chat.")
         public static boolean ragingWind = true;
 
         @ConfigEntry(
                 id = "abilityAnnounceIchorPool",
                 translation = "Ichor Pool"
         )
-        @Comment("Send \"Casting Spell: Ichor Pool!\" in party chat.")
+        @Comment("Send \"Ichor Pool Casted!\" in party chat.")
         public static boolean ichorPool = true;
 
         @ConfigEntry(
