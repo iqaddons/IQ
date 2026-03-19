@@ -9,15 +9,19 @@ import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.BuildProgressOverlayUtil;
+import net.iqaddons.mod.utils.CountdownLagCompensationUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class SimpleBuildProgressWidget extends HudWidget {
+
+    private static final long CLIENT_TICK_INTERVAL_MS = 50L;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final HudLine buildLine;
 
     private int currentProgress = 0;
     private long countdownEndMillis = -1L;
+    private long lastCountdownTickMillis = -1L;
 
     public SimpleBuildProgressWidget() {
         super(
@@ -45,6 +49,7 @@ public class SimpleBuildProgressWidget extends HudWidget {
     protected void onActivate() {
         currentProgress = 0;
         countdownEndMillis = -1L;
+        lastCountdownTickMillis = -1L;
         updateBuildLine();
 
         clearLines();
@@ -58,10 +63,24 @@ public class SimpleBuildProgressWidget extends HudWidget {
     protected void onDeactivate() {
         currentProgress = 0;
         countdownEndMillis = -1L;
+        lastCountdownTickMillis = -1L;
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
+
+        long now = System.currentTimeMillis();
+        if (countdownEndMillis > 0L) {
+            countdownEndMillis = CountdownLagCompensationUtil.applyLagCompensation(
+                    countdownEndMillis,
+                    lastCountdownTickMillis,
+                    now,
+                    CLIENT_TICK_INTERVAL_MS
+            );
+            lastCountdownTickMillis = now;
+        } else {
+            lastCountdownTickMillis = -1L;
+        }
 
         if (hasActiveCountdown()) {
             updateBuildLine();
@@ -70,6 +89,7 @@ public class SimpleBuildProgressWidget extends HudWidget {
 
         if (countdownEndMillis > 0) {
             countdownEndMillis = -1L;
+            lastCountdownTickMillis = -1L;
             updateBuildLine();
         }
 
@@ -88,6 +108,7 @@ public class SimpleBuildProgressWidget extends HudWidget {
         if (event.currentSupply() < 6) return;
 
         countdownEndMillis = System.currentTimeMillis() + BuildProgressOverlayUtil.BUILD_START_COUNTDOWN_MS;
+        lastCountdownTickMillis = System.currentTimeMillis();
         updateBuildLine();
     }
 

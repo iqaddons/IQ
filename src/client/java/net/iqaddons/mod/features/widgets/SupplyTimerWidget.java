@@ -14,6 +14,7 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.CountdownLagCompensationUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,15 +23,19 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
-import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {
+
+    private static final long SUPPLY_SPAWN_COUNTDOWN_MS = 8850L;
+    private static final long HALF_RATE_TICK_INTERVAL_MS = 100L;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     private final List<SupplyPickupEntry> pickupHistory = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean persistUntilInstanceChange = false;
+    private long supplySpawnCountdownEndMillis = -1L;
+    private long lastCountdownTickMillis = -1L;
 
     public SupplyTimerWidget() {
         super(
@@ -91,12 +96,18 @@ public class SupplyTimerWidget extends HudWidget {
 
     private void resetLocalState() {
         pickupHistory.clear();
+        supplySpawnCountdownEndMillis = -1L;
+        lastCountdownTickMillis = -1L;
     }
 
     private void beginNewRunWindow() {
         persistUntilInstanceChange = true;
         supplyState.startSuppliesPhase();
         resetLocalState();
+        if (PhaseOneConfig.supplyTimerCountdown) {
+            supplySpawnCountdownEndMillis = System.currentTimeMillis() + SUPPLY_SPAWN_COUNTDOWN_MS;
+            lastCountdownTickMillis = System.currentTimeMillis();
+        }
     }
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
@@ -130,8 +141,30 @@ public class SupplyTimerWidget extends HudWidget {
             return;
         }
 
-        if (!ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) || !ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
-            resetOnInstanceChange();
+        long now = System.currentTimeMillis();
+        if (supplySpawnCountdownEndMillis > 0L) {
+            supplySpawnCountdownEndMillis = CountdownLagCompensationUtil.applyLagCompensation(
+                    supplySpawnCountdownEndMillis,
+                    lastCountdownTickMillis,
+                    now,
+                    HALF_RATE_TICK_INTERVAL_MS
+            );
+            lastCountdownTickMillis = now;
+        } else {
+            lastCountdownTickMillis = -1L;
+        }
+
+        // Tick updates are countdown-only; instance resets should come from dedicated lifecycle events.
+
+        if (pickupHistory.isEmpty() && hasActiveSupplySpawnCountdown()) {
+            updateDisplay();
+            return;
+        }
+
+        if (pickupHistory.isEmpty() && supplySpawnCountdownEndMillis > 0L) {
+            supplySpawnCountdownEndMillis = -1L;
+            lastCountdownTickMillis = -1L;
+            updateDisplay();
         }
     }
 
@@ -157,6 +190,11 @@ public class SupplyTimerWidget extends HudWidget {
     }
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
+        if (supplySpawnCountdownEndMillis > 0L) {
+            supplySpawnCountdownEndMillis = -1L;
+            lastCountdownTickMillis = -1L;
+        }
+
         pickupHistory.add(new SupplyPickupEntry(
                 event.playerName(),
                 supplyState.getTimeColor(),
@@ -182,7 +220,12 @@ public class SupplyTimerWidget extends HudWidget {
         )));
 
         if (pickupHistory.isEmpty()) {
-            addLine(HudLine.of("§7No placed supplies yet..."));
+            if (hasActiveSupplySpawnCountdown()) {
+                long remainingMs = Math.max(0L, supplySpawnCountdownEndMillis - System.currentTimeMillis());
+                addLine(HudLine.of(String.format("§7Spawning in: %s%.2fs", getSupplySpawnCountdownColor(remainingMs), remainingMs / 1000.0)));
+            } else {
+                addLine(HudLine.of("§7No placed supplies yet..."));
+            }
             markDimensionsDirty();
             return;
         }
@@ -196,6 +239,28 @@ public class SupplyTimerWidget extends HudWidget {
         }
 
         markDimensionsDirty();
+    }
+
+    private boolean hasActiveSupplySpawnCountdown() {
+        if (!PhaseOneConfig.supplyTimerCountdown) {
+            return false;
+        }
+
+        return supplySpawnCountdownEndMillis > System.currentTimeMillis();
+    }
+
+    private @NotNull String getSupplySpawnCountdownColor(long remainingMs) {
+        double ratio = Math.min(1.0, Math.max(0.0, (double) remainingMs / SUPPLY_SPAWN_COUNTDOWN_MS));
+        if (ratio > 0.75) {
+            return "§a";
+        }
+        if (ratio > 0.50) {
+            return "§e";
+        }
+        if (ratio > 0.25) {
+            return "§6";
+        }
+        return "§c";
     }
 
     private record SupplyPickupEntry(

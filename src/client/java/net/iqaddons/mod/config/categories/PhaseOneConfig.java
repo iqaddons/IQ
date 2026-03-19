@@ -24,6 +24,13 @@ public class PhaseOneConfig {
     public static boolean supplyTimers = true;
 
     @ConfigEntry(
+            id = "supplyTimerCountdown",
+            translation = "Supply Timer Countdown"
+    )
+    @Comment("Show a countdown in Kuudra Splits displaying how long remains until supplies spawn.")
+    public static boolean supplyTimerCountdown = true;
+
+    @ConfigEntry(
             id = "supplyProgressDisplay",
             translation = "Supply Progress Display"
     )
@@ -138,6 +145,12 @@ public class PhaseOneConfig {
     @Comment("Choose how pearl waypoints are rendered: solid, outline, both, or none.")
     public static PearlWaypointRenderStyle pearlWaypointRenderStyle = PearlWaypointRenderStyle.SOLID;
 
+    @ConfigEntry(
+            id = "pearlWaypointBlockOutlines",
+            translation = "Pearl Waypoint Stand Block"
+    )
+    @Comment("Toggle the outlined block you should stand on when throwing pearls.")
+    public static boolean pearlWaypointBlockOutlines = true;
 
     @ConfigEntry(
             id = "pearlThrowAlert",
@@ -146,8 +159,6 @@ public class PhaseOneConfig {
     @Comment("Play a sound and highlight when it's time to throw a pearl.")
     public static boolean pearlThrowAlert = true;
 
-    @ConfigOption.Separator("Dynamic Waypoints")
-
     @ConfigEntry(
             id = "dynamicPearlWaypoints",
             translation = "Dynamic Pearl Waypoints"
@@ -155,50 +166,6 @@ public class PhaseOneConfig {
     @Comment("Makes pearl waypoints move up or down based on your position so the marker stays more accurate while doing supplies.")
     public static boolean dynamicPearlWaypoints = true;
 
-    @ConfigEntry(
-            id = "dynamicPearlWaypointConfig",
-            translation = "Dynamic Pearl Waypoint Config"
-    )
-    @Comment("Advanced tuning for Dynamic Pearl Waypoints. If you do not know what these values do, it is recommended to leave them unchanged.")
-    public static final DynamicPearlWaypointSettings dynamicPearlWaypointConfig = new DynamicPearlWaypointSettings();
-
-    @ConfigObject
-    public static class DynamicPearlWaypointSettings {
-        @ConfigEntry(
-                id = "dynamicPearlWaypointOverride",
-                translation = "Override Dynamic Pearl Values"
-        )
-        @Comment("Enables the custom values below. If this is disabled, IQ will use the recommended built-in values. If you do not know what you are doing, do not change these settings.")
-        @SuppressWarnings("unused")
-        public boolean dynamicPearlWaypointOverride = false;
-
-        @ConfigEntry(
-                id = "dynamicPearlWaypointYMultiplier",
-                translation = "Dynamic Pearl Waypoint Y Multiplier"
-        )
-        @ConfigOption.Range(min = 0.0, max = 2.0)
-        @ConfigOption.Slider
-        @Comment("Controls how much your vertical movement changes the waypoint height. Recommended default: 0.81. Only used when Override Dynamic Pearl Values is enabled.")
-        public double dynamicPearlWaypointYMultiplier = 0.81;
-
-        @ConfigEntry(
-                id = "dynamicPearlWaypointHeightAdjustmentFactor",
-                translation = "Dynamic Pearl Waypoint Height Adjustment Factor"
-        )
-        @ConfigOption.Range(min = 0.0, max = 2.0)
-        @ConfigOption.Slider
-        @Comment("Controls how much forward and backward movement changes waypoint height. Recommended default: 0.31. Only used when Override Dynamic Pearl Values is enabled.")
-        public double dynamicPearlWaypointHeightAdjustmentFactor = 0.31;
-
-        @ConfigEntry(
-                id = "dynamicPearlWaypointLeftRightAdjustmentFactor",
-                translation = "Dynamic Pearl Waypoint Left Right Adjustment Factor"
-        )
-        @ConfigOption.Range(min = 0.0, max = 2.0)
-        @ConfigOption.Slider
-        @Comment("Controls how much left and right movement changes waypoint height. Recommended default: 0.63. Only used when Override Dynamic Pearl Values is enabled.")
-        public double dynamicPearlWaypointLeftRightAdjustmentFactor = 0.63;
-    }
 
     @ConfigOption.Separator("Pile Waypoints")
 

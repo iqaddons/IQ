@@ -39,6 +39,9 @@ public class PearlWaypointFeature extends KuudraFeature {
     private static final double READY_Y_OFFSET_MULTIPLIER = 1.3;
     private static final double READY_EXTRA_Y_OFFSET = 0.7;
     private static final long READY_RESET_TIMEOUT_MS = 900L;
+    private static final double DYNAMIC_Y_MULTIPLIER = 0.81;
+    private static final double DYNAMIC_HEIGHT_ADJUSTMENT_FACTOR = 0.31;
+    private static final double DYNAMIC_LEFT_RIGHT_ADJUSTMENT_FACTOR = 0.63;
     private static final List<Integer> SUPPLY_TICK_PERCENTAGES = List.of(
             5, 11, 17, 23, 29, 35, 41,
             47, 53, 59, 65, 71, 77, 83,
@@ -260,7 +263,7 @@ public class PearlWaypointFeature extends KuudraFeature {
             }
         }
 
-        if (waypoint.hasStandBlock()) {
+        if (PhaseOneConfig.pearlWaypointBlockOutlines && waypoint.hasStandBlock()) {
             Vec3d block = waypoint.standBlock();
             Box blockBox = new Box(
                     block.getX(), block.getY(), block.getZ(),
@@ -302,7 +305,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         if (invertForwardBackward != null) {
             double forwardBackwardDirection = invertForwardBackward ? -1.0 : 1.0;
             heightAdjustment = offset.z
-                    * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointHeightAdjustmentFactor
+                    * DYNAMIC_HEIGHT_ADJUSTMENT_FACTOR
                     * forwardBackwardDirection;
         }
 
@@ -316,12 +319,12 @@ public class PearlWaypointFeature extends KuudraFeature {
         if (invertLeftRight != null) {
             double leftRightDirection = invertLeftRight ? -1.0 : 1.0;
             lateralHeightAdjustment = -offset.x
-                    * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointLeftRightAdjustmentFactor
+                    * DYNAMIC_LEFT_RIGHT_ADJUSTMENT_FACTOR
                     * leftRightDirection;
         }
         Vec3d adjustedOffset = new Vec3d(
                 0.0,
-                (offset.y * PhaseOneConfig.dynamicPearlWaypointConfig.dynamicPearlWaypointYMultiplier)
+                (offset.y * DYNAMIC_Y_MULTIPLIER)
                         + heightAdjustment
                         + lateralHeightAdjustment,
                 0.0

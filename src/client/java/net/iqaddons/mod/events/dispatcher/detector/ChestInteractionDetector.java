@@ -52,6 +52,15 @@ public final class ChestInteractionDetector {
         ChestWindowState state = windowStates.computeIfAbsent(windowId, key -> new ChestWindowState());
         state.lastInteractionTick = tickCount;
 
+        // Minecraft recycles syncId values (~0-127). If this windowId was used by a previous
+        // chest that was already fully processed (bought=true, pendingOpen=null), reset the
+        // state so the new chest interaction is not silently ignored.
+        if (state.bought && state.pendingOpen == null) {
+            state.bought = false;
+            state.rerolled = false;
+            state.shardRerolled = false;
+        }
+
         if (slot.id == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this chest")) {
             state.rerolled = true;
             postEvent.accept(new KuudraChestRerollEvent(windowId, KuudraChestRerollEvent.RerollType.ITEMS));
@@ -68,7 +77,10 @@ public final class ChestInteractionDetector {
         }
 
         if (slot.id != BUY_SLOT || state.bought) return;
-        if (!isBuyAction(slot.getStack())) return;
+        // Allow empty slot: on fast clicks the server slot-update packet may not have arrived
+        // yet, so the stack appears empty even though this is a valid buy action.
+        // Only reject if the item is present but explicitly not a buy action.
+        if (!slot.getStack().isEmpty() && !isBuyAction(slot.getStack())) return;
 
         state.bought = true;
         state.pendingOpen = new PendingChestOpen(
@@ -134,11 +146,15 @@ public final class ChestInteractionDetector {
     }
 
     private static final class ChestWindowState {
-        private boolean rerolled;
-        private boolean shardRerolled;
-        private boolean bought;
-        private PendingChestOpen pendingOpen;
-        private long lastInteractionTick;
+        // volatile: fields are written on the Minecraft main thread (ScreenClickEvent) but
+        // read on the Netty I/O thread (ChatReceivedEvent). Without volatile the JVM gives
+        // no visibility guarantee, causing the Netty thread to see stale null values for
+        // pendingOpen and silently drop the KuudraChestOpenEvent.
+        private volatile boolean rerolled;
+        private volatile boolean shardRerolled;
+        private volatile boolean bought;
+        private volatile PendingChestOpen pendingOpen;
+        private volatile long lastInteractionTick;
     }
 
     private record PendingChestOpen(
