@@ -2,6 +2,8 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
@@ -11,6 +13,7 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 
 @Slf4j
 public class FreshersTimerWidget extends HudWidget {
@@ -38,6 +42,10 @@ public class FreshersTimerWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
         setVisibilityCondition(() -> {
+            if (!ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+                return false;
+            }
+
             var phase = kuudraManager.phase();
             boolean inTrackedPhases = KuudraPhase.isOneOf(
                     KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.STUN,
@@ -60,6 +68,8 @@ public class FreshersTimerWidget extends HudWidget {
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
         subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
+        subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(ClientTickEvent.class, this::onTick);
 
         if (kuudraManager.phase() == KuudraPhase.BUILD) {
             beginNewRunWindow();
@@ -70,6 +80,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     @Override
     protected void onDeactivate() {
+        persistUntilInstanceChange = false;
         freshEntries.clear();
     }
 
@@ -94,6 +105,10 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.isEnteringKuudra()) {
+            resetOnInstanceChange();
+        }
+
         if (event.currentPhase() == KuudraPhase.BUILD) {
             beginNewRunWindow();
             updateDisplay();
@@ -102,9 +117,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
-            persistUntilInstanceChange = false;
-            freshEntries.clear();
-            updateDisplay();
+            resetOnInstanceChange();
         }
     }
 
@@ -114,9 +127,38 @@ public class FreshersTimerWidget extends HudWidget {
             return;
         }
 
+        resetOnInstanceChange();
+    }
+
+    private void onTick(@NotNull ClientTickEvent event) {
+        if (!event.isInGame() || !event.isNthTick(2)) {
+            return;
+        }
+
+        if (!ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) || !ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            resetOnInstanceChange();
+        }
+    }
+
+    private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (isInstanceTransferMessage(event.getStrippedMessage())) {
+            resetOnInstanceChange();
+        }
+    }
+
+    private void resetOnInstanceChange() {
+        if (!persistUntilInstanceChange && freshEntries.isEmpty()) {
+            return;
+        }
+
         persistUntilInstanceChange = false;
         freshEntries.clear();
         updateDisplay();
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server")
+                || (message.contains("Starting in ") && message.contains(" seconds"));
     }
 
     private void updateDisplay() {

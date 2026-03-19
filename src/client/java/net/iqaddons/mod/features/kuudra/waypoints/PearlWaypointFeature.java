@@ -249,6 +249,14 @@ public class PearlWaypointFeature extends KuudraFeature {
                         scale, true,
                         getPearlTimerColor(remainingTimerMs, targetIndex)
                 );
+            } else if (shouldRenderTimer() && isReady) {
+                double timerYOffset = shouldRenderText() ? TIMER_Y_OFFSET_WITH_TEXT : TIMER_Y_OFFSET_ONLY;
+                float scale = shouldRenderText()
+                        ? adjustedScale * 0.85f
+                        : adjustedScale;
+
+                Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
+                event.drawText(timerPos, Text.literal("READY"), scale, true, new RenderColor(0, 255, 0, 0xff));
             }
         }
 
@@ -262,7 +270,7 @@ public class PearlWaypointFeature extends KuudraFeature {
             event.drawOutline(blockBox, true, waypointColor);
         }
 
-        if (isReady) {
+        if (isReady && !shouldRenderTimer()) {
             double readyYOffset = getReadyYOffset();
             Vec3d readyPos = new Vec3d(target.getX() - 0.5, target.getY() + size + readyYOffset, target.getZ() - 0.5);
             event.drawText(readyPos, Text.literal("READY"), adjustedScale, true, new RenderColor(0, 255, 0, 0xff));

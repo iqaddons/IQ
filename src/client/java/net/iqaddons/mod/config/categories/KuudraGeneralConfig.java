@@ -318,6 +318,13 @@ public class KuudraGeneralConfig {
     @Comment("Track your personal best Kuudra time and notify when beaten.")
     public static boolean personalBestTracker = true;
 
+    @ConfigEntry(
+            id = "phaseSplitsPBTracker",
+            translation = "Phase Splits PB Tracker"
+    )
+    @Comment("Track your personal best time for each individual Kuudra phase (T5 Infernal only). Notifies when a phase PB is beaten.")
+    public static boolean phaseSplitsPBTracker = true;
+
     @ConfigOption.Separator("Visual")
 
     @ConfigEntry(

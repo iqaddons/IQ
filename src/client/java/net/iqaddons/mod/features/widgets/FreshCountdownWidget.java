@@ -1,6 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
@@ -57,6 +58,7 @@ public class FreshCountdownWidget extends HudWidget {
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
         subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
+        subscribe(ChatReceivedEvent.class, this::onChatReceived);
     }
 
     @Override
@@ -92,6 +94,12 @@ public class FreshCountdownWidget extends HudWidget {
         }
     }
 
+    private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (isInstanceTransferMessage(event.getStrippedMessage())) {
+            resetFreshState();
+        }
+    }
+
     private void updateDisplay() {
         long elapsed = System.currentTimeMillis() - freshStartTime;
         long remaining = FRESH_DURATION_MS - elapsed;
@@ -110,6 +118,10 @@ public class FreshCountdownWidget extends HudWidget {
         freshStartTime = 0;
         countdownLine.text(getCountdownColor(FRESH_DURATION_MS) + TimeUtils.formatTime(FRESH_DURATION_MS));
         markDimensionsDirty();
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server") || message.contains("Starting in 4 seconds...");
     }
 
     private @NotNull String getCountdownColor(double remaining) {

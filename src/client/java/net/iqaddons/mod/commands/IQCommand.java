@@ -8,6 +8,7 @@ import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.manager.PersonalBestManager;
+import net.iqaddons.mod.manager.PhaseSplitsPBManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitScope;
@@ -18,6 +19,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -64,6 +71,7 @@ public class IQCommand {
                             return 1;
                         }))
                         .then(literal("pb").executes(ctx -> sendPersonalBest(ctx.getSource())))
+                        .then(literal("pbs").executes(ctx -> sendPhaseSplitsPBs(ctx.getSource())))
                         .then(literal("profit")
                                 .executes(ctx -> sendProfitTrackerMode(ctx.getSource()))
                                 .then(literal("toggle").executes(ctx -> toggleProfitTrackerMode(ctx.getSource())))
@@ -118,19 +126,128 @@ public class IQCommand {
             return 0;
         }
 
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§aYour Kuudra PB: §f" + formatSeconds(personalBestManager.getBestTimeMillis())));
-
         Map<KuudraPhase, Long> splits = personalBestManager.getSplitsMillis();
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§bSplits:"));
+        List<net.iqaddons.mod.model.PersonalBest.SupplyTiming> supplyTimings = personalBestManager.getSupplyTimings().stream()
+                .sorted(Comparator.comparingInt(net.iqaddons.mod.model.PersonalBest.SupplyTiming::currentSupply))
+                .toList();
+        List<net.iqaddons.mod.model.PersonalBest.FreshTiming> freshTimings = personalBestManager.getFreshTimings();
+
+        final String sep = "§8§m──────────────────────";
+
+        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Text.literal("  §d§l[IQ] §bPersonal Best §8> §3"
+                + formatSeconds(personalBestManager.getBestTimeMillis())
+                + " §8(Tier §b" + personalBestManager.getTier().getDisplayName() + "§8)"));
+        source.sendFeedback(Text.literal("  §bData: §3" + formatPbDate(personalBestManager.getRecordedAtEpochMillis())
+                + " §8- §bHour: §3" + formatPbHour(personalBestManager.getRecordedAtEpochMillis())));
+        source.sendFeedback(Text.literal(sep));
+
+        source.sendFeedback(Text.literal("  §bSplits:"));
         for (KuudraPhase phase : KuudraPhase.RUN_PHASES) {
             long millis = splits.getOrDefault(phase, 0L);
-            source.sendFeedback(Text.literal("§8- §f" + phase.getDisplayName() + ": §b" + formatSeconds(millis)));
+            String phaseColor = getPhaseSplitColor(phase);
+            String value = millis > 0 ? phaseColor + formatSeconds(millis) : "§8-";
+            source.sendFeedback(Text.literal("    " + phaseColor + phase.getDisplayName() + " §8> " + value));
         }
 
+        source.sendFeedback(Text.literal("  §bSupplies §8[§3" + supplyTimings.size() + "§8]:"));
+        if (supplyTimings.isEmpty()) {
+            source.sendFeedback(Text.literal("    §8-"));
+        } else {
+            for (net.iqaddons.mod.model.PersonalBest.SupplyTiming timing : supplyTimings) {
+                source.sendFeedback(Text.literal("    " + timing.playerName()
+                        + " §8(§b" + timing.currentSupply() + "§8/§36§8) §3"
+                        + String.format(Locale.ROOT, "%.2fs", timing.seconds())));
+            }
+        }
+
+        source.sendFeedback(Text.literal("  §bFreshs §8[§3" + freshTimings.size() + "§8]:"));
+        if (freshTimings.isEmpty()) {
+            source.sendFeedback(Text.literal("    §8-"));
+        } else {
+            for (net.iqaddons.mod.model.PersonalBest.FreshTiming timing : freshTimings) {
+                source.sendFeedback(Text.literal("    " + timing.playerName() + " §8- §3"
+                        + String.format(Locale.ROOT, "%.2fs", timing.seconds())));
+            }
+        }
+
+        source.sendFeedback(Text.literal(sep));
         return 1;
     }
 
+    private static int sendPhaseSplitsPBs(@NotNull FabricClientCommandSource source) {
+        PhaseSplitsPBManager pbManager = PhaseSplitsPBManager.get();
+        if (!pbManager.hasAnyPB()) {
+            source.sendFeedback(Text.literal("§d§l[IQ] §r§7No Phase Split PBs recorded yet. Complete a T5 Infernal run!"));
+            return 0;
+        }
+
+        Map<KuudraPhase, Long> splits = pbManager.getAllSplits();
+        Integer buildFreshCount = pbManager.getBuildPbFreshCount();
+        final String sep = "§8§m──────────────────────";
+
+        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Text.literal("  §d§l[IQ]  §b§lPhase Split PBs  §8(§3T5 Infernal§8)"));
+        source.sendFeedback(Text.literal(sep));
+
+        for (KuudraPhase phase : KuudraPhase.RUN_PHASES) {
+            sendPbPhaseLine(source, splits, phase, buildFreshCount);
+        }
+
+        source.sendFeedback(Text.literal(sep));
+        return 1;
+    }
+
+    private static void sendPbPhaseLine(
+            @NotNull FabricClientCommandSource source,
+            @NotNull Map<KuudraPhase, Long> splits,
+            @NotNull KuudraPhase phase,
+            Integer buildFreshCount
+    ) {
+        long millis = splits.getOrDefault(phase, 0L);
+        String phaseColor = getPhaseSplitColor(phase);
+        String timeStr = millis > 0 ? phaseColor + formatSeconds(millis) : "§8-";
+
+        String phaseLabel = phase.getDisplayName();
+        if (phase == KuudraPhase.BUILD && buildFreshCount != null) {
+            phaseLabel += " §8(§b" + buildFreshCount + "§8)";
+        }
+
+        source.sendFeedback(Text.literal("    §8▸ " + phaseColor + phaseLabel + " §8» " + timeStr));
+    }
+
+    private static @NotNull String getPhaseSplitColor(@NotNull KuudraPhase phase) {
+        return switch (phase) {
+            case SUPPLIES -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.supplies.code();
+            case BUILD    -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.build.code();
+            case EATEN    -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.eaten.code();
+            case STUN     -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.stun.code();
+            case DPS      -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.dps.code();
+            case SKIP     -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.skip.code();
+            case BOSS     -> net.iqaddons.mod.config.categories.KuudraGeneralConfig.SplitColorConfig.boss.code();
+            default       -> "§f";
+        };
+    }
+
     private static @NotNull String formatSeconds(long millis) {
-        return String.format("%.2fs", millis / 1000.0);
+        return String.format(Locale.ROOT, "%.2fs", millis / 1000.0);
+    }
+
+    private static @NotNull String formatPbDate(long epochMillis) {
+        if (epochMillis <= 0) {
+            return "--/--/----";
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return formatter.format(Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()));
+    }
+
+    private static @NotNull String formatPbHour(long epochMillis) {
+        if (epochMillis <= 0) {
+            return "--:--:--";
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return formatter.format(Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()));
     }
 }

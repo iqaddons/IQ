@@ -2,9 +2,11 @@ package net.iqaddons.mod.features.widgets;
 
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.BuildProgressOverlayUtil;
@@ -24,6 +26,7 @@ public class BuildProgressWidget extends HudWidget {
     private int currentProgress = 0;
     private int builderCount = 0;
     private int freshCount = 0;
+    private long countdownEndMillis = -1L;
 
     public BuildProgressWidget() {
         super(
@@ -34,13 +37,19 @@ public class BuildProgressWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        titleLine = HudLine.of("§6§lBuild Progress");
-        progressLine = HudLine.of("§fProgress: §c0%");
-        buildersLine = HudLine.of("§fBuilders: §e0").showWhen(() -> builderCount > 0);
-        freshLine = HudLine.of("§fFresh: §b0").showWhen(() -> freshCount > 0);
+        titleLine = HudLine.of("§6§lBuild Progress")
+                .showWhen(() -> stateManager.phase() == KuudraPhase.BUILD || hasActiveCountdown());
+        progressLine = HudLine.of("§fProgress: §c0%")
+                .showWhen(() -> stateManager.phase() == KuudraPhase.BUILD || hasActiveCountdown());
+        buildersLine = HudLine.of("§fBuilders: §e0").showWhen(() -> !hasActiveCountdown() && builderCount > 0);
+        freshLine = HudLine.of("§fFresh: §b0").showWhen(() -> !hasActiveCountdown() && freshCount > 0);
 
         setEnabledSupplier(BuildProgressOverlayUtil::isClassicOverlayEnabled);
-        setVisibilityCondition(() -> stateManager.phase() == KuudraPhase.BUILD);
+        setVisibilityCondition(() -> {
+            KuudraPhase phase = stateManager.phase();
+            if (phase == KuudraPhase.BUILD) return true;
+            return phase == KuudraPhase.SUPPLIES && BuildProgressOverlayUtil.isBuildStartCountdownEnabled();
+        });
 
         setExampleLines(List.of(
                 HudLine.of("§6§lBuild Progress"),
@@ -55,6 +64,7 @@ public class BuildProgressWidget extends HudWidget {
         currentProgress = 0;
         builderCount = 0;
         freshCount = 0;
+        countdownEndMillis = -1L;
 
         clearLines();
         addLines(titleLine, progressLine, buildersLine, freshLine);
@@ -63,6 +73,7 @@ public class BuildProgressWidget extends HudWidget {
 
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
+        subscribe(SupplyPlaceEvent.class, this::onSupplyPlace);
     }
 
     @Override
@@ -70,11 +81,24 @@ public class BuildProgressWidget extends HudWidget {
         currentProgress = 0;
         builderCount = 0;
         freshCount = 0;
+        countdownEndMillis = -1L;
         updateDisplay();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
+
+        if (hasActiveCountdown()) {
+            updateDisplay();
+            return;
+        }
+
+        if (countdownEndMillis > 0) {
+            countdownEndMillis = -1L;
+            updateDisplay();
+        }
+
+        if (stateManager.phase() != KuudraPhase.BUILD) return;
 
         BuildProgressOverlayUtil.BuildProgressData data = BuildProgressOverlayUtil.getBuildProgressFromArmorStand();
         if (data == null) return;
@@ -93,11 +117,34 @@ public class BuildProgressWidget extends HudWidget {
         updateDisplay();
     }
 
+    private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
+        if (!PhaseTwoConfig.buildStartCountdownOverlay) return;
+        if (event.currentSupply() < 6) return;
+
+        countdownEndMillis = System.currentTimeMillis() + BuildProgressOverlayUtil.BUILD_START_COUNTDOWN_MS;
+        updateDisplay();
+    }
+
     private void updateDisplay() {
+        if (hasActiveCountdown()) {
+            long remainingMs = Math.max(0L, countdownEndMillis - System.currentTimeMillis());
+            String color = BuildProgressOverlayUtil.getCountdownColor(remainingMs);
+            if (color == null) color = "§c";
+
+            progressLine.text(String.format("§fStarting in: %s%ss", color, BuildProgressOverlayUtil.formatCountdownSeconds(remainingMs)));
+            markDimensionsDirty();
+            return;
+        }
+
         progressLine.text(String.format("§fProgress: %s%d%%", getProgressColor(currentProgress), currentProgress));
         buildersLine.text(String.format("§fBuilders: §e%d", builderCount));
         freshLine.text(String.format("§fFresh: §b%d", freshCount));
         markDimensionsDirty();
+    }
+
+    private boolean hasActiveCountdown() {
+        if (!PhaseTwoConfig.buildStartCountdownOverlay) return false;
+        return countdownEndMillis > System.currentTimeMillis();
     }
 
     private @NotNull String getProgressColor(int progress) {

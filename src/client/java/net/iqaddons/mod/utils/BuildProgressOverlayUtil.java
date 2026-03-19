@@ -4,8 +4,10 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +18,7 @@ public final class BuildProgressOverlayUtil {
 
 	private static final Pattern PROGRESS_PATTERN = Pattern.compile("Building Progress:?\\s*(\\d+)%");
     private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
+	public static final long BUILD_START_COUNTDOWN_MS = 6200L;
 
 	private static boolean lastClassicEnabled = PhaseTwoConfig.buildProgressOverlay;
 	private static boolean lastSimpleEnabled = PhaseTwoConfig.simpleBuildProgressOverlay;
@@ -28,6 +31,25 @@ public final class BuildProgressOverlayUtil {
 	public static boolean isSimpleOverlayEnabled() {
 		syncOverlayModes();
 		return PhaseTwoConfig.simpleBuildProgressOverlay;
+	}
+
+	public static boolean isBuildStartCountdownEnabled() {
+		return PhaseTwoConfig.buildStartCountdownOverlay;
+	}
+
+	public static @Nullable String getCountdownColor(long remainingMs) {
+		if (remainingMs <= 0) return null;
+
+		double ratio = Math.min(1.0, Math.max(0.0, (double) remainingMs / BUILD_START_COUNTDOWN_MS));
+		if (ratio > 0.75) return "§a";
+		if (ratio > 0.50) return "§e";
+		if (ratio > 0.25) return "§6";
+		return "§c";
+	}
+
+	public static @NotNull String formatCountdownSeconds(long remainingMs) {
+		double seconds = Math.max(0L, remainingMs) / 1000.0;
+		return String.format(Locale.ROOT, "%.2f", seconds);
 	}
 
 	public static void syncOverlayModes() {

@@ -2,6 +2,8 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
@@ -12,6 +14,7 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {
@@ -39,6 +43,10 @@ public class SupplyTimerWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseOneConfig.supplyTimers);
         setVisibilityCondition(() -> {
+            if (!ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+                return false;
+            }
+
             var phase = KuudraStateManager.get().phase();
             boolean inTrackedPhases = KuudraPhase.isOneOf(
                     KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
@@ -69,12 +77,15 @@ public class SupplyTimerWidget extends HudWidget {
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
         subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
+        subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(ClientTickEvent.class, this::onTick);
 
         updateDisplay();
     }
 
     @Override
     protected void onDeactivate() {
+        persistUntilInstanceChange = false;
         resetLocalState();
     }
 
@@ -89,6 +100,10 @@ public class SupplyTimerWidget extends HudWidget {
     }
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.isEnteringKuudra()) {
+            resetOnInstanceChange();
+        }
+
         if (event.currentPhase() == KuudraPhase.SUPPLIES) {
             beginNewRunWindow();
             updateDisplay();
@@ -97,9 +112,7 @@ public class SupplyTimerWidget extends HudWidget {
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
-            persistUntilInstanceChange = false;
-            resetLocalState();
-            updateDisplay();
+            resetOnInstanceChange();
         }
     }
 
@@ -109,9 +122,38 @@ public class SupplyTimerWidget extends HudWidget {
             return;
         }
 
+        resetOnInstanceChange();
+    }
+
+    private void onTick(@NotNull ClientTickEvent event) {
+        if (!event.isInGame() || !event.isNthTick(2)) {
+            return;
+        }
+
+        if (!ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) || !ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            resetOnInstanceChange();
+        }
+    }
+
+    private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (isInstanceTransferMessage(event.getStrippedMessage())) {
+            resetOnInstanceChange();
+        }
+    }
+
+    private void resetOnInstanceChange() {
+        if (!persistUntilInstanceChange && pickupHistory.isEmpty()) {
+            return;
+        }
+
         persistUntilInstanceChange = false;
         resetLocalState();
         updateDisplay();
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server")
+                || (message.contains("Starting in ") && message.contains(" seconds"));
     }
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {

@@ -1,25 +1,30 @@
 package net.iqaddons.mod.features.kuudra.tracker;
 
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
+import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.PersonalBestManager;
+import net.iqaddons.mod.model.PersonalBest;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 public class PersonalBestTrackerFeature extends Feature {
 
-    private static final Identifier PERSONALBEST_SOUND_ID = Identifier.of("iq", "pb_new_record");
-
     private final PersonalBestManager personalBestManager = PersonalBestManager.get();
+    private final Map<Integer, PersonalBest.SupplyTiming> supplyTimings = new HashMap<>();
+    private final List<PersonalBest.FreshTiming> freshTimings = new ArrayList<>();
+    private long buildPhaseStartedAt = -1L;
 
     public PersonalBestTrackerFeature() {
         super("personalBestTracker", "PB Tracker",
@@ -28,10 +33,54 @@ public class PersonalBestTrackerFeature extends Feature {
 
     @Override
     protected void onActivate() {
+        subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
+        subscribe(SupplyPlaceEvent.class, this::onSupplyPlace);
+        subscribe(PlayerFreshEvent.class, this::onFresh);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
     }
 
+    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.isEnteringKuudra()) {
+            supplyTimings.clear();
+            freshTimings.clear();
+            buildPhaseStartedAt = -1L;
+        }
+
+        if (event.currentPhase() == KuudraPhase.BUILD) {
+            buildPhaseStartedAt = System.currentTimeMillis();
+        }
+    }
+
+    private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
+        if (event.currentSupply() <= 0 || event.currentSupply() > 6) {
+            return;
+        }
+
+        supplyTimings.put(
+                event.currentSupply(),
+                PersonalBest.SupplyTiming.of(event.playerName(), event.currentSupply(), event.placedAt())
+        );
+    }
+
+    private void onFresh(@NotNull PlayerFreshEvent event) {
+        if (buildPhaseStartedAt <= 0) {
+            return;
+        }
+
+        double seconds = Math.max(0.0, (event.freshAt() - buildPhaseStartedAt) / 1000.0);
+        freshTimings.add(PersonalBest.FreshTiming.of(event.playerName(), seconds));
+    }
+
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        List<PersonalBest.SupplyTiming> runSupplyTimings = supplyTimings.values().stream()
+                .sorted(java.util.Comparator.comparingInt(PersonalBest.SupplyTiming::currentSupply))
+                .toList();
+        List<PersonalBest.FreshTiming> runFreshTimings = List.copyOf(freshTimings);
+
+        supplyTimings.clear();
+        freshTimings.clear();
+        buildPhaseStartedAt = -1L;
+
         if (!event.isCompleted()) return;
 
         long runMillis = event.totalDuration().toMillis();
@@ -47,32 +96,35 @@ public class PersonalBestTrackerFeature extends Feature {
             splits.put(phase, event.getPhase(phase).toMillis());
         }
 
-        personalBestManager.updatePersonalBest(runMillis, splits);
+        personalBestManager.updatePersonalBest(
+                runMillis,
+                splits,
+                event.tier(),
+                System.currentTimeMillis(),
+                runSupplyTimings,
+                runFreshTimings
+        );
         if (previousPbMillis <= 0) {
-            MessageUtil.sendFormattedMessage("§aNew Personal Best set: &f" + formatSeconds(runMillis));
-            playSound();
+            MessageUtil.sendFormattedMessage("&aNew Personal Best! &9" + formatSeconds(runMillis));
             return;
         }
 
-        MessageUtil.showTitle("§a§lNew Personal Best!", formatSeconds(previousPbMillis) + " > " + formatSeconds(runMillis), 0, 35, 10);
-        MessageUtil.sendFormattedMessage(String.format(
-                "§aYou just beat a new Personal Best! Previous one was &f%s&a, now is &f%s&a.",
-                formatSeconds(previousPbMillis),
-                formatSeconds(runMillis)
-        ));
-
-        playSound();
+        long deltaMillis = previousPbMillis - runMillis;
+        MessageUtil.showTitle(
+                "§a§lNew Personal Best!",
+                "§c" + formatSeconds(previousPbMillis) + " §7> §9" + formatSeconds(runMillis),
+                0,
+                35,
+                10
+        );
+        MessageUtil.sendFormattedMessage(
+                "&aNew Personal Best! &c" + formatSeconds(previousPbMillis)
+                        + " &7> &9" + formatSeconds(runMillis)
+                        + " &8(-" + formatSeconds(deltaMillis) + ")"
+        );
     }
 
     private @NotNull String formatSeconds(long millis) {
         return String.format(Locale.ROOT, "%.2fs", millis / 1000.0);
-    }
-
-    private void playSound() {
-        if (mc.getSoundManager() == null) {
-            return;
-        }
-
-        mc.getSoundManager().play(PositionedSoundInstance.master(SoundEvent.of(PERSONALBEST_SOUND_ID), 1.0F, 1.0F));
     }
 }

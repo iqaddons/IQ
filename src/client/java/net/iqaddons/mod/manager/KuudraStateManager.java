@@ -236,6 +236,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         KuudraPhase previousPhase = current.phase();
         long phaseDurationMs = current.phaseDuration().toMillis();
+        KuudraTier runTier = current.tier();
 
         contextRef.set(KuudraContext.empty());
         KuudraLocationUtil.invalidateCache();
@@ -253,6 +254,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         EventBus.post(new KuudraRunEndEvent(
                 reason,
+                runTier,
                 totalDuration,
                 Map.copyOf(phaseDurations)
         ));
@@ -262,7 +264,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private boolean isInstanceTransferMessage(@NotNull String message) {
-        return message.contains("Sending to server") || message.contains("Starting in 5 seconds...");
+        return message.contains("Sending to server") || message.contains("Starting in 4 seconds...");
     }
 
     private boolean performPhaseTransition(

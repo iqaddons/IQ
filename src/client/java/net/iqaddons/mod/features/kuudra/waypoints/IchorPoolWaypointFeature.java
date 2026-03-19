@@ -3,6 +3,9 @@ package net.iqaddons.mod.features.kuudra.waypoints;
 import net.iqaddons.mod.config.categories.PhaseFourConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.WorldRenderEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
+import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.util.math.Vec3d;
@@ -13,6 +16,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 
 public class IchorPoolWaypointFeature extends Feature {
 
@@ -39,15 +44,24 @@ public class IchorPoolWaypointFeature extends Feature {
     protected void onActivate() {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
         subscribe(WorldRenderEvent.class, this::onWorldRender);
+        subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
+        subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
+        subscribe(KuudraRunEndEvent.class, this::onRunEnd);
     }
 
     @Override
     protected void onDeactivate() {
-        activePools.clear();
+        clearActivePools();
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
-        Matcher matcher = ICHOR_LOCATION_PATTERN.matcher(event.getStrippedMessage());
+        String message = event.getStrippedMessage();
+        if (isInstanceTransferMessage(message)) {
+            clearActivePools();
+            return;
+        }
+
+        Matcher matcher = ICHOR_LOCATION_PATTERN.matcher(message);
         if (!matcher.matches()) return;
 
         double x = Double.parseDouble(matcher.group(1));
@@ -55,6 +69,25 @@ public class IchorPoolWaypointFeature extends Feature {
         double z = Double.parseDouble(matcher.group(3));
 
         activePools.add(new IchorPoolArea(new Vec3d(x + 0.5, y + 0.05, z + 0.5), System.currentTimeMillis() + ICHOR_DURATION_MS));
+    }
+
+    private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
+        if (!stillInKuudraInstance) {
+            clearActivePools();
+        }
+    }
+
+    private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (event.isEnteringKuudra()) {
+            clearActivePools();
+        }
+    }
+
+    private void onRunEnd(@NotNull KuudraRunEndEvent event) {
+        if (event.isUnexpectedlyEnded()) {
+            clearActivePools();
+        }
     }
 
     private void onWorldRender(@NotNull WorldRenderEvent event) {
@@ -74,6 +107,15 @@ public class IchorPoolWaypointFeature extends Feature {
                     ICHOR_COLOR
             );
         }
+    }
+
+    private void clearActivePools() {
+        activePools.clear();
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server")
+                || (message.contains("Starting in ") && message.contains(" seconds"));
     }
 
     private record IchorPoolArea(Vec3d center, long expiresAtMs) {

@@ -13,6 +13,7 @@ import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
+import net.iqaddons.mod.utils.ServerUtils;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +29,12 @@ public class NoPreAlertFeature extends KuudraFeature {
 
     private static final int SUPPLY_SCAN_INTERVAL_TICKS = 2;
     private static final long EARLY_CHECK_DELAY_MS = 10_000L;
+    private static final long MAX_LAG_BUDGET_MS = 4_000L;
+    private static final long PING_BASELINE_MS = 120L;
+    private static final long FALLBACK_CONFIRM_DELAY_MS = 350L;
+    private static final int MIN_EMPTY_SCANS_FOR_FALLBACK = 3;
+    private static final long SUPPLY_SPAWN_DESYNC_GRACE_MS = 250L;
+    private static final int PARTIAL_SPAWN_MAX_SUPPLIES = 2;
 
     private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
             "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
@@ -45,6 +52,11 @@ public class NoPreAlertFeature extends KuudraFeature {
     private boolean supplyCheckCompleted = false;
     private boolean carrierCheckAttempted = false;
     private boolean timedCheckAttempted = false;
+    private boolean fallbackConfirmationPending = false;
+    private long fallbackConfirmationStartMs = 0L;
+    private long firstSupplySeenAtMs = 0L;
+    private boolean graceRecheckAttempted = false;
+    private int consecutiveEmptyScans = 0;
 
     public NoPreAlertFeature() {
         super(
@@ -77,15 +89,50 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (supplyCheckCompleted || kuudraState.phase() != KuudraPhase.SUPPLIES) return;
 
         List<SupplyPosition> supplies = updateSupplyPositions();
-        if (!carrierCheckAttempted && !supplies.isEmpty()) {
-            carrierCheckAttempted = true;
-            queueSupplyCheck("supplier giant spawn", false);
+        if (!supplies.isEmpty()) {
+            long now = System.currentTimeMillis();
+            if (firstSupplySeenAtMs == 0L) {
+                firstSupplySeenAtMs = now;
+            }
+
+            consecutiveEmptyScans = 0;
+            fallbackConfirmationPending = false;
+            if (!carrierCheckAttempted) {
+                carrierCheckAttempted = true;
+                queueSupplyCheck("supplier giant spawn", false);
+            } else if (!graceRecheckAttempted
+                    && now - firstSupplySeenAtMs >= SUPPLY_SPAWN_DESYNC_GRACE_MS) {
+                graceRecheckAttempted = true;
+                queueSupplyCheck("spawn desync grace recheck", false);
+            }
             return;
         }
 
-        if (!timedCheckAttempted && supplyState.getElapsedTimeMillis() >= EARLY_CHECK_DELAY_MS) {
-            timedCheckAttempted = true;
-            queueSupplyCheck("10.0s fallback timer", false);
+        firstSupplySeenAtMs = 0L;
+        graceRecheckAttempted = false;
+        consecutiveEmptyScans++;
+
+        if (!timedCheckAttempted) {
+            long elapsedMs = supplyState.getElapsedTimeMillis();
+            long adaptiveFallbackDelayMs = getAdaptiveFallbackDelayMs();
+
+            if (elapsedMs >= adaptiveFallbackDelayMs) {
+                if (!fallbackConfirmationPending) {
+                    fallbackConfirmationPending = true;
+                    fallbackConfirmationStartMs = System.currentTimeMillis();
+                    log.debug("Starting no-pre fallback confirmation (elapsed={}ms, delay={}ms, emptyScans={})",
+                            elapsedMs, adaptiveFallbackDelayMs, consecutiveEmptyScans);
+                    return;
+                }
+
+                long confirmationElapsed = System.currentTimeMillis() - fallbackConfirmationStartMs;
+                if (confirmationElapsed >= FALLBACK_CONFIRM_DELAY_MS
+                        && consecutiveEmptyScans >= MIN_EMPTY_SCANS_FOR_FALLBACK) {
+                    timedCheckAttempted = true;
+                    fallbackConfirmationPending = false;
+                    queueSupplyCheck("adaptive fallback timer", false);
+                }
+            }
         }
     }
 
@@ -131,6 +178,11 @@ public class NoPreAlertFeature extends KuudraFeature {
         supplyCheckCompleted = false;
         carrierCheckAttempted = false;
         timedCheckAttempted = false;
+        fallbackConfirmationPending = false;
+        fallbackConfirmationStartMs = 0L;
+        firstSupplySeenAtMs = 0L;
+        graceRecheckAttempted = false;
+        consecutiveEmptyScans = 0;
     }
 
     private void queueSupplyCheck(@NotNull String trigger, boolean notifyDetectionFailure) {
@@ -145,7 +197,7 @@ public class NoPreAlertFeature extends KuudraFeature {
                 supplyCheckCompleted = true;
                 log.debug("Triggered no-pre check from {}", trigger);
             } else {
-                log.debug("Skipped no-pre check from {} because pre spot was not ready yet", trigger);
+                log.debug("Deferred no-pre check from {} until state is stable", trigger);
             }
         });
     }
@@ -212,10 +264,16 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         log.debug("Detected pre spot: {}", preSpot.getDisplayName());
-        updateSupplyPositions();
+        List<SupplyPosition> supplies = updateSupplyPositions();
 
         boolean hasPre = supplyState.hasPreSupply();
         if (!hasPre) {
+            if (shouldWaitForSpawnDesync(supplies)) {
+                log.debug("Deferring no-pre alert for {} due to spawn desync grace (supplies={})",
+                        preSpot.getDisplayName(), supplies.size());
+                return false;
+            }
+
             supplyState.setMissingPre(preSpot.getMissingPreValue());
             MessageUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!");
             log.debug("No pre supply detected for {}, announced to party", preSpot.getDisplayName());
@@ -224,6 +282,12 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (preSpot.hasSecondaryLocation()) {
             Boolean hasSecondary = supplyState.hasSecondarySupply();
             if (hasSecondary != null && !hasSecondary) {
+                if (shouldWaitForSpawnDesync(supplies)) {
+                    log.debug("Deferring secondary alert for {} due to spawn desync grace (supplies={})",
+                            preSpot.getSecondaryName(), supplies.size());
+                    return false;
+                }
+
                 MessageUtil.PARTY.sendMessage("No " + preSpot.getSecondaryName() + "!");
                 log.debug("No secondary supply detected for {}, announced to party",
                         preSpot.getSecondaryName());
@@ -237,5 +301,31 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         return true;
+    }
+
+    private boolean shouldWaitForSpawnDesync(@NotNull List<SupplyPosition> supplies) {
+        if (supplies.isEmpty() || supplies.size() > PARTIAL_SPAWN_MAX_SUPPLIES) {
+            return false;
+        }
+
+        if (firstSupplySeenAtMs == 0L) {
+            return false;
+        }
+
+        long elapsedSinceFirstSupplyMs = System.currentTimeMillis() - firstSupplySeenAtMs;
+        return elapsedSinceFirstSupplyMs < SUPPLY_SPAWN_DESYNC_GRACE_MS;
+    }
+
+    private long getAdaptiveFallbackDelayMs() {
+        float averageTps = ServerUtils.getAverageTps();
+        long averagePingMs = ServerUtils.getAveragePing().toMillis();
+
+        long tpsBudgetMs = Math.max(0L, Math.round((20.0f - averageTps) * 220.0f));
+        long pingBudgetMs = averagePingMs > PING_BASELINE_MS
+                ? (averagePingMs - PING_BASELINE_MS) * 2L
+                : 0L;
+
+        long lagBudgetMs = Math.min(MAX_LAG_BUDGET_MS, tpsBudgetMs + pingBudgetMs);
+        return EARLY_CHECK_DELAY_MS + lagBudgetMs;
     }
 }

@@ -57,6 +57,13 @@ public class PhaseTwoConfig {
     public static boolean simpleBuildProgressOverlay = false;
 
     @ConfigEntry(
+            id = "buildStartCountdownOverlay",
+            translation = "Build Start Countdown"
+    )
+    @Comment("Show a countdown for when the build starts during the phase animation.")
+    public static boolean buildStartCountdownOverlay = true;
+
+    @ConfigEntry(
             id = "freshTimers",
             translation = "Fresh Times"
     )
