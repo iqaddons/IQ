@@ -2,8 +2,8 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
-import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
@@ -48,10 +48,6 @@ public class SupplyTimerWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseOneConfig.supplyTimers);
         setVisibilityCondition(() -> {
-            if (!ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
-                return false;
-            }
-
             var phase = KuudraStateManager.get().phase();
             boolean inTrackedPhases = KuudraPhase.isOneOf(
                     KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
@@ -86,12 +82,14 @@ public class SupplyTimerWidget extends HudWidget {
         subscribe(ClientTickEvent.class, this::onTick);
 
         updateDisplay();
+        log.info("Freshers Timer Widget has been activated");
     }
 
     @Override
     protected void onDeactivate() {
         persistUntilInstanceChange = false;
         resetLocalState();
+        log.info("Freshers Timer Widget has been deactivated");
     }
 
     private void resetLocalState() {
