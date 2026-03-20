@@ -115,7 +115,10 @@ public final class KuudraStateValidator {
 
         if (context.isInRun()) {
             String currentArea = getCurrentArea();
-            if (!isInKuudraArea(currentArea)) {
+            // An empty/blank area string means the scoreboard area line is momentarily absent
+            // (e.g. during a phase transition that changes the scoreboard format like DPS->SKIP).
+            // Only report a mismatch when we have an actual non-blank area to compare against.
+            if (!currentArea.isBlank() && !isInKuudraArea(currentArea)) {
                 return new ValidationResult.AreaMismatch(KUUDRA_AREA_ID, currentArea);
             }
 

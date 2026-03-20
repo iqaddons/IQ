@@ -12,6 +12,7 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,11 +22,13 @@ import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 public class FreshCountdownWidget extends HudWidget {
 
     private static final long FRESH_DURATION_MS = 10_000;
+    private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
 
     private long freshStartTime = 0;
     private boolean freshActive = false;
+    private long pendingExitSinceMillis = -1L;
 
     private final HudLine countdownLine;
 
@@ -88,10 +91,24 @@ public class FreshCountdownWidget extends HudWidget {
     }
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
-        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
-        if (!stillInKuudraInstance) {
+        if (!event.onSkyBlock()) {
             resetFreshState();
+            return;
         }
+
+        // Ignore transient blank area updates during scoreboard format transitions
+        // (e.g. DPS -> SKIP) while still inside the same SkyBlock instance.
+        if (event.newArea().isBlank()) {
+            return;
+        }
+
+        boolean stillInKuudraInstance = event.newArea().contains(KUUDRA_AREA_ID);
+        if (!stillInKuudraInstance) {
+            armPendingExit();
+            return;
+        }
+
+        clearPendingExit();
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
@@ -101,6 +118,8 @@ public class FreshCountdownWidget extends HudWidget {
     }
 
     private void updateDisplay() {
+        confirmPendingExitIfNeeded();
+
         long elapsed = System.currentTimeMillis() - freshStartTime;
         long remaining = FRESH_DURATION_MS - elapsed;
         if (remaining <= 0) {
@@ -116,8 +135,38 @@ public class FreshCountdownWidget extends HudWidget {
     private void resetFreshState() {
         freshActive = false;
         freshStartTime = 0;
+        clearPendingExit();
         countdownLine.text(getCountdownColor(FRESH_DURATION_MS) + TimeUtils.formatTime(FRESH_DURATION_MS));
         markDimensionsDirty();
+    }
+
+    private void armPendingExit() {
+        if (pendingExitSinceMillis < 0L) {
+            pendingExitSinceMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void clearPendingExit() {
+        pendingExitSinceMillis = -1L;
+    }
+
+    private void confirmPendingExitIfNeeded() {
+        if (!freshActive || pendingExitSinceMillis < 0L) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - pendingExitSinceMillis < INSTANCE_EXIT_CONFIRMATION_MS) {
+            return;
+        }
+
+        if (ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            clearPendingExit();
+            return;
+        }
+
+        clearPendingExit();
+        resetFreshState();
     }
 
     private boolean isInstanceTransferMessage(@NotNull String message) {

@@ -28,7 +28,8 @@ import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 public class SupplyTimerWidget extends HudWidget {
 
     private static final long SUPPLY_SPAWN_COUNTDOWN_MS = 8850L;
-    private static final long HALF_RATE_TICK_INTERVAL_MS = 100L;
+    private static final long FULL_RATE_TICK_INTERVAL_MS = 50L;
+    private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
@@ -36,6 +37,7 @@ public class SupplyTimerWidget extends HudWidget {
     private volatile boolean persistUntilInstanceChange = false;
     private long supplySpawnCountdownEndMillis = -1L;
     private long lastCountdownTickMillis = -1L;
+    private long pendingExitSinceMillis = -1L;
 
     public SupplyTimerWidget() {
         super(
@@ -98,6 +100,7 @@ public class SupplyTimerWidget extends HudWidget {
         pickupHistory.clear();
         supplySpawnCountdownEndMillis = -1L;
         lastCountdownTickMillis = -1L;
+        clearPendingExit();
     }
 
     private void beginNewRunWindow() {
@@ -128,18 +131,33 @@ public class SupplyTimerWidget extends HudWidget {
     }
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
-        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
-        if (stillInKuudraInstance) {
+        if (!event.onSkyBlock()) {
+            resetOnInstanceChange();
             return;
         }
 
-        resetOnInstanceChange();
+        // Ignore transient blank area updates that occur when the scoreboard changes format
+        // between phases (e.g. DPS -> SKIP). A blank newArea while still on SkyBlock does
+        // not mean the player left the Kuudra instance.
+        if (event.newArea().isBlank()) {
+            return;
+        }
+
+        boolean stillInKuudraInstance = event.newArea().contains(KUUDRA_AREA_ID);
+        if (stillInKuudraInstance) {
+            clearPendingExit();
+            return;
+        }
+
+        armPendingExit();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame() || !event.isNthTick(2)) {
+        if (!event.isInGame()) {
             return;
         }
+
+        confirmPendingExitIfNeeded();
 
         long now = System.currentTimeMillis();
         if (supplySpawnCountdownEndMillis > 0L) {
@@ -147,7 +165,7 @@ public class SupplyTimerWidget extends HudWidget {
                     supplySpawnCountdownEndMillis,
                     lastCountdownTickMillis,
                     now,
-                    HALF_RATE_TICK_INTERVAL_MS
+                    FULL_RATE_TICK_INTERVAL_MS
             );
             lastCountdownTickMillis = now;
         } else {
@@ -182,6 +200,35 @@ public class SupplyTimerWidget extends HudWidget {
         persistUntilInstanceChange = false;
         resetLocalState();
         updateDisplay();
+    }
+
+    private void armPendingExit() {
+        if (pendingExitSinceMillis < 0L) {
+            pendingExitSinceMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void clearPendingExit() {
+        pendingExitSinceMillis = -1L;
+    }
+
+    private void confirmPendingExitIfNeeded() {
+        if (pendingExitSinceMillis < 0L) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - pendingExitSinceMillis < INSTANCE_EXIT_CONFIRMATION_MS) {
+            return;
+        }
+
+        if (ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            clearPendingExit();
+            return;
+        }
+
+        clearPendingExit();
+        resetOnInstanceChange();
     }
 
     private boolean isInstanceTransferMessage(@NotNull String message) {

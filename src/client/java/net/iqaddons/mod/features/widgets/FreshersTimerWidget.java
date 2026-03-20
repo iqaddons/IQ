@@ -122,6 +122,13 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        // Ignore transient blank area updates that occur when the scoreboard changes format
+        // between phases (e.g. DPS -> SKIP). A blank newArea while still on SkyBlock does
+        // not mean the player left the Kuudra instance.
+        if (event.onSkyBlock() && event.newArea().isBlank()) {
+            return;
+        }
+
         boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
         if (stillInKuudraInstance) {
             return;
@@ -132,6 +139,14 @@ public class FreshersTimerWidget extends HudWidget {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame() || !event.isNthTick(2)) {
+            return;
+        }
+
+        // If KuudraStateManager still considers us in-run, trust its lifecycle management.
+        // Only fall back to a direct scoreboard check when the manager also reports no active
+        // run, to avoid false resets caused by transient scoreboard format changes between
+        // phases (e.g. DPS -> SKIP).
+        if (kuudraManager.isInKuudra()) {
             return;
         }
 

@@ -75,6 +75,11 @@ public class KuudraEventsDispatcher extends EventDispatcher {
             }
 
             String newArea = ScoreboardUtils.getArea();
+            // Ignore transient empty area reads (e.g. during scoreboard format changes between phases).
+            // A genuinely empty area while on SkyBlock just means the scoreboard line is momentarily absent.
+            if (newArea.isEmpty()) {
+                return;
+            }
             if (!newArea.equals(currentArea)) {
                 String previousArea = currentArea;
                 currentArea = newArea;
