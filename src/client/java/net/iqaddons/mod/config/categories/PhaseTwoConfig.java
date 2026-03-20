@@ -88,7 +88,7 @@ public class PhaseTwoConfig {
             id = "teamHighlight",
             translation = "Team Highlight"
     )
-    @Comment("Highlight teammates and show freshers during the build phase.")
+    @Comment("Highlight your teammates since the start of the runs.")
     public static boolean teamHighlight = true;
     @ConfigEntry(
             id = "teamHighlightColor",
@@ -97,13 +97,14 @@ public class PhaseTwoConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the teammate highlight.")
     public static int teamHighlightColor = new Color(67, 179, 29, 209).getRGB();
-    @ConfigOption.Separator("Build Alerts")
+
     @ConfigEntry(
-            id = "freshMessage",
-            translation = "Fresh Message"
+            id = "teamHighlightFreshColorEnabled",
+            translation = "Team Highlight Fresh Color"
     )
-    @Comment("Send a party message when you fresh.")
-    public static boolean freshMessage = true;
+    @Comment("Enable the fresh-color override for teammates who fresh.")
+    public static boolean teamHighlightFresh = true;
+
     @ConfigEntry(
             id = "teamHighlightFreshColor",
             translation = "Team Highlight Fresh Color"
@@ -111,6 +112,15 @@ public class PhaseTwoConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Use a different color for freshers teammates.")
     public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+
+    @ConfigOption.Separator("Build Alerts")
+    @ConfigEntry(
+            id = "freshMessage",
+            translation = "Fresh Message"
+    )
+    @Comment("Send a party message when you fresh.")
+    public static boolean freshMessage = true;
+
     @ConfigOption.Separator("Ballista Sounds")
 
     @ConfigEntry(

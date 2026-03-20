@@ -3,7 +3,11 @@ package net.iqaddons.mod.features.kuudra.alerts;
 import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
+import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.features.Feature;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.minecraft.sound.SoundEvent;
@@ -40,16 +44,6 @@ public class KuudraNotificationsFeature extends Feature {
                     () -> KuudraGeneralConfig.KuudraNotifications.sosReminder
             ),
             new KuudraNotificationRule(
-                    Pattern.compile(".*Phew! The Ballista is finally ready!"),
-                    "§a§lBUILD 100%",
-                    () -> KuudraGeneralConfig.KuudraNotifications.buildDone
-            ),
-            new KuudraNotificationRule(
-                    Pattern.compile(".*\\(6/6\\).*"),
-                    "§b§lSUPPLIES 6/6",
-                    () -> KuudraGeneralConfig.KuudraNotifications.suppliesDone
-            ),
-            new KuudraNotificationRule(
                     Pattern.compile("You purchased Human Cannonball!"),
                     "§e§lCANNONBALL",
                     () -> KuudraGeneralConfig.KuudraNotifications.cannonBall
@@ -66,7 +60,7 @@ public class KuudraNotificationsFeature extends Feature {
         super(
                 "kuudraNotifications",
                 "Kuudra Notifications",
-                () -> NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled) &&
+                () -> isAnyNotificationEnabled() &&
                         ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)
         );
     }
@@ -74,6 +68,9 @@ public class KuudraNotificationsFeature extends Feature {
     @Override
     protected void onActivate() {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(KuudraPhaseChangeEvent.class, this::onKuudraPhaseChange);
+        subscribe(SupplyPickupEvent.class, this::onSupplyPickup);
+        subscribe(SupplyPlaceEvent.class, this::onSupplyPlace);
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
@@ -85,12 +82,43 @@ public class KuudraNotificationsFeature extends Feature {
             if (!matcher.matches()) continue;
 
             String alertText = matcher.replaceAll(rule.titleTemplate).toUpperCase(Locale.ROOT);
-            if (rule.soundEvent() != null) {
-                MessageUtil.showAlert(alertText, 60, rule.soundEvent());
-            } else {
-                MessageUtil.showAlert(alertText, 60);
-            }
+            showAlert(alertText, rule.soundEvent());
             return;
+        }
+    }
+
+    private void onKuudraPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
+        if (!KuudraGeneralConfig.KuudraNotifications.buildDone) return;
+        if (event.currentPhase() != KuudraPhase.EATEN) return;
+
+        showAlert("§A§LBUILD 100%", null);
+    }
+
+    private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
+        if (!KuudraGeneralConfig.KuudraNotifications.suppliesDone) return;
+        if (event.currentSupply() != 6) return;
+
+        showAlert("§B§LSUPPLIES 6/6", null);
+    }
+
+    private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
+        if (!KuudraGeneralConfig.KuudraNotifications.supplyPickedUp) return;
+
+        MessageUtil.showAlert("§a§lPICKED UP", 40);
+    }
+
+    private static boolean isAnyNotificationEnabled() {
+        return NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled)
+                || KuudraGeneralConfig.KuudraNotifications.buildDone
+                || KuudraGeneralConfig.KuudraNotifications.suppliesDone
+                || KuudraGeneralConfig.KuudraNotifications.supplyPickedUp;
+    }
+
+    private static void showAlert(@NotNull String alertText, @Nullable SoundEvent soundEvent) {
+        if (soundEvent != null) {
+            MessageUtil.showAlert(alertText, 60, soundEvent);
+        } else {
+            MessageUtil.showAlert(alertText, 60);
         }
     }
 

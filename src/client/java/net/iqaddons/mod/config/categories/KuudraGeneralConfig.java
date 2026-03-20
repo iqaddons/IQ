@@ -252,6 +252,13 @@ public class KuudraGeneralConfig {
         )
         @Comment("Show an alert when a supply is dropped.")
         public static boolean supplyDropped = true;
+
+        @ConfigEntry(
+                id = "supplyPickedUpTitle",
+                translation = "Supply Picked Up Notification"
+        )
+        @Comment("Show an alert when you finish picking up a supply.")
+        public static boolean supplyPickedUp = true;
     }
 
     @ConfigEntry(

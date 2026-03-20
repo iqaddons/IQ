@@ -116,14 +116,12 @@ public class FreshAlertFeature extends KuudraFeature {
             );
         }
 
-        applyFreshEffect(event.playerEntityId(), event.playerName());
+        trackFreshPlayer(event.playerEntityId(), event.playerName());
     }
 
-    private void applyFreshEffect(int entityId, String playerName) {
+    private void trackFreshPlayer(int entityId, String playerName) {
         freshPlayers.put(entityId, System.currentTimeMillis());
 
-        RenderColor freshColor = RenderColor.fromArgb(PhaseTwoConfig.freshHightlightColor);
-        EntityGlowUtil.setGlowing(entityId, freshColor, PRIORITY_FRESH);
 
         log.debug("Applied Fresh to {} (id: {}), total: {}", playerName, entityId, freshPlayers.size());
     }
