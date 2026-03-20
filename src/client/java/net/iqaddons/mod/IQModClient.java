@@ -14,6 +14,7 @@ import net.iqaddons.mod.lifecycle.LifecycleComponent;
 import net.iqaddons.mod.lifecycle.modules.FeatureModule;
 import net.iqaddons.mod.lifecycle.modules.KuudraModule;
 import net.iqaddons.mod.lifecycle.modules.WidgetModule;
+import net.iqaddons.mod.utils.update.ModrinthUpdateChecker;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,11 +48,13 @@ public class IQModClient implements ClientModInitializer {
 
         IQKeyBindings.register();
         registerCommands();
+        ModrinthUpdateChecker.INSTANCE.register();
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             components.forEach(LifecycleComponent::stop);
 
             DiscordRPCIntegration.INSTANCE.shutdown();
+            ModrinthUpdateChecker.INSTANCE.shutdown();
         });
 
         log.info("IQ Mod has been initialized!");
