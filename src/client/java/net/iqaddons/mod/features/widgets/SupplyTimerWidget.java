@@ -14,7 +14,6 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.CountdownLagCompensationUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,15 +27,14 @@ import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 public class SupplyTimerWidget extends HudWidget {
 
     private static final long SUPPLY_SPAWN_COUNTDOWN_MS = 8850L;
-    private static final long FULL_RATE_TICK_INTERVAL_MS = 50L;
     private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     private final List<SupplyPickupEntry> pickupHistory = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean persistUntilInstanceChange = false;
+    private volatile boolean runWindowInitialized = false;
     private long supplySpawnCountdownEndMillis = -1L;
-    private long lastCountdownTickMillis = -1L;
     private long pendingExitSinceMillis = -1L;
 
     public SupplyTimerWidget() {
@@ -99,17 +97,20 @@ public class SupplyTimerWidget extends HudWidget {
     private void resetLocalState() {
         pickupHistory.clear();
         supplySpawnCountdownEndMillis = -1L;
-        lastCountdownTickMillis = -1L;
         clearPendingExit();
     }
 
     private void beginNewRunWindow() {
+        if (runWindowInitialized) {
+            return;
+        }
+
+        runWindowInitialized = true;
         persistUntilInstanceChange = true;
         supplyState.startSuppliesPhase();
         resetLocalState();
         if (PhaseOneConfig.supplyTimerCountdown) {
             supplySpawnCountdownEndMillis = System.currentTimeMillis() + SUPPLY_SPAWN_COUNTDOWN_MS;
-            lastCountdownTickMillis = System.currentTimeMillis();
         }
     }
 
@@ -132,7 +133,7 @@ public class SupplyTimerWidget extends HudWidget {
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
         if (!event.onSkyBlock()) {
-            resetOnInstanceChange();
+            armPendingExit();
             return;
         }
 
@@ -159,19 +160,6 @@ public class SupplyTimerWidget extends HudWidget {
 
         confirmPendingExitIfNeeded();
 
-        long now = System.currentTimeMillis();
-        if (supplySpawnCountdownEndMillis > 0L) {
-            supplySpawnCountdownEndMillis = CountdownLagCompensationUtil.applyLagCompensation(
-                    supplySpawnCountdownEndMillis,
-                    lastCountdownTickMillis,
-                    now,
-                    FULL_RATE_TICK_INTERVAL_MS
-            );
-            lastCountdownTickMillis = now;
-        } else {
-            lastCountdownTickMillis = -1L;
-        }
-
         // Tick updates are countdown-only; instance resets should come from dedicated lifecycle events.
 
         if (pickupHistory.isEmpty() && hasActiveSupplySpawnCountdown()) {
@@ -181,7 +169,6 @@ public class SupplyTimerWidget extends HudWidget {
 
         if (pickupHistory.isEmpty() && supplySpawnCountdownEndMillis > 0L) {
             supplySpawnCountdownEndMillis = -1L;
-            lastCountdownTickMillis = -1L;
             updateDisplay();
         }
     }
@@ -193,6 +180,8 @@ public class SupplyTimerWidget extends HudWidget {
     }
 
     private void resetOnInstanceChange() {
+        runWindowInitialized = false;
+
         if (!persistUntilInstanceChange && pickupHistory.isEmpty()) {
             return;
         }
@@ -239,7 +228,6 @@ public class SupplyTimerWidget extends HudWidget {
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
         if (supplySpawnCountdownEndMillis > 0L) {
             supplySpawnCountdownEndMillis = -1L;
-            lastCountdownTickMillis = -1L;
         }
 
         pickupHistory.add(new SupplyPickupEntry(

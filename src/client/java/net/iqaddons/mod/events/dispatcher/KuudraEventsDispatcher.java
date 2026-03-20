@@ -22,6 +22,8 @@ import static net.iqaddons.mod.IQConstants.*;
 @Slf4j
 public class KuudraEventsDispatcher extends EventDispatcher {
 
+    private static final long SKYBLOCK_EXIT_CONFIRMATION_MS = 1200L;
+
     private KuudraStateManager kuudraStateManager;
 
     private final ChestInteractionDetector chestDetector = new ChestInteractionDetector();
@@ -31,6 +33,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
 
     private volatile boolean onSkyBlock = false;
     private volatile String currentArea = "";
+    private volatile long pendingSkyBlockExitSinceMillis = -1L;
 
     private volatile long lastTickCount = 0L;
 
@@ -55,15 +58,26 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         }
 
         {
+            boolean scoreboardReportsSkyBlock = ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
+            if (scoreboardReportsSkyBlock) {
+                clearPendingSkyBlockExit();
+            } else if (onSkyBlock) {
+                armPendingSkyBlockExit();
+                if (!isSkyBlockExitConfirmed()) {
+                    return;
+                }
+            }
+
+            boolean resolvedOnSkyBlock = scoreboardReportsSkyBlock || (onSkyBlock && !isSkyBlockExitConfirmed());
             boolean wasOnSkyBlock = onSkyBlock;
-            onSkyBlock = ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID);
-            if (wasOnSkyBlock != onSkyBlock) {
+            onSkyBlock = resolvedOnSkyBlock;
+            if (wasOnSkyBlock != resolvedOnSkyBlock) {
                 EventBus.post(new SkyblockAreaChangeEvent(
-                        onSkyBlock, currentArea,
-                        onSkyBlock ? "joined" : "left")
+                        resolvedOnSkyBlock, currentArea,
+                        resolvedOnSkyBlock ? "joined" : "left")
                 );
 
-                log.info("SkyBlock status: {}", onSkyBlock ? "joined" : "left");
+                log.info("SkyBlock status: {}", resolvedOnSkyBlock ? "joined" : "left");
             }
 
             if (!onSkyBlock) {
@@ -89,6 +103,21 @@ public class KuudraEventsDispatcher extends EventDispatcher {
                 log.info("Area: {} -> {}", previousArea, newArea);
             }
         }
+    }
+
+    private void armPendingSkyBlockExit() {
+        if (pendingSkyBlockExitSinceMillis < 0L) {
+            pendingSkyBlockExitSinceMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void clearPendingSkyBlockExit() {
+        pendingSkyBlockExitSinceMillis = -1L;
+    }
+
+    private boolean isSkyBlockExitConfirmed() {
+        return pendingSkyBlockExitSinceMillis >= 0L
+                && (System.currentTimeMillis() - pendingSkyBlockExitSinceMillis) >= SKYBLOCK_EXIT_CONFIRMATION_MS;
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {

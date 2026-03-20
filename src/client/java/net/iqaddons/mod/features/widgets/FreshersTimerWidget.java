@@ -27,10 +27,13 @@ import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 @Slf4j
 public class FreshersTimerWidget extends HudWidget {
 
+    private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
+
     private final List<PlayerFreshedEntry> freshEntries = Collections.synchronizedList(new ArrayList<>());
 
     private final KuudraStateManager kuudraManager = KuudraStateManager.get();
     private volatile boolean persistUntilInstanceChange = false;
+    private long pendingExitSinceMillis = -1L;
 
     public FreshersTimerWidget() {
         super("freshers_timer",
@@ -81,6 +84,7 @@ public class FreshersTimerWidget extends HudWidget {
     @Override
     protected void onDeactivate() {
         persistUntilInstanceChange = false;
+        clearPendingExit();
         freshEntries.clear();
     }
 
@@ -101,6 +105,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     private void beginNewRunWindow() {
         persistUntilInstanceChange = true;
+        clearPendingExit();
         freshEntries.clear();
     }
 
@@ -122,37 +127,33 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
+        if (!event.onSkyBlock()) {
+            armPendingExit();
+            return;
+        }
+
         // Ignore transient blank area updates that occur when the scoreboard changes format
         // between phases (e.g. DPS -> SKIP). A blank newArea while still on SkyBlock does
         // not mean the player left the Kuudra instance.
-        if (event.onSkyBlock() && event.newArea().isBlank()) {
+        if (event.newArea().isBlank()) {
             return;
         }
 
-        boolean stillInKuudraInstance = event.onSkyBlock() && event.newArea().contains(KUUDRA_AREA_ID);
+        boolean stillInKuudraInstance = event.newArea().contains(KUUDRA_AREA_ID);
         if (stillInKuudraInstance) {
+            clearPendingExit();
             return;
         }
 
-        resetOnInstanceChange();
+        armPendingExit();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame() || !event.isNthTick(2)) {
+        if (!event.isInGame()) {
             return;
         }
 
-        // If KuudraStateManager still considers us in-run, trust its lifecycle management.
-        // Only fall back to a direct scoreboard check when the manager also reports no active
-        // run, to avoid false resets caused by transient scoreboard format changes between
-        // phases (e.g. DPS -> SKIP).
-        if (kuudraManager.isInKuudra()) {
-            return;
-        }
-
-        if (!ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) || !ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
-            resetOnInstanceChange();
-        }
+        confirmPendingExitIfNeeded();
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
@@ -162,6 +163,8 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     private void resetOnInstanceChange() {
+        clearPendingExit();
+
         if (!persistUntilInstanceChange && freshEntries.isEmpty()) {
             return;
         }
@@ -169,6 +172,35 @@ public class FreshersTimerWidget extends HudWidget {
         persistUntilInstanceChange = false;
         freshEntries.clear();
         updateDisplay();
+    }
+
+    private void armPendingExit() {
+        if (pendingExitSinceMillis < 0L) {
+            pendingExitSinceMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void clearPendingExit() {
+        pendingExitSinceMillis = -1L;
+    }
+
+    private void confirmPendingExitIfNeeded() {
+        if (pendingExitSinceMillis < 0L) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - pendingExitSinceMillis < INSTANCE_EXIT_CONFIRMATION_MS) {
+            return;
+        }
+
+        if (ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) && ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            clearPendingExit();
+            return;
+        }
+
+        clearPendingExit();
+        resetOnInstanceChange();
     }
 
     private boolean isInstanceTransferMessage(@NotNull String message) {

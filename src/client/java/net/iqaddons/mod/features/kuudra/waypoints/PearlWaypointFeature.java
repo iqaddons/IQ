@@ -144,9 +144,11 @@ public class PearlWaypointFeature extends KuudraFeature {
         if (area == null) return;
 
         Vec3d commonStandBlockCenter = null;
+        PearlWaypoint standBlockWaypoint = null;
         for (PearlWaypoint waypoint : area.waypoints()) {
             if (waypoint.hasStandBlock()) {
                 commonStandBlockCenter = waypoint.standBlock().add(0.5, 0.5, 0.5);
+                standBlockWaypoint = waypoint;
                 break;
             }
         }
@@ -157,6 +159,27 @@ public class PearlWaypointFeature extends KuudraFeature {
 
             renderWaypoint(event, area, waypoint, commonStandBlockCenter);
         }
+
+        renderAreaStandBlockOutline(event, standBlockWaypoint);
+    }
+
+    private void renderAreaStandBlockOutline(@NotNull WorldRenderEvent event, PearlWaypoint standBlockWaypoint) {
+        if (!PhaseOneConfig.pearlWaypointBlockOutlines || standBlockWaypoint == null || !standBlockWaypoint.hasStandBlock()) {
+            return;
+        }
+
+        RenderColor outlineColor = standBlockWaypoint.color();
+        if (outlineColor.a == 0.0f) {
+            outlineColor = RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor);
+        }
+
+        Vec3d block = standBlockWaypoint.standBlock();
+        Box blockBox = new Box(
+                block.getX(), block.getY(), block.getZ(),
+                block.getX() + 1, block.getY() + 1, block.getZ() + 1
+        );
+
+        event.drawOutline(blockBox, true, outlineColor);
     }
 
     private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
@@ -263,15 +286,6 @@ public class PearlWaypointFeature extends KuudraFeature {
             }
         }
 
-        if (PhaseOneConfig.pearlWaypointBlockOutlines && waypoint.hasStandBlock()) {
-            Vec3d block = waypoint.standBlock();
-            Box blockBox = new Box(
-                    block.getX(), block.getY(), block.getZ(),
-                    block.getX() + 1, block.getY() + 1, block.getZ() + 1
-            );
-
-            event.drawOutline(blockBox, true, waypointColor);
-        }
 
         if (isReady && !shouldRenderTimer()) {
             double readyYOffset = getReadyYOffset();
