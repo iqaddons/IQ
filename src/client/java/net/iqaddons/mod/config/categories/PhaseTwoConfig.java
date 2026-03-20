@@ -88,7 +88,7 @@ public class PhaseTwoConfig {
             id = "teamHighlight",
             translation = "Team Highlight"
     )
-    @Comment("Highlight your teammates since the start of the runs.")
+    @Comment("Enable this to highlight all teammates from the start of the run, as well as freshers.")
     public static boolean teamHighlight = true;
     @ConfigEntry(
             id = "teamHighlightColor",
@@ -100,9 +100,9 @@ public class PhaseTwoConfig {
 
     @ConfigEntry(
             id = "teamHighlightFreshColorEnabled",
-            translation = "Team Highlight Fresh Color"
+            translation = "Only Highlight Freshers"
     )
-    @Comment("Enable the fresh-color override for teammates who fresh.")
+    @Comment("Enable this to highlight only freshers, instead of highlighting all teammates from the start of the run.")
     public static boolean teamHighlightFresh = true;
 
     @ConfigEntry(
@@ -112,6 +112,22 @@ public class PhaseTwoConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Use a different color for freshers teammates.")
     public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+
+    @ConfigOption.Separator("Fresh Highlight")
+    @ConfigEntry(
+            id = "freshHighlightIndependent",
+            translation = "Fresh Highlight (Independent)"
+    )
+    @Comment("Highlight teammates when they fresh, independent of Team Highlight.")
+    public static boolean freshHighlightIndependent = true;
+
+    @ConfigEntry(
+            id = "freshHighlightColor",
+            translation = "Fresh Highlight Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Color to use when highlighting freshers.")
+    public static int freshHighlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
 
     @ConfigOption.Separator("Build Alerts")
     @ConfigEntry(

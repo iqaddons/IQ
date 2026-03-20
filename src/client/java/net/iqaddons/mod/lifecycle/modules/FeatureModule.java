@@ -29,7 +29,7 @@ public class FeatureModule implements LifecycleComponent {
                 new ElleHighlightFeature(), new FreshAlertFeature(), new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
                 new ManaDrainAlertFeature(), new BlockUselessPerksFeature(), new HideMobNametagsFeature(),
-                new TeamHighlightFeature(), new KuudraPhaseAlertFeature(), new DangerAlertFeature(),
+                new TeamHighlightFeature(), new TeamHighlightFreshColorFeature(), new KuudraPhaseAlertFeature(), new DangerAlertFeature(),
                 new KuudraHealthFeature(), new HideDamageTitleFeature(), new SupplyDroppedAlertFeature(),
                 new PersonalBestTrackerFeature(), new PhaseSplitsPBTrackerFeature(), new AutoRequeueFeature(), new ChestCounterTrackerFeature(),
                 new KuudraProfitTrackerFeature(), new CroesusHelperFeature(), new HideKuudraBossBarFeature(),
