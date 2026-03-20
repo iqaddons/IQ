@@ -2,8 +2,8 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
@@ -45,10 +45,6 @@ public class FreshersTimerWidget extends HudWidget {
 
         setEnabledSupplier(() -> PhaseTwoConfig.freshTimers);
         setVisibilityCondition(() -> {
-            if (!ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
-                return false;
-            }
-
             var phase = kuudraManager.phase();
             boolean inTrackedPhases = KuudraPhase.isOneOf(
                     KuudraPhase.BUILD, KuudraPhase.EATEN, KuudraPhase.STUN,
@@ -67,6 +63,10 @@ public class FreshersTimerWidget extends HudWidget {
 
     @Override
     protected void onActivate() {
+        if (kuudraManager.phase() == KuudraPhase.BUILD) {
+            beginNewRunWindow();
+        }
+
         subscribe(PlayerFreshEvent.class, this::onPlayerFresh);
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
         subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
@@ -74,11 +74,8 @@ public class FreshersTimerWidget extends HudWidget {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
         subscribe(ClientTickEvent.class, this::onTick);
 
-        if (kuudraManager.phase() == KuudraPhase.BUILD) {
-            beginNewRunWindow();
-        }
-
         updateDisplay();
+        log.info("Freshers Timer Widget has been activated");
     }
 
     @Override
@@ -86,6 +83,7 @@ public class FreshersTimerWidget extends HudWidget {
         persistUntilInstanceChange = false;
         clearPendingExit();
         freshEntries.clear();
+        log.info("Freshers Timer Widget has been deactivated");
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
@@ -112,17 +110,20 @@ public class FreshersTimerWidget extends HudWidget {
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
             resetOnInstanceChange();
+            log.info("Freshers Timer Widget has been activated");
         }
 
         if (event.currentPhase() == KuudraPhase.BUILD) {
             beginNewRunWindow();
             updateDisplay();
+            log.info("Freshers Timer Widget has been activated");
         }
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
             resetOnInstanceChange();
+            log.info("Freshers Timer Widget has been deactivated");
         }
     }
 
