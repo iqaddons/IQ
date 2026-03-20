@@ -25,9 +25,9 @@ public class TeamHighlightFreshColorFeature extends KuudraFeature {
 
     public TeamHighlightFreshColorFeature() {
         super(
-                "teamHighlightFreshColor",
-                "Team Highlight Fresh Color",
-                () -> PhaseTwoConfig.teamHighlightFresh,
+                "freshHighlightIndependent",
+                "Fresh Highlight (Independent)",
+                () -> PhaseTwoConfig.freshHighlightIndependent,
                 KuudraPhase.BUILD
         );
     }
@@ -50,7 +50,7 @@ public class TeamHighlightFreshColorFeature extends KuudraFeature {
         int entityId = event.playerEntityId();
         freshPlayers.put(entityId, System.currentTimeMillis());
 
-        RenderColor freshColor = RenderColor.fromArgb(PhaseTwoConfig.freshHightlightColor);
+        RenderColor freshColor = RenderColor.fromArgb(PhaseTwoConfig.freshHighlightColor);
         EntityGlowUtil.setGlowing(entityId, freshColor, PRIORITY_FRESH);
 
         log.debug("Applied fresh teammate color to {} (id: {})", event.playerName(), entityId);
