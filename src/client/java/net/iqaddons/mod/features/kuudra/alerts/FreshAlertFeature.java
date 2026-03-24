@@ -7,7 +7,6 @@ import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
-import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.minecraft.sound.SoundCategory;
@@ -21,7 +20,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.iqaddons.mod.utils.EntityDetectorUtil.findPlayerById;
-import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_FRESH;
 
 @Slf4j
 public class FreshAlertFeature extends KuudraFeature {
@@ -50,7 +48,6 @@ public class FreshAlertFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraDeactivate() {
-        freshPlayers.keySet().forEach(id -> EntityGlowUtil.removeGlowing(id, PRIORITY_FRESH));
         freshPlayers.clear();
     }
 
@@ -64,7 +61,6 @@ public class FreshAlertFeature extends KuudraFeature {
             long elapsed = now - entry.getValue();
 
             if (elapsed >= FRESH_DURATION_MS) {
-                EntityGlowUtil.removeGlowing(entry.getKey(), PRIORITY_FRESH);
                 iterator.remove();
                 log.debug("Fresh expired for entity {}", entry.getKey());
             }

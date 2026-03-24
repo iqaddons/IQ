@@ -66,19 +66,23 @@ public class TeamHighlightFeature extends KuudraFeature {
         }
 
         Set<Integer> currentTeammates = new HashSet<>();
+        RenderColor teamColor = RenderColor.fromArgb(PhaseTwoConfig.teamHighlightColor);
+
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
             if (player == mc.player) continue;
             if (!isRealPlayer(player)) continue;
 
             int playerId = player.getId();
             currentTeammates.add(playerId);
+            highlightedPlayers.add(playerId);
 
-            if (!highlightedPlayers.contains(playerId) && !EntityGlowUtil.isGlowing(playerId)) {
-                var renderColor = RenderColor.fromArgb(PhaseTwoConfig.teamHighlightColor);
-                EntityGlowUtil.setGlowing(playerId, renderColor, PRIORITY_TEAM_HIGHLIGHT);
-
-                highlightedPlayers.add(playerId);
-                log.debug("Highlighted teammate: {}", player.getName().getString());
+            boolean hasHigherPriorityGlow = EntityGlowUtil.isGlowingWithPriority(playerId, PRIORITY_TEAM_HIGHLIGHT + 1);
+            if (!hasHigherPriorityGlow) {
+                RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
+                if (currentColor == null || currentColor.argb != teamColor.argb) {
+                    EntityGlowUtil.setGlowing(playerId, teamColor, PRIORITY_TEAM_HIGHLIGHT);
+                    log.debug("Highlighted teammate: {}", player.getName().getString());
+                }
             }
         }
 

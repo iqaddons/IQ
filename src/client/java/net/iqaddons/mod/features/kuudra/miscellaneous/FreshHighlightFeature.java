@@ -17,16 +17,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import static net.iqaddons.mod.utils.EntityGlowUtil.PRIORITY_FRESH;
 
 @Slf4j
-public class TeamHighlightFreshColorFeature extends KuudraFeature {
+public class FreshHighlightFeature extends KuudraFeature {
 
     private static final long FRESH_DURATION_MS = 10_000;
 
     private final Map<Integer, Long> freshPlayers = new ConcurrentHashMap<>();
 
-    public TeamHighlightFreshColorFeature() {
+    public FreshHighlightFeature() {
         super(
                 "freshHighlightIndependent",
-                "Fresh Highlight (Independent)",
+                "Fresh Highlight",
                 () -> PhaseTwoConfig.freshHighlightIndependent,
                 KuudraPhase.BUILD
         );
@@ -72,4 +72,5 @@ public class TeamHighlightFreshColorFeature extends KuudraFeature {
         }
     }
 }
+
 

@@ -88,37 +88,22 @@ public class PhaseTwoConfig {
             id = "teamHighlight",
             translation = "Team Highlight"
     )
-    @Comment("Enable this to highlight all teammates from the start of the run, as well as freshers.")
+    @Comment("Highlight teammates with the normal team glow during the run.")
     public static boolean teamHighlight = true;
+
     @ConfigEntry(
             id = "teamHighlightColor",
-            translation = "Team Hightlight Color"
+            translation = "Team Highlight Color"
     )
     @ConfigOption.Color(alpha = true)
     @Comment("Change the color of the teammate highlight.")
     public static int teamHighlightColor = new Color(67, 179, 29, 209).getRGB();
 
     @ConfigEntry(
-            id = "teamHighlightFreshColorEnabled",
-            translation = "Only Highlight Freshers"
-    )
-    @Comment("Enable this to highlight only freshers, instead of highlighting all teammates from the start of the run.")
-    public static boolean teamHighlightFresh = true;
-
-    @ConfigEntry(
-            id = "teamHighlightFreshColor",
-            translation = "Team Highlight Fresh Color"
-    )
-    @ConfigOption.Color(alpha = true)
-    @Comment("Use a different color for freshers teammates.")
-    public static int freshHightlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
-
-    @ConfigOption.Separator("Fresh Highlight")
-    @ConfigEntry(
             id = "freshHighlightIndependent",
-            translation = "Fresh Highlight (Independent)"
+            translation = "Fresh Highlight"
     )
-    @Comment("Highlight teammates when they fresh, independent of Team Highlight.")
+    @Comment("Temporarily override a player's glow when they fresh.")
     public static boolean freshHighlightIndependent = true;
 
     @ConfigEntry(

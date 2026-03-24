@@ -120,7 +120,7 @@ Complete fresh tracking system:
 - **Fresh Message** — Sends party message when you fresh (with build %)
 - **Fresh Timers** — Renders countdown above fresher's heads
 - **Fresh Countdown** — Personal HUD countdown for your fresh
-- **Fresh Highlight** — Glowing effect on players who are fresh
+- **Fresh Highlight** — Separate temporary glow override for players who are fresh
 </details>
 
 <details>
@@ -244,7 +244,7 @@ Comprehensive run timing display.
 <details>
 <summary><b>👥 Team Highlight</b></summary>
 <br>
-Highlights your teammates with a glowing effect during runs.
+Highlights your teammates with the normal glowing effect during runs.
 
 - Distinguishes real players from NPCs
 - Customizable highlight color
