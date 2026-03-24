@@ -28,22 +28,26 @@ public enum MessageUtil {
     }
 
     public void sendMessage(String message) {
-        ClientPlayerEntity player = mc.player;
-        if (player != null) {
-            if (this == PARTY) {
-                player.networkHandler.sendChatCommand("pc " + message);
-                return;
-            }
+        mc.execute(() -> {
+            ClientPlayerEntity player = mc.player;
+            if (player != null) {
+                if (this == PARTY) {
+                    player.networkHandler.sendChatCommand("pc " + message);
+                    return;
+                }
 
-            player.sendMessage(Text.literal(PREFIX + color + message), false);
-        }
+                player.sendMessage(Text.literal(PREFIX + color + message), false);
+            }
+        });
     }
 
     public static void sendFormattedMessage(@NotNull String message) {
-        ClientPlayerEntity player = mc.player;
-        if (player != null) {
-            player.sendMessage(Text.literal(PREFIX + message.replace('&', '§')), false);
-        }
+        mc.execute(() -> {
+            ClientPlayerEntity player = mc.player;
+            if (player != null) {
+                player.sendMessage(Text.literal(PREFIX + message.replace('&', '§')), false);
+            }
+        });
     }
 
     public static void showTitle(
@@ -63,11 +67,13 @@ public enum MessageUtil {
     }
 
     public static void showTitle(Text title, Text subtitle, int fadeIn, int stay, int fadeOut) {
-        if (mc.inGameHud == null) return;
+        mc.execute(() -> {
+            if (mc.inGameHud == null) return;
 
-        mc.inGameHud.setTitle(title);
-        mc.inGameHud.setSubtitle(subtitle);
-        mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
+            mc.inGameHud.setTitle(title);
+            mc.inGameHud.setSubtitle(subtitle);
+            mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
+        });
     }
 
     public static void showAlert(String message, int durationTicks) {
