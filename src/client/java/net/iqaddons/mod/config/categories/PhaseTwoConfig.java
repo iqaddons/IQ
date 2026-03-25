@@ -83,12 +83,13 @@ public class PhaseTwoConfig {
     )
     @Comment("Configure the Elle highlight feature.")
     public static final ElleConfig elleConfig = new ElleConfig();
+
     @ConfigOption.Separator("Build Highlights")
     @ConfigEntry(
             id = "teamHighlight",
             translation = "Team Highlight"
     )
-    @Comment("Highlight teammates with the normal team glow during the run.")
+    @Comment("Enable this to highlight all teammates from the start of the run.")
     public static boolean teamHighlight = true;
 
     @ConfigEntry(
@@ -103,7 +104,7 @@ public class PhaseTwoConfig {
             id = "freshHighlightIndependent",
             translation = "Fresh Highlight"
     )
-    @Comment("Temporarily override a player's glow when they fresh.")
+    @Comment("Highlight teammates when they fresh for 10 seconds.")
     public static boolean freshHighlightIndependent = true;
 
     @ConfigEntry(
@@ -130,6 +131,7 @@ public class PhaseTwoConfig {
     )
     @Comment("Disable most of sounds during build for a cleaner audio experience.")
     public static boolean cleanBallistaSounds = true;
+
     @ConfigEntry(
             id = "replaceBallistaBuildSound",
             translation = "Replace Ballista Build Sound"

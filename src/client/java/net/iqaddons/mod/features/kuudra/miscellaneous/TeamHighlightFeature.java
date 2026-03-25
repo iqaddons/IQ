@@ -74,30 +74,23 @@ public class TeamHighlightFeature extends KuudraFeature {
 
             int playerId = player.getId();
             currentTeammates.add(playerId);
-            highlightedPlayers.add(playerId);
 
-            boolean hasHigherPriorityGlow = EntityGlowUtil.isGlowingWithPriority(playerId, PRIORITY_TEAM_HIGHLIGHT + 1);
-            if (!hasHigherPriorityGlow) {
-                RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
-                if (currentColor == null || currentColor.argb != teamColor.argb) {
-                    EntityGlowUtil.setGlowing(playerId, teamColor, PRIORITY_TEAM_HIGHLIGHT);
-                    log.debug("Highlighted teammate: {}", player.getName().getString());
-                }
+            if (!highlightedPlayers.contains(playerId)) {
+                EntityGlowUtil.setGlowing(playerId, teamColor, PRIORITY_TEAM_HIGHLIGHT);
+                highlightedPlayers.add(playerId);
+                log.debug("Highlighted teammate: {}", player.getName().getString());
             }
         }
 
         Set<Integer> toRemove = new HashSet<>();
         for (Integer playerId : highlightedPlayers) {
             if (!currentTeammates.contains(playerId)) {
-                RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
-                if (currentColor != null) EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
-
+                EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
                 toRemove.add(playerId);
             }
         }
         highlightedPlayers.removeAll(toRemove);
     }
-
 
     private boolean isRealPlayer(@NotNull AbstractClientPlayerEntity player) {
         if (mc.getNetworkHandler() == null) return false;
@@ -110,10 +103,9 @@ public class TeamHighlightFeature extends KuudraFeature {
 
     private void clearAllHighlights() {
         for (Integer playerId : highlightedPlayers) {
-            RenderColor currentColor = EntityGlowUtil.getGlowColor(playerId);
-            if (currentColor != null) EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
+            EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
         }
-
         highlightedPlayers.clear();
     }
 }
+

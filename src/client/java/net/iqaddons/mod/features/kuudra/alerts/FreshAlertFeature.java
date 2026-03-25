@@ -117,9 +117,7 @@ public class FreshAlertFeature extends KuudraFeature {
 
     private void trackFreshPlayer(int entityId, String playerName) {
         freshPlayers.put(entityId, System.currentTimeMillis());
-
-
-        log.debug("Applied Fresh to {} (id: {}), total: {}", playerName, entityId, freshPlayers.size());
+        log.debug("Tracking fresh timer for {} (id: {}), total: {}", playerName, entityId, freshPlayers.size());
     }
 
     @NotNull
