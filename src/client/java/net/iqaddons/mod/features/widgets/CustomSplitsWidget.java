@@ -1,7 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.IQConstants;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
@@ -20,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 
 @Slf4j
 public class CustomSplitsWidget extends HudWidget {
@@ -40,6 +43,7 @@ public class CustomSplitsWidget extends HudWidget {
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final Map<KuudraPhase, Double> splits = new EnumMap<>(KuudraPhase.class);
+    private volatile boolean persistUntilInstanceChange = false;
     private long pendingExitSinceMillis = -1L;
 
     private final HudLine titleLine;
@@ -74,7 +78,15 @@ public class CustomSplitsWidget extends HudWidget {
         paceLine = HudLine.of("§7Pace: §f0.00s");
 
         setEnabledSupplier(() -> KuudraGeneralConfig.customSplits);
-        setVisibilityCondition(() -> ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID));
+        setVisibilityCondition(() -> {
+            var phase = stateManager.phase();
+            boolean inTrackedPhases = KuudraPhase.isOneOf(
+                    KuudraPhase.SUPPLIES, KuudraPhase.BUILD, KuudraPhase.EATEN,
+                    KuudraPhase.STUN, KuudraPhase.DPS, KuudraPhase.SKIP,
+                    KuudraPhase.BOSS, KuudraPhase.COMPLETED
+            ).test(phase);
+            return inTrackedPhases || persistUntilInstanceChange;
+        });
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),
@@ -92,6 +104,10 @@ public class CustomSplitsWidget extends HudWidget {
 
     @Override
     protected void onActivate() {
+        if (stateManager.phase().isInRun() || stateManager.phase() == KuudraPhase.COMPLETED) {
+            beginNewRunWindow();
+        }
+
         resetSplits();
         loadExistingSplits();
 
@@ -106,8 +122,15 @@ public class CustomSplitsWidget extends HudWidget {
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
         subscribe(SkyblockAreaChangeEvent.class, this::onAreaChange);
         subscribe(KuudraRunEndEvent.class, this::onRunEnd);
+        subscribe(ChatReceivedEvent.class, this::onChatReceived);
 
         updateDisplay();
+    }
+
+    @Override
+    protected void onDeactivate() {
+        persistUntilInstanceChange = false;
+        clearPendingExit();
     }
 
     private void loadExistingSplits() {
@@ -129,10 +152,14 @@ public class CustomSplitsWidget extends HudWidget {
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
-            clearPendingExit();
+            beginNewRunWindow();
             resetSplits();
             updateDisplay();
             return;
+        }
+
+        if (event.currentPhase().isInRun() || event.currentPhase() == KuudraPhase.COMPLETED) {
+            beginNewRunWindow();
         }
 
         KuudraPhase completedPhase = event.previousPhase();
@@ -146,8 +173,7 @@ public class CustomSplitsWidget extends HudWidget {
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
         if (!event.onSkyBlock()) {
-            resetSplits();
-            updateDisplay();
+            armPendingExit();
             return;
         }
 
@@ -156,7 +182,7 @@ public class CustomSplitsWidget extends HudWidget {
             return;
         }
 
-        boolean stillInKuudraInstance = event.newArea().contains(IQConstants.KUUDRA_AREA_ID);
+        boolean stillInKuudraInstance = event.newArea().contains(KUUDRA_AREA_ID);
         if (stillInKuudraInstance) {
             clearPendingExit();
             return;
@@ -167,8 +193,13 @@ public class CustomSplitsWidget extends HudWidget {
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
-            resetSplits();
-            updateDisplay();
+            armPendingExit();
+        }
+    }
+
+    private void onChatReceived(@NotNull ChatReceivedEvent event) {
+        if (isInstanceTransferMessage(event.getStrippedMessage())) {
+            resetOnInstanceChange();
         }
     }
 
@@ -200,6 +231,24 @@ public class CustomSplitsWidget extends HudWidget {
         pendingExitSinceMillis = -1L;
     }
 
+    private void beginNewRunWindow() {
+        persistUntilInstanceChange = true;
+        clearPendingExit();
+    }
+
+    private void resetOnInstanceChange() {
+        clearPendingExit();
+
+        boolean hasNonZeroSplit = splits.values().stream().anyMatch(value -> value > 0.0);
+        if (!persistUntilInstanceChange && !hasNonZeroSplit) {
+            return;
+        }
+
+        persistUntilInstanceChange = false;
+        resetSplits();
+        updateDisplay();
+    }
+
     private void confirmPendingExitIfNeeded() {
         if (pendingExitSinceMillis < 0L) {
             return;
@@ -210,14 +259,18 @@ public class CustomSplitsWidget extends HudWidget {
             return;
         }
 
-        if (ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)) {
+        if (ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) && ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
             clearPendingExit();
             return;
         }
 
         clearPendingExit();
-        resetSplits();
-        updateDisplay();
+        resetOnInstanceChange();
+    }
+
+    private boolean isInstanceTransferMessage(@NotNull String message) {
+        return message.contains("Sending to server")
+                || (message.contains("Starting in ") && message.contains(" seconds"));
     }
 
     private void updateDisplay() {

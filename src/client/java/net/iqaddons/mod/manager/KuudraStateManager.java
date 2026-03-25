@@ -31,12 +31,14 @@ import static net.iqaddons.mod.IQConstants.*;
 public final class KuudraStateManager extends SubscriptionOwner {
 
     private static final Pattern KUUDRA_TIER_PATTERN = Pattern.compile("\\(T([1-5])\\)");
+    private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
 
     private static KuudraStateManager instance;
 
     private final AtomicReference<KuudraContext> contextRef = new AtomicReference<>(KuudraContext.empty());
     private final KuudraStateValidator validator = new KuudraStateValidator();
     private final Map<KuudraPhase, Duration> phaseDurations = new EnumMap<>(KuudraPhase.class);
+    private long pendingExitSinceMillis = -1L;
 
     public void start() {
         subscribe(ClientTickEvent.class, this::onClientTick);
@@ -47,6 +49,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private void onClientTick(@NotNull ClientTickEvent event) {
+        confirmPendingExitIfNeeded();
+
         if (!context().isInRun()) return;
 
         var player = event.client().player;
@@ -124,15 +128,22 @@ public final class KuudraStateManager extends SubscriptionOwner {
             return;
         }
 
-        if (!event.newArea().contains(KUUDRA_AREA_ID) && isInKuudra()) {
-            log.info("Detected leaving Kuudra area (now in: {})", event.newArea());
-            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
+        if (!isInKuudra()) {
+            clearPendingExit();
+            return;
         }
 
-        if (!event.onSkyBlock() && isInKuudra()) {
-            log.info("Detected leaving SkyBlock");
-            forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
+        if (!event.onSkyBlock()) {
+            armPendingExit();
+            return;
         }
+
+        if (event.newArea().contains(KUUDRA_AREA_ID)) {
+            clearPendingExit();
+            return;
+        }
+
+        armPendingExit();
     }
 
     public @NotNull KuudraPhase phase() {
@@ -200,6 +211,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private boolean handleRunStart() {
+        clearPendingExit();
+
         KuudraStateValidator.AreaInfo areaInfo = validator.detectAreaInfo();
         if (!areaInfo.canBeInRun()) {
             log.warn("Cannot start run - not in Kuudra area");
@@ -230,6 +243,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
     }
 
     private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull KuudraRunEndEvent.EndReason reason) {
+        clearPendingExit();
+
         if (current.phase().isInRun()) {
             phaseDurations.put(current.phase(), current.phaseDuration());
         }
@@ -265,6 +280,35 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private boolean isInstanceTransferMessage(@NotNull String message) {
         return message.contains("Sending to server") || message.contains("Starting in 4 seconds...");
+    }
+
+    private void armPendingExit() {
+        if (pendingExitSinceMillis < 0L) {
+            pendingExitSinceMillis = System.currentTimeMillis();
+        }
+    }
+
+    private void clearPendingExit() {
+        pendingExitSinceMillis = -1L;
+    }
+
+    private void confirmPendingExitIfNeeded() {
+        if (pendingExitSinceMillis < 0L || !isInKuudra()) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - pendingExitSinceMillis < INSTANCE_EXIT_CONFIRMATION_MS) {
+            return;
+        }
+
+        if (ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) && ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+            clearPendingExit();
+            return;
+        }
+
+        log.info("Confirmed leaving Kuudra instance after pending-exit window");
+        forceReset(KuudraRunEndEvent.EndReason.DISCONNECTED);
     }
 
     private boolean performPhaseTransition(

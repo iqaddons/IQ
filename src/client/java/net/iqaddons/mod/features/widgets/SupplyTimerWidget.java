@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
+import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 
 @Slf4j
 public class SupplyTimerWidget extends HudWidget {
@@ -125,7 +126,7 @@ public class SupplyTimerWidget extends HudWidget {
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
-            resetOnInstanceChange();
+            armPendingExit();
         }
     }
 
@@ -209,7 +210,7 @@ public class SupplyTimerWidget extends HudWidget {
             return;
         }
 
-        if (ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
+        if (ScoreboardUtils.hasTitle(SKYBLOCK_AREA_ID) && ScoreboardUtils.isInArea(KUUDRA_AREA_ID)) {
             clearPendingExit();
             return;
         }

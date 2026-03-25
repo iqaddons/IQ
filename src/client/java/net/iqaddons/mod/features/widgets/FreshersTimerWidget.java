@@ -122,8 +122,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (event.isUnexpectedlyEnded()) {
-            resetOnInstanceChange();
-            log.info("Freshers Timer Widget has been deactivated");
+            armPendingExit();
         }
     }
 
