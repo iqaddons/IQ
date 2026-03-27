@@ -92,8 +92,23 @@ public class PhaseThreeConfig {
         @ConfigOption.Select
         @Comment("Choose how the hitbox is drawn (outline, filled, or both).")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
-
     }
+
+    @ConfigEntry(
+            id = "kuudraTransparency",
+            translation = "Kuudra Transparency"
+    )
+    @Comment("Enable transparent rendering for Kuudra during the run.")
+    public static boolean kuudraTransparency = false;
+
+    @ConfigEntry(
+            id = "kuudraOpacity",
+            translation = "Kuudra Opacity"
+    )
+    @ConfigOption.Range(min = 0.05, max = 1)
+    @ConfigOption.Slider
+    @Comment("Adjust Kuudra opacity (lower values are more transparent).")
+    public static float kuudraOpacity = 0.45f;
 
     @ConfigOption.Separator("Stun Waypoints")
     @ConfigEntry(

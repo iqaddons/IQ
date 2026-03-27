@@ -14,7 +14,9 @@
     "ItemUseMixin",
     "WorldRendererMixin",
     "feature.BallistaBuildSoundMixin",
-    "feature.FishingCastSoundMixin"
+    "feature.FishingCastSoundMixin",
+    "feature.transparency.MagmaCubeRendererStateMixin",
+    "feature.transparency.SlimeEntityRenderStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1
