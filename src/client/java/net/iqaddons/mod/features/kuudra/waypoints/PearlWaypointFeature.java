@@ -523,6 +523,16 @@ public class PearlWaypointFeature extends KuudraFeature {
 
         return (READY_FALLBACK_Y_OFFSET * READY_Y_OFFSET_MULTIPLIER) + READY_EXTRA_Y_OFFSET;
     }
+
+    /**
+     * Recarrega as areas/waypoints do JSON e aplica imediatamente na run atual.
+     */
+    public void reloadConfig() {
+        List<WaypointArea> areas = configLoader.reload();
+        areaDetection.setAreas(areas);
+        areaDetection.update();
+        log.info("Pearl waypoints config reloaded: {} areas", areas.size());
+    }
 }
 
 

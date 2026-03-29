@@ -176,6 +176,22 @@ public class PhaseOneConfig {
     @Comment("Show waypoints at crate pile locations.")
     public static boolean pileWaypoints = true;
 
+    @ConfigButton(
+            title = "Edit Pile Locations",
+            text = "OPEN"
+    )
+    @Comment("Customize pile waypoints by editing the pile_locations.json file.\nSave the file and run /iq reload to apply changes.")
+    @SuppressWarnings("unused")
+    public static final Runnable editPileLocations = () -> {
+        try {
+            Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
+            Files.createDirectories(configDir);
+            Util.getOperatingSystem().open(configDir.toFile());
+        } catch (Exception e) {
+            // Silently fail
+        }
+    };
+
     @ConfigEntry(
             id = "pileWaypointNames",
             translation = "Pile Waypoint Names"

@@ -1,0 +1,50 @@
+{
+  "_comment": "Pile Waypoints config - edit this file to customize supply pile positions.",
+  "_howToUse": [
+    "This file is valid JSON. Do not use // or /* */ comments. Use keys like _comment or _guide if you want to leave notes.",
+    "After editing this file, save it and run /iq reload. You do NOT need to restart the game.",
+    "Each object inside 'piles' is one pile waypoint shown during Kuudra supplies.",
+    "position uses [x, y, z] coordinates.",
+    "noPreValue controls which pile gets the special no-pre color for each missing pre count. Use 0 if the pile should never be highlighted as the no-pre pile."
+  ],
+  "_fieldGuide": {
+    "pileFields": {
+      "name": "Displayed pile name.",
+      "position": "Pile position in [x, y, z].",
+      "noPreValue": "Optional integer used by the no-pre highlight system."
+    }
+  },
+  "piles": [
+    {
+      "name": "Shop",
+      "position": [-98, 78.125, -112.9375],
+      "noPreValue": 7
+    },
+    {
+      "name": "Triangle",
+      "position": [-94, 78.125, -106],
+      "noPreValue": 6
+    },
+    {
+      "name": "Equals",
+      "position": [-106, 78.125, -99.0625],
+      "noPreValue": 5
+    },
+    {
+      "name": "Slash",
+      "position": [-98, 78.125, -99.0625],
+      "noPreValue": 4
+    },
+    {
+      "name": "X Cannon",
+      "position": [-110, 78.125, -106],
+      "noPreValue": 2
+    },
+    {
+      "name": "X",
+      "position": [-106, 78.125, -112.9375],
+      "noPreValue": 1
+    }
+  ]
+}
+

@@ -6,16 +6,20 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.loader.EtherwarpConfigLoader;
+import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
 import net.iqaddons.mod.features.kuudra.waypoints.EtherwarpHelperFeature;
+import net.iqaddons.mod.features.kuudra.waypoints.PearlWaypointFeature;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.manager.EtherwarpCategoryToggleManager;
 import net.iqaddons.mod.manager.PersonalBestManager;
 import net.iqaddons.mod.manager.PhaseSplitsPBManager;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.etherwarp.EtherwarpCategory;
+import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
@@ -51,17 +55,29 @@ public class IQCommand {
                         }))
                         .then(literal("reload").executes(ctx -> {
                             mc.send(() -> {
-                                WaypointConfigLoader.get().reload();
+                                List<PileLocation> pileLocations = PileConfigLoader.get().reload();
+                                SupplyStateManager.get().reloadPileLocations(pileLocations);
 
                                 IQModClient client = IQModClient.get();
                                 if (client != null && client.getFeatureManager() != null) {
+                                    PearlWaypointFeature pearlFeature = client.getFeatureManager().get(PearlWaypointFeature.class);
+                                    if (pearlFeature != null) {
+                                        pearlFeature.reloadConfig();
+                                    } else {
+                                        WaypointConfigLoader.get().reload();
+                                    }
+
                                     EtherwarpHelperFeature etherwarpFeature = client.getFeatureManager().get(EtherwarpHelperFeature.class);
                                     if (etherwarpFeature != null) {
                                         etherwarpFeature.reloadConfig();
-                                        return;
+                                    } else {
+                                        List<EtherwarpCategory> categories = EtherwarpConfigLoader.get().reload();
+                                        EtherwarpCategoryToggleManager.get().syncWithCategories(categories);
                                     }
+                                    return;
                                 }
 
+                                WaypointConfigLoader.get().reload();
                                 List<EtherwarpCategory> categories = EtherwarpConfigLoader.get().reload();
                                 EtherwarpCategoryToggleManager.get().syncWithCategories(categories);
                             });
