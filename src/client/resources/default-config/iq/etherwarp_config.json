@@ -1,0 +1,221 @@
+{
+  "_comment": "Etherwarp Helper config - edit this file to customize your waypoints setup.",
+  "_howToUse": [
+    "This file is valid JSON. Do not use // or /* */ comments. Use keys like _comment or _guide if you want to leave notes.",
+    "After editing this file, save it and run /iq reload. You do NOT need to restart the game.",
+    "Each category groups related waypoints that can be toggled together.",
+    "Each waypoint defines which phases it should appear in and which phases it should hide.",
+    "If you just want a normal full-block highlight, use shape: FULL or simply omit the shape field.",
+    "Use shape presets to highlight only parts of a block (top, slab, center, pillar, etc.).",
+    "This file already includes ready-to-copy templates for FULL, TOP, SLAB_UPPER, SLAB_LOWER and CENTER_PLATE.",
+    "Only use box when shape is CUSTOM. That is the advanced/enthusiast option.",
+    "Supported phases: SUPPLIES, BUILD, EATEN, STUN, DPS, SKIP, BOSS, COMPLETED"
+  ],
+  "_shapePresets": {
+    "FULL": "Whole block (default)",
+    "TOP": "Upper thin strip",
+    "BOTTOM": "Lower thin strip",
+    "SLAB_LOWER": "Lower half block",
+    "SLAB_UPPER": "Upper half block",
+    "HALF_LOWER": "Alias of lower half",
+    "HALF_UPPER": "Alias of upper half",
+    "CENTER_PLATE": "Small centered plate",
+    "EDGE_TOP": "Very thin top edge",
+    "EDGE_BOTTOM": "Very thin bottom edge",
+    "PILLAR": "Thin vertical pillar in the center",
+    "CUSTOM": "Use custom min/max box offsets"
+  },
+  "_fieldGuide": {
+    "categoryFields": {
+      "name": "Category name. Used for organizing and toggling groups of waypoints.",
+      "enabled": "Whether this category is active. true or false.",
+      "waypoints": "List of waypoint objects in this category."
+    },
+    "waypointFields": {
+      "name": "Waypoint name/description. Displayed in logs.",
+      "position": "Legacy single position in [x, y, z]. Still supported.",
+      "positions": "Multiple highlight positions in [[x, y, z], ...]. Use this for clusters.",
+      "color": "Waypoint color as hex string (#RRGGBB) or RGB array [r, g, b]. Example: #FF0000 (red), [0, 255, 0] (green).",
+      "colors": "Optional per-position colors. Order matches positions: positions[0] -> colors[0], positions[1] -> colors[1], etc. If shorter than positions, the last color is reused.",
+      "alpha": "Waypoint opacity. 0.0 (transparent) to 1.0 (opaque). Default: 0.8.",
+      "renderStyle": "Render type: OUTLINE or SOLID. Default: OUTLINE.",
+      "lineWidth": "Line thickness for OUTLINE style (0.5 - 4.0). Default: 2.0.",
+      "shape": "Optional. Default is FULL. Presets: FULL, TOP, BOTTOM, SLAB_LOWER, SLAB_UPPER, HALF_LOWER, HALF_UPPER, CENTER_PLATE, EDGE_TOP, EDGE_BOTTOM, PILLAR, CUSTOM.",
+      "box": "Advanced only. Use only with CUSTOM shape. Relative local box with min/max arrays. Example: {\"min\":[-0.5,0.5,-0.5],\"max\":[0.5,1.0,0.5]}.",
+      "showInPhases": "Array of phases where this waypoint should appear. Example: [\"EATEN\", \"STUN\"].",
+      "hideInPhases": "Array of phases where this waypoint should be hidden. Takes priority over showInPhases. Default: [].",
+      "maxRenderDistance": "Maximum distance to render waypoint (-1 = unlimited). Default: -1."
+    }
+  },
+  "categories": [
+    {
+      "name": "Skip Waypoint",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "Skip Main",
+          "position": [-176, 33, -151],
+          "color": "#FF5555",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 2.0,
+          "shape": "EDGE_TOP",
+          "showInPhases": ["EATEN", "STUN"],
+          "hideInPhases": ["SKIP"],
+          "maxRenderDistance": -1
+        }
+      ]
+    },
+    {
+      "name": "DPS Waypoints",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "DPS Agro",
+          "positions": [[-161, 49, -186], [-162, 49, -186]],
+          "color": "#55FF55",
+          "alpha": 0.8,
+          "renderStyle": "SOLID",
+          "lineWidth": 1.0,
+          "shape": "PILLAR",
+          "showInPhases": ["DPS"],
+          "hideInPhases": ["SKIP"],
+          "maxRenderDistance": 100
+        },
+        {
+          "name": "DPS Main",
+          "position": [-168, 28, -168],
+          "color": "#55FF55",
+          "alpha": 0.8,
+          "renderStyle": "SOLID",
+          "lineWidth": 1.0,
+          "shape": "FULL",
+          "showInPhases": ["DPS"],
+          "hideInPhases": ["SKIP"],
+          "maxRenderDistance": 100
+        }
+      ]
+    },
+    {
+      "name": "X Etherwarps",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "X Aim (X Cannon / Coal Left / Coal Right / Square)",
+          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -147],[-154.5, 76.52, -150.5],[-169, 76, -115]],
+          "color": "#FFFF55",
+          "colors": ["#FFFF55", "#000000", "#FFFFFF", "#F1F1F1"],
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "EDGE_TOP",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        },
+        {
+          "name": "X Block Highlights (X Cannon / Coal Left / Coal Right / Square)",
+          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -125.5],[-135.5, 78, -130.5],[-139.5, 78, -89.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "FULL",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        }
+      ]
+    },
+    {
+      "name": "Slash Etherwarps",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "X Aim (X Cannon / Coal)",
+          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "EDGE_TOP",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        },
+        {
+          "name": "X Block Highlights",
+          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "FULL",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        }
+      ]
+    },
+    {
+      "name": "Equals Etherwarps",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "Equals Aim (X Cannon / Coal / Shop Left / Shop Right)",
+          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "EDGE_TOP",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        },
+        {
+          "name": "X Block Highlights",
+          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "FULL",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        }
+      ]
+    },
+    {
+      "name": "Triagle Etherwarps",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "Tri Aim (X Cannon / Coal / Shop Left / Shop Right)",
+          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "EDGE_TOP",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        },
+        {
+          "name": "Tri Block Highlights",
+          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
+          "color": "#FFFF55",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 0.5,
+          "shape": "FULL",
+          "showInPhases": ["SUPPLIES"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        }
+      ]
+    }
+  ]
+}

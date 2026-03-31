@@ -4,6 +4,13 @@ import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.features.kuudra.miscellaneous.HideUselessArmorStandsFeature;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 import net.iqaddons.mod.utils.TextColor;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Util;
+import net.iqaddons.mod.config.screen.EtherwarpCategorySelectorScreen;
+import net.minecraft.client.MinecraftClient;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Category(
         value = "Kuudra Utilities"
@@ -331,6 +338,41 @@ public class KuudraGeneralConfig {
     )
     @Comment("Track your personal best time for each individual Kuudra phase (T5 Infernal only). Notifies when a phase PB is beaten.")
     public static boolean phaseSplitsPBTracker = true;
+
+    @ConfigOption.Separator("Etherwarp Helper")
+
+    @ConfigEntry(
+            id = "etherwarpHelper",
+            translation = "Etherwarp Helper"
+    )
+    @Comment("Render Etherwarp helper waypoints by Kuudra phase.")
+    public static boolean etherwarpHelper = true;
+
+    @ConfigButton(
+            title = "Etherwarp Categories",
+            text = "SELECT"
+    )
+    @Comment("Choose which Etherwarp categories are active. \nThis list is pulled from category names in etherwarp_config.json and updates after /iq reload.")
+    @SuppressWarnings("unused")
+    public static final Runnable openEtherwarpCategorySelector = () -> {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> mc.setScreen(new EtherwarpCategorySelectorScreen(mc.currentScreen)));
+    };
+
+    @ConfigButton(
+            title = "Open Etherwarp Config",
+            text = "OPEN"
+    )
+    @Comment("Open config/iq folder to edit etherwarp_config.json. \nSave and run /iq reload to edit in real-time.")
+    @SuppressWarnings("unused")
+    public static final Runnable openEtherwarpConfig = () -> {
+        try {
+            Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
+            Files.createDirectories(configDir);
+            Util.getOperatingSystem().open(configDir.toFile());
+        } catch (Exception ignored) {
+        }
+    };
 
     @ConfigOption.Separator("Visual")
 

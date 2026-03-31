@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.dispatcher.KuudraEventsDispatcher;
+import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.integration.DiscordRPCIntegration;
 import net.iqaddons.mod.lifecycle.LifecycleComponent;
 import net.iqaddons.mod.lifecycle.modules.FeatureModule;
@@ -17,6 +18,7 @@ import net.iqaddons.mod.lifecycle.modules.WidgetModule;
 import net.iqaddons.mod.utils.update.ModrinthUpdateChecker;
 import net.minecraft.client.MinecraftClient;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class IQModClient implements ClientModInitializer {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
     private Configurator configurator;
+    private @Nullable FeatureManager featureManager;
 
     private final List<LifecycleComponent> components = new ArrayList<>();
 
@@ -41,10 +44,12 @@ public class IQModClient implements ClientModInitializer {
         configurator = new Configurator(MOD_ID);
         configurator.register(Configuration.class);
 
+        FeatureModule featureModule = new FeatureModule();
         initializeModules(
                 new KuudraModule(), new KuudraEventsDispatcher(),
-                new FeatureModule(), new WidgetModule()
+                featureModule, new WidgetModule()
         );
+        this.featureManager = featureModule.getFeatures();
 
         IQKeyBindings.register();
         registerCommands();

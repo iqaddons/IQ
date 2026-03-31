@@ -2,6 +2,7 @@ package net.iqaddons.mod.manager;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.model.spot.SupplyPosition;
@@ -120,10 +121,16 @@ public final class SupplyStateManager {
         }
     }
 
+    public void reloadPileLocations(@NotNull List<PileLocation> updatedPiles) {
+        remainingPiles.clear();
+        remainingPiles.addAll(updatedPiles);
+        log.debug("Pile locations reloaded from config: {} piles", updatedPiles.size());
+    }
+
     public void reset() {
         activeSupplies.clear();
         remainingPiles.clear();
-        remainingPiles.addAll(PileLocation.DEFAULT_PILES);
+        remainingPiles.addAll(getConfiguredPiles());
 
         detectedPreSpot = null;
         preSpotLocked = false;
@@ -165,6 +172,11 @@ public final class SupplyStateManager {
         if (time < 29500) return 3;
         if (time < 32000) return 4;
         return 5;
+    }
+
+    private @NotNull List<PileLocation> getConfiguredPiles() {
+        List<PileLocation> cachedPiles = PileConfigLoader.get().getCached();
+        return cachedPiles.isEmpty() ? PileConfigLoader.get().load() : cachedPiles;
     }
 
     public static SupplyStateManager get() {
