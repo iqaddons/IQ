@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.IQModClient;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.config.loader.EtherwarpConfigLoader;
 import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
@@ -53,6 +54,8 @@ public class IQCommand {
                             mc.send(() -> HudManager.get().openEditor());
                             return 1;
                         }))
+                        .then(literal("etherwarps").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
+                        .then(literal("etherwarp").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
                         .then(literal("reload").executes(ctx -> {
                             mc.send(() -> {
                                 List<PileLocation> pileLocations = PileConfigLoader.get().reload();
@@ -118,6 +121,12 @@ public class IQCommand {
                                         .executes(ctx -> resetProfitTrackerAll(ctx.getSource()))))
 
         );
+    }
+
+    private static int openEtherwarpCategories(@NotNull FabricClientCommandSource source) {
+        mc.send(KuudraGeneralConfig.openEtherwarpCategorySelector);
+        source.sendFeedback(Text.literal("§d§l[IQ] §r§fOpening Etherwarp categories..."));
+        return 1;
     }
 
     private static int sendProfitTrackerMode(@NotNull FabricClientCommandSource source) {
