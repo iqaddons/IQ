@@ -78,10 +78,10 @@ public class PhaseOneConfig {
     public static boolean pearlWaypoints = true;
 
     @ConfigButton(
-            title = "Make Your Own Waypoints",
+            title = "Make Your Own Pearl Waypoints",
             text = "OPEN"
     )
-    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file.\nSave the file and run /iq reload to apply changes.")
+    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file.\nSave the file and run /iq reload to apply changes.\nDelete de file to restore default waypoints.")
     @SuppressWarnings("unused")
     public static final Runnable makeYourOwnPearls = () -> {
         try {
