@@ -1,4 +1,4 @@
-package net.iqaddons.mod.mixin.feature.transparency;
+package net.iqaddons.mod.mixin.accessor;
 
 public interface KuudraTransparencyState {
 
@@ -6,3 +6,4 @@ public interface KuudraTransparencyState {
 
     void iq$setKuudraOpacity(float opacity);
 }
+
