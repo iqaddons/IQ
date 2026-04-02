@@ -57,6 +57,7 @@ public class NoPreAlertFeature extends KuudraFeature {
     private long firstSupplySeenAtMs = 0L;
     private boolean graceRecheckAttempted = false;
     private int consecutiveEmptyScans = 0;
+    private boolean preSpotDetectionAnnounced = false;
 
     public NoPreAlertFeature() {
         super(
@@ -183,6 +184,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         firstSupplySeenAtMs = 0L;
         graceRecheckAttempted = false;
         consecutiveEmptyScans = 0;
+        preSpotDetectionAnnounced = false;
     }
 
     private void queueSupplyCheck(@NotNull String trigger, boolean notifyDetectionFailure) {
@@ -219,6 +221,7 @@ public class NoPreAlertFeature extends KuudraFeature {
         if (detected) {
             PreSpot preSpot = supplyState.getDetectedPreSpot();
             if (preSpot != null) {
+                announceDetectedPreSpot(preSpot, "Elle head-over message");
                 log.debug("Locked pre spot from Elle head-over message: {}", preSpot.getDisplayName());
             }
         }
@@ -261,6 +264,8 @@ public class NoPreAlertFeature extends KuudraFeature {
                 log.error("Pre spot is null after successful detection!");
                 return false;
             }
+
+            announceDetectedPreSpot(preSpot, "supply check");
         }
 
         log.debug("Detected pre spot: {}", preSpot.getDisplayName());
@@ -301,6 +306,16 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         return true;
+    }
+
+    private void announceDetectedPreSpot(@NotNull PreSpot preSpot, @NotNull String source) {
+        if (preSpotDetectionAnnounced) {
+            return;
+        }
+
+        preSpotDetectionAnnounced = true;
+        MessageUtil.sendFormattedMessage("&fPre Spot detected: &e" + preSpot.getDisplayName() + "&f!");
+        log.debug("Announced detected pre spot {} from {}", preSpot.getDisplayName(), source);
     }
 
     private boolean shouldWaitForSpawnDesync(@NotNull List<SupplyPosition> supplies) {
