@@ -22,7 +22,7 @@ import static net.iqaddons.mod.IQConstants.KUUDRA_AREA_ID;
 public class IchorPoolWaypointFeature extends Feature {
 
     private static final Pattern ICHOR_LOCATION_PATTERN = Pattern.compile(
-            "(?i).*\\bcasting(?:\\s+spell:)?\\s+ichor\\s+pool!?\\s*(?:at|@)?\\s*\\(?\\s*(-?\\d+)\\s*[, ]+\\s*(-?\\d+)\\s*[, ]+\\s*(-?\\d+)\\s*\\)?.*"
+            "(?i).*(?:\\bcasting(?:\\s+spell:)?\\s+ichor\\s+pool!?|\\bichor\\s+pool\\s+casted(?:!|\\b))\\s*(?:at|@)?\\s*\\(?\\s*(-?\\d+)\\s*[, ]+\\s*(-?\\d+)\\s*[, ]+\\s*(-?\\d+)\\s*\\)?.*"
     );
 
     private static final float ICHOR_RADIUS = 8.0F;
