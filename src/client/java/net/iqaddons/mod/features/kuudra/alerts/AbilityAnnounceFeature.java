@@ -17,18 +17,22 @@ public class AbilityAnnounceFeature extends KuudraFeature {
     private static final List<AbilityAnnounceRule> SPELL_RULES = List.of(
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Spirit Spark!"),
+                    "Spirit Spark",
                     () -> KuudraGeneralConfig.AbilityAnnounce.spiritSpark
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Hollowed Rush!"),
+                    "Hollowed Rush",
                     () -> KuudraGeneralConfig.AbilityAnnounce.hollowedRush
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Raging Wind!"),
+                    "Raging Wind",
                     () -> KuudraGeneralConfig.AbilityAnnounce.ragingWind
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
+                    "Ichor Pool",
                     () -> KuudraGeneralConfig.AbilityAnnounce.ichorPool
             )
     );
@@ -54,21 +58,22 @@ public class AbilityAnnounceFeature extends KuudraFeature {
             if (!rule.isEnabled()) continue;
 
             if (rule.pattern().matcher(message).matches()) {
-                MessageUtil.PARTY.sendMessage("[IQ] %s @%s".formatted(message, formatPlayerPosition()));
+                MessageUtil.PARTY.sendMessage("[IQ] %s Casted at %s!".formatted(rule.spellName(), formatPlayerPosition()));
                 return;
             }
         }
     }
 
     private @NotNull String formatPlayerPosition() {
-        if (mc.player == null) return "(?, ?, ?)";
+        if (mc.player == null) return "?, ?, ?";
 
         BlockPos pos = mc.player.getBlockPos();
-        return "(%d, %d, %d)".formatted(pos.getX(), pos.getY(), pos.getZ());
+        return "%d, %d, %d".formatted(pos.getX(), pos.getY(), pos.getZ());
     }
 
     private record AbilityAnnounceRule(
             Pattern pattern,
+            String spellName,
             BooleanSupplier enabledSupplier
     ) {
         private boolean isEnabled() {
