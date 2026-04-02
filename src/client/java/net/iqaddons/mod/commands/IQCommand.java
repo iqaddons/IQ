@@ -9,6 +9,7 @@ import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.config.loader.EtherwarpConfigLoader;
 import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
+import net.iqaddons.mod.config.loader.CratePriorityConfigLoader;
 import net.iqaddons.mod.features.kuudra.waypoints.EtherwarpHelperFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.PearlWaypointFeature;
 import net.iqaddons.mod.hud.HudManager;
@@ -60,6 +61,7 @@ public class IQCommand {
                             mc.send(() -> {
                                 List<PileLocation> pileLocations = PileConfigLoader.get().reload();
                                 SupplyStateManager.get().reloadPileLocations(pileLocations);
+                                CratePriorityConfigLoader.get().reload();
 
                                 IQModClient client = IQModClient.get();
                                 if (client != null && client.getFeatureManager() != null) {
@@ -83,6 +85,7 @@ public class IQCommand {
                                 WaypointConfigLoader.get().reload();
                                 List<EtherwarpCategory> categories = EtherwarpConfigLoader.get().reload();
                                 EtherwarpCategoryToggleManager.get().syncWithCategories(categories);
+                                CratePriorityConfigLoader.get().reload();
                             });
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fWaypoints and configs reloaded."));
                             return 1;

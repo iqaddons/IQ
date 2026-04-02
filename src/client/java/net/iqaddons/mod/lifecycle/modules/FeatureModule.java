@@ -25,7 +25,7 @@ public class FeatureModule implements LifecycleComponent {
 
         features.register(
                 new PearlWaypointFeature(), new SupplyWaypointsFeature(), new PileWaypointsFeature(),
-                new NoPreAlertFeature(), new SecondSupplyAlertFeature(), new CustomSupplyMessageFeature(),
+                new NoPreAlertFeature(), new CratePriorityFeature(), new SecondSupplyAlertFeature(), new CustomSupplyMessageFeature(),
                 new ElleHighlightFeature(), new FreshAlertFeature(), new KuudraHitboxFeature(),
                 new RendDamageAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
                 new ManaDrainAlertFeature(), new BlockUselessPerksFeature(), new HideMobNametagsFeature(),

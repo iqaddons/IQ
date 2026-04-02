@@ -1,0 +1,62 @@
+{
+  "_comment": "Crate Priority config - edit this file to customize next-action priorities during Supplies.",
+  "_howToUse": [
+    "This file is valid JSON. Do not use // or /* */ comments. Use keys like _comment or _guide if you want to leave notes.",
+    "After editing this file, save it and run /iq reload. You do NOT need to restart the game.",
+    "'priorities' is grouped by your current pre spot: X, SLASH, EQUALS, TRIANGLE.",
+    "Inside each pre spot, the key is the missing/no-pre call and the value is the destination shown by Crate Priority.",
+    "You can edit only the entries you want. Missing/invalid entries fall back to built-in defaults.",
+    "Accepted missing keys: X, X_CANNON (or XC/XCANNON), SQUARE, SLASH, EQUALS (or EQ), TRIANGLE (or TRI), SHOP."
+  ],
+  "_fieldGuide": {
+    "rootFields": {
+      "version": "Config version for future compatibility.",
+      "priorities": "Main mapping object used by Crate Priority."
+    },
+    "priorityFields": {
+      "X|SLASH|EQUALS|TRIANGLE": "Your detected current pre spot.",
+      "X|X_CANNON|SQUARE|SLASH|EQUALS|TRIANGLE|SHOP": "No-pre call received from party.",
+      "destination value": "Destination text shown as 'Go <value>' in the Crate Priority widget."
+    }
+  },
+  "version": 1,
+  "priorities": {
+    "X": {
+      "X": "Shop",
+      "X_CANNON": "Square",
+      "SLASH": "X Cannon",
+      "SQUARE": "X Cannon",
+      "EQUALS": "X Cannon",
+      "TRIANGLE": "X Cannon",
+      "SHOP": "X Cannon"
+    },
+    "SLASH": {
+      "SLASH": "Shop",
+      "SQUARE": "X Cannon",
+      "X": "Square",
+      "X_CANNON": "Square",
+      "EQUALS": "Square",
+      "TRIANGLE": "Square",
+      "SHOP": "Square"
+    },
+    "EQUALS": {
+      "SHOP": "Shop",
+      "EQUALS": "Shop",
+      "SQUARE": "Shop",
+      "X_CANNON": "Shop",
+      "TRIANGLE": "Square",
+      "X": "Square",
+      "SLASH": "Square"
+    },
+    "TRIANGLE": {
+      "TRIANGLE": "Shop",
+      "SQUARE": "Shop",
+      "X_CANNON": "Shop",
+      "X": "X Cannon",
+      "SHOP": "X Cannon",
+      "SLASH": "Square",
+      "EQUALS": "Square"
+    }
+  }
+}
+

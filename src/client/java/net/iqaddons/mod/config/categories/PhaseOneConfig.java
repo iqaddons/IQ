@@ -2,6 +2,7 @@ package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.fabricmc.loader.api.FabricLoader;
+import net.iqaddons.mod.utils.TextColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.util.Util;
 
@@ -13,6 +14,47 @@ import java.nio.file.Path;
         value = "Phase 1 - Supplies"
 )
 public class PhaseOneConfig {
+
+    @ConfigOption.Separator("Crate Priority")
+
+    @ConfigEntry(
+            id = "cratePriority",
+            translation = "Crate Priority"
+    )
+    @Comment("Alerts you where to go after picking up your first supply or if you had no pre on the first supply.\nYou can edit the priority in the crate_priority.json file and use /iq reload to apply changes.")
+    public static boolean cratePriority = true;
+
+    @ConfigEntry(
+            id = "cratePriorityColor",
+            translation = "Crate Priority Title Color"
+    )
+    @ConfigOption.Select
+    @Comment("Choose the text color used by the Crate Priority title widget.")
+    public static TextColor cratePriorityColor = TextColor.YELLOW;
+
+    @ConfigEntry(
+            id = "cratePriorityDurationSeconds",
+            translation = "Crate Priority Duration"
+    )
+    @ConfigOption.Range(min = 1, max = 10)
+    @ConfigOption.Slider
+    @Comment("How long the Crate Priority title stays on screen (seconds).")
+    public static int cratePriorityDurationSeconds = 2;
+
+    @ConfigEntry(
+            id = "cratePriorityAnimation",
+            translation = "Crate Priority Animation"
+    )
+    @ConfigOption.Select
+    @Comment("Choose the animation style for the Crate Priority title widget.")
+    public static CratePriorityAnimation cratePriorityAnimation = CratePriorityAnimation.FADE;
+
+    @ConfigEntry(
+            id = "cratePrioritySound",
+            translation = "Crate Priority Sound"
+    )
+    @Comment("Play a sound when a new Crate Priority action is shown.")
+    public static boolean cratePrioritySound = true;
 
     @ConfigOption.Separator("Supply Widgets")
 
@@ -81,7 +123,7 @@ public class PhaseOneConfig {
             title = "Make Your Own Pearl Waypoints",
             text = "OPEN"
     )
-    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file.\nSave the file and run /iq reload to apply changes.\nDelete de file to restore default waypoints.")
+    @Comment("Customize or add pearl waypoints by editing the pearl_waypoints.json file.\nSave the file and run /iq reload to apply changes.\nDelete the file to restore default waypoints.")
     @SuppressWarnings("unused")
     public static final Runnable makeYourOwnPearls = () -> {
         try {
@@ -264,5 +306,11 @@ public class PhaseOneConfig {
         OUTLINE,
         BOTH,
         NONE
+    }
+
+    public enum CratePriorityAnimation {
+        NONE,
+        FADE,
+        SLIDE
     }
 }
