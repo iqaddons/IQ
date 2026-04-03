@@ -116,7 +116,6 @@ public class HudConfigManager {
 
     public void setConfig(@NotNull HudElementConfig config) {
         configCache.put(config.id(), config.validated());
-        saveAsync();
     }
 
     public void updatePosition(@NotNull String elementId, float x, float y) {

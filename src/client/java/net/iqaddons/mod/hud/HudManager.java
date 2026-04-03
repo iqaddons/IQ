@@ -166,6 +166,8 @@ public final class HudManager {
         for (HudWidget widget : widgets) {
             configManager.saveFromWidget(widget);
         }
+        
+        configManager.saveAsync();
     }
 
     public boolean handleClick(double mouseX, double mouseY, int button) {
