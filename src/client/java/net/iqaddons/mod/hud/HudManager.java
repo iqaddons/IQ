@@ -164,8 +164,9 @@ public final class HudManager {
 
     public void saveConfig() {
         for (HudWidget widget : widgets) {
-            configManager.saveFromWidget(widget, true);
+            configManager.saveFromWidget(widget);
         }
+        
         configManager.saveAsync();
     }
 
