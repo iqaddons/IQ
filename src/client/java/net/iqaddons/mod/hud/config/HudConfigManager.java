@@ -116,11 +116,6 @@ public class HudConfigManager {
 
     public void setConfig(@NotNull HudElementConfig config) {
         configCache.put(config.id(), config.validated());
-        saveAsync();
-    }
-
-    public void setConfigSilent(@NotNull HudElementConfig config) {
-        configCache.put(config.id(), config.validated());
     }
 
     public void updatePosition(@NotNull String elementId, float x, float y) {
@@ -149,14 +144,9 @@ public class HudConfigManager {
         }
     }
 
-    public void saveFromWidget(@NotNull HudWidget widget, boolean silent) {
+    public void saveFromWidget(@NotNull HudWidget widget) {
         HudElementConfig config = HudElementConfig.fromWidget(widget);
-
-        if (silent) {
-            setConfigSilent(config);
-        } else {
-            setConfig(config);
-        }
+        setConfig(config);
     }
 
     public boolean hasConfig(@NotNull String elementId) {
