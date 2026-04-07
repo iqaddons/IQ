@@ -239,6 +239,31 @@ public class WorldRenderUtils {
         matrices.pop();
     }
 
+    public static void drawLine(
+            @NotNull MatrixStack matrices, VertexConsumerProvider.@NotNull Immediate consumer,
+            @NotNull Camera camera, @NotNull Vec3d start, @NotNull Vec3d end,
+            boolean throughWalls, @NotNull RenderColor color
+    ) {
+        matrices.push();
+        Vec3d camPos = camera.getPos();
+        matrices.translate(-camPos.getX(), -camPos.getY(), -camPos.getZ());
+
+        MatrixStack.Entry entry = matrices.peek();
+        VertexConsumer buffer = consumer.getBuffer(throughWalls ? Layers.GuiLine : Layers.BoxOutline);
+
+        Vector3f normal = end.toVector3f()
+                .sub((float) start.getX(), (float) start.getY(), (float) start.getZ())
+                .normalize(new Vector3f(1.0f, 1.0f, 1.0f));
+
+        buffer.vertex(entry, (float) start.getX(), (float) start.getY(), (float) start.getZ())
+                .color(color.r, color.g, color.b, color.a)
+                .normal(entry, normal);
+        buffer.vertex(entry, (float) end.getX(), (float) end.getY(), (float) end.getZ())
+                .color(color.r, color.g, color.b, color.a)
+                .normal(entry, normal);
+        matrices.pop();
+    }
+
     public static void drawHitBox(
             @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
             @NotNull Camera camera, Entity entity, @NotNull RenderTickCounter tickCounter,

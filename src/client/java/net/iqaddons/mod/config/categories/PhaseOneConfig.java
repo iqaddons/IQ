@@ -208,6 +208,37 @@ public class PhaseOneConfig {
     @Comment("Makes pearl waypoints move up or down based on your position so the marker stays more accurate while doing supplies.")
     public static boolean dynamicPearlWaypoints = true;
 
+    @ConfigEntry(
+            id = "pearlTrajectoryLine",
+            translation = "Pearl Trajectory Line"
+    )
+    @Comment("Render a smooth real-time line showing where your Ender Pearl will land.")
+    public static boolean pearlTrajectoryLine = true;
+
+    @ConfigEntry(
+            id = "pearlTrajectoryLineColor",
+            translation = "Pearl Trajectory Line Color"
+    )
+    @ConfigOption.Color(alpha = true)
+    @Comment("Color used for the Ender Pearl trajectory overlay line.")
+    public static int pearlTrajectoryLineColor = new Color(0, 255, 170, 180).getRGB();
+
+    @ConfigEntry(
+            id = "pearlTrajectoryPlacementAlert",
+            translation = "Pearl Placement Guarantee Alert"
+    )
+    @Comment("Show a subtle subtitle alert when your trajectory is aligned with a valid pile.")
+    public static boolean pearlTrajectoryPlacementAlert = true;
+
+    @ConfigEntry(
+            id = "pearlTrajectoryPileTolerance",
+            translation = "Pearl Pile Tolerance"
+    )
+    @ConfigOption.Range(min = 0.1, max = 2.0)
+    @ConfigOption.Slider
+    @Comment("Horizontal X/Z tolerance used to consider trajectory landing as valid for a pile.")
+    public static double pearlTrajectoryPileTolerance = 0.7;
+
 
     @ConfigOption.Separator("Pile Waypoints")
 

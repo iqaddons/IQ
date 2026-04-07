@@ -78,6 +78,10 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawTracer(matrices, consumer, camera, pos, color);
     }
 
+    public void drawLine(Vec3d start, Vec3d end, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawLine(matrices, consumer, camera, start, end, throughWalls, color);
+    }
+
     public void drawHitbox(Entity entity, boolean troughWalls, RenderColor color) {
         WorldRenderUtils.drawHitBox(matrices, consumer, camera, entity, tickCounter, troughWalls, color);
     }
@@ -86,5 +90,4 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawStyledHitBox(matrices, consumer, camera, entity, tickCounter, throughWalls, color, style);
     }
 }
-
 
