@@ -25,7 +25,7 @@ public class LuckyBuildFeature extends KuudraFeature {
         mc.execute(() -> {
             if (mc.getSoundManager() == null) return;
 
-            mc.getSoundManager().play(PositionedSoundInstance.master(
+            mc.getSoundManager().play(PositionedSoundInstance.ui(
                     SoundEvent.of(IQConstants.LUCKY_BUILD_SOUND),
                     1.0F,
                     3.0F)
@@ -41,7 +41,7 @@ public class LuckyBuildFeature extends KuudraFeature {
             if (mc.getSoundManager() == null) return;
 
             mc.getSoundManager().stopSounds(IQConstants.LUCKY_BUILD_SOUND, SoundCategory.MASTER);
-            mc.getSoundManager().play(PositionedSoundInstance.master(
+            mc.getSoundManager().play(PositionedSoundInstance.ui(
                     SoundEvent.of(LUCKY_BUILD_SOUND_END),
                     1.0F,
                     2.0F
