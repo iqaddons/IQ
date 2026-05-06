@@ -15,7 +15,7 @@
     "discord": "https://discord.gg/HdhXhCWcW9"
   },
   "license": "MIT",
-  "icon": "assets/iq/icon.png",
+  "icon": "assets/iq/textures/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [

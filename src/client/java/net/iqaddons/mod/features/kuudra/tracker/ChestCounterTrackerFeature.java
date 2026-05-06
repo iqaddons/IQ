@@ -36,7 +36,9 @@ public class ChestCounterTrackerFeature extends Feature {
     }
 
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        if (!event.isCompleted()) return;
+        if (!event.isCompleted() && !event.isFailed()) {
+            return;
+        }
 
         int current = manager.increment();
         lastRunTimestamp = System.currentTimeMillis();
@@ -58,7 +60,7 @@ public class ChestCounterTrackerFeature extends Feature {
                 MessageUtil.PARTY.sendMessage("[IQ] Run 60/60, opening chests...");
             }
 
-            MessageUtil.sendFormattedMessage("§fYour chest tracker is full! Run §e/iq resetchests §fto reset your progress.");
+            MessageUtil.sendFormattedMessage("§fYour chest tracker is full! Run §e/iq resetchests §fto reset your percent.");
         }
     }
 

@@ -13,13 +13,12 @@ import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
+import net.iqaddons.mod.utils.NoPreMessageParser;
 import net.iqaddons.mod.utils.ServerUtils;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
 import static net.iqaddons.mod.IQConstants.ELLE_NOT_AGAIN_MESSAGE;
@@ -35,16 +34,6 @@ public class NoPreAlertFeature extends KuudraFeature {
     private static final int MIN_EMPTY_SCANS_FOR_FALLBACK = 3;
     private static final long SUPPLY_SPAWN_DESYNC_GRACE_MS = 250L;
     private static final int PARTIAL_SPAWN_MAX_SUPPLIES = 2;
-
-    private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
-            "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?[Nn]o\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
-            Pattern.CASE_INSENSITIVE
-    );
-
-    private static final Pattern NO_PRE_SIMPLE_PATTERN = Pattern.compile(
-            "(?:[Nn]o|[Mm]issing)\\s+(triangle|equals|slash|shop|x cannon|square|tri|eq|x|xc)(?:\\s|!|$)",
-            Pattern.CASE_INSENSITIVE
-    );
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final KuudraStateManager kuudraState = KuudraStateManager.get();
@@ -139,6 +128,10 @@ public class NoPreAlertFeature extends KuudraFeature {
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        mc.execute(() -> handleChatMessage(message));
+    }
+
+    private void handleChatMessage(@NotNull String message) {
         if (message.contains(ELLE_HEAD_OVER_MESSAGE)) {
             detectPreSpotFromPlayerPosition();
             return;
@@ -153,24 +146,13 @@ public class NoPreAlertFeature extends KuudraFeature {
         }
 
         if (!message.startsWith("Party >")) return;
-        Matcher matcher = PARTY_NO_PRE_PATTERN.matcher(message);
-        if (matcher.find()) {
-            String pileName = matcher.group(1);
-            int missingPreValue = PreSpot.getMissingPreValueFromPileName(pileName);
-            if (missingPreValue > 0) {
-                updateMissingPre(missingPreValue, pileName);
-            }
+
+        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+        if (parsed == null) {
             return;
         }
 
-        Matcher simpleMatcher = NO_PRE_SIMPLE_PATTERN.matcher(message);
-        if (simpleMatcher.find()) {
-            String pileName = simpleMatcher.group(1);
-            int missingPreValue = PreSpot.getMissingPreValueFromPileName(pileName);
-            if (missingPreValue > 0) {
-                updateMissingPre(missingPreValue, pileName);
-            }
-        }
+        updateMissingPre(parsed.missingPreValue(), parsed.canonicalPileName());
     }
 
     private void resetForSuppliesPhase() {

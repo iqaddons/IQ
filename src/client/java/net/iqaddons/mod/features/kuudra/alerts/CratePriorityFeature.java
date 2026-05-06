@@ -12,12 +12,10 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.PreSpot;
+import net.iqaddons.mod.utils.NoPreMessageParser;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
 
@@ -33,11 +31,6 @@ public class CratePriorityFeature extends KuudraFeature {
     private static final int MISSING_EQUALS = 5;
     private static final int MISSING_TRIANGLE = 6;
     private static final int MISSING_SHOP = 7;
-
-    private static final Pattern PARTY_NO_PRE_PATTERN = Pattern.compile(
-            "Party > (?:\\[[^]]+] )?\\w+: (?:\\[IQ] )?(?:[Nn]o|[Mm]issing)\\s+(Triangle|Equals|Slash|Shop|X Cannon|X|Square|tri|eq|xc)!?",
-            Pattern.CASE_INSENSITIVE
-    );
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final CratePriorityConfigLoader cratePriorityConfig = CratePriorityConfigLoader.get();
@@ -77,9 +70,13 @@ public class CratePriorityFeature extends KuudraFeature {
     }
 
     private void onChat(@NotNull ChatReceivedEvent event) {
+        String message = event.getStrippedMessage();
+        mc.execute(() -> handleChatMessage(message));
+    }
+
+    private void handleChatMessage(@NotNull String message) {
         if (currentPhase() != KuudraPhase.SUPPLIES) return;
 
-        String message = event.getStrippedMessage();
         if (message.contains(ELLE_HEAD_OVER_MESSAGE)) {
             resolveCurrentPreSpot();
             tryDispatchPriority("elle chat");
@@ -88,15 +85,12 @@ public class CratePriorityFeature extends KuudraFeature {
 
         if (!message.startsWith("Party >")) return;
 
-        Matcher matcher = PARTY_NO_PRE_PATTERN.matcher(message);
-        if (!matcher.find()) return;
-
-        int missingPre = PreSpot.getMissingPreValueFromPileName(matcher.group(1));
-        if (missingPre <= 0) {
+        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+        if (parsed == null) {
             return;
         }
 
-        pendingMissingPre = missingPre;
+        pendingMissingPre = parsed.missingPreValue();
         tryDispatchPriority("party no-pre");
     }
 
@@ -130,7 +124,7 @@ public class CratePriorityFeature extends KuudraFeature {
 
         lastDecisionKey = decisionKey;
 
-        int durationTicks = Math.max(20, Math.min(200, PhaseOneConfig.cratePriorityDurationSeconds * 20));
+        int durationTicks = Math.max(20, Math.min(200, PhaseOneConfig.CratePriorityConfig.cratePriorityDurationSeconds * 20));
         EventBus.post(new CratePriorityHudEvent("Go " + destination, durationTicks));
         log.debug("Crate priority update from {} => pre={}, missing={}, action=Go {}",
                 source, currentPre, pendingMissingPre, destination);
@@ -178,8 +172,8 @@ public class CratePriorityFeature extends KuudraFeature {
                 default -> null;
             };
             case EQUALS -> switch (missingPre) {
-                case MISSING_SHOP, MISSING_EQUALS, MISSING_SQUARE, MISSING_X_CANNON -> "Shop";
-                case MISSING_TRIANGLE, MISSING_X, MISSING_SLASH -> "Square";
+                case MISSING_EQUALS, MISSING_SQUARE, MISSING_X_CANNON -> "Shop";
+                case MISSING_SHOP, MISSING_TRIANGLE, MISSING_X, MISSING_SLASH -> "Square";
                 default -> null;
             };
             case TRIANGLE -> switch (missingPre) {

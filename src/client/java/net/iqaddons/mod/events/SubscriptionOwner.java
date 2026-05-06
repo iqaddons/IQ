@@ -16,7 +16,15 @@ public abstract class SubscriptionOwner {
             @NotNull Class<T> eventClass,
             @NotNull Consumer<T> handler
     ) {
-        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler);
+        return subscribe(eventClass, handler, EventPriority.NORMAL);
+    }
+
+    protected final <T extends Event> EventBus.@NotNull Subscription<T> subscribe(
+            @NotNull Class<T> eventClass,
+            @NotNull Consumer<T> handler,
+            @NotNull EventPriority priority
+    ) {
+        EventBus.Subscription<T> subscription = EventBus.subscribe(eventClass, handler, priority);
         subscriptions.add(subscription);
         return subscription;
     }

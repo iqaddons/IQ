@@ -15,8 +15,7 @@
     "WorldRendererMixin",
     "feature.BallistaBuildSoundMixin",
     "feature.FishingCastSoundMixin",
-    "feature.transparency.MagmaCubeRendererStateMixin",
-    "feature.transparency.SlimeEntityRenderStateMixin"
+    "feature.MuteTerminatorCooldownSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

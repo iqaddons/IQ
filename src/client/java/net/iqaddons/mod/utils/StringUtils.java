@@ -4,8 +4,10 @@ import lombok.experimental.UtilityClass;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +18,14 @@ public class StringUtils {
 
     private static final Pattern MINECRAFT_NAME_PATTERN = Pattern.compile("([A-Za-z0-9_]{3,16})(?!.*[A-Za-z0-9_]{3,16})");
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("§([0-9a-fA-F])");
+
+    public @NotNull String normalizeItemName(@NotNull ItemStack stack) {
+        return normalizeText(StringUtils.stripFormatting(stack.getName().getString()));
+    }
+
+    public @NotNull String normalizeText(@NotNull String text) {
+        return text.toLowerCase(Locale.ROOT);
+    }
 
     public @NotNull String extractFormattedPlayerName(@NotNull String formattedMessage) {
         int endIndex = findMessageSeparator(formattedMessage);

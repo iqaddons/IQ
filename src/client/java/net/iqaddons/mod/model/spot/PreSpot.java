@@ -71,7 +71,7 @@ public enum PreSpot {
     public static @Nullable PreSpot fromMessage(@NotNull String message) {
         String normalized = message.toLowerCase().trim();
 
-        if (normalized.contains("x cannon") || normalized.equals("xc")) {
+        if (normalized.contains("x cannon") || normalized.contains("xcannon") || normalized.equals("xc")) {
             return PreSpot.X;  // X Cannon is secondary for X pre
         }
         if (normalized.contains("square")) {

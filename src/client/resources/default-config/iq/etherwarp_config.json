@@ -49,19 +49,19 @@
   },
   "categories": [
     {
-      "name": "Skip Waypoint",
+      "name": "Skip Spot Waypoint",
       "enabled": true,
       "waypoints": [
         {
-          "name": "Skip Main",
-          "position": [-176, 33, -151],
-          "color": "#FF5555",
+          "name": "Skip Spot",
+          "position": [-174.5, 31, -155.5],
+          "color": "#00FFFF",
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 2.0,
-          "shape": "EDGE_TOP",
-          "showInPhases": ["EATEN", "STUN"],
-          "hideInPhases": ["SKIP"],
+          "shape": "FULL",
+          "showInPhases": ["DPS"],
+          "hideInPhases": [""],
           "maxRenderDistance": -1
         }
       ]
@@ -71,27 +71,27 @@
       "enabled": true,
       "waypoints": [
         {
-          "name": "DPS Agro",
-          "positions": [[-161, 49, -186], [-162, 49, -186]],
-          "color": "#55FF55",
+          "name": "DPS Agro (Close / Mid / Long)",
+          "positions": [[-88.5, 78, -78.5], [-84.5, 78, -85.5], [-82.5, 78, -92.5]],
+          "color": "#00FFFF",
           "alpha": 0.8,
-          "renderStyle": "SOLID",
+          "renderStyle": "OUTLINE",
           "lineWidth": 1.0,
-          "shape": "PILLAR",
-          "showInPhases": ["DPS"],
-          "hideInPhases": ["SKIP"],
+          "shape": "FULL",
+          "showInPhases": ["EATEN"],
+          "hideInPhases": [""],
           "maxRenderDistance": 100
         },
         {
-          "name": "DPS Main",
-          "position": [-168, 28, -168],
-          "color": "#55FF55",
-          "alpha": 0.8,
+          "name": "DPS Main (Top / Top / Bottom / Bottom)",
+          "positions": [[-110.5, 78, -71.5], [-110.5, 78, -72.5], [-113.5, 76, -68.5], [-113.5, 76, -69.5]],
+          "color": "#00FFFF",
+          "alpha": 0.4,
           "renderStyle": "SOLID",
           "lineWidth": 1.0,
           "shape": "FULL",
-          "showInPhases": ["DPS"],
-          "hideInPhases": ["SKIP"],
+          "showInPhases": ["EATEN"],
+          "hideInPhases": [""],
           "maxRenderDistance": 100
         }
       ]
@@ -102,9 +102,13 @@
       "waypoints": [
         {
           "name": "X Aim (X Cannon / Coal Left / Coal Right / Square)",
-          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -147],[-154.5, 76.52, -150.5],[-169, 76, -115]],
-          "color": "#FFFF55",
-          "colors": ["#FFFF55", "#000000", "#FFFFFF", "#F1F1F1"],
+          "positions": [
+            [-158, 76, -139.5],
+            [-154.5, 76.50, -147],
+            [-154.5, 76.52, -150.5],
+            [-169, 76, -115]
+          ],
+          "colors": ["#FF5555", "#55FF55", "#5599FF", "#FFAA00"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
@@ -115,8 +119,13 @@
         },
         {
           "name": "X Block Highlights (X Cannon / Coal Left / Coal Right / Square)",
-          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -125.5],[-135.5, 78, -130.5],[-139.5, 78, -89.5]],
-          "color": "#FFFF55",
+          "positions": [
+            [-129.5, 78, -114.5],
+            [-135.5, 78, -125.5],
+            [-135.5, 78, -130.5],
+            [-139.5, 78, -89.5]
+          ],
+          "colors": ["#FF5555", "#55FF55", "#5599FF", "#FFAA00"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
@@ -128,29 +137,29 @@
       ]
     },
     {
-      "name": "Slash Etherwarps",
+      "name": "Other Etherwarps",
       "enabled": true,
       "waypoints": [
         {
-          "name": "X Aim (X Cannon / Coal)",
-          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
-          "color": "#FFFF55",
+          "name": "Square Safe Spot",
+          "positions": [[-141.5, 77, -86.5],[]],
+          "color": "#00FFFF",
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
-          "shape": "EDGE_TOP",
+          "shape": "FULL",
           "showInPhases": ["SUPPLIES"],
           "hideInPhases": [],
           "maxRenderDistance": -1
         },
         {
-          "name": "X Block Highlights",
-          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
+          "name": "X Cannon Safe Spot",
+          "positions": [[-135.25, 77.5, -128],[]],
           "color": "#FFFF55",
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
-          "shape": "FULL",
+          "shape": "CENTER_PLATE",
           "showInPhases": ["SUPPLIES"],
           "hideInPhases": [],
           "maxRenderDistance": -1
@@ -162,9 +171,13 @@
       "enabled": true,
       "waypoints": [
         {
-          "name": "Equals Aim (X Cannon / Coal / Shop Left / Shop Right)",
-          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
-          "color": "#FFFF55",
+          "name": "Equals Aim (Square / Shop Left / Shop Right)",
+          "positions": [
+            [-101.5, 75, -77],
+            [-47, 75, -115.5],
+            [-34, 75, -123.5]
+          ],
+          "colors": ["#AA55FF", "#FFAA00", "#FF55AA"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
@@ -174,9 +187,13 @@
           "maxRenderDistance": -1
         },
         {
-          "name": "X Block Highlights",
-          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
-          "color": "#FFFF55",
+          "name": "Equals Block Highlights (Square / Shop Left / Shop Right)",
+          "positions": [
+            [-139.5, 78, -90.5],
+            [-87.5, 78, -127.5],
+            [-74.5, 78, -135.5]
+          ],
+          "colors": ["#AA55FF", "#FFAA00", "#FF55AA"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
@@ -192,21 +209,35 @@
       "enabled": true,
       "waypoints": [
         {
-          "name": "Tri Aim (X Cannon / Coal / Shop Left / Shop Right)",
-          "positions": [[-158, 76, -140.5],[-154.5, 76.52, -150.5]],
-          "color": "#FFFF55",
+          "name": "Tri Aim (Square / X Cannon / Coal Left / Coal Right / Shop Left / Shop Right)",
+          "positions": [
+            [-113, 76, -107],
+            [-103.5, 76, -130.5],
+            [-103.5, 76.2, -140.3],
+            [-103.5, 76.3, -143],
+            [-62, 76, -143.5],
+            [-50, 76.1, -149.5]
+          ],
+          "colors": ["#FF5555", "#55FF55", "#FFFF55", "#FFAA00", "#AA55FF", "#FF55AA"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,
           "shape": "EDGE_TOP",
           "showInPhases": ["SUPPLIES"],
           "hideInPhases": [],
-          "maxRenderDistance": -1
+         "maxRenderDistance": -1
         },
         {
-          "name": "Tri Block Highlights",
-          "positions": [[-129.5, 78, -114.5],[-135.5, 78, -130.5]],
-          "color": "#FFFF55",
+          "name": "Tri Block Highlights (Square / X Cannon / Coal Left / Coal Right / Shop Left / Shop Right)",
+          "positions": [
+            [-139.5, 78, -90.5],
+            [-129.5, 78, -114.5],
+            [-135.5, 78, -125.5],
+            [-135.5, 78, -130.5],
+            [-87.5, 78, -127.5],
+            [-74.5, 78, -135.5]
+          ],
+          "colors": ["#FF5555", "#55FF55", "#FFFF55", "#FFAA00", "#AA55FF", "#FF55AA"],
           "alpha": 0.8,
           "renderStyle": "OUTLINE",
           "lineWidth": 0.5,

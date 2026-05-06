@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +23,21 @@ public final class EventBus {
             @NotNull Class<T> eventType,
             @NotNull Consumer<T> handler
     ) {
-        var subscription = new Subscription<>(eventType, handler);
-        SUBSCRIPTIONS.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>())
-                .add(subscription);
+        return subscribe(eventType, handler, EventPriority.NORMAL);
+    }
 
-        log.debug("Subscribed to event: {}", eventType.getSimpleName());
+    @NotNull
+    public static <T extends Event> Subscription<T> subscribe(
+            @NotNull Class<T> eventType,
+            @NotNull Consumer<T> handler,
+            @NotNull EventPriority priority
+    ) {
+        var subscription = new Subscription<>(eventType, handler, priority);
+        var subscriptions = SUBSCRIPTIONS.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>());
+        subscriptions.add(subscription);
+        subscriptions.sort(Comparator.comparingInt(s -> s.priority().ordinal()));
+
+        log.debug("Subscribed to event: {} with priority {}", eventType.getSimpleName(), priority);
         return subscription;
     }
 
@@ -64,7 +75,8 @@ public final class EventBus {
 
     public record Subscription<T extends Event>(
             Class<T> eventClass,
-            Consumer<T> handler
+            Consumer<T> handler,
+            EventPriority priority
     ) {
 
         public void unsubscribe() {

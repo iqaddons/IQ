@@ -1,5 +1,6 @@
 package net.iqaddons.mod.lifecycle.modules;
 
+import lombok.Getter;
 import net.iqaddons.mod.features.FeatureManager;
 import net.iqaddons.mod.features.generic.*;
 import net.iqaddons.mod.features.kuudra.alerts.*;
@@ -11,6 +12,7 @@ import net.iqaddons.mod.features.kuudra.tracker.PhaseSplitsPBTrackerFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.*;
 import net.iqaddons.mod.lifecycle.LifecycleComponent;
 
+@Getter
 public class FeatureModule implements LifecycleComponent {
 
     private FeatureManager features;
@@ -34,8 +36,8 @@ public class FeatureModule implements LifecycleComponent {
                 new PersonalBestTrackerFeature(), new PhaseSplitsPBTrackerFeature(), new AutoRequeueFeature(), new ChestCounterTrackerFeature(),
                 new KuudraProfitTrackerFeature(), new CroesusHelperFeature(), new HideKuudraBossBarFeature(),
                 new KuudraNotificationsFeature(), new BackboneAlertFeature(), new SupplyGiantHitboxAlertFeature(),
-                new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature(), new LuckyBuildFeature(), new DiscordRPCFeature(),
-                new IchorPoolWaypointFeature(), new EtherwarpHelperFeature()
+                new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature(), new DiscordRPCFeature(),
+                new IchorPoolWaypointFeature(), new EtherwarpHelperFeature(), new KuudraDistanceFeature()
         );
 
         features.start();
@@ -46,7 +48,4 @@ public class FeatureModule implements LifecycleComponent {
         features.stop();
     }
 
-    public FeatureManager getFeatures() {
-        return features;
-    }
 }

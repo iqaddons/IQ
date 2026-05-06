@@ -29,7 +29,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
                 return;
             }
 
-            MessageUtil.showAlert("§c§lDROPPED", 15, SoundEvents.BLOCK_ANVIL_LAND);
+            MessageUtil.showAlert("§cDropped", 15, SoundEvents.BLOCK_ANVIL_LAND);
         });
     }
 }

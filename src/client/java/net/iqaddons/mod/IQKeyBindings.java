@@ -1,10 +1,11 @@
 package net.iqaddons.mod;
 
-import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.*;
+import net.iqaddons.mod.screen.IQConfigScreen;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -85,11 +86,12 @@ public class IQKeyBindings {
     }
 
     public static void openConfigScreen(@NotNull MinecraftClient client) {
-        client.setScreen(
-                ResourcefulConfigScreen.make(IQModClient.get().getConfigurator(), Configuration.class)
-                        .withParent(null)
-                        .build()
-        );
+        client.setScreen(new IQConfigScreen(null,
+                Configuration.class,
+                KuudraGeneralConfig.class,
+                PhaseOneConfig.class, PhaseTwoConfig.class,
+                PhaseThreeConfig.class, PhaseFourConfig.class
+        ));
     }
 
     private static @NotNull KeyBinding registerWardrobeSlotKey(int slotNumber, int defaultKeyCode) {

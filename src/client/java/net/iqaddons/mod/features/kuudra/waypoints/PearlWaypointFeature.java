@@ -130,7 +130,7 @@ public class PearlWaypointFeature extends KuudraFeature {
             supplyProgressStartMs = now - getTargetTimeMs(lastSupplyProgressIndex);
         }
 
-        if (!PhaseOneConfig.pearlThrowAlert || previousIndex < 0
+        if (!PhaseOneConfig.PearlWaypointsConfig.pearlThrowAlert || previousIndex < 0
                 || lastSupplyProgressIndex < 0
                 || previousIndex == lastSupplyProgressIndex
         ) return;
@@ -164,13 +164,13 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private void renderAreaStandBlockOutline(@NotNull WorldRenderEvent event, PearlWaypoint standBlockWaypoint) {
-        if (!PhaseOneConfig.pearlWaypointBlockOutlines || standBlockWaypoint == null || !standBlockWaypoint.hasStandBlock()) {
+        if (!PhaseOneConfig.PearlWaypointsConfig.pearlWaypointBlockOutlines || standBlockWaypoint == null || !standBlockWaypoint.hasStandBlock()) {
             return;
         }
 
         RenderColor outlineColor = standBlockWaypoint.color();
         if (outlineColor.a == 0.0f) {
-            outlineColor = RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor);
+            outlineColor = RenderColor.fromArgb(PhaseOneConfig.PearlWaypointsConfig.pearlWaypointColor);
         }
 
         Vec3d block = standBlockWaypoint.standBlock();
@@ -186,9 +186,9 @@ public class PearlWaypointFeature extends KuudraFeature {
         Vec3d target = getRenderTarget(area, waypoint, commonStandBlockCenter);
         if (target.x == 0 && target.y == 0 && target.z == 0) return;
 
-        float adjustedScale = PhaseOneConfig.pearlWaypointsScale;
+        float adjustedScale = PhaseOneConfig.PearlWaypointsConfig.pearlWaypointsScale;
 
-        int sizeAdjustmentSteps = Math.clamp(PhaseOneConfig.pearlWaypointSize, -5, 5);
+        int sizeAdjustmentSteps = Math.clamp(PhaseOneConfig.PearlWaypointsConfig.pearlWaypointSize, -5, 5);
         double sizeMultiplier = 1.0 + (sizeAdjustmentSteps * 0.1);
         float size = (float) Math.max(0.05, waypoint.size() * sizeMultiplier);
         float half = size / 2f;
@@ -200,7 +200,7 @@ public class PearlWaypointFeature extends KuudraFeature {
 
         RenderColor waypointColor = waypoint.color();
         if (waypointColor.a == 0.0f) {
-            waypointColor = RenderColor.fromArgb(PhaseOneConfig.pearlWaypointColor);
+            waypointColor = RenderColor.fromArgb(PhaseOneConfig.PearlWaypointsConfig.pearlWaypointColor);
         }
 
         int targetIndex = -1;
@@ -211,7 +211,7 @@ public class PearlWaypointFeature extends KuudraFeature {
             targetIndex = getAdjustedTargetIndex(adjustedLabel);
 
             // Change to green if it's time to throw the pearl
-            if (PhaseOneConfig.pearlThrowAlert && waypoint.alert() && targetIndex >= 0 && lastSupplyProgress > 0) {
+            if (PhaseOneConfig.PearlWaypointsConfig.pearlThrowAlert && waypoint.alert() && targetIndex >= 0 && lastSupplyProgress > 0) {
                 int currentIndex = lastSupplyProgressIndex;
                 if (currentIndex >= 0) {
                     int ticksRemaining = targetIndex - currentIndex;
@@ -223,7 +223,7 @@ public class PearlWaypointFeature extends KuudraFeature {
             }
         }
 
-        switch (PhaseOneConfig.pearlWaypointRenderStyle) {
+        switch (PhaseOneConfig.PearlWaypointsConfig.pearlWaypointRenderStyle) {
             case SOLID:
                 event.drawFilled(targetBox, true, waypointColor.withOpacity(80.0f));
                 break;
@@ -295,17 +295,17 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private boolean shouldRenderText() {
-        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TEXT_STATIC;
+        return PhaseOneConfig.PearlWaypointsConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TEXT_STATIC;
     }
 
     private boolean shouldRenderTimer() {
-        return PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_MS
-                || PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS;
+        return PhaseOneConfig.PearlWaypointsConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_MS
+                || PhaseOneConfig.PearlWaypointsConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS;
     }
 
     private @NotNull Vec3d getRenderTarget(@NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
         Vec3d target = waypoint.target();
-        if (!PhaseOneConfig.dynamicPearlWaypoints || commonStandBlockCenter == null || mc.player == null) {
+        if (!PhaseOneConfig.PearlWaypointsConfig.dynamicPearlWaypoints || commonStandBlockCenter == null || mc.player == null) {
             return target;
         }
 
@@ -368,7 +368,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private int getEffectiveDelayOffset() {
-        int manualDelayMs = PhaseOneConfig.pearlWaypointsTimerDelay * SUPPLY_STEP_TIME_MS;
+        int manualDelayMs = PhaseOneConfig.PearlWaypointsConfig.pearlWaypointsTimerDelay * SUPPLY_STEP_TIME_MS;
         return Math.round((float) manualDelayMs / SUPPLY_STEP_TIME_MS);
     }
 
@@ -384,7 +384,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private @NotNull String formatTimerText(long remainingMs) {
-        if (PhaseOneConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS) {
+        if (PhaseOneConfig.PearlWaypointsConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS) {
             return String.format(Locale.ROOT, "%.1fs", remainingMs / 1000.0);
         }
         return remainingMs + "ms";
@@ -427,7 +427,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private @NotNull RenderColor getAlertColor(@NotNull PearlWaypoint waypoint, int targetIndex) {
-        if (!PhaseOneConfig.pearlThrowAlert || !waypoint.alert() || targetIndex < 0) {
+        if (!PhaseOneConfig.PearlWaypointsConfig.pearlThrowAlert || !waypoint.alert() || targetIndex < 0) {
             return RenderColor.white;
         }
 

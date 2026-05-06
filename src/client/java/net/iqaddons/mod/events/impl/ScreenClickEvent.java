@@ -15,6 +15,7 @@ public class ScreenClickEvent implements Event, Cancellable {
 
     private final HandledScreen<?> screen;
     private final Slot slot;
+    private final int button;
     private final SlotActionType actionType;
 
     @Setter

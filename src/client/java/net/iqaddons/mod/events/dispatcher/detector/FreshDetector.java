@@ -64,7 +64,7 @@ public class FreshDetector {
                 try {
                     return Integer.parseInt(matcher.group(1));
                 } catch (NumberFormatException e) {
-                    log.warn("Failed to parse progress: {}", stripped);
+                    log.warn("Failed to parse percent: {}", stripped);
                 }
             }
         }

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public enum MessageUtil {
 
     SUCCESS("§a"),
-    INFO("§7"),
+    INFO("§f"),
     WARNING("§e"),
     ERROR("§c"),
     PARTY();

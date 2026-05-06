@@ -31,7 +31,12 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     private float y;
     private float scale;
 
+    private final float defaultX;
+    private final float defaultY;
+    private final float defaultScale;
+
     private HudAnchor anchor;
+    private final HudAnchor defaultAnchor;
     private boolean selected;
 
     private final List<HudLine> lines = new ArrayList<>();
@@ -59,7 +64,11 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         this.x = defaultX;
         this.y = defaultY;
         this.scale = defaultScale;
+        this.defaultX = defaultX;
+        this.defaultY = defaultY;
+        this.defaultScale = defaultScale;
         this.anchor = defaultAnchor;
+        this.defaultAnchor = defaultAnchor;
     }
 
     protected HudWidget(
@@ -75,6 +84,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    public void resetToDefaults() {
+        this.x = defaultX;
+        this.y = defaultY;
+        this.scale = defaultScale;
+        this.anchor = defaultAnchor;
+        markDimensionsDirty();
     }
 
     public float getAbsoluteX() {
@@ -241,6 +258,19 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     protected void onDeactivate() {}
 
+    protected float getLineStartX(@NotNull TextRenderer textRenderer) {
+        return 0.0f;
+    }
+
+    protected void renderBeforeLines(
+            @NotNull DrawContext context,
+            float x,
+            float y,
+            int width,
+            int height,
+            @NotNull TextRenderer textRenderer
+    ) {}
+
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
         var textRenderer = mc.textRenderer;
@@ -278,7 +308,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
 
-        float currentX = scaledX;
+        float currentX = scaledX + getLineStartX(textRenderer);
         float currentY = scaledY;
 
         int totalWidth = getWidth();
@@ -296,6 +326,8 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             );
         }
 
+        renderBeforeLines(context, scaledX, scaledY, totalWidth, totalHeight, textRenderer);
+
         for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
             line.updateHoverState(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale);
@@ -303,13 +335,18 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
             if (line.hasLineBreak()) {
                 currentY += textRenderer.fontHeight + 1;
-                currentX = scaledX;
+                currentX = scaledX + getLineStartX(textRenderer);
             } else {
                 currentX += line.getWidth(textRenderer);
             }
         }
 
         context.getMatrices().popMatrix();
+
+        for (HudLine line : renderLines) {
+            if (!line.shouldRender()) continue;
+            line.renderHover(context, textRenderer);
+        }
     }
 
     private void renderEmptyPlaceholder(
@@ -397,7 +434,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
 
-        float currentX = scaledX;
+        float currentX = scaledX + getLineStartX(textRenderer);
         float currentY = scaledY;
 
         for (HudLine line : getRenderableLines()) {
@@ -408,7 +445,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
             if (line.hasLineBreak()) {
                 currentY += textRenderer.fontHeight + 1;
-                currentX = scaledX;
+                currentX = scaledX + getLineStartX(textRenderer);
             } else {
                 currentX += line.getWidth(textRenderer);
             }

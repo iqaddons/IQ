@@ -15,11 +15,9 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -55,8 +53,7 @@ public final class ChestInteractionDetector {
         // Minecraft recycles syncId values (~0-127). If this windowId was used by a previous
         // chest that was already fully processed (bought=true, pendingOpen=null), reset the
         // state so the new chest interaction is not silently ignored.
-        if (state.bought && state.pendingOpen == null) {
-            state.bought = false;
+        if (state.pendingOpens.isEmpty()) {
             state.rerolled = false;
             state.shardRerolled = false;
         }
@@ -76,19 +73,18 @@ public final class ChestInteractionDetector {
             return;
         }
 
-        if (slot.id != BUY_SLOT || state.bought) return;
+        if (slot.id != BUY_SLOT) return;
         // Allow empty slot: on fast clicks the server slot-update packet may not have arrived
         // yet, so the stack appears empty even though this is a valid buy action.
         // Only reject if the item is present but explicitly not a buy action.
         if (!slot.getStack().isEmpty() && !isBuyAction(slot.getStack())) return;
 
-        state.bought = true;
-        state.pendingOpen = new PendingChestOpen(
+        state.pendingOpens.addLast(new PendingChestOpen(
                 windowId,
                 title,
                 new ArrayList<>(handler.slots),
                 chestType
-        );
+        ));
     }
 
     public void detect(@NotNull ChatReceivedEvent event, long tickCount, @NotNull Consumer<Event> postEvent) {
@@ -96,17 +92,18 @@ public final class ChestInteractionDetector {
         if (!message.contains(PAID_CHEST_REWARDS_MESSAGE) && !message.contains(FREE_CHEST_REWARDS_MESSAGE)) return;
 
         windowStates.values().stream()
-                .filter(state -> state.pendingOpen != null)
+                .filter(state -> !state.pendingOpens.isEmpty())
                 .max(Comparator.comparingLong(left -> left.lastInteractionTick))
                 .ifPresent(state -> {
                     state.lastInteractionTick = tickCount;
+                    PendingChestOpen pendingOpen = state.pendingOpens.pollFirst();
+                    if (pendingOpen == null) return;
                     postEvent.accept(new KuudraChestOpenEvent(
-                            state.pendingOpen.windowId(),
-                            state.pendingOpen.title(),
-                            state.pendingOpen.slots(),
-                            state.pendingOpen.chestType()
+                            pendingOpen.windowId(),
+                            pendingOpen.title(),
+                            pendingOpen.slots(),
+                            pendingOpen.chestType()
                     ));
-                    state.pendingOpen = null;
                 });
     }
 
@@ -152,8 +149,7 @@ public final class ChestInteractionDetector {
         // pendingOpen and silently drop the KuudraChestOpenEvent.
         private volatile boolean rerolled;
         private volatile boolean shardRerolled;
-        private volatile boolean bought;
-        private volatile PendingChestOpen pendingOpen;
+        private final Deque<PendingChestOpen> pendingOpens = new ConcurrentLinkedDeque<>();
         private volatile long lastInteractionTick;
     }
 

@@ -84,7 +84,7 @@ public final class ChestProfitUtil {
             double itemValue = CHEST_PROFIT_CALCULATOR.calculateItemValue(stack);
 
             if (CRIMSON_ESSENCE_ID.equals(itemId)) {
-                int bonusQuantity = (int) Math.round(quantity * (KuudraGeneralConfig.kuudraPetBonus / 100.0));
+                int bonusQuantity = (int) Math.round(quantity * (KuudraGeneralConfig.ProfitTrackerConfig.kuudraPetBonus / 100.0));
                 if (bonusQuantity > 0) {
                     double unitPrice = ItemPriceManager.get().getItemPrice(CRIMSON_ESSENCE_ID);
                     double bonusValue = unitPrice * bonusQuantity;

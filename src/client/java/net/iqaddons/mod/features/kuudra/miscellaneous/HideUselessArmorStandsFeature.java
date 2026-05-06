@@ -10,16 +10,15 @@ import net.iqaddons.mod.utils.BoundingBox2D;
 import net.minecraft.client.render.entity.state.ArmorStandEntityRenderState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.Objects;
 
 public class HideUselessArmorStandsFeature extends KuudraFeature {
 
     public HideUselessArmorStandsFeature() {
         super("hideUselessArmorStands",
                 "Hide Useless ArmorStand",
-                () -> KuudraGeneralConfig.hideUselessArmorStands.length > 0,
+                () -> KuudraGeneralConfig.hideUselessArmorStands
+                        && KuudraGeneralConfig.HideUselessArmorStandsConfig.anyEnabled(),
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -67,13 +66,23 @@ public class HideUselessArmorStandsFeature extends KuudraFeature {
     }
 
     private @NotNull EnumSet<HiddenArmorStandType> selectedTypes() {
-        HiddenArmorStandType[] configured = KuudraGeneralConfig.hideUselessArmorStands;
-        if (configured == null || configured.length == 0) {
-            return EnumSet.noneOf(HiddenArmorStandType.class);
+        EnumSet<HiddenArmorStandType> selected = EnumSet.noneOf(HiddenArmorStandType.class);
+        if (KuudraGeneralConfig.HideUselessArmorStandsConfig.build) {
+            selected.add(HiddenArmorStandType.BUILD);
+        }
+        if (KuudraGeneralConfig.HideUselessArmorStandsConfig.rightCannon) {
+            selected.add(HiddenArmorStandType.RIGHT_CANNON);
+        }
+        if (KuudraGeneralConfig.HideUselessArmorStandsConfig.leftCannon) {
+            selected.add(HiddenArmorStandType.LEFT_CANNON);
+        }
+        if (KuudraGeneralConfig.HideUselessArmorStandsConfig.shop) {
+            selected.add(HiddenArmorStandType.SHOP);
+        }
+        if (KuudraGeneralConfig.HideUselessArmorStandsConfig.others) {
+            selected.add(HiddenArmorStandType.OTHERS);
         }
 
-        EnumSet<HiddenArmorStandType> selected = EnumSet.noneOf(HiddenArmorStandType.class);
-        Arrays.stream(configured).filter(Objects::nonNull).forEach(selected::add);
         return selected;
     }
 

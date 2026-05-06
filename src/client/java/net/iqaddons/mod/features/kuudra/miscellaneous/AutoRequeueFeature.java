@@ -10,11 +10,14 @@ import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.MessageUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class AutoRequeueFeature extends Feature {
+
+    private static final int MIN_SAFE_REQUEUE_DELAY_TICKS = 10;
 
     private static final Pattern PARTY_DT_PATTERN = Pattern.compile(
             "^(?:Party >\\s*)?(?:\\[[^]]+]\\s*)?(?:\\[[^]]+]\\s*)?([A-Za-z0-9_]+):\\s*[!.]dt(?:\\s+(.*))?$",
@@ -24,6 +27,7 @@ public class AutoRequeueFeature extends Feature {
     private int pendingRequeueTicks = -1;
     private boolean downtimeRequested = false;
     private String downtimeReason;
+    private boolean waitingForRequeueResponse = false;
 
     public AutoRequeueFeature() {
         super("autoRequeue", "Auto Requeue",
@@ -42,6 +46,7 @@ public class AutoRequeueFeature extends Feature {
     private void onClientTick(@NotNull ClientTickEvent event) {
         if (!isEnabled()) {
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
@@ -56,6 +61,7 @@ public class AutoRequeueFeature extends Feature {
         if (downtimeRequested) {
             log.debug("Skipping auto-requeue because DT was requested before command execution");
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
@@ -70,17 +76,28 @@ public class AutoRequeueFeature extends Feature {
         }
 
         pendingRequeueTicks = -1;
+        waitingForRequeueResponse = true;
         mc.player.networkHandler.sendChatCommand("instancerequeue");
         MessageUtil.INFO.sendMessage("§aAuto Requeue: executing §f/instancerequeue§a.");
         log.info("Executed auto-requeue command");
     }
+
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         if (!isEnabled()) return;
 
         String message = event.getStrippedMessage();
         if (message.contains("You are not allowed to use that command as a spectator!")) {
+            if (!waitingForRequeueResponse || downtimeRequested) {
+                return;
+            }
+
             pendingRequeueTicks = 15;
             return;
+        }
+
+        if (waitingForRequeueResponse) {
+            // Any other response means we should stop treating future spectator messages as our own retries.
+            waitingForRequeueResponse = false;
         }
 
         Matcher matcher = PARTY_DT_PATTERN.matcher(message);
@@ -97,6 +114,7 @@ public class AutoRequeueFeature extends Feature {
         if (pendingRequeueTicks >= 0) {
             pendingRequeueTicks = -1;
         }
+        waitingForRequeueResponse = false;
 
         MessageUtil.WARNING.sendMessage(String.format("Auto Requeue Cancelled: %s requested DT (§f%s§e).",
                 playerName, downtimeReason));
@@ -109,12 +127,14 @@ public class AutoRequeueFeature extends Feature {
             downtimeRequested = false;
             downtimeReason = null;
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
         if (event.isExitingKuudra() && pendingRequeueTicks >= 0) {
             log.debug("Exited Kuudra before auto-requeue command was sent; clearing pending command");
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
         }
 
         if (event.isRunCompleted() && pendingRequeueTicks >= 0) {
@@ -125,11 +145,13 @@ public class AutoRequeueFeature extends Feature {
     private void onRunEnd(@NotNull KuudraRunEndEvent event) {
         if (!isEnabled()) {
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
         if (!event.isCompleted() && !event.isFailed()) {
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
@@ -141,11 +163,42 @@ public class AutoRequeueFeature extends Feature {
             );
             MessageUtil.showTitle("§c§lREQUEUE CANCELLED", "§eDT Detected", 5, 45, 10);
             pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
             return;
         }
 
-        pendingRequeueTicks = Math.max(1, KuudraGeneralConfig.requeueDelay);
+        if (shouldAutoStopOnFastRun(event)) {
+            pendingRequeueTicks = -1;
+            waitingForRequeueResponse = false;
+            return;
+        }
+
+        pendingRequeueTicks = Math.max(MIN_SAFE_REQUEUE_DELAY_TICKS, Math.max(1, KuudraGeneralConfig.AutoRequeueConfig.requeueDelay));
+        waitingForRequeueResponse = false;
         log.info("Kuudra run completed. Scheduling /instancerequeue in {} ticks", pendingRequeueTicks);
+    }
+
+    private boolean shouldAutoStopOnFastRun(@NotNull KuudraRunEndEvent event) {
+        if (!KuudraGeneralConfig.AutoRequeueConfig.autoStopAutoRequeue) {
+            return false;
+        }
+
+        if (!event.isCompleted()) {
+            return false;
+        }
+
+        long runMillis = Math.max(0L, event.totalDuration().toMillis());
+        long stopThresholdMillis = Math.max(1L, Math.round(KuudraGeneralConfig.AutoRequeueConfig.autoStopAutoRequeueOverallSeconds * 1000.0));
+        if (runMillis <= 0L || runMillis > stopThresholdMillis) {
+            return false;
+        }
+
+        String runTime = String.format(Locale.ROOT, "%.2fs", runMillis / 1000.0);
+        String stopTime = String.format(Locale.ROOT, "%.2fs", stopThresholdMillis / 1000.0);
+        MessageUtil.WARNING.sendMessage("Auto Requeue paused: run overall " + runTime + " <= " + stopTime + ".");
+        MessageUtil.showTitle("§e§lAUTO REQUEUE PAUSED", "§fRun: " + runTime, 5, 40, 10);
+        log.info("Auto requeue paused by fast-run auto-stop (run={}ms, threshold={}ms)", runMillis, stopThresholdMillis);
+        return true;
     }
 
     @Override
@@ -153,5 +206,6 @@ public class AutoRequeueFeature extends Feature {
         pendingRequeueTicks = -1;
         downtimeRequested = false;
         downtimeReason = null;
+        waitingForRequeueResponse = false;
     }
 }

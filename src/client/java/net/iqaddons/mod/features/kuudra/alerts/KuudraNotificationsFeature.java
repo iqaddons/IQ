@@ -9,7 +9,9 @@ import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
+import net.iqaddons.mod.utils.NoPreMessageParser;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
@@ -25,32 +27,27 @@ public class KuudraNotificationsFeature extends Feature {
     private static final List<KuudraNotificationRule> NOTIFICATION_RULES = List.of(
             new KuudraNotificationRule(
                     Pattern.compile(".*It's time to build the Ballista again! Cover me!"),
-                    "§a§lBUILD STARTED",
+                    "§aBuild Started",
                     () -> KuudraGeneralConfig.KuudraNotifications.buildStarted
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
-                    "§b§lICHOR",
+                    "§bIchor Used",
                     () -> KuudraGeneralConfig.KuudraNotifications.ichorUsed
             ),
             new KuudraNotificationRule(
-                    Pattern.compile(".* No (X|Equals|Triangle|Slash|X Cannon|Shop|Square)!"),
-                    "§4§lNO $1!",
-                    () -> KuudraGeneralConfig.KuudraNotifications.noPre
-            ),
-            new KuudraNotificationRule(
                     Pattern.compile(".*Starting in 4 seconds\\.{1,3}.*"),
-                    "§b§lSOS REMINDER",
+                    "§b§lSOS Reminder",
                     () -> KuudraGeneralConfig.KuudraNotifications.sosReminder
             ),
             new KuudraNotificationRule(
                     Pattern.compile("You purchased Human Cannonball!"),
-                    "§e§lCANNONBALL",
+                    "§eCannonball",
                     () -> KuudraGeneralConfig.KuudraNotifications.cannonBall
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Someone else is currently trying to pick up these supplies!"),
-                    "§c§lALREADY PICKING!",
+                    "§cAlready Picking!",
                     () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert,
                     SoundEvents.ENTITY_VILLAGER_NO
             )
@@ -75,6 +72,19 @@ public class KuudraNotificationsFeature extends Feature {
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+
+        mc.execute(() -> handleChatMessage(message));
+    }
+
+    private void handleChatMessage(@NotNull String message) {
+        if (KuudraGeneralConfig.KuudraNotifications.noPre) {
+            NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+            if (parsed != null) {
+                showAlert("§4No " + parsed.canonicalPileName(), null);
+                return;
+            }
+        }
+
         for (KuudraNotificationRule rule : NOTIFICATION_RULES) {
             if (!rule.isEnabled()) continue;
 
@@ -91,27 +101,41 @@ public class KuudraNotificationsFeature extends Feature {
         if (!KuudraGeneralConfig.KuudraNotifications.buildDone) return;
         if (event.currentPhase() != KuudraPhase.EATEN) return;
 
-        showAlert("§A§LBUILD 100%", null);
+        showAlert("§ABuild Completed%", null);
     }
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
+        if (KuudraGeneralConfig.KuudraNotifications.placedSupply && isLocalPlayer(event.playerName())) {
+            MessageUtil.showAlert("§aPLACED", 40, SoundEvents.BLOCK_NOTE_BLOCK_PLING.value());
+        }
+
         if (!KuudraGeneralConfig.KuudraNotifications.suppliesDone) return;
         if (event.currentSupply() != 6) return;
 
-        showAlert("§B§LSUPPLIES 6/6", null);
+        showAlert("§B§L6/6", null);
     }
 
     private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
         if (!KuudraGeneralConfig.KuudraNotifications.supplyPickedUp) return;
 
-        MessageUtil.showAlert("§a§lPICKED UP", 40);
+        MessageUtil.showAlert("§a§lPicked Up", 40);
     }
 
     private static boolean isAnyNotificationEnabled() {
         return NOTIFICATION_RULES.stream().anyMatch(KuudraNotificationRule::isEnabled)
+                || KuudraGeneralConfig.KuudraNotifications.noPre
                 || KuudraGeneralConfig.KuudraNotifications.buildDone
                 || KuudraGeneralConfig.KuudraNotifications.suppliesDone
+                || KuudraGeneralConfig.KuudraNotifications.placedSupply
                 || KuudraGeneralConfig.KuudraNotifications.supplyPickedUp;
+    }
+
+    private boolean isLocalPlayer(@Nullable String playerName) {
+        if (mc.player == null || playerName == null || playerName.isBlank()) {
+            return false;
+        }
+
+        return StringUtils.stripFormatting(playerName).equalsIgnoreCase(mc.player.getName().getString());
     }
 
     private static void showAlert(@NotNull String alertText, @Nullable SoundEvent soundEvent) {

@@ -1,7 +1,6 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
-import net.iqaddons.mod.features.kuudra.miscellaneous.HideUselessArmorStandsFeature;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 import net.iqaddons.mod.utils.TextColor;
 import net.fabricmc.loader.api.FabricLoader;
@@ -17,23 +16,71 @@ import java.nio.file.Path;
 )
 public class KuudraGeneralConfig {
 
-    @ConfigOption.Separator("Kuudra Requeuing")
+    @ConfigOption.Separator("Kuudra Splits")
 
     @ConfigEntry(
-            id = "autoRequeue",
-            translation = "Auto Requeue"
+            id = "customSplits",
+            translation = "Kuudra Splits"
     )
-    @Comment("Automatically start a new Kuudra run after the boss is defeated.")
-    public static boolean autoRequeue = true;
+    @Comment("Display an overlay with timings for each Kuudra phase.")
+    public static boolean customSplits = true;
 
     @ConfigEntry(
-            id = "requeueDelay",
-            translation = "Auto Requeue Delay"
+            id = "splitColorConfig",
+            translation = "Split Time Colors"
     )
-    @Comment("Delay before requeueing (in ticks).")
-    @ConfigOption.Range(min = 1, max = 50)
-    @ConfigOption.Slider
-    public static int requeueDelay = 20;
+    @Comment("Customize the color of each phase of Custom Splits.")
+    public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
+
+    @ConfigObject
+    public static class SplitColorConfig {
+        @ConfigEntry(id = "title", translation = "Title Text Color")
+        @ConfigOption.Select
+        public static TextColor title = TextColor.AQUA;
+
+        @ConfigEntry(id = "supplies", translation = "Supplies Text Color")
+        @ConfigOption.Select
+        public static TextColor supplies = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "build", translation = "Build Text Color")
+        @ConfigOption.Select
+        public static TextColor build = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "eaten", translation = "Eaten Text Color")
+        @ConfigOption.Select
+        public static TextColor eaten = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "stun", translation = "Stun Text Color")
+        @ConfigOption.Select
+        public static TextColor stun = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "dps", translation = "DPS Text Color")
+        @ConfigOption.Select
+        public static TextColor dps = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "skip", translation = "Skip Text Color")
+        @ConfigOption.Select
+        public static TextColor skip = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "boss", translation = "Boss Text Color")
+        @ConfigOption.Select
+        public static TextColor boss = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "overall", translation = "Overall Text Color")
+        @ConfigOption.Select
+        public static TextColor overall = TextColor.DARK_AQUA;
+
+        @ConfigEntry(id = "pace", translation = "Pace Text Color")
+        @ConfigOption.Select
+        public static TextColor pace = TextColor.DARK_AQUA;
+    }
+
+    @ConfigEntry(
+            id = "customSplitsBenchmarks",
+            translation = "Pace Splits Benchmarks"
+    )
+    @Comment("Pace is the run time to beat so just set the best possible times in each phase.")
+    public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
 
     @ConfigOption.Separator("Profit Tracking")
 
@@ -45,48 +92,34 @@ public class KuudraGeneralConfig {
     public static boolean kuudraProfitTracker = true;
 
     @ConfigEntry(
-            id = "profitTrackerVisibility",
-            translation = "Profit Tracker Visibility"
+            id = "profitTrackerColorConfig",
+            translation = "Profit Tracker Colors"
     )
-    @ConfigOption.Select
-    @Comment("Control when the profit tracker is visible.")
-    public static ProfitTrackerVisibility profitTrackerVisibility = ProfitTrackerVisibility.KUUDRA_AREAS;
+    @Comment("Customize the color of each line in the Profit Tracker widget.")
+    public static final ProfitTrackerColorConfig profitTrackerColorConfig = new ProfitTrackerColorConfig();
 
     @ConfigEntry(
-            id = "bazaarPricingMode",
-            translation = "Bazaar Pricing Mode"
+            id = "profitTrackerConfig",
+            translation = "Profit Tracker Config"
     )
-    @ConfigOption.Select
-    @Comment("Choose how Bazaar prices are calculated for profit and chest value.")
-    public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.SELL_ORDER;
+    @Comment("Customize visibility, pricing, faction, and value calculations for the Profit Tracker.")
+    public static final ProfitTrackerConfig profitTrackerConfig = new ProfitTrackerConfig();
+
+    @ConfigOption.Separator("Kuudra Chests")
 
     @ConfigEntry(
-            id = "crimsonIsleFaction",
-            translation = "Crimson Isle Faction"
+            id = "chestCounterTracker",
+            translation = "Chest Counter Tracker"
     )
-    @ConfigOption.Select
-    @Comment("Select your Crimson Isle faction to improve profit calculations.")
-    public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
-
+    @Comment("Track percent toward the 60 chest cap.")
+    public static boolean chestCounterTracker = true;
 
     @ConfigEntry(
-            id = "armorValueType",
-            translation = "Armor Value Type"
+            id = "chestCounterPartyAnnouncements",
+            translation = "Chest Counter Party Announcements"
     )
-    @ConfigOption.Select
-    @Comment("Choose how armor value is calculated in the profit tracker.")
-    public static ArmorValueType armorValueType = ArmorValueType.SALVAGE;
-
-    @ConfigEntry(
-            id = "kuudraPetBonus",
-            translation = "Kuudra Pet Bonus"
-    )
-    @ConfigOption.Range(min = 0, max = 20)
-    @ConfigOption.Slider
-    @Comment("Apply your Kuudra pet level bonus to profit calculations.")
-    public static int kuudraPetBonus = 20;
-
-    @ConfigOption.Separator("Widgets")
+    @Comment("Send reminders to party chat at milestones and when nearing the cap.")
+    public static boolean chestCounterPartyAnnouncements = true;
 
     @ConfigEntry(
             id = "chestValueWidget",
@@ -102,80 +135,49 @@ public class KuudraGeneralConfig {
     @Comment("Highlight already opened chests in Croesus and Vesuvius menus.")
     public static boolean croesusHelper = true;
 
-    @ConfigEntry(
-            id = "chestCounterTracker",
-            translation = "Chest Counter Tracker"
-    )
-    @Comment("Track progress toward the 60 chest cap.")
-    public static boolean chestCounterTracker = true;
+    @ConfigOption.Separator("Kuudra Requeuing")
 
     @ConfigEntry(
-            id = "chestCounterPartyAnnouncements",
-            translation = "Chest Counter Party Announcements"
+            id = "autoRequeue",
+            translation = "Auto Requeue"
     )
-    @Comment("Send reminders to party chat at milestones and when nearing the cap.")
-    public static boolean chestCounterPartyAnnouncements = true;
-
-    @ConfigOption.Separator("Custom Splits")
+    @Comment("Automatically start a new Kuudra run after the boss is defeated.")
+    public static boolean autoRequeue = true;
 
     @ConfigEntry(
-            id = "customSplits",
-            translation = "Custom Splits"
+            id = "autoRequeueConfig",
+            translation = "Auto Requeue Config"
     )
-    @Comment("Display an overlay with timings for each Kuudra phase.")
-    public static boolean customSplits = true;
-
-    @ConfigEntry(
-            id = "customSplitsBenchmarks",
-            translation = "Pace Custom Splits"
-    )
-    @Comment("Set the split timings that are used to calculate the pace feature.")
-    public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
-
-    @ConfigEntry(
-            id = "splitColorConfig",
-            translation = "Split Time Colors"
-    )
-    @Comment("Customize the color of each phase of Custom Splits.")
-    public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
+    @Comment("Configure Auto Requeue options: delay, auto-stop and run time threshold.")
+    public static final AutoRequeueConfig autoRequeueConfig = new AutoRequeueConfig();
 
     @ConfigObject
-    public static class SplitColorConfig {
-        @ConfigEntry(id = "supplies", translation = "Supplies Text Color")
-        @ConfigOption.Select
-        public static TextColor supplies = TextColor.GRAY;
+    public static class AutoRequeueConfig {
 
-        @ConfigEntry(id = "build", translation = "Build Text Color")
-        @ConfigOption.Select
-        public static TextColor build = TextColor.GRAY;
+        @ConfigEntry(
+                id = "requeueDelay",
+                translation = "Auto Requeue Delay"
+        )
+        @Comment("Delay before requeueing (in ticks).")
+        @ConfigOption.Range(min = 1, max = 50)
+        @ConfigOption.Slider
+        public static int requeueDelay = 20;
 
-        @ConfigEntry(id = "eaten", translation = "Eaten Text Color")
-        @ConfigOption.Select
-        public static TextColor eaten = TextColor.GRAY;
+        @ConfigEntry(
+                id = "autoStopAutoRequeue",
+                translation = "Auto Stop Auto Requeue"
+        )
+        @Comment("Pause Auto Requeue when a completed run hits your configured overall time target.")
+        public static boolean autoStopAutoRequeue = false;
 
-        @ConfigEntry(id = "stun", translation = "Stun Text Color")
-        @ConfigOption.Select
-        public static TextColor stun = TextColor.GRAY;
-
-        @ConfigEntry(id = "dps", translation = "DPS Text Color")
-        @ConfigOption.Select
-        public static TextColor dps = TextColor.GRAY;
-
-        @ConfigEntry(id = "skip", translation = "Skip Text Color")
-        @ConfigOption.Select
-        public static TextColor skip = TextColor.GRAY;
-
-        @ConfigEntry(id = "boss", translation = "Boss Text Color")
-        @ConfigOption.Select
-        public static TextColor boss = TextColor.GRAY;
-
-        @ConfigEntry(id = "overall", translation = "Overall Text Color")
-        @ConfigOption.Select
-        public static TextColor overall = TextColor.GRAY;
-
-        @ConfigEntry(id = "pace", translation = "Pace Text Color")
-        @ConfigOption.Select
-        public static TextColor pace = TextColor.GRAY;
+        @ConfigEntry(
+                id = "autoStopAutoRequeueOverallSeconds",
+                translation = "Auto Stop Run Time (s)"
+        )
+        @Comment("Set the completed run time that will stop Auto Requeue (Current WR: 52s).")
+        @ConfigOption.Range(min = 1, max = 180)
+        @ConfigOption.Slider
+        public static double autoStopAutoRequeueOverallSeconds = 51.0;
     }
 
     @ConfigOption.Separator("Notifications")
@@ -189,6 +191,13 @@ public class KuudraGeneralConfig {
 
     @ConfigObject
     public static class KuudraNotifications {
+
+        @ConfigEntry(
+                id = "kuudraNotificationsSound",
+                translation = "Kuudra Notifications Sound"
+        )
+        @Comment("Play a sound when a Kuudra notification is shown.")
+        public static boolean kuudraNotificationsSound = true;
 
         @ConfigEntry(
                 id = "kuudraNotificationBuildStarted",
@@ -261,19 +270,19 @@ public class KuudraGeneralConfig {
         public static boolean supplyDropped = true;
 
         @ConfigEntry(
+                id = "placedSupplyTitle",
+                translation = "Placed Supply"
+        )
+        @Comment("Show an alert when you place a supply.")
+        public static boolean placedSupply = true;
+
+        @ConfigEntry(
                 id = "supplyPickedUpTitle",
                 translation = "Supply Picked Up Notification"
         )
         @Comment("Show an alert when you finish picking up a supply.")
         public static boolean supplyPickedUp = true;
     }
-
-    @ConfigEntry(
-            id = "kuudraNotificationsSound",
-            translation = "Kuudra Notifications Sound"
-    )
-    @Comment("Play a sound when a Kuudra notification is shown.")
-    public static boolean kuudraNotificationsSound = true;
 
     @ConfigEntry(
             id = "abilityAnnounce",
@@ -336,14 +345,14 @@ public class KuudraGeneralConfig {
             id = "phaseSplitsPBTracker",
             translation = "Phase Personal Best Tracker"
     )
-    @Comment("Track your personal best time for each individual Kuudra phase (T5 Infernal only). Notifies when a phase PB is beaten.")
+    @Comment("Track your personal best time for each individual T5 Kuudra phase.")
     public static boolean phaseSplitsPBTracker = true;
 
-    @ConfigOption.Separator("Etherwarp Helper")
+    @ConfigOption.Separator("ETHERWARP WAYPOINTS")
 
     @ConfigEntry(
             id = "etherwarpHelper",
-            translation = "Etherwarp Helper"
+            translation = "Etherwarp Waypoints Helper"
     )
     @Comment("Render Etherwarp helper waypoints by Kuudra phase.")
     public static boolean etherwarpHelper = true;
@@ -352,7 +361,7 @@ public class KuudraGeneralConfig {
             title = "Etherwarp Categories",
             text = "SELECT"
     )
-    @Comment("Choose which Etherwarp categories are active. \nThis list is pulled from category names in etherwarp_config.json and updates after /iq reload.")
+    @Comment("Choose which Etherwarp categories are active.")
     @SuppressWarnings("unused")
     public static final Runnable openEtherwarpCategorySelector = () -> {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -374,18 +383,49 @@ public class KuudraGeneralConfig {
         }
     };
 
-    @ConfigOption.Separator("Visual")
+    @ConfigOption.Separator("Visuals")
 
     @ConfigEntry(
             id = "hideUselessArmorStands",
             translation = "Hide Useless Armor Stands"
     )
     @Comment("Hide armor stands used for visual effects that don't provide useful information.")
-    public static HideUselessArmorStandsFeature.HiddenArmorStandType[] hideUselessArmorStands = new HideUselessArmorStandsFeature.HiddenArmorStandType[]{
-            HideUselessArmorStandsFeature.HiddenArmorStandType.SHOP,
-            HideUselessArmorStandsFeature.HiddenArmorStandType.BUILD,
-            HideUselessArmorStandsFeature.HiddenArmorStandType.OTHERS
-    };
+    public static boolean hideUselessArmorStands = true;
+
+    @ConfigEntry(
+            id = "hideUselessArmorStandsConfig",
+            translation = "Hide Useless Armor Stands Config"
+    )
+    @Comment("")
+    public static final HideUselessArmorStandsConfig hideUselessArmorStandsConfig = new HideUselessArmorStandsConfig();
+
+    @ConfigObject
+    public static class HideUselessArmorStandsConfig {
+
+        @ConfigEntry(id = "build", translation = "Build Area")
+        @Comment("Hide the dropped balista pieces around the build area.")
+        public static boolean build = true;
+
+        @ConfigEntry(id = "rightCannon", translation = "Right Cannon")
+        @Comment("Hide the armour stand from right cannon.")
+        public static boolean rightCannon = false;
+
+        @ConfigEntry(id = "leftCannon", translation = "Left Cannon")
+        @Comment("Hide the armour stand from left cannon.")
+        public static boolean leftCannon = false;
+
+        @ConfigEntry(id = "shop", translation = "Shop Area")
+        @Comment("Hide the shop armour stand near Triangle.")
+        public static boolean shop = true;
+
+        @ConfigEntry(id = "others", translation = "Other Areas")
+        @Comment("Hide other armour stands like bonemerangs, fireballs, etc.")
+        public static boolean others = true;
+
+        public static boolean anyEnabled() {
+            return build || rightCannon || leftCannon || shop || others;
+        }
+    }
 
     @ConfigEntry(
             id = "hideMobNametags",
@@ -400,43 +440,43 @@ public class KuudraGeneralConfig {
         @ConfigEntry(id = "supplies", translation = "Supplies Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Supplies phase.")
+        @Comment("Preset best-possible Supplies split used in Pace calculation.")
         public static double supplies = 22.5;
 
         @ConfigEntry(id = "build", translation = "Build Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Build phase.")
+        @Comment("Preset best-possible Build split used in Pace calculation.")
         public static double build = 12;
 
         @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Eaten phase.")
+        @Comment("Preset best-possible Eaten split used in Pace calculation.")
         public static double eaten = 4.125;
 
         @ConfigEntry(id = "stun", translation = "Stun Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Stun phase.")
+        @Comment("Preset best-possible Stun split used in Pace calculation.")
         public static double stun = 0.0;
 
         @ConfigEntry(id = "dps", translation = "DPS Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the DPS phase.")
+        @Comment("Preset best-possible DPS split used in Pace calculation.")
         public static double dps = 3.5;
 
         @ConfigEntry(id = "skip", translation = "Skip Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Skip phase.")
+        @Comment("Preset best-possible Skip split used in Pace calculation.")
         public static double skip = 4.6;
 
         @ConfigEntry(id = "boss", translation = "Boss Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("Target time (seconds) for the Boss phase.")
+        @Comment("Preset best-possible Boss split used in Pace calculation.")
         public static double boss = 1.875;
     }
 
@@ -446,6 +486,84 @@ public class KuudraGeneralConfig {
     )
     @Comment("Hide Kuudra's vanilla boss bar during runs.")
     public static boolean hideKuudraBossBar = true;
+
+    @ConfigObject
+    public static class ProfitTrackerConfig {
+        @ConfigEntry(id = "profitTrackerVisibility", translation = "Profit Tracker Visibility")
+        @ConfigOption.Select
+        @Comment("Control when the profit tracker is visible.")
+        public static ProfitTrackerVisibility profitTrackerVisibility = ProfitTrackerVisibility.KUUDRA_AREAS;
+
+        @ConfigEntry(id = "bazaarPricingMode", translation = "Bazaar Pricing Mode")
+        @ConfigOption.Select
+        @Comment("Choose how Bazaar prices are calculated for profit and chest value.")
+        public static BazaarPricingMode bazaarPricingMode = BazaarPricingMode.SELL_ORDER;
+
+        @ConfigEntry(id = "crimsonIsleFaction", translation = "Crimson Isle Faction")
+        @ConfigOption.Select
+        @Comment("Select your Crimson Isle faction to improve profit calculations.")
+        public static CrimsonFaction crimsonIsleFaction = CrimsonFaction.MAGE;
+
+        @ConfigEntry(id = "armorValueType", translation = "Armor Value Type")
+        @ConfigOption.Select
+        @Comment("Choose how armor value is calculated in the profit tracker.")
+        public static ArmorValueType armorValueType = ArmorValueType.SALVAGE;
+
+        @ConfigEntry(id = "kuudraPetBonus", translation = "Kuudra Pet Bonus")
+        @ConfigOption.Range(min = 0, max = 20)
+        @ConfigOption.Slider
+        @Comment("Apply your Kuudra pet level bonus to profit calculations.")
+        public static int kuudraPetBonus = 20;
+    }
+
+    @ConfigObject
+    public static class ProfitTrackerColorConfig {
+
+        @ConfigEntry(id = "titleColor", translation = "Title Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Profit Tracker' title text.")
+        public static TextColor titleColor = TextColor.AQUA;
+
+        @ConfigEntry(id = "profitLabelColor", translation = "Profit Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Profit:' label.")
+        public static TextColor profitLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "runsLabelColor", translation = "Runs Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Runs:' label.")
+        public static TextColor runsLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "chestsLabelColor", translation = "Chests Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Chests:' label.")
+        public static TextColor chestsLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "rerollsLabelColor", translation = "Rerolls Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Rerolls:' label.")
+        public static TextColor rerollsLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "avgTimeLabelColor", translation = "Avg Time Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Avg Time:' label.")
+        public static TextColor avgTimeLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "timeLabelColor", translation = "Time Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Time:' label.")
+        public static TextColor timeLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "rateLabelColor", translation = "Rate Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Rate:' label.")
+        public static TextColor rateLabelColor = TextColor.WHITE;
+
+        @ConfigEntry(id = "trackingLabelColor", translation = "Tracking Label Color")
+        @ConfigOption.Select
+        @Comment("Color of the 'Tracking:' label.")
+        public static TextColor trackingLabelColor = TextColor.WHITE;
+    }
 
     public enum ProfitTrackerVisibility {
         KUUDRA_AREAS, ALWAYS

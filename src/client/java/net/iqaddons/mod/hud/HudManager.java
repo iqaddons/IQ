@@ -9,7 +9,6 @@ import net.iqaddons.mod.hud.config.HudConfigManager;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -118,8 +117,19 @@ public final class HudManager {
 
     public void renderOnHandledScreen(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
         if (!(mc.currentScreen instanceof HandledScreen<?>)) return;
+        if (mc.player == null) return;
+        if (mc.options.hudHidden) return;
+        if (mc.options.playerListKey.isPressed()) return;
 
-        renderWidgets(context, mouseX, mouseY, delta);
+        for (HudWidget widget : widgets) {
+            if (!widget.isActive() && widget.shouldRender()) {
+                widget.activate();
+            }
+
+            if (widget.isActive()) {
+                widget.render(context, mouseX, mouseY, delta);
+            }
+        }
     }
 
     public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
@@ -166,13 +176,10 @@ public final class HudManager {
         for (HudWidget widget : widgets) {
             configManager.saveFromWidget(widget);
         }
-        
-        configManager.saveAsync();
     }
 
     public boolean handleClick(double mouseX, double mouseY, int button) {
         if (editorOpen) return false;
-        if (mc.currentScreen instanceof ChatScreen) return false;
 
         for (HudWidget widget : widgets) {
             if (widget.isActive() && widget.shouldRender()) {

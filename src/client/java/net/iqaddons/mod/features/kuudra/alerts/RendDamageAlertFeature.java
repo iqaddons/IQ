@@ -19,13 +19,15 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private static final double IGNORE_Y_THRESHOLD = 30.0;
 
     private volatile float lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
+    private volatile boolean finalCheckProcessed;
 
     public RendDamageAlertFeature() {
         super(
                 "rendDamageAlert",
                 "Rend Damage Alert",
                 () -> PhaseFourConfig.rendDamageAlert,
-                KuudraPhase.BOSS
+                KuudraPhase.BOSS,
+                KuudraPhase.COMPLETED
         );
     }
 
@@ -38,18 +40,52 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraDeactivate() {
+        // Fallback if deactivate occurs before/without the BOSS->COMPLETED phase callback.
+        if (currentPhase() == KuudraPhase.COMPLETED && !finalCheckProcessed) {
+            performFinalCheck(true, null);
+        }
         resetState();
+    }
+
+    private void performFinalCheck(boolean forceBossDead, Double fixedTimeSeconds) {
+        if (mc.player == null) return;
+        if (!forceBossDead && mc.player.getY() > IGNORE_Y_THRESHOLD) return;
+
+        var bossInfo = currentContext().bossInfo();
+        float currentHealth = forceBossDead ? 0f : (bossInfo.isAlive() ? bossInfo.currentHealth() : 0f);
+        if (currentHealth > BOSS_HEALTH_CAP) return;
+
+        float diff = Math.max(0f, lastKuudraHealth - currentHealth);
+        if (diff > MIN_REND_DAMAGE) {
+            float scaledDamage = diff * DAMAGE_MULTIPLIER;
+            double timeSeconds = fixedTimeSeconds != null
+                    ? fixedTimeSeconds
+                    : stateManager.getPhaseDuration(KuudraPhase.BOSS)
+                    .map(d -> d.toMillis() / 1000.0)
+                    .orElseGet(() -> currentContext().phaseDuration().toMillis() / 1000.0);
+            MessageUtil.INFO.sendMessage("§fSomeone pulled for %s%s §fdamage at §a%.2fs§f."
+                    .formatted(getDamageColor(diff), formatDamage(scaledDamage), timeSeconds)
+            );
+            log.debug("Rend pull detected on final check: raw={} scaled={} forceBossDead={}", diff, scaledDamage, forceBossDead);
+        }
     }
 
     @Override
     protected void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
-        if (!event.currentPhase().isCombatPhase()) {
+        // Evaluate exactly when BOSS closes; completion implies the boss died.
+        if (event.previousPhase() == KuudraPhase.BOSS && event.currentPhase() == KuudraPhase.COMPLETED) {
+            finalCheckProcessed = true;
+            performFinalCheck(true, event.phaseDurationMillis() / 1000.0);
+            return;
+        }
+
+        if (event.currentPhase() == KuudraPhase.NONE) {
             resetState();
         }
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
-        if (!event.isInGame() || !event.isNthTick(2) || mc.player == null) {
+        if (!event.isInGame() || mc.player == null) {
             return;
         }
 
@@ -64,9 +100,11 @@ public class RendDamageAlertFeature extends KuudraFeature {
         float diff = Math.max(0f, lastKuudraHealth - currentHealth);
         if (diff > MIN_REND_DAMAGE) {
             float scaledDamage = diff * DAMAGE_MULTIPLIER;
+            double timeSeconds = stateManager.getPhaseDuration(KuudraPhase.BOSS)
+                    .map(d -> d.toMillis() / 1000.0)
+                    .orElseGet(() -> currentContext().phaseDuration().toMillis() / 1000.0);
             MessageUtil.INFO.sendMessage("§fSomeone pulled for %s%s §fdamage at §a%.2fs§f."
-                    .formatted(getDamageColor(diff), formatDamage(scaledDamage),
-                            currentContext().phaseDuration().toMillis() / 1000.0)
+                    .formatted(getDamageColor(diff), formatDamage(scaledDamage), timeSeconds)
             );
 
             log.debug("Rend pull detected: raw={} scaled={}", diff, scaledDamage);
@@ -77,6 +115,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
     private void resetState() {
         lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
+        finalCheckProcessed = false;
     }
 
     private @NotNull String formatDamage(float number) {
@@ -92,3 +131,4 @@ public class RendDamageAlertFeature extends KuudraFeature {
         return "§a";
     }
 }
+

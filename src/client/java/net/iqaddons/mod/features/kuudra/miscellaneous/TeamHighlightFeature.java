@@ -78,7 +78,7 @@ public class TeamHighlightFeature extends KuudraFeature {
             if (!highlightedPlayers.contains(playerId)) {
                 EntityGlowUtil.setGlowing(playerId, teamColor, PRIORITY_TEAM_HIGHLIGHT);
                 highlightedPlayers.add(playerId);
-                log.debug("Highlighted teammate: {}", player.getName().getString());
+                log.info("Highlighted teammate: {}", player.getName().getString());
             }
         }
 

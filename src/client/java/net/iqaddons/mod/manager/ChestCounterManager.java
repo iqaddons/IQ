@@ -53,4 +53,9 @@ public final class ChestCounterManager {
         chests = 0;
         store.set(CHEST_COUNT_KEY, chests);
     }
+
+    public synchronized void set(int amount) {
+        chests = Math.max(0, Math.min(MAX_CHESTS, amount));
+        store.set(CHEST_COUNT_KEY, chests);
+    }
 }

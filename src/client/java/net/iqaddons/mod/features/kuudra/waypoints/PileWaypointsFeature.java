@@ -78,14 +78,14 @@ public class PileWaypointsFeature extends KuudraFeature {
         int missingPre = supplyState.getMissingPre();
         for (PileLocation pile : piles) {
             RenderColor color = pile.isNoPrePile(missingPre)
-                    ? RenderColor.fromArgb(PhaseOneConfig.noPrePileColor)
-                    : RenderColor.fromArgb(PhaseOneConfig.normalPileColor);
+                    ? RenderColor.fromArgb(PhaseOneConfig.PileWaypointsConfig.noPrePileColor)
+                    : RenderColor.fromArgb(PhaseOneConfig.PileWaypointsConfig.normalPileColor);
 
             event.drawStyledWithBeam(Box.from(pile.position()), BEACON_HEIGHT,
                     false, color, WorldRenderUtils.RenderStyle.BOTH
             );
 
-            if (PhaseOneConfig.pileWaypointNames) {
+            if (PhaseOneConfig.PileWaypointsConfig.pileWaypointNames) {
                 event.drawText(pile.position().add(0, 2.5, 0),
                         Text.literal(pile.name()), 0.05f,
                         true, color.withOpacity(100)

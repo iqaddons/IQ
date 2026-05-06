@@ -30,16 +30,16 @@ public class CustomSplitsWidget extends HudWidget {
     private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
 
     private static final Map<KuudraPhase, double[]> PHASE_THRESHOLDS = Map.of(
-            KuudraPhase.SUPPLIES, new double[]{21.5, 24.7, 26.5, 28.0, 30.0},
-            KuudraPhase.BUILD, new double[]{12, 15.0, 17.0, 19.0, 20.0},
-            KuudraPhase.EATEN, new double[]{4.0, 5.3, 5.7, 6.0, 7.0},
-            KuudraPhase.STUN, new double[]{0.0, 0.0, 0.1, 0.3, 0.8},
-            KuudraPhase.DPS, new double[]{3.0, 3.6, 3.8, 4.2, 4.5},
-            KuudraPhase.SKIP, new double[]{3.0, 4.2, 4.5, 4.8, 5.3},
-            KuudraPhase.BOSS, new double[]{1.8, 2.3, 2.8, 3.3, 4.0}
+            KuudraPhase.SUPPLIES, new double[]{22.0, 23.0, 24.6, 27.0, 30.0, 34.0},
+            KuudraPhase.BUILD, new double[]{12, 13.5, 15.0, 17.0, 19.0, 20.0},
+            KuudraPhase.EATEN, new double[]{4.0, 4.4, 5.0, 5.5, 6.0, 7.0},
+            KuudraPhase.STUN, new double[]{0.0, 0.0, 0.0, 0.1, 0.3, 0.8},
+            KuudraPhase.DPS, new double[]{3.0, 3.3, 3.6, 3.8, 4.2, 4.5},
+            KuudraPhase.SKIP, new double[]{3.5, 4.0, 4.6, 4.8, 5.0, 5.2},
+            KuudraPhase.BOSS, new double[]{1.7, 2.0, 2.3, 2.8, 3.3, 4.0}
     );
 
-    private static final double[] OVERALL_THRESHOLDS = {51.0, 59.49, 65.0, 70.0, 80.0};
+    private static final double[] OVERALL_THRESHOLDS = {50.0, 52.49, 59.49, 65.0, 70.0, 80.0};
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
     private final Map<KuudraPhase, Double> splits = new EnumMap<>(KuudraPhase.class);
@@ -66,7 +66,7 @@ public class CustomSplitsWidget extends HudWidget {
                 HudAnchor.TOP_LEFT
         );
 
-        titleLine = HudLine.of("§b§lKuudra Splits");
+        titleLine = HudLine.of(KuudraGeneralConfig.SplitColorConfig.title.code() + "§lKuudra Splits");
         suppliesLine = HudLine.of("§7Supplies §f0.00s");
         buildLine = HudLine.of("§7Build: §f0.00s");
         eatenLine = HudLine.of("§7Eaten: §f0.00s");
@@ -90,15 +90,15 @@ public class CustomSplitsWidget extends HudWidget {
 
         setExampleLines(List.of(
                 HudLine.of("§b§lKuudra Splits"),
-                HudLine.of("§7Supplies: §f22.45s"),
-                HudLine.of("§7Build: §914.32s"),
-                HudLine.of("§7Eaten: §a5.21s"),
-                HudLine.of("§7Stun: §f0.53s"),
-                HudLine.of("§7DPS: §63.89s"),
-                HudLine.of("§7Skip: §f0.00s"),
-                HudLine.of("§7Boss: §c5.12s"),
-                HudLine.of("§7Overall: §a51.00s"),
-                HudLine.of("§7Pace: §953.50s")
+                HudLine.of("§3Supplies: §f22.45s"),
+                HudLine.of("§3Build: §914.32s"),
+                HudLine.of("§3Eaten: §a5.21s"),
+                HudLine.of("§3Stun: §f0.53s"),
+                HudLine.of("§3DPS: §63.89s"),
+                HudLine.of("§3Skip: §f0.00s"),
+                HudLine.of("§3Boss: §c5.12s"),
+                HudLine.of("§3Overall: §a51.00s"),
+                HudLine.of("§3Pace: §953.50s")
         ));
     }
 
@@ -274,6 +274,8 @@ public class CustomSplitsWidget extends HudWidget {
     }
 
     private void updateDisplay() {
+        titleLine.text(KuudraGeneralConfig.SplitColorConfig.title.code() + "§lKuudra Splits");
+
         updatePhaseLine(suppliesLine, "Supplies", KuudraPhase.SUPPLIES);
         updatePhaseLine(buildLine, "Build", KuudraPhase.BUILD);
         updatePhaseLine(eatenLine, "Eaten", KuudraPhase.EATEN);
@@ -348,10 +350,11 @@ public class CustomSplitsWidget extends HudWidget {
         if (time <= 0) return "§f";
 
         if (time <= thresholds[0]) return TextColor.WHITE.code();
-        if (time <= thresholds[1]) return TextColor.BLUE.code();
-        if (time <= thresholds[2]) return TextColor.GREEN.code();
-        if (time <= thresholds[3]) return TextColor.GOLD.code();
-        if (time <= thresholds[4]) return TextColor.RED.code();
+        if (time <= thresholds[1]) return TextColor.DARK_PURPLE.code();
+        if (time <= thresholds[2]) return TextColor.BLUE.code();
+        if (time <= thresholds[3]) return TextColor.GREEN.code();
+        if (time <= thresholds[4]) return TextColor.GOLD.code();
+        if (time <= thresholds[5]) return TextColor.RED.code();
         return TextColor.DARK_RED.code();
     }
 
@@ -370,7 +373,8 @@ public class CustomSplitsWidget extends HudWidget {
 
     private @NotNull String getOverallColor(double time) {
         if (time <= 0) return "§f";
-        if (time >= 48.0 && time <= 59.0) return "§9";
+        if (time >= 52.5 && time <= 59.0) return "§9";
+        if (time >= 50.0 && time <= 52.49) return "§5";
         return getSplitColor(time, OVERALL_THRESHOLDS);
     }
 }

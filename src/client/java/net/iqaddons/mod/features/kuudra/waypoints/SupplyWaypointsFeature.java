@@ -11,8 +11,6 @@ import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.GiantEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.util.math.Box;
@@ -24,11 +22,10 @@ import java.util.List;
 @Slf4j
 public class SupplyWaypointsFeature extends KuudraFeature {
 
-    private static final int UPDATE_INTERVAL_TICKS = 1;
+    private static final int UPDATE_INTERVAL_TICKS = 2;
     private static final int BEACON_HEIGHT = 100;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
-    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     public SupplyWaypointsFeature() {
         super(
@@ -66,45 +63,48 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         List<SupplyPosition> supplies = supplyState.getActiveSupplies();
         if (supplies.isEmpty()) return;
 
-        List<ZombieEntity> zombies = PhaseOneConfig.supplyHitBox
+        List<ZombieEntity> zombies = PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox
                 ? EntityDetectorUtil.getEntitiesOfType(ZombieEntity.class)
                 : List.of();
 
-        RenderColor color = RenderColor.fromArgb(PhaseOneConfig.supplyWaypointColor);
-        double halfBox = PhaseOneConfig.supplyWaypointBoxSize / 2.0;
+        double halfBox = PhaseOneConfig.SupplyWaypointsConfig.supplyWaypointBoxSize / 2.0;
         for (SupplyPosition supply : supplies) {
-            Vec3d renderPos = getInterpolatedSupplyPosition(event, supply);
-            event.drawStyledWithBeam(new Box(
-                    renderPos.x + 0.5 - halfBox,
-                    renderPos.y - 1,
-                    renderPos.z + 1.5 - halfBox,
-                    renderPos.x + 0.5 + halfBox,
-                    renderPos.y,
-                    renderPos.z + 1.5 + halfBox
-            ), BEACON_HEIGHT, true, color, WorldRenderUtils.RenderStyle.BOTH);
+            Box renderBox = new Box(
+                    supply.position().x + 0.5 - halfBox,
+                    supply.position().y - 1,
+                    supply.position().z + 1.5 - halfBox,
+                    supply.position().x + 0.5 + halfBox,
+                    supply.position().y,
+                    supply.position().z + 1.5 + halfBox);
+            RenderColor color = RenderColor.fromArgb(PhaseOneConfig.SupplyWaypointsConfig.supplyWaypointColor);
 
-            if (PhaseOneConfig.supplyHitBox) {
+            event.drawStyledWithBeam(
+                    renderBox, BEACON_HEIGHT,
+                    true, color,
+                    WorldRenderUtils.RenderStyle.BOTH
+            );
+
+            if (PhaseOneConfig.SupplyWaypointsConfig.supplyPullCircle) {
+                event.drawCircleOutline(new Vec3d(
+                        supply.position().x + 0.5,
+                        supply.position().y,
+                        supply.position().z + 1.5
+                ), 5, 60, false, color);
+            }
+
+            if (PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox) {
                 zombies.stream()
-                        .filter(zombie -> zombie.squaredDistanceTo(renderPos) < 9)
-                        .forEach(zombie ->
-                                event.drawStyledHitbox(
-                                        zombie, false,
-                                        color, WorldRenderUtils.RenderStyle.BOTH)
-                        );
+                        .filter(zombie -> zombie.squaredDistanceTo(supply.position()) < 9)
+                        .forEach(zombie -> {
+                            event.drawStyledHitbox(
+                                    zombie, false,
+                                    zombie.distanceTo(mc.player) > 3 ?
+                                            color :
+                                            RenderColor.green,
+                                    WorldRenderUtils.RenderStyle.BOTH
+                            );
+                        });
             }
         }
-    }
-
-    private @NotNull Vec3d getInterpolatedSupplyPosition(@NotNull WorldRenderEvent event, @NotNull SupplyPosition supply) {
-        if (mc.world == null) return supply.position();
-
-        Entity entity = mc.world.getEntityById(supply.entityId());
-        if (!(entity instanceof GiantEntity giant)) return supply.position();
-
-        float tickDelta = event.tickCounter().getTickProgress(true);
-        double x = giant.lastX + (giant.getX() - giant.lastX) * tickDelta;
-        double z = giant.lastZ + (giant.getZ() - giant.lastZ) * tickDelta;
-
-        return SupplyPosition.fromGiant(x, z, giant.getYaw(), giant.getId()).position();
     }
 }

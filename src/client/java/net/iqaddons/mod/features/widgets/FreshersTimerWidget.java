@@ -55,7 +55,7 @@ public class FreshersTimerWidget extends HudWidget {
         });
 
         setExampleLines(List.of(
-                HudLine.of("§b§lFresh Timers §8[§e2§8]"),
+                HudLine.of("§b§lFresh Times §8[§e2§8]"),
                 HudLine.of("§bckac10 §8- §f§l5.23s"),
                 HudLine.of("§aPeHenrii §8- §a§l7.85s")
         ));
@@ -211,7 +211,8 @@ public class FreshersTimerWidget extends HudWidget {
     private void updateDisplay() {
         clearLines();
         int freshers = freshEntries.size();
-        addLine(HudLine.of(String.format("§b§lFresh Timers §8[%s%d§8]",
+        addLine(HudLine.of(String.format("%s§lFresh Times §8[%s%d§8]",
+                PhaseTwoConfig.freshTimesTitleColor.code(),
                 getFresherCountColor(freshers), freshers))
         );
 
@@ -231,6 +232,7 @@ public class FreshersTimerWidget extends HudWidget {
 
     @Contract(pure = true)
     private @NotNull String getTimeColor(double time) {
+        if (time <= 4.2) return "§5";
         if (time <= 5) return "§9";
         if (time <= 7) return "§a";
         if (time <= 9) return "§6";
@@ -240,11 +242,11 @@ public class FreshersTimerWidget extends HudWidget {
     @Contract(pure = true)
     private @NotNull String getFresherCountColor(int count) {
         return switch (count) {
-            case 0 -> "§c";
-            case 1 -> "§6";
-            case 2 -> "§e";
-            case 3 -> "§a";
-            case 4 -> "§9";
+            case 0 -> "§6";
+            case 1 -> "§e";
+            case 2 -> "§a";
+            case 3 -> "§9";
+            case 4 -> "§5";
             default -> "§b";
         };
     }

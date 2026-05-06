@@ -10,6 +10,8 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 )
 public class PhaseFourConfig {
 
+    @ConfigOption.Separator("VISUALS")
+
     @ConfigEntry(
             id = "hideDamageTitle",
             translation = "Hide Kuudra Damage Title"
@@ -36,7 +38,7 @@ public class PhaseFourConfig {
             id = "backboneAlert",
             translation = "Backbone Alert"
     )
-    @Comment("Track Bonemerang backbone timing with a HUD progress bar and Rend alert.")
+    @Comment("Track Bonemerang backbone timing with a HUD percent bar and Rend alert.")
     public static boolean backboneAlert = true;
 
     @ConfigEntry(
@@ -45,6 +47,15 @@ public class PhaseFourConfig {
     )
     @Comment("Play a sound when the Backbone Alert is active.")
     public static boolean backboneAlertSound = true;
+
+    @ConfigEntry(
+            id = "backboneAdvanceTicks",
+            translation = "Backbone Advance (Ticks)"
+    )
+    @ConfigOption.Range(min = 0, max = 6)
+    @ConfigOption.Slider
+    @Comment("Trigger the Backbone Rend earlier by this many ticks.")
+    public static int backboneAlertAdvanceTicks = 2;
 
     @ConfigEntry(
             id = "dangerZoneAlert",
@@ -59,5 +70,12 @@ public class PhaseFourConfig {
     )
     @Comment("Render the area of effect of the ichor pools on the ground.")
     public static boolean ichorPoolArea = true;
+
+    @ConfigEntry(
+            id = "kuudraDistanceDisplay",
+            translation = "Kuudra Distance Display"
+    )
+    @Comment("Show your distance from Kuudra inside the Magma Cube.")
+    public static boolean kuudraDistanceDisplay = true;
 
 }

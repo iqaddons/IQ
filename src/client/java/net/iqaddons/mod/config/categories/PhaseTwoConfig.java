@@ -1,6 +1,7 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.iqaddons.mod.utils.TextColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 
 import java.awt.*;
@@ -16,6 +17,50 @@ public class PhaseTwoConfig {
     )
     @Comment("Give you some extra luck during the build phase ❤")
     public static boolean luckyBuild = true;
+
+    @ConfigEntry(
+            id = "freshTimers",
+            translation = "Fresh Times"
+    )
+    @Comment("Display an overlay that tracks all freshs during the build.")
+    public static boolean freshTimers = true;
+
+    @ConfigEntry(
+            id = "freshTimesTitleColor",
+            translation = "Fresh Times Title Color"
+    )
+    @ConfigOption.Select
+    @Comment("Choose the color used for the Fresh Times title.")
+    public static TextColor freshTimesTitleColor = TextColor.AQUA;
+
+    @ConfigEntry(
+            id = "buildProgressOverlay",
+            translation = "Build Progress Overlay"
+    )
+    @Comment("Display a build percent overlay on the screen.")
+    public static boolean buildProgressOverlay = true;
+
+    @ConfigEntry(
+            id = "simpleBuildProgressOverlay",
+            translation = "Build Progress Style"
+    )
+    @Comment("Choose the build progress overlay style: ")
+    public static boolean simpleBuildProgressOverlay = false;
+
+    @ConfigEntry(
+            id = "buildStartCountdownOverlay",
+            translation = "Build Start Countdown"
+    )
+    @Comment("Show a countdown for when the build starts during the phase animation.")
+    public static boolean buildStartCountdownOverlay = true;
+
+    @ConfigEntry(
+            id = "freshCountdown",
+            translation = "Fresh Countdown"
+    )
+    @Comment("Displays a countdown above players who freshed during build.")
+    public static boolean freshCountdown = true;
+
 
     @ConfigOption.Separator("Build Waypoints")
     @ConfigEntry(
@@ -38,51 +83,8 @@ public class PhaseTwoConfig {
             id = "hideDefaultBuildPileText",
             translation = "Hide Default Build Pile Text"
     )
-    @Comment("Hide Kuudra's default pile progress holograms while IQ build overlay is active.")
+    @Comment("Hide Kuudra's default pile percent holograms while IQ build overlay is active.")
     public static boolean hideDefaultBuildPileText = true;
-
-    @ConfigOption.Separator("Build Widgets")
-    @ConfigEntry(
-            id = "buildProgressOverlay",
-            translation = "Build Progress Overlay"
-    )
-    @Comment("Display a build progress overlay on the screen")
-    public static boolean buildProgressOverlay = true;
-
-    @ConfigEntry(
-            id = "simpleBuildProgressOverlay",
-            translation = "Simple Build Progress Overlay"
-    )
-    @Comment("Display only the build percent as a compact single-line widget")
-    public static boolean simpleBuildProgressOverlay = false;
-
-    @ConfigEntry(
-            id = "buildStartCountdownOverlay",
-            translation = "Build Start Countdown"
-    )
-    @Comment("Show a countdown for when the build starts during the phase animation.")
-    public static boolean buildStartCountdownOverlay = true;
-
-    @ConfigEntry(
-            id = "freshTimers",
-            translation = "Fresh Times"
-    )
-    @Comment("Render a timer above freshers heads during the build phase")
-    public static boolean freshTimers = true;
-
-    @ConfigEntry(
-            id = "freshCountdown",
-            translation = "Fresh Countdown"
-    )
-    @Comment("Display a countdown timer of you fresh")
-    public static boolean freshCountdown = true;
-
-    @ConfigEntry(
-            id = "elleHighlightConfig",
-            translation = "Elle Highlight Config"
-    )
-    @Comment("Configure the Elle highlight feature.")
-    public static final ElleConfig elleConfig = new ElleConfig();
 
     @ConfigOption.Separator("Build Highlights")
     @ConfigEntry(
@@ -114,6 +116,13 @@ public class PhaseTwoConfig {
     @ConfigOption.Color(alpha = true)
     @Comment("Color to use when highlighting freshers.")
     public static int freshHighlightColor = new Color(0.0f, 0.964f, 1.0f).getRGB();
+
+    @ConfigEntry(
+            id = "elleHighlightConfig",
+            translation = "Elle Highlight Config"
+    )
+    @Comment("Configure the Elle highlight feature.")
+    public static final ElleConfig elleConfig = new ElleConfig();
 
     @ConfigOption.Separator("Build Alerts")
     @ConfigEntry(

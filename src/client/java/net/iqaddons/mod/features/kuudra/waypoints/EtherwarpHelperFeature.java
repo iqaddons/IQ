@@ -132,7 +132,6 @@ public class EtherwarpHelperFeature extends KuudraFeature {
      */
     private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull EtherwarpWaypoint waypoint, @NotNull Vec3d pos, int colorIndex) {
         Box box = waypoint.getRenderBox(pos);
-
         RenderColor color = RenderColor.fromHex(waypoint.getColorForIndex(colorIndex)).withOpacity(waypoint.alpha());
 
         if (waypoint.renderStyle() == WorldRenderUtils.RenderStyle.SOLID) {
@@ -157,10 +156,6 @@ public class EtherwarpHelperFeature extends KuudraFeature {
         }
     }
 
-    /**
-     * Recarrega a configuração de waypoints.
-     * Chamado pelo sistema /iq reload.
-     */
     public void reloadConfig() {
         log.info("Reloading Etherwarp Helper config");
         List<EtherwarpCategory> categories = configLoader.reload();

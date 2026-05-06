@@ -72,6 +72,7 @@ public class HudEditScreen extends Screen {
                 "§e[Scroll / + / -]§7 Scale",
                 "§e[Arrows]§7 Fine-tune position",
                 "§e[G]§7 Toggle grid | §e[S]§7 Toggle snap",
+                "§e[C]§7 Center selected",
                 "§e[R]§7 Reset selected | §e[ESC]§7 Save & close"
         );
 
@@ -98,7 +99,7 @@ public class HudEditScreen extends Screen {
                 width - client.textRenderer.getWidth(snapStatus) - 5,
                 5,
                 snapColor
-        );;
+        );
     }
 
     @Override
@@ -190,6 +191,10 @@ public class HudEditScreen extends Screen {
                     resetSelectedElement();
                     return true;
                 }
+                case GLFW.GLFW_KEY_C -> {
+                    centerSelectedElement();
+                    return true;
+                }
                 case GLFW.GLFW_KEY_KP_ADD, GLFW.GLFW_KEY_EQUAL -> {
                     adjustSelectedScale(SCALE_STEP);
                     return true;
@@ -235,10 +240,37 @@ public class HudEditScreen extends Screen {
     private void resetSelectedElement() {
         if (selectedElement == null) return;
 
-        String id = selectedElement.getId();
-        HudManager.get().getConfigManager().removeConfig(id);
+        if (selectedElement instanceof HudWidget widget) {
+            widget.resetToDefaults();
+            HudManager.get().getConfigManager().saveFromWidget(widget);
+            log.info("Reset element to defaults: {}", widget.getId());
+        }
+    }
 
-        log.info("Reset element to defaults: {}", id);
+    private void centerSelectedElement() {
+        if (selectedElement == null) return;
+
+        int[] screen = net.iqaddons.mod.hud.element.HudAnchor.getScreenDimensions();
+        int screenWidth = screen[0];
+        int screenHeight = screen[1];
+        int widgetWidth = selectedElement.getScaledWidth();
+        int widgetHeight = selectedElement.getScaledHeight();
+
+        float absoluteX = (screenWidth - widgetWidth) / 2.0f;
+        float absoluteY = (screenHeight - widgetHeight) / 2.0f;
+
+        float offsetX = selectedElement.getAnchor().toOffsetX(absoluteX, screenWidth, widgetWidth);
+        float offsetY = selectedElement.getAnchor().toOffsetY(absoluteY, screenHeight, widgetHeight);
+
+        if (snapToGrid) {
+            offsetX = snapToGrid(offsetX);
+            offsetY = snapToGrid(offsetY);
+        }
+
+        selectedElement.setPosition(offsetX, offsetY);
+        if (selectedElement instanceof HudWidget widget) {
+            HudManager.get().getConfigManager().saveFromWidget(widget);
+        }
     }
 
     private void adjustSelectedScale(float scaleDelta) {

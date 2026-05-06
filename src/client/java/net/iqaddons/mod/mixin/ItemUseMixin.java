@@ -2,7 +2,6 @@ package net.iqaddons.mod.mixin;
 
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.ItemUseEvent;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -25,7 +24,7 @@ public class ItemUseMixin {
         );
 
         if (event.isCancelled()) {
-            cir.cancel();
+            cir.setReturnValue(ActionResult.FAIL);
         }
     }
 }

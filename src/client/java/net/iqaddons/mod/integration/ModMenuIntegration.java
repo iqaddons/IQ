@@ -1,17 +1,20 @@
 package net.iqaddons.mod.integration;
 
-import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.config.categories.*;
+import net.iqaddons.mod.screen.IQConfigScreen;
 
 public class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return screen -> ResourcefulConfigScreen.make(IQModClient.get().getConfigurator(), Configuration.class)
-                .withParent(screen)
-                .build();
+        return screen -> new IQConfigScreen(screen,
+                Configuration.class,
+                KuudraGeneralConfig.class,
+                PhaseOneConfig.class, PhaseTwoConfig.class,
+                PhaseThreeConfig.class, PhaseFourConfig.class
+        );
     }
 }
