@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class AuctionPriceProvider implements PriceProvider {
 
-    private static final String LOWEST_BIN_ENDPOINT = "https://moulberry.codes/lowestbin.json";
+    private static final String LOWEST_BIN_ENDPOINT = "https://whatyouth.ing/api/nofrills/v2/economy/get-item-pricing/";
 
     private final HttpClient httpClient;
     private final Map<String, Double> prices = new ConcurrentHashMap<>();
@@ -50,7 +50,8 @@ public class AuctionPriceProvider implements PriceProvider {
             }
 
             JsonObject root = JsonParser.parseString(response.body()).getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+            JsonObject auctionData = root.getAsJsonObject("auction");
+            for (Map.Entry<String, JsonElement> entry : auctionData.entrySet()) {
                 double value = Math.max(0D, entry.getValue().getAsDouble());
                 prices.put(entry.getKey(), value);
             }
