@@ -26,11 +26,35 @@ public class KuudraGeneralConfig {
     public static boolean customSplits = true;
 
     @ConfigEntry(
-            id = "splitColorConfig",
-            translation = "Split Time Colors"
+            id = "kuudraSplitsConfig",
+            translation = "Kuudra Splits Config"
     )
-    @Comment("Customize the color of each phase of Custom Splits.")
-    public static final SplitColorConfig splitColorConfig = new SplitColorConfig();
+    @Comment("Configure split time colors and pace benchmarks for Custom Splits.")
+    public static final KuudraSplitsConfig kuudraSplitsConfig = new KuudraSplitsConfig();
+
+    // Backward-compatible alias for existing usages in code.
+    public static final SplitColorConfig splitColorConfig = KuudraSplitsConfig.splitTimeColors;
+
+    // Backward-compatible alias for existing usages in code.
+    public static final CustomSplitsBenchmarks customSplitsBenchmarks = KuudraSplitsConfig.paceSplitsBenchmarks;
+
+    @ConfigObject
+    public static class KuudraSplitsConfig {
+
+        @ConfigEntry(
+                id = "splitTimeColors",
+                translation = "Split Time Colors"
+        )
+        @Comment("Customize the color of each phase of Custom Splits.")
+        public static final SplitColorConfig splitTimeColors = new SplitColorConfig();
+
+        @ConfigEntry(
+                id = "paceSplitsBenchmarks",
+                translation = "Pace Splits Benchmarks"
+        )
+        @Comment("Pace is the run time to beat so just set the best possible times in each phase.")
+        public static final CustomSplitsBenchmarks paceSplitsBenchmarks = new CustomSplitsBenchmarks();
+    }
 
     @ConfigObject
     public static class SplitColorConfig {
@@ -75,13 +99,6 @@ public class KuudraGeneralConfig {
         public static TextColor pace = TextColor.DARK_AQUA;
     }
 
-    @ConfigEntry(
-            id = "customSplitsBenchmarks",
-            translation = "Pace Splits Benchmarks"
-    )
-    @Comment("Pace is the run time to beat so just set the best possible times in each phase.")
-    public static final CustomSplitsBenchmarks customSplitsBenchmarks = new CustomSplitsBenchmarks();
-
     @ConfigOption.Separator("Profit Tracking")
 
     @ConfigEntry(
@@ -92,26 +109,22 @@ public class KuudraGeneralConfig {
     public static boolean kuudraProfitTracker = true;
 
     @ConfigEntry(
-            id = "profitTrackerColorConfig",
-            translation = "Profit Tracker Colors"
-    )
-    @Comment("Customize the color of each line in the Profit Tracker widget.")
-    public static final ProfitTrackerColorConfig profitTrackerColorConfig = new ProfitTrackerColorConfig();
-
-    @ConfigEntry(
             id = "profitTrackerConfig",
             translation = "Profit Tracker Config"
     )
-    @Comment("Customize visibility, pricing, faction, and value calculations for the Profit Tracker.")
+    @Comment("Customize colors, visibility, pricing, faction, and value calculations for the Profit Tracker.")
     public static final ProfitTrackerConfig profitTrackerConfig = new ProfitTrackerConfig();
+
+    // Backward-compatible alias for existing usages in code.
+    public static final ProfitTrackerColorConfig profitTrackerColorConfig = ProfitTrackerConfig.colors;
 
     @ConfigOption.Separator("Kuudra Chests")
 
     @ConfigEntry(
             id = "chestCounterTracker",
-            translation = "Chest Counter Tracker"
+            translation = "Chest Counter"
     )
-    @Comment("Track percent toward the 60 chest cap.")
+    @Comment("Render an overlay that tracks all your chests until you reach the cap of 60.")
     public static boolean chestCounterTracker = true;
 
     @ConfigEntry(
@@ -183,11 +196,18 @@ public class KuudraGeneralConfig {
     @ConfigOption.Separator("Notifications")
 
     @ConfigEntry(
-            id = "kuudraNotifications",
+            id = "kuudraNotificationsEnabled",
             translation = "Kuudra Notifications"
     )
-    @Comment("Configure alerts for important Kuudra-related events.")
-    public static final KuudraNotifications kuudraNotifications = new KuudraNotifications();
+    @Comment("Shows various notifications in Kuudra.")
+    public static boolean kuudraNotifications = true;
+
+    @ConfigEntry(
+            id = "kuudraNotificationsConfig",
+            translation = "Kuudra Notifications Config"
+    )
+    @Comment("Configure sounds, style, and individual Kuudra notifications.")
+    public static final KuudraNotifications kuudraNotificationsConfig = new KuudraNotifications();
 
     @ConfigObject
     public static class KuudraNotifications {
@@ -200,137 +220,320 @@ public class KuudraGeneralConfig {
         public static boolean kuudraNotificationsSound = true;
 
         @ConfigEntry(
-                id = "kuudraNotificationBuildStarted",
-                translation = "Build Started Notification"
+                id = "notificationBold",
+                translation = "Bold Text"
         )
-        @Comment("Show an alert when Elle asks to build the Ballista.")
-        public static boolean buildStarted = true;
+        @Comment("Apply bold formatting to all notification alerts.")
+        public static boolean bold = true;
 
         @ConfigEntry(
-                id = "kuudraNotificationIchorUsed",
-                translation = "Ichor Used Notification"
+                id = "kuudraNotifications",
+                translation = "Kuudra Notifications"
         )
-        @Comment("Show an alert when Ichor Pool is cast.")
-        public static boolean ichorUsed = true;
+        @Comment("Choose which individual notifications are enabled.")
+        public static final NotificationToggles notificationToggles = new NotificationToggles();
 
         @ConfigEntry(
-                id = "kuudraNotificationNoPre",
-                translation = "No Pre Notifications"
+                id = "notificationStyles",
+                translation = "Notification Styles"
         )
-        @Comment("Show an alert for 'No Pre' party messages.")
-        public static boolean noPre = true;
+        @Comment("Customize the color and duration for each individual notification.")
+        public static final NotificationStyles notificationStyles = new NotificationStyles();
+
+        @ConfigObject
+        public static class NotificationToggles {
+
+            @ConfigEntry(
+                    id = "kuudraNotificationBuildStarted",
+                    translation = "Build Started Notification"
+            )
+            @Comment("Show an alert when Elle asks to build the Ballista.")
+            public static boolean buildStarted = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationIchorUsed",
+                    translation = "Ichor Used Notification"
+            )
+            @Comment("Show an alert when Ichor Pool is cast.")
+            public static boolean ichorUsed = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationNoPre",
+                    translation = "No Pre Notifications"
+            )
+            @Comment("Show an alert for 'No Pre' party messages.")
+            public static boolean noPre = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationSosReminder",
+                    translation = "SOS Reminder Notification"
+            )
+            @Comment("Show an alert 4 seconds before the stun phase begins.")
+            public static boolean sosReminder = true;
+
+            @ConfigEntry(
+                    id = "kuudraPhaseAlert",
+                    translation = "Phase Change Notification"
+            )
+            @Comment("Show an alert when the Kuudra phase changes.")
+            public static boolean phaseChange = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationBuildDone",
+                    translation = "Build Done Notification"
+            )
+            @Comment("Show an alert when the Ballista is fully built.")
+            public static boolean buildDone = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationSuppliesDone",
+                    translation = "Supplies Done Notification"
+            )
+            @Comment("Show an alert when supplies reach 6/6.")
+            public static boolean suppliesDone = true;
+
+            @ConfigEntry(
+                    id = "kuudraNotificationCannonball",
+                    translation = "Cannonball Notification"
+            )
+            @Comment("Show an alert when Human Cannonball is purchased.")
+            public static boolean cannonBall = true;
+
+            @ConfigEntry(
+                    id = "supplyPickingAlert",
+                    translation = "Supply Already Picking Alert"
+            )
+            @Comment("Show an alert if another player is already picking your supply.")
+            public static boolean supplyPickingAlert = true;
+
+            @ConfigEntry(
+                    id = "supplyDroppedTitle",
+                    translation = "Supply Dropped Notification"
+            )
+            @Comment("Show an alert when a supply is dropped.")
+            public static boolean supplyDropped = true;
+
+            @ConfigEntry(
+                    id = "placedSupplyTitle",
+                    translation = "Placed Supply"
+            )
+            @Comment("Show an alert when you place a supply.")
+            public static boolean placedSupply = true;
+
+            @ConfigEntry(
+                    id = "supplyPickedUpTitle",
+                    translation = "Supply Picked Up Notification"
+            )
+            @Comment("Show an alert when you finish picking up a supply.")
+            public static boolean supplyPickedUp = true;
+        }
 
         @ConfigEntry(
-                id = "kuudraNotificationSosReminder",
-                translation = "SOS Reminder Notification"
+                id = "abilityAnnounce",
+                translation = "Ability Notifications"
         )
-        @Comment("Show an alert 4 seconds before the stun phase begins.")
-        public static boolean sosReminder = true;
+        @Comment("Announce ability usage in party chat.")
+        public static final AbilityAnnounce abilityAnnounce = new AbilityAnnounce();
 
-        @ConfigEntry(
-                id = "kuudraPhaseAlert",
-                translation = "Phase Change Notification"
-        )
-        @Comment("Show an alert when the Kuudra phase changes.")
-        public static boolean phaseChange = true;
+        @ConfigObject
+        public static class AbilityAnnounce {
 
-        @ConfigEntry(
-                id = "kuudraNotificationBuildDone",
-                translation = "Build Done Notification"
-        )
-        @Comment("Show an alert when the Ballista is fully built.")
-        public static boolean buildDone = true;
+            @ConfigEntry(
+                    id = "abilityAnnounceSpiritSpark",
+                    translation = "Spirit Spark"
+            )
+            @Comment("Send \"Spirit Spark Casted!\" in party chat.")
+            public static boolean spiritSpark = true;
 
-        @ConfigEntry(
-                id = "kuudraNotificationSuppliesDone",
-                translation = "Supplies Done Notification"
-        )
-        @Comment("Show an alert when supplies reach 6/6.")
-        public static boolean suppliesDone = true;
+            @ConfigEntry(
+                    id = "abilityAnnounceHollowedRush",
+                    translation = "Hollowed Rush"
+            )
+            @Comment("Send \"Hollowed Rush Casted!\" in party chat.")
+            public static boolean hollowedRush = true;
 
-        @ConfigEntry(
-                id = "kuudraNotificationCannonball",
-                translation = "Cannonball Notification"
-        )
-        @Comment("Show an alert when Human Cannonball is purchased.")
-        public static boolean cannonBall = true;
+            @ConfigEntry(
+                    id = "abilityAnnounceRagingWind",
+                    translation = "Raging Wind"
+            )
+            @Comment("Send \"Raging Wind Casted!\" in party chat.")
+            public static boolean ragingWind = true;
 
-        @ConfigEntry(
-                id = "supplyPickingAlert",
-                translation = "Supply Already Picking Alert"
-        )
-        @Comment("Show an alert if another player is already picking your supply.")
-        public static boolean supplyPickingAlert = true;
+            @ConfigEntry(
+                    id = "abilityAnnounceIchorPool",
+                    translation = "Ichor Pool"
+            )
+            @Comment("Send \"Ichor Pool Casted!\" in party chat.")
+            public static boolean ichorPool = true;
 
-        @ConfigEntry(
-                id = "supplyDroppedTitle",
-                translation = "Supply Dropped Notification"
-        )
-        @Comment("Show an alert when a supply is dropped.")
-        public static boolean supplyDropped = true;
+            @ConfigEntry(
+                    id = "abilityAnnounceManaDrain",
+                    translation = "Mana Drain"
+            )
+            @Comment("Send the amount of mana drained to party chat.")
+            public static boolean manaDrain = true;
 
-        @ConfigEntry(
-                id = "placedSupplyTitle",
-                translation = "Placed Supply"
-        )
-        @Comment("Show an alert when you place a supply.")
-        public static boolean placedSupply = true;
+            public static boolean hasSpellEnabled() {
+                return spiritSpark || hollowedRush || ragingWind || ichorPool;
+            }
+        }
 
-        @ConfigEntry(
-                id = "supplyPickedUpTitle",
-                translation = "Supply Picked Up Notification"
-        )
-        @Comment("Show an alert when you finish picking up a supply.")
-        public static boolean supplyPickedUp = true;
-    }
+        @ConfigObject
+        public static class NotificationStyles {
 
-    @ConfigEntry(
-            id = "abilityAnnounce",
-            translation = "Ability Announce"
-    )
-    @Comment("Announce ability usage in party chat.")
-    public static final AbilityAnnounce abilityAnnounce = new AbilityAnnounce();
+            @ConfigOption.Separator("Build Started")
+            @ConfigEntry(id = "buildStartedColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor buildStartedColor = TextColor.GREEN;
 
-    @ConfigObject
-    public static class AbilityAnnounce {
+            @ConfigEntry(id = "buildStartedDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int buildStartedDuration = 60;
 
-        @ConfigEntry(
-                id = "abilityAnnounceSpiritSpark",
-                translation = "Spirit Spark"
-        )
-        @Comment("Send \"Spirit Spark Casted!\" in party chat.")
-        public static boolean spiritSpark = true;
+            @ConfigEntry(id = "buildStartedText", translation = "Message Text")
+            @Comment("Custom message for Build Started notification.")
+            public static String buildStartedText = "BUILD STARTED";
 
-        @ConfigEntry(
-                id = "abilityAnnounceHollowedRush",
-                translation = "Hollowed Rush"
-        )
-        @Comment("Send \"Hollowed Rush Casted!\" in party chat.")
-        public static boolean hollowedRush = true;
+            @ConfigOption.Separator("Ichor Used")
+            @ConfigEntry(id = "ichorUsedColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor ichorUsedColor = TextColor.AQUA;
 
-        @ConfigEntry(
-                id = "abilityAnnounceRagingWind",
-                translation = "Raging Wind"
-        )
-        @Comment("Send \"Raging Wind Casted!\" in party chat.")
-        public static boolean ragingWind = true;
+            @ConfigEntry(id = "ichorUsedDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int ichorUsedDuration = 60;
 
-        @ConfigEntry(
-                id = "abilityAnnounceIchorPool",
-                translation = "Ichor Pool"
-        )
-        @Comment("Send \"Ichor Pool Casted!\" in party chat.")
-        public static boolean ichorPool = true;
+            @ConfigEntry(id = "ichorUsedText", translation = "Message Text")
+            @Comment("Custom message for Ichor Used notification.")
+            public static String ichorUsedText = "ICHOR";
 
-        @ConfigEntry(
-                id = "abilityAnnounceManaDrain",
-                translation = "Mana Drain"
-        )
-        @Comment("Send the amount of mana drained to party chat.")
-        public static boolean manaDrain = true;
+            @ConfigOption.Separator("SOS Reminder")
+            @ConfigEntry(id = "sosReminderColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor sosReminderColor = TextColor.AQUA;
 
-        public static boolean hasSpellEnabled() {
-            return spiritSpark || hollowedRush || ragingWind || ichorPool;
+            @ConfigEntry(id = "sosReminderDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int sosReminderDuration = 60;
+
+            @ConfigEntry(id = "sosReminderText", translation = "Message Text")
+            @Comment("Custom message for SOS Reminder notification.")
+            public static String sosReminderText = "SOS REMINDER";
+
+            @ConfigOption.Separator("Cannonball")
+            @ConfigEntry(id = "cannonBallColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor cannonBallColor = TextColor.YELLOW;
+
+            @ConfigEntry(id = "cannonBallDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int cannonBallDuration = 60;
+
+            @ConfigEntry(id = "cannonBallText", translation = "Message Text")
+            @Comment("Custom message for Cannonball notification.")
+            public static String cannonBallText = "CANNONBALL";
+
+            @ConfigOption.Separator("Already Picking")
+            @ConfigEntry(id = "supplyPickingAlertColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor supplyPickingAlertColor = TextColor.RED;
+
+            @ConfigEntry(id = "supplyPickingAlertDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int supplyPickingAlertDuration = 60;
+
+            @ConfigEntry(id = "supplyPickingAlertText", translation = "Message Text")
+            @Comment("Custom message for Already Picking notification.")
+            public static String supplyPickingAlertText = "ALREADY PICKING!";
+
+            @ConfigOption.Separator("No Pre")
+            @ConfigEntry(id = "noPreColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor noPreColor = TextColor.DARK_RED;
+
+            @ConfigEntry(id = "noPreDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int noPreDuration = 60;
+
+            @ConfigEntry(id = "noPreText", translation = "Message Text")
+            @Comment("Custom message for No Pre notification. Use {pile} for the pile name.")
+            public static String noPreText = "NO {PILE}!";
+
+            @ConfigOption.Separator("Build Done")
+            @ConfigEntry(id = "buildDoneColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor buildDoneColor = TextColor.GREEN;
+
+            @ConfigEntry(id = "buildDoneDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int buildDoneDuration = 60;
+
+            @ConfigEntry(id = "buildDoneText", translation = "Message Text")
+            @Comment("Custom message for Build Done notification.")
+            public static String buildDoneText = "BUILD DONE";
+
+            @ConfigOption.Separator("Supplies Done")
+            @ConfigEntry(id = "suppliesDoneColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor suppliesDoneColor = TextColor.AQUA;
+
+            @ConfigEntry(id = "suppliesDoneDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int suppliesDoneDuration = 60;
+
+            @ConfigEntry(id = "suppliesDoneText", translation = "Message Text")
+            @Comment("Custom message for Supplies Done notification.")
+            public static String suppliesDoneText = "6/6";
+
+            @ConfigOption.Separator("Placed Supply")
+            @ConfigEntry(id = "placedSupplyColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor placedSupplyColor = TextColor.GREEN;
+
+            @ConfigEntry(id = "placedSupplyDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int placedSupplyDuration = 40;
+
+            @ConfigEntry(id = "placedSupplyText", translation = "Message Text")
+            @Comment("Custom message for Placed Supply notification.")
+            public static String placedSupplyText = "PLACED";
+
+            @ConfigOption.Separator("Supply Dropped")
+            @ConfigEntry(id = "supplyDroppedColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor supplyDroppedColor = TextColor.RED;
+
+            @ConfigEntry(id = "supplyDroppedDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int supplyDroppedDuration = 40;
+
+            @ConfigEntry(id = "supplyDroppedText", translation = "Message Text")
+            @Comment("Custom message for Supply Dropped notification.")
+            public static String supplyDroppedText = "DROPPED";
+
+            @ConfigOption.Separator("Supply Picked Up")
+            @ConfigEntry(id = "supplyPickedUpColor", translation = "Color")
+            @ConfigOption.Select
+            public static TextColor supplyPickedUpColor = TextColor.GREEN;
+
+            @ConfigEntry(id = "supplyPickedUpDuration", translation = "Duration (ticks)")
+            @ConfigOption.Range(min = 10, max = 200)
+            @ConfigOption.Slider
+            public static int supplyPickedUpDuration = 40;
+
+            @ConfigEntry(id = "supplyPickedUpText", translation = "Message Text")
+            @Comment("Custom message for Supply Picked Up notification.")
+            public static String supplyPickedUpText = "PICKED UP";
         }
     }
 
@@ -345,7 +548,7 @@ public class KuudraGeneralConfig {
             id = "phaseSplitsPBTracker",
             translation = "Phase Personal Best Tracker"
     )
-    @Comment("Track your personal best time for each individual T5 Kuudra phase.")
+    @Comment("Track your personal best time for individuals Kuudra phases.")
     public static boolean phaseSplitsPBTracker = true;
 
     @ConfigOption.Separator("ETHERWARP WAYPOINTS")
@@ -489,6 +692,10 @@ public class KuudraGeneralConfig {
 
     @ConfigObject
     public static class ProfitTrackerConfig {
+        @ConfigEntry(id = "colors", translation = "Colors")
+        @Comment("Customize the color of each line in the Profit Tracker widget.")
+        public static final ProfitTrackerColorConfig colors = new ProfitTrackerColorConfig();
+
         @ConfigEntry(id = "profitTrackerVisibility", translation = "Profit Tracker Visibility")
         @ConfigOption.Select
         @Comment("Control when the profit tracker is visible.")

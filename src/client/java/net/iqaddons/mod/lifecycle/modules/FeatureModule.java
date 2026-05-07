@@ -37,7 +37,8 @@ public class FeatureModule implements LifecycleComponent {
                 new KuudraProfitTrackerFeature(), new CroesusHelperFeature(), new HideKuudraBossBarFeature(),
                 new KuudraNotificationsFeature(), new BackboneAlertFeature(), new SupplyGiantHitboxAlertFeature(),
                 new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature(), new DiscordRPCFeature(),
-                new IchorPoolWaypointFeature(), new EtherwarpHelperFeature(), new KuudraDistanceFeature()
+                new IchorPoolWaypointFeature(), new EtherwarpHelperFeature(), new KuudraDistanceFeature(),
+                new LuckyBuildFeature()
         );
 
         features.start();

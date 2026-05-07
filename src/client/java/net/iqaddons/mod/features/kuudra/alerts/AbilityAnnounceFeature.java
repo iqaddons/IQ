@@ -18,22 +18,22 @@ public class AbilityAnnounceFeature extends KuudraFeature {
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Spirit Spark!"),
                     "Spirit Spark",
-                    () -> KuudraGeneralConfig.AbilityAnnounce.spiritSpark
+                    () -> KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce.spiritSpark
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Hollowed Rush!"),
                     "Hollowed Rush",
-                    () -> KuudraGeneralConfig.AbilityAnnounce.hollowedRush
+                    () -> KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce.hollowedRush
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Raging Wind!"),
                     "Raging Wind",
-                    () -> KuudraGeneralConfig.AbilityAnnounce.ragingWind
+                    () -> KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce.ragingWind
             ),
             new AbilityAnnounceRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
                     "Ichor Pool",
-                    () -> KuudraGeneralConfig.AbilityAnnounce.ichorPool
+                    () -> KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce.ichorPool
             )
     );
 
@@ -41,7 +41,7 @@ public class AbilityAnnounceFeature extends KuudraFeature {
         super(
                 "abilityAnnounce",
                 "Ability Announce",
-                KuudraGeneralConfig.AbilityAnnounce::hasSpellEnabled,
+                KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce::hasSpellEnabled,
                 KuudraPhase.RUN_PHASES
         );
     }

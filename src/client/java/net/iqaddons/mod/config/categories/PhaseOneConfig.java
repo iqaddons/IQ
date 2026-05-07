@@ -34,7 +34,7 @@ public class PhaseOneConfig {
 
     @ConfigEntry(
             id = "supplyTimerCountdown",
-            translation = "Supply Timer Countdown"
+            translation = "Supply Times Countdown"
     )
     @Comment("Show a countdown in Kuudra Splits displaying how long remains until supplies spawn.")
     public static boolean supplyTimerCountdown = true;

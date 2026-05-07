@@ -17,9 +17,11 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private static final float DAMAGE_MULTIPLIER = 9600f;
     private static final float BOSS_HEALTH_CAP = 25_000f;
     private static final double IGNORE_Y_THRESHOLD = 30.0;
+    private static final long INITIAL_TRACKING_DELAY_MS = 1200; // 1.2 segundos
 
     private volatile float lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
     private volatile boolean finalCheckProcessed;
+    private volatile long bossPhaseStartTime = 0;
 
     public RendDamageAlertFeature() {
         super(
@@ -34,6 +36,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
     @Override
     protected void onKuudraActivate() {
         resetState();
+        bossPhaseStartTime = System.currentTimeMillis();
 
         subscribe(ClientTickEvent.class, this::onTick);
     }
@@ -91,6 +94,12 @@ public class RendDamageAlertFeature extends KuudraFeature {
 
         if (mc.player.getY() > IGNORE_Y_THRESHOLD) return;
 
+        // Verificar se tempo inicial passou antes de rastrear dano
+        long elapsedMs = System.currentTimeMillis() - bossPhaseStartTime;
+        if (elapsedMs < INITIAL_TRACKING_DELAY_MS) {
+            return;
+        }
+
         var bossInfo = currentContext().bossInfo();
         if (!bossInfo.isAlive()) return;
 
@@ -116,6 +125,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private void resetState() {
         lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
         finalCheckProcessed = false;
+        bossPhaseStartTime = 0;
     }
 
     private @NotNull String formatDamage(float number) {
