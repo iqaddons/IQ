@@ -31,7 +31,7 @@ public class PhaseTwoConfig {
             translation = "Build Progress Overlay"
     )
     @Comment("Display a build percent overlay on the screen.")
-    public static boolean buildProgressOverlay = false;
+    public static boolean buildProgressOverlay = true;
 
     @ConfigEntry(
             id = "simpleBuildProgressOverlay",
