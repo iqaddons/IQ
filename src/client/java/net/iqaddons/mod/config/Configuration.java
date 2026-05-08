@@ -60,14 +60,14 @@ public class Configuration {
             translation = "Mute Fishing Cast Sound"
     )
     @Comment("Disable the sound played when casting a fishing rod.")
-    public static boolean muteFishingCastSound = false;
+    public static boolean muteFishingCastSound = true;
 
     @ConfigEntry(
             id = "muteTerminatorCooldownSound",
             translation = "Mute Terminator Cooldown Sound"
     )
     @Comment("Disable the annoying Terminator ability cooldown sound/chat message.")
-    public static boolean muteTerminatorCooldownSound = false;
+    public static boolean muteTerminatorCooldownSound = true;
 
     @ConfigEntry(
             id = "partyCommands",

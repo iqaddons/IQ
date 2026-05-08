@@ -76,6 +76,6 @@ public class PhaseFourConfig {
             translation = "Kuudra Distance Display"
     )
     @Comment("Show your distance from Kuudra inside the Magma Cube.")
-    public static boolean kuudraDistanceDisplay = true;
+    public static boolean kuudraDistanceDisplay = false;
 
 }

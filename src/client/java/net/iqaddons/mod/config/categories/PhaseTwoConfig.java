@@ -31,14 +31,14 @@ public class PhaseTwoConfig {
             translation = "Build Progress Overlay"
     )
     @Comment("Display a build percent overlay on the screen.")
-    public static boolean buildProgressOverlay = true;
+    public static boolean buildProgressOverlay = false;
 
     @ConfigEntry(
             id = "simpleBuildProgressOverlay",
             translation = "Build Progress Style"
     )
     @Comment("Choose the build progress overlay style: ")
-    public static boolean simpleBuildProgressOverlay = false;
+    public static boolean simpleBuildProgressOverlay = true;
 
     @ConfigEntry(
             id = "buildStartCountdownOverlay",
@@ -70,7 +70,7 @@ public class PhaseTwoConfig {
     @ConfigOption.Range(min = 0, max = 1)
     @ConfigOption.Slider
     @Comment("Change the opacity of the build helper holograms.")
-    public static float buildHelperOpacity = 0.5f;
+    public static float buildHelperOpacity = 0.3f;
 
     @ConfigEntry(
             id = "hideDefaultBuildPileText",
@@ -132,14 +132,14 @@ public class PhaseTwoConfig {
             translation = "Clean Ballista Build Sounds"
     )
     @Comment("Disable most of sounds during build for a cleaner audio experience.")
-    public static boolean cleanBallistaSounds = true;
+    public static boolean cleanBallistaSounds = false;
 
     @ConfigEntry(
             id = "replaceBallistaBuildSound",
             translation = "Replace Ballista Build Sound"
     )
     @Comment("Replace the default ballista build sound while in build phase.")
-    public static boolean replaceBallistaBuildSound = true;
+    public static boolean replaceBallistaBuildSound = false;
 
     @ConfigOption.Separator("SPECIAL")
     @ConfigEntry(
@@ -147,7 +147,7 @@ public class PhaseTwoConfig {
             translation = "Lucky Build"
     )
     @Comment("Play Garota de Ipanema music during build for extra fresh luck (real).")
-    public static boolean luckyBuild = true;
+    public static boolean luckyBuild = false;
 
     @ConfigObject
     public static class ElleConfig {

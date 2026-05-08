@@ -152,13 +152,13 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "cratePriorityColor", translation = "Crate Priority Title Color")
         @ConfigOption.Select
         @Comment("Choose the text color used by the Crate Priority title widget.")
-        public static TextColor cratePriorityColor = TextColor.YELLOW;
+        public static TextColor cratePriorityColor = TextColor.GOLD;
 
         @ConfigEntry(id = "cratePriorityDurationSeconds", translation = "Crate Priority Duration")
         @ConfigOption.Range(min = 1, max = 10)
         @ConfigOption.Slider
         @Comment("How long the Crate Priority title stays on screen (seconds).")
-        public static int cratePriorityDurationSeconds = 2;
+        public static int cratePriorityDurationSeconds = 6;
 
         @ConfigEntry(id = "cratePriorityAnimation", translation = "Crate Priority Animation")
         @ConfigOption.Select
@@ -227,7 +227,7 @@ public class PhaseOneConfig {
         @ConfigOption.Range(min = 0.01, max = 1)
         @ConfigOption.Slider
         @Comment("Adjust the size of the text displayed on pearl waypoints.")
-        public static float pearlWaypointsScale = 0.3f;
+        public static float pearlWaypointsScale = 0.15f;
 
         @ConfigEntry(id = "pearlWaypointsTimerDelay", translation = "Pearl Waypoints Timer Delay")
         @ConfigOption.Range(min = -4, max = 4)
@@ -238,7 +238,7 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "pearlWaypointTimes", translation = "Pearl Waypoint Type")
         @ConfigOption.Select
         @Comment("Choose what pearl waypoints display: timer in milliseconds, timer in seconds, or static text.")
-        public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER_MS;
+        public static PearlWaypointType pearlWaypointTimes = PearlWaypointType.TIMER_SECONDS;
 
         @ConfigEntry(id = "pearlWaypointRenderStyle", translation = "Pearl Waypoint Render Style")
         @ConfigOption.Select
