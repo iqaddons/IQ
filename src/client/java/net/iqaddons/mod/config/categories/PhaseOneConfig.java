@@ -179,7 +179,7 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "supplyWaypointColor", translation = "Supply Waypoint Color")
         @ConfigOption.Color(alpha = true)
         @Comment("Change the color of supply waypoints.")
-        public static int supplyWaypointColor = new Color(0, 0, 0, 77).getRGB();
+        public static int supplyWaypointColor = new Color(138, 103, 191, 60).getRGB();
 
         @ConfigEntry(id = "supplyWaypointStyle", translation = "Supply Hitbox Style")
         @ConfigOption.Select
