@@ -36,6 +36,10 @@ public final class SupplyStateManager {
     private volatile int currentSupplyProgress = 0;
 
     public void startSuppliesPhase() {
+        if (suppliesPhaseStart != null) {
+            return;
+        }
+
         suppliesPhaseStart = Instant.now();
         log.debug("Supplies phase started");
     }
@@ -156,10 +160,11 @@ public final class SupplyStateManager {
     public @NotNull String getTimeColor() {
         return switch (getTimeTier()) {
             case 0 -> "§f§l";
-            case 1 -> "§9§l";
-            case 2 -> "§a§l";
-            case 3 -> "§2§l";
-            case 4 -> "§e§l";
+            case 1 -> "§5§l";
+            case 2 -> "§9§l";
+            case 3 -> "§a§l";
+            case 4 -> "§2§l";
+            case 5 -> "§e§l";
             default -> "§c§l";
         };
     }
@@ -167,11 +172,12 @@ public final class SupplyStateManager {
     private int getTimeTier() {
         long time = getElapsedTimeMillis();
         if (time < 19000) return 0;
-        if (time < 23000) return 1;
-        if (time < 26000) return 2;
-        if (time < 29500) return 3;
-        if (time < 32000) return 4;
-        return 5;
+        if (time < 20000) return 1;
+        if (time < 22600) return 2;
+        if (time < 25000) return 3;
+        if (time < 28000) return 4;
+        if (time < 32000) return 5;
+        return 6;
     }
 
     private @NotNull List<PileLocation> getConfiguredPiles() {

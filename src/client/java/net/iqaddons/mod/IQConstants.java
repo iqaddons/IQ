@@ -15,7 +15,7 @@ public final class IQConstants {
     public static final int DEFAULT_CHECK_INTERVAL_TICKS = 20;
 
     public static final String SUPPLY_PICKUP_MESSAGE = "You retrieved some of Elle's supplies from the Lava!";
-    public static final Pattern SUPPLY_PLACE_PATTERN = Pattern.compile("(.+) recovered one of Elle's supplies! \\((\\d)/6\\)");
+    public static final Pattern SUPPLY_PLACE_PATTERN = Pattern.compile("(.+?) recovered.*?\\((\\d)/6\\)");
     public static final Pattern SUPPLY_DROPPED_PATTERN = Pattern.compile("(.+) dropped Elle's supplies back into the lava! Oops!");
     public static final Pattern SUPPLY_PROGRESS_PATTERN = Pattern.compile("^\\[[| ]+]\\s*(\\d+)%$");
 
@@ -30,5 +30,4 @@ public final class IQConstants {
     public static final String ELLE_NOT_AGAIN_MESSAGE = "[NPC] Elle: Not again!";
 
     public static final Identifier IQ_FONT_IDENTIFIER = Identifier.of("iq", "default");
-    public static final Identifier LUCKY_BUILD_SOUND = Identifier.of("iq", "lucky_build");
 }

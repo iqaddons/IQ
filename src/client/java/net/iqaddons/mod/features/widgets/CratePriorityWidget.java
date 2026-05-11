@@ -5,20 +5,23 @@ import net.iqaddons.mod.config.categories.PhaseOneConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.CratePriorityHudEvent;
 import net.iqaddons.mod.hud.HudManager;
-import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TextColor;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.NotNull;
+
+import java.awt.*;
 
 public class CratePriorityWidget extends HudWidget {
 
     private static final int FADE_TICKS = 4;
     private static final int SLIDE_OFFSET_PIXELS = 8;
-    private static final String MIN_REFERENCE_TEXT = "Go X Cannon";
+    private static final String MIN_REFERENCE_TEXT = "§lGO X CANNON";
 
     private @NotNull String text = "";
     private int totalTicks = 0;
@@ -39,8 +42,6 @@ public class CratePriorityWidget extends HudWidget {
                 ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)
                         || HudManager.get().isEditorOpen()
         );
-
-        setExampleLines(HudLine.of("§eGo Shop"));
     }
 
     @Override
@@ -61,7 +62,7 @@ public class CratePriorityWidget extends HudWidget {
         ticksRemaining = totalTicks;
         markDimensionsDirty();
 
-        if (PhaseOneConfig.cratePrioritySound && mc.player != null) {
+        if (PhaseOneConfig.CratePriorityConfig.cratePrioritySound && mc.player != null) {
             mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.6f, 1.0f);
         }
     }
@@ -81,12 +82,17 @@ public class CratePriorityWidget extends HudWidget {
 
     @Override
     public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        if (HudManager.get().isEditorOpen()) {
-            super.render(context, mouseX, mouseY, delta);
-            return;
-        }
+        renderWidget(context, mouseX, mouseY, false);
+    }
 
-        if (text.isEmpty() || ticksRemaining <= 0) {
+    @Override
+    public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+        renderWidget(context, mouseX, mouseY, true);
+    }
+
+    private void renderWidget(@NotNull DrawContext context, double mouseX, double mouseY, boolean preview) {
+        String renderText = getRenderText(preview);
+        if (renderText.isEmpty()) {
             return;
         }
 
@@ -95,38 +101,56 @@ public class CratePriorityWidget extends HudWidget {
             return;
         }
 
-        float alpha = getAlpha();
-        float slideOffset = getSlideOffset();
+        float alpha = preview ? 1.0f : getAlpha();
+        float slideOffset = preview ? 0.0f : getSlideOffset();
 
-        int argb = toArgb(PhaseOneConfig.cratePriorityColor, alpha);
+        int textArgb = toArgb(PhaseOneConfig.CratePriorityConfig.cratePriorityColor, alpha);
 
         float scale = getScale();
-        int textWidth = textRenderer.getWidth(text);
         int widgetWidth = getWidth();
+        int widgetHeight = getHeight();
 
-        float scaledX = (getAbsoluteX() / scale) + Math.max(0, (widgetWidth - textWidth) / 2.0f);
+        float scaledX = getAbsoluteX() / scale;
         float scaledY = (getAbsoluteY() / scale) - slideOffset;
+        int centerX = Math.round(scaledX + (widgetWidth / 2.0f));
+        int textY = Math.round(scaledY);
 
         context.getMatrices().pushMatrix();
         context.getMatrices().scale(scale, scale);
-        context.drawText(textRenderer, text, (int) scaledX, (int) scaledY, argb, true);
+
+        if (preview) {
+            renderEditorOverlay(context, mouseX, mouseY, textRenderer, (int) scaledX, textY, widgetWidth, widgetHeight);
+        }
+
+        HudRenderer.drawCenteredText(context, renderText, centerX, textY, textArgb);
+
         context.getMatrices().popMatrix();
     }
 
     @Override
     public int getWidth() {
-        int baseWidth = super.getWidth();
         var textRenderer = mc.textRenderer;
         if (textRenderer == null) {
-            return baseWidth;
+            return 20;
         }
 
+        int referenceWidth = textRenderer.getWidth(MIN_REFERENCE_TEXT);
         int dynamicWidth = text.isEmpty() ? 0 : textRenderer.getWidth(text);
-        return Math.max(baseWidth, Math.max(dynamicWidth, textRenderer.getWidth(MIN_REFERENCE_TEXT)));
+        return Math.max(referenceWidth, dynamicWidth);
+    }
+
+    @Override
+    public int getHeight() {
+        var textRenderer = mc.textRenderer;
+        if (textRenderer == null) {
+            return 1;
+        }
+
+        return textRenderer.fontHeight;
     }
 
     private float getAlpha() {
-        if (PhaseOneConfig.cratePriorityAnimation == PhaseOneConfig.CratePriorityAnimation.NONE) {
+        if (PhaseOneConfig.CratePriorityConfig.cratePriorityAnimation == PhaseOneConfig.CratePriorityAnimation.NONE) {
             return 1.0f;
         }
 
@@ -141,7 +165,7 @@ public class CratePriorityWidget extends HudWidget {
     }
 
     private float getSlideOffset() {
-        if (PhaseOneConfig.cratePriorityAnimation != PhaseOneConfig.CratePriorityAnimation.SLIDE || totalTicks <= 0) {
+        if (PhaseOneConfig.CratePriorityConfig.cratePriorityAnimation != PhaseOneConfig.CratePriorityAnimation.SLIDE || totalTicks <= 0) {
             return 0.0f;
         }
 
@@ -176,6 +200,75 @@ public class CratePriorityWidget extends HudWidget {
 
     private float clamp01(float value) {
         return Math.max(0.0f, Math.min(1.0f, value));
+    }
+
+    private @NotNull String getRenderText(boolean preview) {
+        if (preview) {
+            return text.isEmpty() ? MIN_REFERENCE_TEXT : text;
+        }
+
+        if (ticksRemaining <= 0) {
+            return "";
+        }
+
+        return text;
+    }
+
+    private void renderEditorOverlay(
+            @NotNull DrawContext context,
+            double mouseX,
+            double mouseY,
+            @NotNull TextRenderer textRenderer,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
+        if (isSelected()) {
+            renderSelectionBorder(context, textRenderer, x, y, width, height);
+        }
+
+        if (isMouseOver(mouseX, mouseY)) {
+            context.fill(x, y, x + width, y + height, new Color(0, 0, 0, 100).getRGB());
+        }
+    }
+
+    private void renderSelectionBorder(
+            @NotNull DrawContext context,
+            @NotNull TextRenderer textRenderer,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
+        int borderColor = new Color(255, 0, 0, 170).getRGB();
+
+        context.fill(x, y, x + width, y + 1, borderColor);
+        context.fill(x, y + height - 1, x + width, y + height, borderColor);
+        context.fill(x, y, x + 1, y + height, borderColor);
+        context.fill(x + width - 1, y, x + width, y + height, borderColor);
+
+        String widgetName = getDisplayName();
+        String widgetLocation = String.format("X: %.0f Y: %.0f", getX(), getY());
+
+        int nameX = x + (width - textRenderer.getWidth(widgetName)) / 2;
+        int locationX = x + (width - textRenderer.getWidth(widgetLocation)) / 2;
+
+        context.drawTextWithShadow(
+                textRenderer,
+                widgetName,
+                nameX,
+                y - textRenderer.fontHeight - 2,
+                new Color(255, 255, 255, 220).getRGB()
+        );
+
+        context.drawTextWithShadow(
+                textRenderer,
+                widgetLocation,
+                locationX,
+                y + height + 2,
+                new Color(255, 255, 255, 200).getRGB()
+        );
     }
 
     private void reset() {

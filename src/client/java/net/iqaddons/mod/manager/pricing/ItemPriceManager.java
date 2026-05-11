@@ -84,7 +84,7 @@ public final class ItemPriceManager {
         }
 
         double netherStar = getPrice("NETHER_STAR").orElse(0D);
-        double factionMaterial = getPrice(KuudraGeneralConfig.crimsonIsleFaction.getMaterialId()).orElse(0D);
+        double factionMaterial = getPrice(KuudraGeneralConfig.ProfitTrackerConfig.crimsonIsleFaction.getMaterialId()).orElse(0D);
 
         return key.getBaseCoinsCost() + (2 * netherStar) + (key.getMaterialAmount() * factionMaterial);
     }

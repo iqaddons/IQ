@@ -60,7 +60,14 @@ public class Configuration {
             translation = "Mute Fishing Cast Sound"
     )
     @Comment("Disable the sound played when casting a fishing rod.")
-    public static boolean muteFishingCastSound = false;
+    public static boolean muteFishingCastSound = true;
+
+    @ConfigEntry(
+            id = "muteTerminatorCooldownSound",
+            translation = "Mute Terminator Cooldown Sound"
+    )
+    @Comment("Disable the annoying Terminator ability cooldown sound/chat message.")
+    public static boolean muteTerminatorCooldownSound = true;
 
     @ConfigEntry(
             id = "partyCommands",
@@ -112,15 +119,15 @@ public class Configuration {
         public static boolean kuudraCommand = true;
 
         @ConfigEntry(id = "partyCommandChests", translation = "!chests")
-        @Comment("Reply with your current chest counter progress.")
+        @Comment("Reply with your current chest counter percent.")
         public static boolean partyCommandChests = true;
 
         @ConfigEntry(id = "partyCommandRuns", translation = "!runs")
-        @Comment("Reply with your current run counter progress.")
+        @Comment("Reply with your current run counter percent.")
         public static boolean partyCommandRuns = true;
 
         @ConfigEntry(id = "partyCommandProfit", translation = "!profit")
-        @Comment("Reply with your current profit counter progress.")
+        @Comment("Reply with your current profit counter percent.")
         public static boolean partyCommandProfit = true;
     }
 

@@ -96,7 +96,7 @@ public class IchorPoolWaypointFeature extends Feature {
         Iterator<IchorPoolArea> iterator = activePools.iterator();
         while (iterator.hasNext()) {
             IchorPoolArea pool = iterator.next();
-            if (pool.expiresAtMs() <= now) {
+            if (pool.expiresAtMs() <= now || activePools.isEmpty()) {
                 iterator.remove();
                 continue;
             }

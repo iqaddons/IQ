@@ -29,6 +29,8 @@ public class SupplyTimerWidget extends HudWidget {
 
     private static final long SUPPLY_SPAWN_COUNTDOWN_MS = 8850L;
     private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
+    private static final String DARK_PURPLE_BOLD = "§5§l";
+    private static final String WHITE_BOLD = "§f§l";
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
@@ -229,14 +231,37 @@ public class SupplyTimerWidget extends HudWidget {
             supplySpawnCountdownEndMillis = -1L;
         }
 
+        String displayColor = resolveDisplayColorForPlacement(event.playerName());
+
         pickupHistory.add(new SupplyPickupEntry(
                 event.playerName(),
-                supplyState.getTimeColor(),
+                displayColor,
                 event.currentSupply(),
                 event.placedAt()
         ));
 
         updateDisplay();
+    }
+
+    private @NotNull String resolveDisplayColorForPlacement(@NotNull String playerName) {
+        String timeColor = supplyState.getTimeColor();
+        if (!DARK_PURPLE_BOLD.equals(timeColor)) {
+            return timeColor;
+        }
+
+        // Dark purple is reserved for repeat placements by the same player.
+        return playerHasPriorPlacement(playerName) ? timeColor : WHITE_BOLD;
+    }
+
+    private boolean playerHasPriorPlacement(@NotNull String playerName) {
+        synchronized (pickupHistory) {
+            for (SupplyPickupEntry entry : pickupHistory) {
+                if (entry.playerName().equals(playerName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void updateDisplay() {
@@ -248,7 +273,8 @@ public class SupplyTimerWidget extends HudWidget {
         }
 
         addLine(HudLine.of(String.format(
-                "§b§lSupply Times §8[%s%d§8/§a6§8]",
+                "%s§lSupply Times §8[%s%d§8/§a6§8]",
+                PhaseOneConfig.supplyTimesTitleColor.code(),
                 totalCollected >= 6 ? "§a" : "§e",
                 totalCollected
         )));

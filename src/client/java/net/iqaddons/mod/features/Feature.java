@@ -32,11 +32,11 @@ public abstract class Feature extends SubscriptionOwner {
 
     public final boolean activate() {
         if (!active.compareAndSet(false, true)) {
-            log.debug("Feature {} already active", name);
+            log.warn("Feature {} already active", name);
             return false;
         }
 
-        log.debug("Activating feature: {}", name);
+        log.info("Activating feature: {}", name);
         try {
             onActivate();
         } catch (Exception e) {
@@ -51,11 +51,11 @@ public abstract class Feature extends SubscriptionOwner {
 
     public final boolean deactivate() {
         if (!active.compareAndSet(true, false)) {
-            log.debug("Feature {} already inactive", name);
+            log.warn("Feature {} already inactive", name);
             return false;
         }
 
-        log.debug("Deactivating feature: {}", name);
+        log.info("Deactivating feature: {}", name);
         clearSubscriptions();
 
         try {

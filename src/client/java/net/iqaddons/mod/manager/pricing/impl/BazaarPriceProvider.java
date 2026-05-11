@@ -37,7 +37,7 @@ public class BazaarPriceProvider implements PriceProvider {
 
     @Override
     public Optional<Double> getPrice(String itemId) {
-        if (KuudraGeneralConfig.bazaarPricingMode == KuudraGeneralConfig.BazaarPricingMode.SELL_ORDER) {
+        if (KuudraGeneralConfig.ProfitTrackerConfig.bazaarPricingMode == KuudraGeneralConfig.BazaarPricingMode.SELL_ORDER) {
             return Optional.ofNullable(sellOrderPrices.get(itemId));
         }
 

@@ -121,7 +121,7 @@ public class PartyCommandsFeature extends Feature {
             return;
         }
 
-        ProfitData data = KuudraProfitTrackerManager.get().lifetime();
+        ProfitData data = KuudraProfitTrackerManager.get().session();
         MessageUtil.PARTY.sendMessage(String.format(
                 "[IQ] Runs: %d (F:%d) | Avg: %.2fs",
                 data.runs, data.failedRuns, data.averageRunMillis() / 1000.0

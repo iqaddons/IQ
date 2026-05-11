@@ -23,7 +23,7 @@ public class SalvageValueCalculator implements ItemValueCalculator {
         int bonus = (int) Math.floor(totalStarCost * KUUDRA_STAR_MULTIPLIER);
         int salvageValue = BASE_CRIMSON_ESSENCE + bonus;
 
-        if (KuudraGeneralConfig.armorValueType == KuudraGeneralConfig.ArmorValueType.SALVAGE) {
+        if (KuudraGeneralConfig.ProfitTrackerConfig.armorValueType == KuudraGeneralConfig.ArmorValueType.SALVAGE) {
             return (manager.getItemPrice("ESSENCE_CRIMSON") * salvageValue) * quantity;
         } else {
             return manager.getItemPrice(itemId) * quantity;

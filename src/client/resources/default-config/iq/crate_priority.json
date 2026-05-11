@@ -40,7 +40,7 @@
       "SHOP": "Square"
     },
     "EQUALS": {
-      "SHOP": "Shop",
+      "SHOP": "Square",
       "EQUALS": "Shop",
       "SQUARE": "Shop",
       "X_CANNON": "Shop",
@@ -59,4 +59,3 @@
     }
   }
 }
-

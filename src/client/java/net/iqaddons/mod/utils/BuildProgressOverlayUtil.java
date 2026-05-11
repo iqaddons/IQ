@@ -20,17 +20,12 @@ public final class BuildProgressOverlayUtil {
     private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
 	public static final long BUILD_START_COUNTDOWN_MS = 6200L;
 
-	private static boolean lastClassicEnabled = PhaseTwoConfig.buildProgressOverlay;
-	private static boolean lastSimpleEnabled = PhaseTwoConfig.simpleBuildProgressOverlay;
-
 	public static boolean isClassicOverlayEnabled() {
-		syncOverlayModes();
-		return PhaseTwoConfig.buildProgressOverlay;
+		return PhaseTwoConfig.buildProgressOverlay && !PhaseTwoConfig.simpleBuildProgressOverlay;
 	}
 
 	public static boolean isSimpleOverlayEnabled() {
-		syncOverlayModes();
-		return PhaseTwoConfig.simpleBuildProgressOverlay;
+		return PhaseTwoConfig.buildProgressOverlay && PhaseTwoConfig.simpleBuildProgressOverlay;
 	}
 
 	public static boolean isBuildStartCountdownEnabled() {
@@ -50,27 +45,6 @@ public final class BuildProgressOverlayUtil {
 	public static @NotNull String formatCountdownSeconds(long remainingMs) {
 		double seconds = Math.max(0L, remainingMs) / 1000.0;
 		return String.format(Locale.ROOT, "%.2f", seconds);
-	}
-
-	public static void syncOverlayModes() {
-		boolean classicEnabled = PhaseTwoConfig.buildProgressOverlay;
-		boolean simpleEnabled = PhaseTwoConfig.simpleBuildProgressOverlay;
-
-		if (classicEnabled && simpleEnabled) {
-			boolean classicChanged = classicEnabled != lastClassicEnabled;
-			boolean simpleChanged = simpleEnabled != lastSimpleEnabled;
-
-			if (classicChanged && !simpleChanged) {
-				PhaseTwoConfig.simpleBuildProgressOverlay = false;
-			} else if (simpleChanged && !classicChanged) {
-				PhaseTwoConfig.buildProgressOverlay = false;
-			} else {
-				PhaseTwoConfig.simpleBuildProgressOverlay = false;
-			}
-		}
-
-		lastClassicEnabled = PhaseTwoConfig.buildProgressOverlay;
-		lastSimpleEnabled = PhaseTwoConfig.simpleBuildProgressOverlay;
 	}
 
 	public static @Nullable BuildProgressData getBuildProgressFromArmorStand() {

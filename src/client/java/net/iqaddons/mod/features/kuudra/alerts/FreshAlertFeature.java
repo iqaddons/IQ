@@ -30,9 +30,9 @@ public class FreshAlertFeature extends KuudraFeature {
 
     public FreshAlertFeature() {
         super(
-                "freshMessage",
-                "Fresh Message",
-                () -> PhaseTwoConfig.freshMessage,
+                "freshCountdown",
+                "Fresh Countdown",
+                () -> PhaseTwoConfig.freshCountdown || PhaseTwoConfig.freshMessage,
                 KuudraPhase.BUILD
         );
     }
@@ -70,7 +70,7 @@ public class FreshAlertFeature extends KuudraFeature {
     private void onWorldRender(@NotNull WorldRenderEvent event) {
         if (freshPlayers.isEmpty()) return;
         if (mc.world == null) return;
-        if (!PhaseTwoConfig.freshTimers) return;
+        if (!PhaseTwoConfig.freshCountdown) return;
 
         long now = System.currentTimeMillis();
         for (Map.Entry<Integer, Long> entry : freshPlayers.entrySet()) {
@@ -101,7 +101,7 @@ public class FreshAlertFeature extends KuudraFeature {
     }
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
-        if (event.selfFresh()) {
+        if (event.selfFresh() && PhaseTwoConfig.freshMessage) {
             MessageUtil.showTitle("§a§lFRESH!", "", 0, 20, 5);
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(event.buildingProgress()));
 

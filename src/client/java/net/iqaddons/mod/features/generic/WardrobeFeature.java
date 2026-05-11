@@ -46,8 +46,6 @@ public class WardrobeFeature extends Feature {
         int slotIndex = keyCodeToWardrobeSlot(event.getKeyCode(), event.getScanCode());
         if (slotIndex < 0) return;
 
-        var screenBefore = mc.currentScreen;
-
         event.setCancelled(true);
         clickWardrobeSlot(slotIndex);
 

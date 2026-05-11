@@ -30,8 +30,7 @@ public abstract class WorldRendererMixin {
     private OrderedRenderCommandQueueImpl entityRenderCommandQueue;
 
     @Unique
-    @Final
-    private VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(new BufferAllocator(1536 * 20));
+    private VertexConsumerProvider.Immediate iq$immediate;
 
     @Inject(method = "render", at = @At("RETURN"))
     private void iq$onWorldRender(
@@ -51,12 +50,20 @@ public abstract class WorldRendererMixin {
         matrices.multiplyPositionMatrix(positionMatrix);
 
         EventBus.post(new WorldRenderEvent(
-                immediate,
+                iq$getImmediate(),
                 entityRenderCommandQueue,
                 matrices,
                 projectionMatrix,
                 camera,
                 tickCounter
         ));
+    }
+
+    @Unique
+    private VertexConsumerProvider.Immediate iq$getImmediate() {
+        if (iq$immediate == null) {
+            iq$immediate = VertexConsumerProvider.immediate(new BufferAllocator(1536 * 20));
+        }
+        return iq$immediate;
     }
 }

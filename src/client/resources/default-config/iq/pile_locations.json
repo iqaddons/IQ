@@ -17,32 +17,32 @@
   "piles": [
     {
       "name": "Shop",
-      "position": [-98, 78.125, -112.9375],
+      "position": [-98.5, 78.4, -113.5],
       "noPreValue": 7
     },
     {
       "name": "Triangle",
-      "position": [-94, 78.125, -106],
+      "position": [-94.5, 78.4, -106.5],
       "noPreValue": 6
     },
     {
       "name": "Equals",
-      "position": [-106, 78.125, -99.0625],
+      "position": [-106.5, 78.4, -99.5],
       "noPreValue": 5
     },
     {
       "name": "Slash",
-      "position": [-98, 78.125, -99.0625],
+      "position": [-98.5, 78.4, -99.5],
       "noPreValue": 4
     },
     {
       "name": "X Cannon",
-      "position": [-110, 78.125, -106],
+      "position": [-110.5, 78.4, -106.5],
       "noPreValue": 2
     },
     {
       "name": "X",
-      "position": [-106, 78.125, -112.9375],
+      "position": [-106.5, 78.4, -113.5],
       "noPreValue": 1
     }
   ]

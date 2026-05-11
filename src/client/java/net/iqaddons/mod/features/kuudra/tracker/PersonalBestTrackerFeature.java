@@ -25,6 +25,7 @@ public class PersonalBestTrackerFeature extends Feature {
     private final Map<Integer, PersonalBest.SupplyTiming> supplyTimings = new HashMap<>();
     private final List<PersonalBest.FreshTiming> freshTimings = new ArrayList<>();
     private long buildPhaseStartedAt = -1L;
+    private boolean reachedBossPhase = false;
 
     public PersonalBestTrackerFeature() {
         super("personalBestTracker", "PB Tracker",
@@ -41,13 +42,15 @@ public class PersonalBestTrackerFeature extends Feature {
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
-            supplyTimings.clear();
-            freshTimings.clear();
-            buildPhaseStartedAt = -1L;
+            resetRunTracking();
         }
 
         if (event.currentPhase() == KuudraPhase.BUILD) {
             buildPhaseStartedAt = System.currentTimeMillis();
+        }
+
+        if (event.currentPhase() == KuudraPhase.BOSS) {
+            reachedBossPhase = true;
         }
     }
 
@@ -76,12 +79,12 @@ public class PersonalBestTrackerFeature extends Feature {
                 .sorted(java.util.Comparator.comparingInt(PersonalBest.SupplyTiming::currentSupply))
                 .toList();
         List<PersonalBest.FreshTiming> runFreshTimings = List.copyOf(freshTimings);
+        boolean completedAfterBoss = reachedBossPhase;
 
-        supplyTimings.clear();
-        freshTimings.clear();
-        buildPhaseStartedAt = -1L;
+        resetRunTracking();
 
         if (!event.isCompleted()) return;
+        if (!completedAfterBoss) return;
 
         long runMillis = event.totalDuration().toMillis();
         if (runMillis <= 0) return;
@@ -126,5 +129,12 @@ public class PersonalBestTrackerFeature extends Feature {
 
     private @NotNull String formatSeconds(long millis) {
         return String.format(Locale.ROOT, "%.2fs", millis / 1000.0);
+    }
+
+    private void resetRunTracking() {
+        supplyTimings.clear();
+        freshTimings.clear();
+        buildPhaseStartedAt = -1L;
+        reachedBossPhase = false;
     }
 }

@@ -2,6 +2,7 @@ package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseOneConfig;
+import net.iqaddons.mod.events.EventPriority;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyDropEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
@@ -49,7 +50,7 @@ public class SupplyProgressWidget extends HudWidget {
 
         subscribe(SupplyPickupEvent.class, event -> clearProgress());
         subscribe(SupplyDropEvent.class, event -> clearProgress());
-        subscribe(SupplyProgressEvent.class, this::onSupplyProgress);
+        subscribe(SupplyProgressEvent.class, this::onSupplyProgress, EventPriority.LOWEST);
 
         subscribe(ClientTickEvent.class, event -> {
             if (currentProgress.isEmpty()) return;

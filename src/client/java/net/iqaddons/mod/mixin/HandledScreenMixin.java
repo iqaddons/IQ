@@ -60,6 +60,7 @@ public class HandledScreenMixin {
         ScreenClickEvent event = EventBus.post(new ScreenClickEvent(
                 screen,
                 slot,
+                button,
                 actionType
         ));
 

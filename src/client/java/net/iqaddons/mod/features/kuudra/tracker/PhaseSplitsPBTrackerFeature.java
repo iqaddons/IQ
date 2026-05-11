@@ -2,8 +2,6 @@ package net.iqaddons.mod.features.kuudra.tracker;
 
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
-import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
-import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.PhaseSplitsPBManager;
@@ -17,7 +15,6 @@ import java.util.Locale;
 public class PhaseSplitsPBTrackerFeature extends Feature {
 
     private final PhaseSplitsPBManager pbManager = PhaseSplitsPBManager.get();
-    private int currentRunFreshCount = 0;
 
     public PhaseSplitsPBTrackerFeature() {
         super("phaseSplitsPBTracker", "Phase Splits PB Tracker",
@@ -27,27 +24,24 @@ public class PhaseSplitsPBTrackerFeature extends Feature {
     @Override
     protected void onActivate() {
         subscribe(KuudraPhaseChangeEvent.class, this::onPhaseChange);
-        subscribe(PlayerFreshEvent.class, this::onFresh);
-        subscribe(KuudraRunEndEvent.class, this::onRunEnd);
     }
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
         if (event.isEnteringKuudra()) {
-            currentRunFreshCount = 0;
             return;
         }
 
+        if (!event.isRunCompleted()) return;
+
         KuudraPhase finishedPhase = event.previousPhase();
-        if (!finishedPhase.isInRun()) return;
+        if (finishedPhase != KuudraPhase.BOSS) return;
         if (KuudraStateManager.get().context().tier() != KuudraTier.INFERNAL) return;
 
         long millis = event.phaseDurationMillis();
         if (millis <= 0) return;
 
         long previousPb = pbManager.getBestPhaseMillis(finishedPhase);
-        boolean isNewPB = finishedPhase == KuudraPhase.BUILD
-                ? pbManager.tryUpdatePhase(finishedPhase, millis, currentRunFreshCount)
-                : pbManager.tryUpdatePhase(finishedPhase, millis);
+        boolean isNewPB = pbManager.tryUpdatePhase(finishedPhase, millis);
         if (!isNewPB) return;
 
         if (previousPb > 0) {
@@ -66,15 +60,6 @@ public class PhaseSplitsPBTrackerFeature extends Feature {
         }
     }
 
-    private void onFresh(@NotNull PlayerFreshEvent event) {
-        if (KuudraStateManager.get().phase() == KuudraPhase.BUILD) {
-            currentRunFreshCount++;
-        }
-    }
-
-    private void onRunEnd(@NotNull KuudraRunEndEvent event) {
-        currentRunFreshCount = 0;
-    }
 
     @NotNull String formatSeconds(long millis) {
         return String.format(Locale.ROOT, "%.2fs", millis / 1000.0);

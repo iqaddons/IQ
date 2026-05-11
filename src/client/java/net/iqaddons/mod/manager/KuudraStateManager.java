@@ -32,6 +32,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private static final Pattern KUUDRA_TIER_PATTERN = Pattern.compile("\\(T([1-5])\\)");
     private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
+    private static final String DEFEAT_MESSAGE = "DEFEAT";
 
     private static KuudraStateManager instance;
 
@@ -100,7 +101,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         if (!isInSkyBlock()) return;
 
-        if (message.contains("DEFEAT") && isInKuudra()) {
+        if (isInKuudra() && isDefeatMessage(message) && isDefeatEligiblePhase(context().phase())) {
             forceReset(KuudraRunEndEvent.EndReason.DEFEATED);
             return;
         }
@@ -232,6 +233,8 @@ public final class KuudraStateManager extends SubscriptionOwner {
         }
 
         SupplyStateManager.get().reset();
+        // Initialize supply timing baseline once per run; late feature activations must not shift it.
+        SupplyStateManager.get().startSuppliesPhase();
         phaseDurations.clear();
         EventBus.post(new KuudraPhaseChangeEvent(
                 old.phase(),
@@ -280,6 +283,14 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private boolean isInstanceTransferMessage(@NotNull String message) {
         return message.contains("Sending to server") || message.contains("Starting in 4 seconds...");
+    }
+
+    private boolean isDefeatMessage(@NotNull String message) {
+        return DEFEAT_MESSAGE.equals(message.trim());
+    }
+
+    private boolean isDefeatEligiblePhase(@NotNull KuudraPhase phase) {
+        return phase == KuudraPhase.BOSS || phase == KuudraPhase.COMPLETED;
     }
 
     private void armPendingExit() {

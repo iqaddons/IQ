@@ -39,6 +39,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
+import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 
 public class IQCommand {
 
@@ -111,6 +114,26 @@ public class IQCommand {
                             ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reseted."));
                             return 1;
                         }))
+                        .then(literal("chests")
+                                .executes(ctx -> {
+                                    int current = ChestCounterManager.get().getChests();
+                                    ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter: §e" + current + "§7/" + ChestCounterManager.MAX_CHESTS));
+                                    ctx.getSource().sendFeedback(Text.literal("§8Use §f/iq chests set <amount>§8 or §f/iq chests reset§8."));
+                                    return 1;
+                                })
+                                .then(literal("set")
+                                        .then(argument("amount", integer(0, ChestCounterManager.MAX_CHESTS)).executes(ctx -> {
+                                            int amount = getInteger(ctx, "amount");
+                                            ChestCounterManager.get().set(amount);
+                                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter set to §e" + amount + "§7/" + ChestCounterManager.MAX_CHESTS + "§f."));
+                                            return 1;
+                                        })))
+                                .then(literal("reset").executes(ctx -> {
+                                    ChestCounterManager.get().reset();
+                                    ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reset to §e0§f."));
+                                    return 1;
+                                }))
+                        )
                         .then(literal("pb").executes(ctx -> sendPersonalBest(ctx.getSource())))
                         .then(literal("pbs").executes(ctx -> sendPhaseSplitsPBs(ctx.getSource())))
                         .then(literal("profit")
@@ -122,8 +145,56 @@ public class IQCommand {
                                         .then(literal("session").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.SESSION)))
                                         .then(literal("lifetime").executes(ctx -> resetProfitTracker(ctx.getSource(), ProfitScope.LIFETIME)))
                                         .executes(ctx -> resetProfitTrackerAll(ctx.getSource()))))
+                         .then(literal("updateconfig").executes(ctx -> updateConfigToDefault(ctx.getSource())))
 
         );
+    }
+
+    private static int updateConfigToDefault(@NotNull FabricClientCommandSource source) {
+        mc.send(() -> {
+            try {
+                Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
+                
+                // Delete config files to force reload from defaults
+                Path[] configFiles = {
+                    configDir.resolve("crate_priority.json"),
+                    configDir.resolve("etherwarp_config.json"),
+                    configDir.resolve("pearl_waypoints.json"),
+                    configDir.resolve("pile_locations.json")
+                };
+                
+                for (Path file : configFiles) {
+                    if (Files.exists(file)) {
+                        Files.delete(file);
+                    }
+                }
+                
+                // Reload all configs from defaults
+                CratePriorityConfigLoader.get().reload();
+                PileConfigLoader.get().reload();
+                WaypointConfigLoader.get().reload();
+                List<EtherwarpCategory> categories = EtherwarpConfigLoader.get().reload();
+                EtherwarpCategoryToggleManager.get().syncWithCategories(categories);
+                
+                // Reload feature managers if available
+                IQModClient client = IQModClient.get();
+                if (client != null && client.getFeatureManager() != null) {
+                    PearlWaypointFeature pearlFeature = client.getFeatureManager().get(PearlWaypointFeature.class);
+                    if (pearlFeature != null) {
+                        pearlFeature.reloadConfig();
+                    }
+                    
+                    EtherwarpHelperFeature etherwarpFeature = client.getFeatureManager().get(EtherwarpHelperFeature.class);
+                    if (etherwarpFeature != null) {
+                        etherwarpFeature.reloadConfig();
+                    }
+                }
+            } catch (Exception e) {
+                source.sendFeedback(Text.literal("§d§l[IQ] §r§cFailed to update configs: " + e.getMessage()));
+            }
+        });
+        source.sendFeedback(Text.literal("§d§l[IQ] §r§fConfig files updated to default successfully."));
+        return 1;
     }
 
     private static int openEtherwarpCategories(@NotNull FabricClientCommandSource source) {
