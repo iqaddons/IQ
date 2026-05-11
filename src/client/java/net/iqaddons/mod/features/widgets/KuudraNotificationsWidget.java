@@ -29,7 +29,7 @@ public class KuudraNotificationsWidget extends HudWidget {
     public KuudraNotificationsWidget() {
         super(
                 "kuudra_notifications",
-                "KUUDRA NOTIFICATIONS",
+                "Kuudra Notifications",
                 0f,
                 80f,
                 1.0f,

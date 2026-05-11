@@ -30,55 +30,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * IQ Addons — Config Screen.
- *
- * <p>Design: soft noir palette (#100C14 + #D6A7FF + #F7A8D7), compact translucent layout,
- * sidebar with animated pill, search bar, collapsible ConfigObject sections.
- *
- * <p>Standard usage:
- * <pre>{@code
- * new IQConfigScreen(parent,
- *     Configuration.class, KuudraGeneralConfig.class, ...)
- * }</pre>
- *
- * <p>Open directly at a category (e.g. from HUD editor middle-click):
- * <pre>{@code
- * IQConfigScreen.atCategory(parent, "PhaseTwoConfig",
- *     Configuration.class, KuudraGeneralConfig.class, ...)
- * }</pre>
- */
 public class IQConfigScreen extends Screen {
 
-    // Fallback explicit logger to keep compile stable even if Lombok processing is skipped.
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IQConfigScreen.class);
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Resources
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Resolves to assets/iq/textures/icon.png.
-     * DrawContext.drawTexture requires the full texture path in the identifier.
-     */
-      private static final Identifier LOGO_TEXTURE = Identifier.of("iq", "textures/icon.png");
-      private static final Identifier DISCORD_ICON_TEXTURE = Identifier.of("iq", "textures/social/discord.png");
-      private static final Identifier MODRINTH_ICON_TEXTURE = Identifier.of("iq", "textures/social/modrinth.png");
-      private static final Identifier PATREON_ICON_TEXTURE = Identifier.of("iq", "textures/social/patreon.png");
-      private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.of("iq", "textures/social/settings.png");
-      private static final Identifier CLOSE_ICON_TEXTURE = Identifier.of("iq", "textures/social/close.png");
-    /**
-     * Actual pixel dimensions of icon.png
-     */
+    private static final Identifier LOGO_TEXTURE = Identifier.of("iq", "textures/icon.png");
+    private static final Identifier DISCORD_ICON_TEXTURE = Identifier.of("iq", "textures/social/discord.png");
+    private static final Identifier MODRINTH_ICON_TEXTURE = Identifier.of("iq", "textures/social/modrinth.png");
+    private static final Identifier PATREON_ICON_TEXTURE = Identifier.of("iq", "textures/social/patreon.png");
+    private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.of("iq", "textures/social/settings.png");
+    private static final Identifier CLOSE_ICON_TEXTURE = Identifier.of("iq", "textures/social/close.png");
     private static final int LOGO_TEX_SIZE = 160;
-    /**
-     * Rendered size in the sidebar
-     */
     private static final int LOGO_SIZE = 24;
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Palette (soft purple / pink + black, translucent)
-    // ═══════════════════════════════════════════════════════════════════════
 
     private static final int BG_HEADER = 0xD50D0A16;
     private static final int BG_ENTRY = 0xA3120E1C;
@@ -104,11 +67,7 @@ public class IQConfigScreen extends Screen {
     private static final int T_MAIN = 0xFFF8F1FB;
     private static final int T_MUTED = 0xFFC9B4D5;
     private static final int T_ACCENT = 0xFFF7A8DC;
-    private static final int T_ACTION_TEXT = 0xFFFFE7F4;
     private static final int T_ACTION_TEXT_HOV = 0xFFFFC2E7;
-    // Feature rows keep a clear text hierarchy: stronger title, softer description.
-    private static final int T_FEATURE_TITLE = 0xFFFFF3FC;
-    private static final int T_FEATURE_DESC = 0xFFC1ADD0;
 
      private static final int ACCENT = 0xFFD650AB;
      private static final int SLIDER_HANDLE = 0xFFFBE9F6;
@@ -123,10 +82,6 @@ public class IQConfigScreen extends Screen {
      private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
      private static final int GROUP_SEP_LINE = 0x26FFFFFF;
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Layout
-    // ═══════════════════════════════════════════════════════════════════════
-
     private static final float GUI_W_RATIO = 0.49f;
     private static final float GUI_H_RATIO = 0.47f;
     private static final int GUI_MIN_W = 575;
@@ -137,7 +92,6 @@ public class IQConfigScreen extends Screen {
 
     private static final int SIDEBAR_BASE_W = 118;
     private static final int CONTENT_MIN_W = 340;
-    // Match sidebar top zone height so both columns align.
     private static final int HEADER_H = 42;
     private static final int LOGO_ZONE_H = 42;
     private static final int PADDING = 10;
@@ -199,10 +153,9 @@ public class IQConfigScreen extends Screen {
     private static final DataKey<String> K_LAST_CATEGORY_ID = DataKey.of("iqconfig.lastCategoryId", String.class);
     private static final DataKey<Double> K_LAST_SCROLL = DataKey.of("iqconfig.lastScroll", Double.class);
     private static final DataKey<String> K_LAST_SEARCH = DataKey.of("iqconfig.lastSearch", String.class);
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  State
-    // ═══════════════════════════════════════════════════════════════════════
+    private static final DataKey<String> K_EXPANDED_SECTIONS = DataKey.of("iqconfig.expandedSections", String.class);
+    private static final DataKey<Double> K_UI_STATE_TIMESTAMP = DataKey.of("iqconfig.uiStateTimestamp", Double.class);
+    private static final long UI_STATE_MAX_AGE_MS = 60_000L;
 
     private final Screen parent;
     private final Class<?>[] configClasses;
@@ -218,45 +171,34 @@ public class IQConfigScreen extends Screen {
     private boolean restoreSavedScrollPending = false;
     private double savedScrollOffset = 0;
 
-    // Search
     private final StringBuilder searchQuery = new StringBuilder();
+    private @Nullable String cachedDisplayQuery;
+    private int cachedDisplayCategory = Integer.MIN_VALUE;
+    private @Nullable List<ConfigEntryModel> cachedDisplayEntries;
+    private final Map<String, List<String>> wrapTextCache = new HashMap<>();
     private boolean searchFocused = false;
     private int cursorTick = 0;
 
-    // Slider drag
     private @Nullable ConfigEntryModel draggingSlider;
     private int sliderTrackX, sliderTrackW;
 
-    // Color editor
     private @Nullable ConfigEntryModel editingColor;
     private double uiScale = 1.0;
 
-    // Hit-test cache
     private final List<RenderedEntry> renderedEntries = new ArrayList<>();
     private final List<SidebarCategorySlot> sidebarSlots = new ArrayList<>();
 
-    // Animated sidebar pill
     private float catPillY = -1f;
 
-    // ── Animation state ──────────────────────────────────────────────────────
-    /** handle position: 0.0 = off, 1.0 = on */
     private final Map<String, Float> toggleAnims  = new HashMap<>();
-    /** expand progress: 0.0 = collapsed, 1.0 = expanded */
     private final Map<String, Float> sectionAnims = new HashMap<>();
-    /** hover fade: 0.0 = idle, 1.0 = fully hovered */
     private final Map<String, Float> hoverAnims   = new HashMap<>();
-    /** select slide: 1.0 = just cycled, 0.0 = settled */
     private final Map<String, Float> selectSlideAnims = new HashMap<>();
-    /** select slide direction: +1 = forward (left), -1 = backward (right) */
     private final Map<String, Integer> selectSlideDirs = new HashMap<>();
-    /** scroll momentum velocity (pixels/frame) */
     private double scrollVelocity = 0;
-    /** content fade-in: 0.0 = invisible, 1.0 = fully visible */
     private float contentFadeAnim = 1f;
-    /** tracks last rendered category to detect switches */
     private int lastRenderedCategory = -1;
 
-     // Frame-local state
      private int frameMouseX = 0, frameMouseY = 0;
      private int cachedGx, cachedGy, cachedGw, cachedGh;
      private int cachedSidebarW = SIDEBAR_BASE_W;
@@ -267,35 +209,12 @@ public class IQConfigScreen extends Screen {
      private @Nullable Screen closeTarget;
      private long lastTransitionTimeMs = -1L;
 
-    // Shared UI settings from Global Configuration Hub
     private int sharedThemeIndex = 0;
     private double sharedGuiOpacity = 0.5;
     private boolean sharedAnimationsEnabled = true;
     private double sharedAnimationSpeed = 0.7;
     private boolean sharedOutlineShadow = true;
-    private boolean sharedBlurEnabled = true;
-    private double sharedBlurIntensity = 0.45;
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Static factory — open at a specific category (HUD editor hook)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Opens the config screen with the given category pre-selected.
-     *
-     * <p>Use this in {@code HudEditScreen} on middle-click:
-     * <pre>{@code
-     * // widget.getCategoryId() returns e.g. "PhaseTwoConfig"
-     * mc.setScreen(IQConfigScreen.atCategory(this, widget.getCategoryId(),
-     *     Configuration.class, KuudraGeneralConfig.class,
-     *     PhaseOneConfig.class, PhaseTwoConfig.class,
-     *     PhaseThreeConfig.class, PhaseFourConfig.class));
-     * }</pre>
-     *
-     * @param parent        the screen to return to on close
-     * @param categoryId    {@code Class.getSimpleName()} of the target config class
-     * @param configClasses all config classes to register
-     */
     @SuppressWarnings("unused")
     public static IQConfigScreen atCategory(@Nullable Screen parent, String categoryId,
                                             Class<?>... configClasses) {
@@ -305,10 +224,6 @@ public class IQConfigScreen extends Screen {
     }
 
     private @Nullable String initialCategoryId = null;
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Construction & lifecycle
-    // ═══════════════════════════════════════════════════════════════════════
 
     public IQConfigScreen(@Nullable Screen parent, Class<?>... configClasses) {
         super(Text.literal("IQ Addons · Config"));
@@ -325,6 +240,12 @@ public class IQConfigScreen extends Screen {
             if (cat != null) categories.add(cat);
         }
         boolean persistUiState = IQGlobalConfigurationScreen.isSharedUiStatePersistenceEnabled();
+        if (persistUiState) {
+            long savedTimestamp = store.getOrDefault(K_UI_STATE_TIMESTAMP, 0.0).longValue();
+            if (System.currentTimeMillis() - savedTimestamp > UI_STATE_MAX_AGE_MS) {
+                persistUiState = false;
+            }
+        }
         if (initialCategoryId != null) {
             for (int i = 0; i < categories.size(); i++) {
                 if (categories.get(i).id().equals(initialCategoryId)) {
@@ -354,14 +275,24 @@ public class IQConfigScreen extends Screen {
             if (!savedSearch.isBlank()) {
                 searchQuery.append(savedSearch);
             }
+            String savedExpanded = store.getOrDefault(K_EXPANDED_SECTIONS, "");
+            if (!savedExpanded.isBlank()) {
+                java.util.Set<String> expandedLabels = new java.util.HashSet<>(
+                        Arrays.asList(savedExpanded.split(",", -1)));
+                for (ConfigCategory cat : categories) {
+                    applyExpandedState(cat.entries(), expandedLabels);
+                }
+            }
         }
         catPillY = -1f;
-        // reset all animation maps so they don't hold stale entries
         toggleAnims.clear();
         sectionAnims.clear();
         hoverAnims.clear();
         selectSlideAnims.clear();
         selectSlideDirs.clear();
+        for (ConfigCategory cat : categories) {
+            preseedSectionAnims(cat.entries());
+        }
         scrollVelocity = 0;
         contentFadeAnim = 1f;
         lastRenderedCategory = -1;
@@ -374,10 +305,6 @@ public class IQConfigScreen extends Screen {
 
     @Override
     public boolean shouldPause() { return false; }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Master render
-    // ═══════════════════════════════════════════════════════════════════════
 
     @Override
     public void render(@NotNull DrawContext ctx, int mouseX, int mouseY, float delta) {
@@ -399,10 +326,9 @@ public class IQConfigScreen extends Screen {
         cachedGy = baseGy + Math.round((1f - renderTransition) * SCREEN_TRANSITION_Y);
         cachedSidebarW = computeSidebarWidth();
 
-        // apply momentum scroll before rendering
         updateScrollAnimation();
 
-        int overlayBaseAlpha = sharedBlurEnabled ? (int) (0x66 + (sharedBlurIntensity * 0x18)) : ((BG_OUTER >>> 24) & 0xFF);
+        int overlayBaseAlpha = (BG_OUTER >>> 24) & 0xFF;
         int bgAlpha = (int) (overlayBaseAlpha * renderTransition);
         int bgColor = (bgAlpha << 24) | (BG_OUTER & 0x00FFFFFF);
         ctx.fill(0, 0, width, height, bgColor);
@@ -419,12 +345,7 @@ public class IQConfigScreen extends Screen {
         if (editingColor != null) renderColorEditor(ctx);
         if (pendingTooltip != null) renderTooltip(ctx, pendingTooltip);
 
-        super.render(ctx, mouseX, mouseY, delta);
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Soft glow border
-    // ═══════════════════════════════════════════════════════════════════════
 
     private void drawGlowBorder(DrawContext ctx, int x, int y, int w, int h) {
         if (!sharedOutlineShadow) {
@@ -441,19 +362,13 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, x, y, w, h, themedBorderBright(), CORNER_R_LARGE);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Header — search bar + breadcrumb + close
-    // ═══════════════════════════════════════════════════════════════════════
-
     private void renderHeader(DrawContext ctx) {
         int x = cachedGx + cachedSidebarW, y = cachedGy, w = cachedGw - cachedSidebarW;
 
         drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), CORNER_R_MED);
 
-        // Soft gradient line at bottom of header using themed accent
         int acc0 = themeAccentColor();
         int r0 = (acc0 >> 16) & 0xFF, g0 = (acc0 >> 8) & 0xFF, b0 = acc0 & 0xFF;
-        // shift slightly toward a secondary accent shade
         int r1 = Math.min(255, r0 + 30), g1 = Math.max(0, g0 - 10), b1 = Math.min(255, b0 + 20);
         for (int i = 0; i < w; i++) {
             double t = (double) i / w;
@@ -465,7 +380,6 @@ public class IQConfigScreen extends Screen {
                     (a << 24) | (r << 16) | (g << 8) | b);
         }
 
-        // ── Search bar (centred) ───────────────────────────────────────────
         HeaderSearchBox searchBox = getHeaderSearchBox(x, y, w);
         int sbW = searchBox.w();
         int sbX = searchBox.x();
@@ -477,12 +391,10 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, sbX, sbY, sbW, SEARCH_H,
                 searchFocused ? BORDER_BRIGHT : (sbHov ? BORDER_MID : BORDER_DIM));
 
-        // Magnifier icon
         int iconY = sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2;
         ctx.drawTextWithShadow(client.textRenderer, Text.literal("⌕"), sbX + 5, iconY, 0xA0E64BA8);
         ctx.drawTextWithShadow(client.textRenderer, Text.literal("⌕"), sbX + 4, iconY, 0xE8FFFFFF);
 
-        // Query + blinking cursor
         String q = searchQuery.toString();
         boolean blink = searchFocused && (cursorTick / 10) % 2 == 0;
         String display;
@@ -495,7 +407,6 @@ public class IQConfigScreen extends Screen {
         ctx.drawTextWithShadow(client.textRenderer, Text.literal(display),
                 sbX + 15, sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2, T_MAIN);
 
-        // Clear ×
         if (!q.isEmpty()) {
             boolean clrHov = isIn(frameMouseX, frameMouseY, sbX + sbW - 15, sbY, 12, SEARCH_H);
             ctx.drawTextWithShadow(client.textRenderer,
@@ -503,7 +414,6 @@ public class IQConfigScreen extends Screen {
                     sbX + sbW - 14, sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2, T_MUTED);
         }
 
-         // ── Settings & Close buttons (right side) ───────────────────────────
          int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
          int settingsBtnX = getHeaderActionButtonsStartX(x, w);
          int closeBtnX = settingsBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
@@ -544,10 +454,6 @@ public class IQConfigScreen extends Screen {
          if (closeHov) pendingTooltip = "Close config";
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Sidebar
-    // ═══════════════════════════════════════════════════════════════════════
-
     private void renderSidebar(DrawContext ctx) {
         int gx = cachedGx, gy = cachedGy, gh = cachedGh, sidebarW = cachedSidebarW;
         boolean searchActive = isSearchActive();
@@ -555,13 +461,11 @@ public class IQConfigScreen extends Screen {
         drawRoundedRect(ctx, gx, gy, sidebarW, gh, themeSidebarColor(), CORNER_R_MED);
         ctx.fill(gx + sidebarW - 1, gy, gx + sidebarW, gy + gh, 0x22FFFFFF);
 
-        // ── Logo zone ──────────────────────────────────────────────────────
         drawRoundedRect(ctx, gx, gy, sidebarW, LOGO_ZONE_H, themeHeaderColor(), CORNER_R_MED);
         ctx.fill(gx, gy + LOGO_ZONE_H - 1, gx + sidebarW, gy + LOGO_ZONE_H, 0x22FFFFFF);
 
         int lx = gx + 10, ly = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2;
 
-        // Logo: Identifier.of("iq", "textures/icon.png") → assets/iq/textures/icon.png
         ctx.drawTexture(RenderPipelines.GUI_TEXTURED, LOGO_TEXTURE,
                 lx, ly, 0f, 0f,
                 LOGO_SIZE, LOGO_SIZE,
@@ -575,7 +479,6 @@ public class IQConfigScreen extends Screen {
 
         renderExternalLinkButtons(ctx, gx, gy, sidebarW);
 
-        // ── Animated category pill ─────────────────────────────────────────
         int listTop = gy + LOGO_ZONE_H + 6;
         rebuildSidebarSlots(listTop);
 
@@ -596,7 +499,6 @@ public class IQConfigScreen extends Screen {
             }
         }
 
-        // ── Category list ──────────────────────────────────────────────────
         int lastGroup = -1;
         for (SidebarCategorySlot slot : sidebarSlots) {
             ConfigCategory category = categories.get(slot.categoryIndex());
@@ -624,7 +526,7 @@ public class IQConfigScreen extends Screen {
             lastGroup = group;
         }
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8SUPPORTER VERSION v1.0.3"),
+        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8MODRINTH VERSION v1.0.2"),
                 gx + 10, gy + gh - client.textRenderer.fontHeight - 8, 0x22FFFFFF);
     }
 
@@ -661,21 +563,15 @@ public class IQConfigScreen extends Screen {
         return iqLabelY + 1;
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Content
-    // ═══════════════════════════════════════════════════════════════════════
-
     private void renderContent(DrawContext ctx, int cx, int cy, int cw, int ch) {
         if (categories.isEmpty()) return;
         ctx.fill(cx, cy, cx + cw, cy + ch, themePanelColor());
 
-        // ── Detect category switch (e.g. triggered via atCategory factory) ──
         if (lastRenderedCategory != selectedCategory) {
             if (lastRenderedCategory != -1) contentFadeAnim = 0f;
             lastRenderedCategory = selectedCategory;
         }
 
-        // Advance fade-in animation
         contentFadeAnim += (1f - contentFadeAnim) * 0.20f;
         if (contentFadeAnim > 0.997f) contentFadeAnim = 1f;
 
@@ -696,7 +592,6 @@ public class IQConfigScreen extends Screen {
         ctx.disableScissor();
         if (maxScroll > 0) renderScrollbar(ctx, cx + cw - SCROLL_W - 2, cy, ch);
 
-        // ── Fade overlay (dark → transparent as contentFadeAnim goes 0→1) ──
         if (contentFadeAnim < 1f) {
             int overlayAlpha = (int) ((1f - contentFadeAnim) * 0xCC);
             if (overlayAlpha > 0)
@@ -712,29 +607,36 @@ public class IQConfigScreen extends Screen {
 
     private List<ConfigEntryModel> getDisplayEntries() {
         String q = searchQuery.toString().trim().toLowerCase(Locale.ROOT);
-        if (q.isEmpty()) {
-            if (selectedCategory >= categories.size()) return List.of();
-            return categories.get(selectedCategory).entries();
+        if (cachedDisplayEntries != null
+                && selectedCategory == cachedDisplayCategory
+                && q.equals(cachedDisplayQuery)) {
+            return cachedDisplayEntries;
         }
-        List<ConfigEntryModel> results = new ArrayList<>();
-        categories.stream()
-                .flatMap(cat -> cat.entries().stream())
-                .forEach(e -> collectSearchResults(e, q, results));
-        return results;
+
+        List<ConfigEntryModel> resolved;
+        if (q.isEmpty()) {
+            resolved = (selectedCategory >= categories.size())
+                    ? List.of()
+                    : categories.get(selectedCategory).entries();
+        } else {
+            List<ConfigEntryModel> results = new ArrayList<>();
+            categories.stream()
+                    .flatMap(cat -> cat.entries().stream())
+                    .forEach(e -> collectSearchResults(e, q, results));
+            resolved = List.copyOf(results);
+        }
+
+        cachedDisplayCategory = selectedCategory;
+        cachedDisplayQuery = q;
+        cachedDisplayEntries = resolved;
+        return resolved;
     }
 
-    /**
-     * Recursively collects entries matching the search query.
-     * If a SECTION_HEADER label matches, it is added as-is (expandable with all children).
-     * If a SECTION_HEADER label does not match, its children are searched individually.
-     */
     private void collectSearchResults(ConfigEntryModel e, String q, List<ConfigEntryModel> results) {
         if (e.getType() == EntryType.SECTION_HEADER) {
             if (e.getLabel().toLowerCase(Locale.ROOT).contains(q)) {
-                // Section header matches: include it as-is (expandable)
                 results.add(e);
             } else {
-                // Header doesn't match: search inside children
                 if (e.getChildren() != null) {
                     for (ConfigEntryModel child : e.getChildren()) {
                         collectSearchResults(child, q, results);
@@ -764,7 +666,6 @@ public class IQConfigScreen extends Screen {
             int rh = rowHeight(entry);
             if (rh == 0) continue;
 
-            // Add subtle vertical breathing room before separators, except when first.
             if (entry.getType() == EntryType.SEPARATOR && used > 0) {
                 y += SEP_TOP_GAP;
                 used += SEP_TOP_GAP;
@@ -785,7 +686,6 @@ public class IQConfigScreen extends Screen {
             y += rh + gap;
             used += rh + gap;
 
-            // ── Animated section expand / collapse ────────────────────────
             if (entry.getType() == EntryType.SECTION_HEADER
                     && entry.getChildren() != null && !entry.getChildren().isEmpty()) {
 
@@ -898,7 +798,6 @@ public class IQConfigScreen extends Screen {
                                      int x, int y, int w, int h, boolean hov) {
         boolean exp = entry.isExpanded();
 
-        // ── hover fade ──────────────────────────────────────────────────────
         String hKey = "secHov#" + sectionKey(entry);
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
         hAnim += ((hov ? 1f : 0f) - hAnim) * 0.28f;
@@ -923,7 +822,6 @@ public class IQConfigScreen extends Screen {
 
     private void renderEntry(DrawContext ctx, ConfigEntryModel entry,
                              int x, int y, int w, int h, boolean hov, boolean isChild) {
-        // ── hover fade ──────────────────────────────────────────────────────
         String hKey = entryKey(entry);
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
         hAnim += ((hov ? 1f : 0f) - hAnim) * 0.28f;
@@ -980,7 +878,6 @@ public class IQConfigScreen extends Screen {
         int x = rx - w;
         int y = cy - h / 2;
 
-        // Match the same square style used by the rest of IQ action controls.
         renderActionControl(ctx, x, y, w, hov);
 
         int innerX = x + 1;
@@ -1008,17 +905,12 @@ public class IQConfigScreen extends Screen {
                 splitX + ((innerW - segW) / 2), cy - client.textRenderer.fontHeight / 2, normal ? activeText : idleText);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Controls
-    // ═══════════════════════════════════════════════════════════════════════
-
     private void renderToggle(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
         try {
             boolean val = (boolean) e.getField().get(null);
             float tTarget = val ? 1f : 0f;
             String tKey   = entryKey(e);
             float tAnim   = toggleAnims.getOrDefault(tKey, tTarget);
-            // lerp handle towards target
             tAnim += (tTarget - tAnim) * 0.22f;
             if (Math.abs(tAnim - tTarget) < 0.004f) tAnim = tTarget;
             toggleAnims.put(tKey, tAnim);
@@ -1026,10 +918,8 @@ public class IQConfigScreen extends Screen {
             int x  = rx - TOGGLE_W, y = cy - TOGGLE_H / 2;
             int bg = lerpArgb(themeToggleOffColor(), themeToggleOnColor(), tAnim);
 
-            // Keep the toggle track as a proper pill in both states.
             drawRoundedRect(ctx, x, y, TOGGLE_W, TOGGLE_H, bg, TOGGLE_H / 2);
 
-            // animated handle position
             int handleSize = TOGGLE_H - 4;
             int hxOff = x + 2;
             int hxOn  = x + TOGGLE_W - handleSize - 2;
@@ -1075,7 +965,6 @@ public class IQConfigScreen extends Screen {
             int bx = rx - bw, by = cy - CONTROL_H / 2;
             renderActionControl(ctx, bx, by, bw, hov);
 
-            // Slide animation: prog decays from 1 → 0 after a cycle
             String sKey = entryKey(e);
             float prog = selectSlideAnims.getOrDefault(sKey, 0f);
             prog += (0f - prog) * 0.22f;
@@ -1132,14 +1021,9 @@ public class IQConfigScreen extends Screen {
         ctx.fill(x, y + CONTROL_H / 2, x + w, y + CONTROL_H, bottom);
         drawRoundedHollowRect(ctx, x, y, w, CONTROL_H, border, CONTROL_RADIUS);
 
-        // Keep a subtle bevel so square controls still feel crisp and readable.
         ctx.fill(x + 1, y + 1, x + w - 1, y + 2, 0x2AFFFFFF);
         ctx.fill(x + 1, y + CONTROL_H - 2, x + w - 1, y + CONTROL_H - 1, 0x22000000);
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Scrollbar
-    // ═══════════════════════════════════════════════════════════════════════
 
     private void renderScrollbar(DrawContext ctx, int sx, int top, int ch) {
         ScrollbarMetrics metrics = getScrollbarMetrics();
@@ -1162,10 +1046,6 @@ public class IQConfigScreen extends Screen {
         int thumbY = cy + (int) ((scrollOffset / maxScroll) * (ch - thumbH));
         return new ScrollbarMetrics(sx, cy, ch, thumbY, thumbH);
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Color editor modal
-    // ═══════════════════════════════════════════════════════════════════════
 
     private void renderColorEditor(DrawContext ctx) {
         if (editingColor == null) return;
@@ -1208,14 +1088,14 @@ public class IQConfigScreen extends Screen {
             drawHollowRect(ctx, cx - 2, cy - 2, 5, 5, 0xFFFFFFFF);
 
             int tx = layout.trackX(), tw = layout.trackW();
-            drawHueTrack(ctx, tx, layout.hueY(), tw, 8);
+            drawHueTrack(ctx, tx, layout.hueY(), tw);
             int hx = tx + (int) (h * tw);
             drawHollowRect(ctx, hx - 2, layout.hueY() - 2, 5, 12, 0xFFFFFFFF);
             ctx.drawTextWithShadow(client.textRenderer, Text.literal("H"), tx - 10, layout.hueY() - 1, themeTextMuted());
 
             if (editingColor.isHasAlpha()) {
                 renderCheckerboard(ctx, tx, layout.alphaY(), tw, 8);
-                drawAlphaTrack(ctx, tx, layout.alphaY(), tw, 8, h, s, v);
+                drawAlphaTrack(ctx, tx, layout.alphaY(), tw, h, s, v);
                 int ax = tx + (int) ((a / 255f) * tw);
                 drawHollowRect(ctx, ax - 2, layout.alphaY() - 2, 5, 12, 0xFFFFFFFF);
                 ctx.drawTextWithShadow(client.textRenderer, Text.literal("A"), tx - 10, layout.alphaY() - 1, themeTextMuted());
@@ -1237,36 +1117,26 @@ public class IQConfigScreen extends Screen {
         drawHollowRect(ctx, x - 1, y - 1, size + 2, size + 2, themedBorderMid());
     }
 
-    private void drawHueTrack(DrawContext ctx, int x, int y, int w, int h) {
+    private void drawHueTrack(DrawContext ctx, int x, int y, int w) {
+        final int trackH = 8;
         int step = 2;
         for (int xx = 0; xx < w; xx += step) {
             float hue = xx / (float) Math.max(1, w - 1);
             int c = hsvToArgb(hue, 1f, 1f, 1f);
-            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + h, c);
+            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + trackH, c);
         }
-        drawHollowRect(ctx, x - 1, y - 1, w + 2, h + 2, themedBorderMid());
+        drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
     }
 
-    private void drawAlphaTrack(DrawContext ctx, int x, int y, int w, int h, float hue, float sat, float val) {
+    private void drawAlphaTrack(DrawContext ctx, int x, int y, int w, float hue, float sat, float val) {
+        final int trackH = 8;
         int step = 2;
         for (int xx = 0; xx < w; xx += step) {
             float a = xx / (float) Math.max(1, w - 1);
             int c = hsvToArgb(hue, sat, val, a);
-            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + h, c);
+            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + trackH, c);
         }
-        drawHollowRect(ctx, x - 1, y - 1, w + 2, h + 2, themedBorderMid());
-    }
-
-    private void renderChannelSlider(DrawContext ctx, int x, int y, int w,
-                                     int value, int color, String lbl) {
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal(lbl), x, y + 2, themeTextMuted());
-        int tx = x + 14, tw = Math.max(30, w - 36), fw = (int)((value / 255.0) * tw);
-        ctx.fill(tx, y + 2, tx + tw, y + 10, 0xCC1C1428);
-        if (fw > 0) ctx.fill(tx, y + 2, tx + fw, y + 10, color);
-        int handleX = Math.max(tx - 2, Math.min(tx + tw - 2, tx + fw - 2));
-        ctx.fill(handleX, y, handleX + 5, y + 13, SLIDER_HANDLE);
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal(String.valueOf(value)),
-                tx + tw + 6, y + 2, themeTextMuted());
+        drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
     }
 
     private void renderCheckerboard(DrawContext ctx, int x, int y, int w, int h) {
@@ -1278,10 +1148,6 @@ public class IQConfigScreen extends Screen {
                         dark ? 0xFFB9B0C6 : 0xFFF6F0FA);
             }
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Tooltip
-    // ═══════════════════════════════════════════════════════════════════════
 
     private void renderTooltip(DrawContext ctx, String text) {
         List<String> lines = wrapText(text, 240);
@@ -1299,47 +1165,36 @@ public class IQConfigScreen extends Screen {
                     tx + 7, ty + 5 + i * lh, themeTooltipTextColor());
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Input
-    // ═══════════════════════════════════════════════════════════════════════
-
-
-     @Override
+    @Override
      public boolean mouseClicked(Click click, boolean doubled) {
          if (closingScreen) return true;
          int imx = (int) click.x(), imy = (int) click.y();
 
-         // Settings & Close buttons
          int headerBtnY = cachedGy + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
          int headerBtnX = getHeaderActionButtonsStartX(cachedGx + cachedSidebarW, cachedGw - cachedSidebarW);
          
-         // Settings button
          if (editingColor == null && isIn(imx, imy, headerBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
              if (client != null) client.setScreen(new net.iqaddons.mod.screen.IQGlobalConfigurationScreen(this, configClasses));
              return true;
          }
          
-         // Close button
          int closeBtnX = headerBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
          if (editingColor == null && isIn(imx, imy, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
              close();
              return true;
          }
 
-        // Color editor
         if (editingColor != null) {
             handleColorEditorClick(imx, imy);
             return true;
         }
 
-        // Search bar
         HeaderSearchBox searchBox = getHeaderSearchBox(cachedGx + cachedSidebarW, cachedGy, cachedGw - cachedSidebarW);
         int sbW = searchBox.w();
         int sbX = searchBox.x();
         int sbY = searchBox.y();
         if (isIn(imx, imy, sbX, sbY, sbW, SEARCH_H)) {
             searchFocused = true;
-            // Clear × button
             if (!searchQuery.isEmpty() && isIn(imx, imy, sbX + sbW - 15, sbY, 12, SEARCH_H)) {
                 searchQuery.setLength(0);
                 scrollOffset = 0;
@@ -1373,7 +1228,6 @@ public class IQConfigScreen extends Screen {
             }
         }
 
-        // Sidebar categories
         int listTop = cachedGy + LOGO_ZONE_H + 6;
         if (sidebarSlots.isEmpty()) rebuildSidebarSlots(listTop);
 
@@ -1393,7 +1247,6 @@ public class IQConfigScreen extends Screen {
             }
         }
 
-        // Entries
         for (RenderedEntry re : renderedEntries) {
             if (re.contains(imx, imy)) {
                 handleEntryClick(re, imx, click.button()); return true; }
@@ -1410,11 +1263,7 @@ public class IQConfigScreen extends Screen {
                     if (isBuildOverlayStyleEntry(entry)) {
                         int x = re2 - MODE_PICKER_W;
                         int mid = x + (MODE_PICKER_W / 2);
-                        if (mx < mid) {
-                            PhaseTwoConfig.simpleBuildProgressOverlay = true;
-                        } else {
-                            PhaseTwoConfig.simpleBuildProgressOverlay = false;
-                        }
+                        PhaseTwoConfig.simpleBuildProgressOverlay = mx < mid;
                     } else {
                         toggleBoolean(entry);
                     }
@@ -1525,7 +1374,6 @@ public class IQConfigScreen extends Screen {
     public boolean mouseScrolled(double mx, double my, double hAmt, double vAmt) {
         if (closingScreen) return true;
         if (editingColor != null) return true;
-        // add momentum instead of instantly jumping
         scrollVelocity -= vAmt * 16;
         return true;
     }
@@ -1533,7 +1381,7 @@ public class IQConfigScreen extends Screen {
     @Override
     public boolean keyPressed(KeyInput input) {
         if (closingScreen) return true;
-        if (input.key() == 256) {  // ESC
+        if (input.key() == 256) {
             if (editingColor != null) {
                 editingColor = null;
                 return true;
@@ -1546,7 +1394,7 @@ public class IQConfigScreen extends Screen {
             close();
             return true;
         }
-        if (searchFocused && input.key() == 259 && !searchQuery.isEmpty()) {  // BACKSPACE
+        if (searchFocused && input.key() == 259 && !searchQuery.isEmpty()) {
             searchQuery.deleteCharAt(searchQuery.length() - 1);
             scrollOffset = 0; return true;
         }
@@ -1564,10 +1412,6 @@ public class IQConfigScreen extends Screen {
         return super.charTyped(input);
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Mutation helpers
-    // ═══════════════════════════════════════════════════════════════════════
-
     private void toggleBoolean(ConfigEntryModel e) {
         try {
             e.getField().set(null, !(boolean) e.getField().get(null));
@@ -1584,10 +1428,9 @@ public class IQConfigScreen extends Screen {
             for (int i = 0; i < vals.length; i++) if (vals[i].equals(cur)) { idx = i; break; }
             int newIdx = ((idx + direction) % vals.length + vals.length) % vals.length;
             e.getField().set(null, vals[newIdx]);
-            // Trigger slide: text slides in opposite to direction of travel
             String key = entryKey(e);
             selectSlideAnims.put(key, 1.0f);
-            selectSlideDirs.put(key, -direction); // text slides in from opposite side
+            selectSlideDirs.put(key, -direction);
         } catch (Exception ex) {
             log.warn("Cycle: {}", e.getLabel(), ex); }
     }
@@ -1604,10 +1447,6 @@ public class IQConfigScreen extends Screen {
         } catch (Exception ex) {
             log.warn("Slider: {}", e.getLabel(), ex); }
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Layout helpers
-    // ═══════════════════════════════════════════════════════════════════════
 
     private int rowHeight(ConfigEntryModel e) {
         return switch (e.getType()) {
@@ -1636,7 +1475,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = client.textRenderer.getWidth("IQ");
         int logoSubtitleW = client.textRenderer.getWidth("Config");
-        int footerW = client.textRenderer.getWidth("Supporter Version v1.0.3");
+        int footerW = client.textRenderer.getWidth("Modrinth Version v1.0.2");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
@@ -1656,8 +1495,6 @@ public class IQConfigScreen extends Screen {
         sharedAnimationsEnabled = IQGlobalConfigurationScreen.isSharedAnimationsEnabled();
         sharedAnimationSpeed = IQGlobalConfigurationScreen.getSharedAnimationSpeed();
         sharedOutlineShadow = IQGlobalConfigurationScreen.isSharedOutlineShadowEnabled();
-        sharedBlurEnabled = IQGlobalConfigurationScreen.isSharedBlurEnabled();
-        sharedBlurIntensity = IQGlobalConfigurationScreen.getSharedBlurIntensity();
     }
 
     private int applySharedOpacity(int baseRgb) {
@@ -1665,138 +1502,154 @@ public class IQConfigScreen extends Screen {
         return (baseRgb & 0x00FFFFFF) | (alpha << 24);
     }
 
+    private int scaleAlphaByOpacity(int color) {
+        int existingAlpha = (color >>> 24) & 0xFF;
+        int newAlpha = (int) Math.round(existingAlpha * Math.max(0.0, Math.min(1.0, sharedGuiOpacity)));
+        return (color & 0x00FFFFFF) | (newAlpha << 24);
+    }
+
+    private static final ThemePalette[] THEME_PALETTES = new ThemePalette[] {
+            new ThemePalette(
+                    0x07060D, 0x080710, BG_HEADER,
+                    BG_SEARCH, BG_SEARCH_ACT,
+                    BG_ENTRY, BG_ENTRY_HOV, BG_SECTION, BG_CHILD,
+                    ACCENT, BG_TOGGLE_ON, BG_TOGGLE_OFF,
+                    0xFFFFF7FD, 0xFF9E86AF, 0xFFFFF6FD, 0xFFAA8FBF,
+                    0xFFFFECF8, T_ACTION_TEXT_HOV, T_ACCENT,
+                    BORDER_DIM, BORDER_MID,
+                    SEP_PILL_BG, SEP_PILL_BORDER, SEP_PILL_GLOW, SEP_TEXT,
+                    0xEE100B16, 0xFF9E86AF,
+                    SEP_LINE,
+                    0xFFFFF7FD, 0xFFF2A5DA, 0xFF9B84AD,
+                    BG_CONTROL_TOP, BG_CONTROL_TOP_HOV, BG_CONTROL_BOTTOM, BG_CONTROL_BOTTOM_HOV
+            ),
+            new ThemePalette(
+                    0x0D0D0D, 0x121212, 0xD5181818,
+                    0xC0131313, 0xD01B1B1B,
+                    0xA3181818, 0xC5222222, 0xB0161616, 0xA31A1A1A,
+                    0xFFEAEAEA, 0xFFEAEAEA, 0xC22A2A2A,
+                    0xFFF5F5F5, 0xFF7D7D7D, 0xFFFFFFFF, 0xFF848484,
+                    0xFFCCCCCC, 0xFFFFFFFF, 0xFFDDDDDD,
+                    0x40404040, 0x6A8E8E8E,
+                    0x6B1A1A1A, 0x30808080, 0x10EAEAEA, 0xFF5A5A5A,
+                    0xEE111111, 0xFFD8D8D8,
+                    0x282A2A2A,
+                    0xFFF0F0F0, 0xFFC8C8C8, 0xFF737373,
+                    0xCC1A1A1A, 0xD6222222, 0xCC161616, 0xD61E1E1E
+            ),
+            new ThemePalette(
+                    0xF5F7FA, 0xEBEEF2, 0xD5EBEEF2,
+                    0xC0FFFFFF, 0xD6F8F9FA,
+                    0xA3FFFFFF, 0xC5F0F3F6, 0xB0EBEEF2, 0xA3F0F3F6,
+                    0xFF1F2328, 0xFF1F2328, 0xC2D0D7DE,
+                    0xFF1A1530, 0xFF544372, 0xFF1A1A2E, 0xFF63537E,
+                    0xFF3A2860, 0xFF1F1050, 0xFF5030A0,
+                    0x3A8A78A8, 0x6A7A5FB0,
+                    0xB0D4CCE8, 0x506858A8, 0x20BC7FE8, 0xFF5A4878,
+                    0xEEF2F5F9, 0xFF3E3260,
+                    0x28000000,
+                    0xFF1A1530, 0xFF6B3DAA, 0xFF544372,
+                    0xCCC7B4DA, 0xD6D6C4E4, 0xCCC2B4D0, 0xD6CDBFD9
+            ),
+            new ThemePalette(
+                    0x07101A, 0x081723, 0xD50C1A29,
+                    0xC00F1D2D, 0xD0152940,
+                    0xA3132132, 0xC51B2D43, 0xB0142235, 0xA316263A,
+                    0xFF4A9EFF, 0xFF3A96E8, 0xC21B2440,
+                    0xFFDDF1FF, 0xFF6E9CB8, 0xFFE9F8FF, 0xFF709EB9,
+                    0xFFD9F0FF, 0xFFFFFFFF, 0xFF80C8FF,
+                    0x30304F72, 0x6A5A9FD9,
+                    0x6B0A1A2A, 0x304A9EFF, 0x154A9EFF, 0xFF6A9ACC,
+                    0xEE0B1A2A, 0xFFAED7FB,
+                    SEP_LINE,
+                    0xFFDDF1FF, 0xFF8BCBFF, 0xFF6D95AC,
+                    0xCC1B3049, 0xD6283E58, 0xCC162436, 0xD61E2E43
+            ),
+            new ThemePalette(
+                    0x16080B, 0x190B10, 0xD51C0D14,
+                    0xC0180D16, 0xD6201320,
+                    0xA328151C, 0xC5381E29, 0xB026131C, 0xA3291722,
+                    0xFFFF5A78, 0xFFE83A50, 0xC227151F,
+                    0xFFFFDEE5, 0xFFA97881, 0xFFFFF1F4, 0xFFAD7D86,
+                    0xFFFFE4E8, 0xFFFFFFFF, 0xFFFF9AAA,
+                    0x304F2A3A, 0x6AD97A93,
+                    0x6B160A12, 0x30FF5A78, 0x15FF5A78, 0xFFB06070,
+                    0xEE1D0D14, 0xFFDDA3AE,
+                    SEP_LINE,
+                    0xFFFFDEE5, 0xFFFF9CAC, 0xFF9E6E78,
+                    0xCC3A1C2A, 0xD64B2534, 0xCC22121C, 0xD62E1824
+            ),
+            new ThemePalette(
+                    0x06110B, 0x081710, 0xD50B1A13,
+                    0xC00E1B16, 0xD613281F,
+                    0xA313251B, 0xC51C3326, 0xB014241C, 0xA316281F,
+                    0xFF4BE08A, 0xFF35C06E, 0xC21A2620,
+                    0xFFD4FFE0, 0xFF669A77, 0xFFF3FFF3, 0xFF689B78,
+                    0xFFD8FFE8, 0xFFFFFFFF, 0xFF70FF9E,
+                    0x30315A42, 0x6A63C78A,
+                    0x6B0A160E, 0x304BE08A, 0x154BE08A, 0xFF50A070,
+                    0xEE0C1A13, 0xFFA7D8B8,
+                    SEP_LINE,
+                    0xFFD4FFE0, 0xFF76F3A0, 0xFF5F8F6E,
+                    0xCC1D3A2A, 0xD6294A35, 0xCC13241B, 0xD61A3124
+            )
+    };
+
+    private ThemePalette palette() {
+        return themePalette(sharedThemeIndex);
+    }
+
+    private static ThemePalette themePalette(int idx) {
+        int clamped = Math.max(0, Math.min(THEME_PALETTES.length - 1, idx));
+        return THEME_PALETTES[clamped];
+    }
+
     private int themePanelColor() {
-        int base = switch (sharedThemeIndex) {
-            case 1 -> 0x0D0D0D;
-            case 2 -> 0xF5F7FA;
-            case 3 -> 0x07101A;
-            case 4 -> 0x16080B;
-            case 5 -> 0x06110B;
-            default -> 0x07060D;
-        };
-        return applySharedOpacity(base);
+        return applySharedOpacity(palette().panelBase());
     }
 
     private int themeSidebarColor() {
-        int base = switch (sharedThemeIndex) {
-            case 1 -> 0x121212;
-            case 2 -> 0xEBEEF2;
-            case 3 -> 0x081723;
-            case 4 -> 0x190B10;
-            case 5 -> 0x081710;
-            default -> 0x080710;
-        };
-        return applySharedOpacity(base);
+        return applySharedOpacity(palette().sidebarBase());
     }
 
     private int themeHeaderColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xD5181818;
-            case 2 -> 0xD5EBEEF2;
-            case 3 -> 0xD50C1A29;
-            case 4 -> 0xD51C0D14;
-            case 5 -> 0xD50B1A13;
-            default -> BG_HEADER;
-        };
+        return scaleAlphaByOpacity(palette().header());
     }
 
     private int themeSearchColor() {
-        return switch (sharedThemeIndex) {
-            case 2 -> 0xC0FFFFFF;
-            case 3 -> 0xC00F1D2D;
-            case 4 -> 0xC0180D16;
-            case 5 -> 0xC00E1B16;
-            case 1 -> 0xC0131313;
-            default -> BG_SEARCH;
-        };
+        return palette().search();
     }
 
     private int themeSearchActiveColor() {
-        return switch (sharedThemeIndex) {
-            case 2 -> 0xD6F8F9FA;
-            case 3 -> 0xD0152940;
-            case 4 -> 0xD6201320;
-            case 5 -> 0xD613281F;
-            case 1 -> 0xD01B1B1B;
-            default -> BG_SEARCH_ACT;
-        };
+        return palette().searchActive();
     }
 
     private int themeEntryColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xA3181818;
-            case 2 -> 0xA3FFFFFF; // Light - card surface
-            case 3 -> 0xA3132132;
-            case 4 -> 0xA328151C;
-            case 5 -> 0xA313251B;
-            default -> BG_ENTRY;
-        };
+        return scaleAlphaByOpacity(palette().entry());
     }
 
     private int themeEntryHoverColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xC5222222;
-            case 2 -> 0xC5F0F3F6; // Light - subtle hover
-            case 3 -> 0xC51B2D43;
-            case 4 -> 0xC5381E29;
-            case 5 -> 0xC51C3326;
-            default -> BG_ENTRY_HOV;
-        };
+        return scaleAlphaByOpacity(palette().entryHover());
     }
 
     private int themeSectionColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xB0161616;
-            case 2 -> 0xB0EBEEF2; // Light - secondary bg
-            case 3 -> 0xB0142235;
-            case 4 -> 0xB026131C;
-            case 5 -> 0xB014241C;
-            default -> BG_SECTION;
-        };
+        return scaleAlphaByOpacity(palette().section());
     }
 
     private int themeChildColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xA31A1A1A;
-            case 2 -> 0xA3F0F3F6; // Light - slightly offset from entry
-            case 3 -> 0xA316263A;
-            case 4 -> 0xA3291722;
-            case 5 -> 0xA316281F;
-            default -> BG_CHILD;
-        };
+        return scaleAlphaByOpacity(palette().child());
     }
 
     private int themeAccentColor() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xFF4A9EFF;
-            case 4 -> 0xFFFF5A78;
-            case 5 -> 0xFF4BE08A;
-            case 2 -> 0xFF1F2328; // Light - text primary as accent
-            case 1 -> 0xFFEAEAEA;
-            default -> ACCENT;
-        };
+        return palette().accent();
     }
 
     private int themeToggleOnColor() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xFF3A96E8; // Ocean - blue
-            case 4 -> 0xFFE83A50; // Crimson - red
-            case 5 -> 0xFF35C06E; // Emerald - green
-            case 2 -> 0xFF1F2328; // Light - dark bg
-            case 1 -> 0xFFEAEAEA; // Dark - near-white
-            default -> BG_TOGGLE_ON; // Default IQ - pink
-        };
+        return palette().toggleOn();
     }
 
     private int themeToggleOffColor() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xC21B2440; // Ocean
-            case 4 -> 0xC227151F; // Crimson
-            case 5 -> 0xC21A2620; // Emerald
-            case 2 -> 0xC2D0D7DE; // Light - soft border gray
-            case 1 -> 0xC22A2A2A; // Dark
-            default -> BG_TOGGLE_OFF;
-        };
+        return palette().toggleOff();
     }
 
     private int themeToggleHandle(float tAnim) {
@@ -1805,159 +1658,63 @@ public class IQConfigScreen extends Screen {
     }
 
     private int themeTextMain() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFF5F5F5;
-            case 2 -> 0xFF1A1530;
-            case 3 -> 0xFFDDF1FF;
-            case 4 -> 0xFFFFDEE5;
-            case 5 -> 0xFFD4FFE0;
-            default -> 0xFFFFF7FD;
-        };
+        return palette().textMain();
     }
 
     private int themeTextMuted() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFF7D7D7D;
-            case 2 -> 0xFF544372;
-            case 3 -> 0xFF6E9CB8;
-            case 4 -> 0xFFA97881;
-            case 5 -> 0xFF669A77;
-            default -> 0xFF9E86AF;
-        };
+        return palette().textMuted();
     }
 
     private int themeFeatureTitleColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFFFFFFF;
-            case 2 -> 0xFF1A1A2E;
-            case 3 -> 0xFFE9F8FF;
-            case 4 -> 0xFFFFF1F4;
-            case 5 -> 0xFFF3FFF3;
-            default -> 0xFFFFF6FD;
-        };
+        return palette().featureTitle();
     }
 
     private int themeFeatureDescriptionColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFF848484;
-            case 2 -> 0xFF63537E;
-            case 3 -> 0xFF709EB9;
-            case 4 -> 0xFFAD7D86;
-            case 5 -> 0xFF689B78;
-            default -> 0xFFAA8FBF;
-        };
+        return palette().featureDescription();
     }
 
     private int themeActionTextColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFCCCCCC;
-            case 2 -> 0xFF3A2860;
-            case 3 -> 0xFFD9F0FF;
-            case 4 -> 0xFFFFE4E8;
-            case 5 -> 0xFFD8FFE8;
-            default -> 0xFFFFECF8;
-        };
+        return palette().actionText();
     }
 
     private int themeActionTextHoverColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFFFFFFF;
-            case 2 -> 0xFF1F1050;
-            case 3, 4, 5 -> 0xFFFFFFFF;
-            default -> T_ACTION_TEXT_HOV;
-        };
+        return palette().actionTextHover();
     }
 
     private int themeHubAccentTextColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFDDDDDD;
-            case 2 -> 0xFF5030A0;
-            case 3 -> 0xFF80C8FF;
-            case 4 -> 0xFFFF9AAA;
-            case 5 -> 0xFF70FF9E;
-            default -> T_ACCENT;
-        };
+        return palette().hubAccentText();
     }
 
     private int themedBorderDim() {
         if (!sharedOutlineShadow) return 0x00000000;
-        return switch (sharedThemeIndex) {
-            case 1 -> 0x40404040; // Dark
-            case 2 -> 0x3A8A78A8; // Light
-            case 3 -> 0x30304F72; // Ocean
-            case 4 -> 0x304F2A3A; // Crimson
-            case 5 -> 0x30315A42; // Emerald
-            default -> BORDER_DIM;
-        };
+        return palette().borderDim();
     }
 
     private int themedBorderMid() {
         if (!sharedOutlineShadow) return 0x00000000;
-        return switch (sharedThemeIndex) {
-            case 1 -> 0x6A8E8E8E; // Dark
-            case 2 -> 0x6A7A5FB0; // Light
-            case 3 -> 0x6A5A9FD9; // Ocean
-            case 4 -> 0x6AD97A93; // Crimson
-            case 5 -> 0x6A63C78A; // Emerald
-            default -> BORDER_MID;
-        };
+        return palette().borderMid();
     }
     private int themedBorderBright() { return sharedOutlineShadow ? withAlpha(themeAccentColor(), 0xB5) : 0x00000000; }
     private int themedBorderHighlight() { return sharedOutlineShadow ? withAlpha(themeAccentColor(), 0x44) : 0x00000000; }
 
     private int themeSepPillBg() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0x6B1A1A1A; // Dark
-            case 2 -> 0xB0D4CCE8; // Light — soft lavender pill
-            case 3 -> 0x6B0A1A2A; // Ocean
-            case 4 -> 0x6B160A12; // Crimson
-            case 5 -> 0x6B0A160E; // Emerald
-            default -> SEP_PILL_BG;
-        };
+        return palette().sepPillBg();
     }
 
     private int themeSepPillBorder() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0x30808080; // Dark — mid gray border
-            case 2 -> 0x506858A8; // Light — visible purple border
-            case 3 -> withAlpha(0x4A9EFF, 0x30); // Ocean
-            case 4 -> withAlpha(0xFF5A78, 0x30); // Crimson
-            case 5 -> withAlpha(0x4BE08A, 0x30); // Emerald
-            default -> SEP_PILL_BORDER;
-        };
+        return palette().sepPillBorder();
     }
 
     private int themeSepPillGlow() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0x10EAEAEA; // Dark — near-white glow
-            case 2 -> 0x20BC7FE8; // Light — purple glow
-            case 3 -> 0x154A9EFF; // Ocean
-            case 4 -> 0x15FF5A78; // Crimson
-            case 5 -> 0x154BE08A; // Emerald
-            default -> SEP_PILL_GLOW;
-        };
+        return palette().sepPillGlow();
     }
 
     private int themeSepText() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFF5A5A5A; // Dark — mid gray
-            case 2 -> 0xFF5A4878; // Light — dark purple on light bg
-            case 3 -> 0xFF6A9ACC; // Ocean
-            case 4 -> 0xFFB06070; // Crimson
-            case 5 -> 0xFF50A070; // Emerald
-            default -> SEP_TEXT;
-        };
+        return palette().sepText();
     }
 
     private int themeTooltipBgColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xEE111111; // Dark
-            case 2 -> 0xEEF2F5F9; // Light
-            case 3 -> 0xEE0B1A2A; // Ocean
-            case 4 -> 0xEE1D0D14; // Crimson
-            case 5 -> 0xEE0C1A13; // Emerald
-            default -> 0xEE100B16;
-        };
+        return palette().tooltipBg();
     }
 
     private int themeTooltipBorderColor() {
@@ -1965,22 +1722,11 @@ public class IQConfigScreen extends Screen {
     }
 
     private int themeTooltipTextColor() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFD8D8D8;
-            case 2 -> 0xFF3E3260;
-            case 3 -> 0xFFAED7FB;
-            case 4 -> 0xFFDDA3AE;
-            case 5 -> 0xFFA7D8B8;
-            default -> themeTextMuted();
-        };
+        return palette().tooltipText();
     }
 
     private int themeSepLine() {
-        return switch (sharedThemeIndex) {
-            case 2 -> 0x28000000; // Light — dark line visible on light bg
-            case 1 -> 0x282A2A2A; // Dark
-            default -> SEP_LINE;
-        };
+        return palette().sepLine();
     }
 
     private int themeSepLineBright() {
@@ -1989,80 +1735,70 @@ public class IQConfigScreen extends Screen {
     }
 
     private int themeSidebarTextActive() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFF0F0F0;
-            case 2 -> 0xFF1A1530;
-            case 3 -> 0xFFDDF1FF;
-            case 4 -> 0xFFFFDEE5;
-            case 5 -> 0xFFD4FFE0;
-            default -> 0xFFFFF7FD;
-        };
+        return palette().sidebarTextActive();
     }
 
     private int themeSidebarTextHover() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFFC8C8C8;
-            case 2 -> 0xFF6B3DAA;
-            case 3 -> 0xFF8BCBFF;
-            case 4 -> 0xFFFF9CAC;
-            case 5 -> 0xFF76F3A0;
-            default -> 0xFFF2A5DA;
-        };
+        return palette().sidebarTextHover();
     }
 
     private int themeSidebarTextMuted() {
-        return switch (sharedThemeIndex) {
-            case 1 -> 0xFF737373;
-            case 2 -> 0xFF544372;
-            case 3 -> 0xFF6D95AC;
-            case 4 -> 0xFF9E6E78;
-            case 5 -> 0xFF5F8F6E;
-            default -> 0xFF9B84AD;
-        };
+        return palette().sidebarTextMuted();
     }
 
     private int themeControlTop() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xCC1B3049;
-            case 4 -> 0xCC3A1C2A;
-            case 5 -> 0xCC1D3A2A;
-            case 2 -> 0xCCC7B4DA;
-            case 1 -> 0xCC1A1A1A;
-            default -> BG_CONTROL_TOP;
-        };
+        return palette().controlTop();
     }
 
     private int themeControlTopHover() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xD6283E58;
-            case 4 -> 0xD64B2534;
-            case 5 -> 0xD6294A35;
-            case 2 -> 0xD6D6C4E4;
-            case 1 -> 0xD6222222;
-            default -> BG_CONTROL_TOP_HOV;
-        };
+        return palette().controlTopHover();
     }
 
     private int themeControlBottom() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xCC162436;
-            case 4 -> 0xCC22121C;
-            case 5 -> 0xCC13241B;
-            case 2 -> 0xCCC2B4D0;
-            case 1 -> 0xCC161616;
-            default -> BG_CONTROL_BOTTOM;
-        };
+        return palette().controlBottom();
     }
 
     private int themeControlBottomHover() {
-        return switch (sharedThemeIndex) {
-            case 3 -> 0xD61E2E43;
-            case 4 -> 0xD62E1824;
-            case 5 -> 0xD61A3124;
-            case 2 -> 0xD6CDBFD9;
-            case 1 -> 0xD61E1E1E;
-            default -> BG_CONTROL_BOTTOM_HOV;
-        };
+        return palette().controlBottomHover();
+    }
+
+    private record ThemePalette(
+            int panelBase,
+            int sidebarBase,
+            int header,
+            int search,
+            int searchActive,
+            int entry,
+            int entryHover,
+            int section,
+            int child,
+            int accent,
+            int toggleOn,
+            int toggleOff,
+            int textMain,
+            int textMuted,
+            int featureTitle,
+            int featureDescription,
+            int actionText,
+            int actionTextHover,
+            int hubAccentText,
+            int borderDim,
+            int borderMid,
+            int sepPillBg,
+            int sepPillBorder,
+            int sepPillGlow,
+            int sepText,
+            int tooltipBg,
+            int tooltipText,
+            int sepLine,
+            int sidebarTextActive,
+            int sidebarTextHover,
+            int sidebarTextMuted,
+            int controlTop,
+            int controlTopHover,
+            int controlBottom,
+            int controlBottomHover
+    ) {
     }
 
     private int controlWidth(@NotNull ConfigEntryModel e) {
@@ -2109,14 +1845,6 @@ public class IQConfigScreen extends Screen {
         if (e.getField() == null) return false;
         return "simpleBuildProgressOverlay".equals(e.getField().getName())
                 && "PhaseTwoConfig".equals(e.getField().getDeclaringClass().getSimpleName());
-    }
-
-    private boolean shouldHideEntry(ConfigEntryModel e) {
-        return false;
-    }
-
-    private List<ConfigEntryModel> filterHiddenEntries(List<ConfigEntryModel> entries) {
-        return entries;
     }
 
     private void rebuildSidebarSlots(int listTop) {
@@ -2181,45 +1909,17 @@ public class IQConfigScreen extends Screen {
         return category.name();
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Text helpers
-    // ═══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Wraps {@code text} to lines of at most {@code maxWidth} pixels.
-     */
     private List<String> wrapText(String text, int maxWidth) {
-        if (maxWidth <= 0) return List.of(text);
-        List<String> lines = new ArrayList<>();
-        String normalized = text.replace("\r\n", "\n").replace('\r', '\n');
-        String[] paragraphs = normalized.split("\n", -1);
+        if (client == null) return List.of(text);
+        String cacheKey = maxWidth + "\n" + text;
+        List<String> cached = wrapTextCache.get(cacheKey);
+        if (cached != null) return cached;
 
-        for (String paragraph : paragraphs) {
-            if (paragraph.isEmpty()) {
-                lines.add("");
-                continue;
-            }
-
-            StringBuilder line = new StringBuilder();
-            for (String word : paragraph.split(" ")) {
-                String candidate = line.isEmpty() ? word : line + " " + word;
-                if (client.textRenderer.getWidth(candidate) <= maxWidth) {
-                    line = new StringBuilder(candidate);
-                } else {
-                    if (!line.isEmpty()) {
-                        lines.add(line.toString());
-                        line = new StringBuilder();
-                    }
-                    if (client.textRenderer.getWidth(word) > maxWidth)
-                        lines.add(client.textRenderer.trimToWidth(word, maxWidth - 6) + "…");
-                    else
-                        line = new StringBuilder(word);
-                }
-            }
-            if (!line.isEmpty()) lines.add(line.toString());
-        }
-
-        return lines.isEmpty() ? List.of(text) : lines;
+        List<String> wrapped = ScreenUiUtil.wrapTextParagraphs(client.textRenderer, text, maxWidth);
+        List<String> snapshot = List.copyOf(wrapped);
+        if (wrapTextCache.size() >= 512) wrapTextCache.clear();
+        wrapTextCache.put(cacheKey, snapshot);
+        return snapshot;
     }
 
     private double getDouble(Field f) throws Exception {
@@ -2243,11 +1943,6 @@ public class IQConfigScreen extends Screen {
                 .collect(Collectors.joining(" "));
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //  Animation helpers
-    // ═══════════════════════════════════════════════════════════════════════════════════════
-
-    /** Applies momentum-based scroll each frame. */
     private void updateScrollAnimation() {
         if (!sharedAnimationsEnabled) {
             if (scrollVelocity != 0) {
@@ -2299,33 +1994,20 @@ public class IQConfigScreen extends Screen {
         return 1f - (u * u * u);
     }
 
-    /** Stable key based on field path, used for animation maps. */
     private String entryKey(ConfigEntryModel e) {
         if (e.getField() != null)
             return e.getField().getDeclaringClass().getName() + "#" + e.getField().getName();
         return "lbl#" + e.getLabel();
     }
 
-    /** Key for section headers (no field). */
     private String sectionKey(ConfigEntryModel e) {
         return "sec#" + e.getLabel();
     }
 
-    /**
-     * Linearly interpolates between two ARGB colours.
-     * {@code t=0} -> c0, {@code t=1} -> c1.
-     */
     private int lerpArgb(int c0, int c1, float t) {
-        t = Math.max(0f, Math.min(1f, t));
-        int a0 = (c0 >> 24) & 0xFF, r0 = (c0 >> 16) & 0xFF, g0 = (c0 >> 8) & 0xFF, b0 = c0 & 0xFF;
-        int a1 = (c1 >> 24) & 0xFF, r1 = (c1 >> 16) & 0xFF, g1 = (c1 >> 8) & 0xFF, b1 = c1 & 0xFF;
-        return ((int) (a0 + (a1 - a0) * t) << 24)
-             | ((int) (r0 + (r1 - r0) * t) << 16)
-             | ((int) (g0 + (g1 - g0) * t) << 8)
-             | (int) (b0 + (b1 - b0) * t);
+        return ScreenUiUtil.lerpArgb(c0, c1, t);
     }
 
-    // Draws a 1px smooth gradient line: dim → bright at 50% → dim.
     private void drawSeparatorGradientLine(DrawContext ctx, int x0, int x1, int y, boolean reverse,
                                            int dimColor, int brightColor) {
         if (x1 <= x0) return;
@@ -2363,22 +2045,7 @@ public class IQConfigScreen extends Screen {
     }
 
     private void drawRoundedRect(DrawContext ctx, int x, int y, int w, int h, int color, int radius) {
-        if (w <= 0 || h <= 0) return;
-        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
-        if (r == 0) {
-            ctx.fill(x, y, x + w, y + h, color);
-            return;
-        }
-
-        ctx.fill(x + r, y, x + w - r, y + h, color);
-        ctx.fill(x, y + r, x + w, y + h - r, color);
-
-        // Use circular corner insets to avoid faceted/hexagonal corners.
-        for (int i = 0; i < r; i++) {
-            int inset = cornerInset(i, r);
-            ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, color);
-            ctx.fill(x + inset, y + h - i - 1, x + w - inset, y + h - i, color);
-        }
+        ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
     }
 
     private void drawRoundedHollowRect(DrawContext ctx, int x, int y, int w, int h, int color) {
@@ -2386,30 +2053,7 @@ public class IQConfigScreen extends Screen {
     }
 
     private void drawRoundedHollowRect(DrawContext ctx, int x, int y, int w, int h, int color, int radius) {
-        if (w <= 1 || h <= 1) return;
-        if (radius <= 0) {
-            drawHollowRect(ctx, x, y, w, h, color);
-            return;
-        }
-
-        int r = Math.min(radius, Math.min(w, h) / 2);
-
-        for (int i = 0; i < r; i++) {
-            int inset = cornerInset(i, r);
-            // top / bottom arcs
-            ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, color);
-            ctx.fill(x + inset, y + h - i - 1, x + w - inset, y + h - i, color);
-        }
-
-        // straight sides between rounded arcs
-        ctx.fill(x, y + r, x + 1, y + h - r, color);
-        ctx.fill(x + w - 1, y + r, x + w, y + h - r, color);
-    }
-
-    private int cornerInset(int row, int radius) {
-        double dy = radius - row - 0.5;
-        double dx = Math.sqrt(Math.max(0.0, (radius * (double) radius) - (dy * dy)));
-        return Math.max(0, (int) Math.ceil(radius - dx));
+        ScreenUiUtil.drawRoundedHollowRect(ctx, x, y, w, h, color, radius);
     }
 
     private int getHeaderActionButtonsStartX(int headerX, int headerW) {
@@ -2437,7 +2081,7 @@ public class IQConfigScreen extends Screen {
         int previewW = Math.max(60, Math.min(80, modalW - 128));
         int previewX = modalX + (modalW - previewW) / 2;
         int previewY = modalY + 26;
-        int svSize = Math.max(96, Math.min(118, modalW - 40));
+        int svSize = 118;
         int svX = modalX + (modalW - svSize) / 2;
         int svY = previewY + 30;
         int trackX = modalX + 18;
@@ -2518,33 +2162,29 @@ public class IQConfigScreen extends Screen {
         ctx.fill(x, y + size / 2, x + size, y + size, bottom);
         ctx.fill(x + 1, y + 1, x + size - 1, y + size - 1, body);
 
-        // Subtle bevel for a cleaner "closed" pixel look.
         ctx.fill(x + 1, y + 1, x + size - 1, y + 2, 0x42FFFFFF);
         ctx.fill(x + 1, y + size - 2, x + size - 1, y + size - 1, 0x3A000000);
         drawHollowRect(ctx, x, y, size, size, border);
     }
 
     private void drawHollowRect(DrawContext ctx, int x, int y, int w, int h, int color) {
-        ctx.fill(x, y, x + w, y + 1, color);
-        ctx.fill(x, y + h - 1, x + w, y + h, color);
-        ctx.fill(x, y, x + 1, y + h, color);
-        ctx.fill(x + w - 1, y, x + w, y + h, color);
+        ScreenUiUtil.drawHollowRect(ctx, x, y, w, h, color);
     }
 
     private boolean isIn(int mx, int my, int x, int y, int w, int h) {
-        return mx >= x && mx < x + w && my >= y && my < y + h;
+        return ScreenUiUtil.isIn(mx, my, x, y, w, h);
     }
 
     private static double clamp01(double v) {
-        return Math.min(1.0, Math.max(0.0, v));
+        return ScreenUiUtil.clamp01(v);
     }
 
     private static double clamp(double v, double lo, double hi) {
-        return Math.min(hi, Math.max(lo, v));
+        return ScreenUiUtil.clamp(v, lo, hi);
     }
 
     private static int withAlpha(int color, int alpha) {
-        return (color & 0x00FFFFFF) | ((alpha & 0xFF) << 24);
+        return ScreenUiUtil.withAlpha(color, alpha);
     }
 
     @Override
@@ -2582,6 +2222,45 @@ public class IQConfigScreen extends Screen {
         }
         store.set(K_LAST_SCROLL, Math.max(0, scrollOffset));
         store.set(K_LAST_SEARCH, searchQuery.toString());
+        store.set(K_EXPANDED_SECTIONS, collectExpandedSectionLabels());
+        store.set(K_UI_STATE_TIMESTAMP, (double) System.currentTimeMillis());
+    }
+
+    private String collectExpandedSectionLabels() {
+        List<String> expanded = new ArrayList<>();
+        for (ConfigCategory cat : categories) {
+            collectExpandedFromEntries(cat.entries(), expanded);
+        }
+        return String.join(",", expanded);
+    }
+
+    private void collectExpandedFromEntries(List<ConfigEntryModel> entries, List<String> out) {
+        for (ConfigEntryModel e : entries) {
+            if (e.getType() == EntryType.SECTION_HEADER) {
+                if (e.isExpanded()) out.add(e.getLabel());
+                if (e.getChildren() != null) collectExpandedFromEntries(e.getChildren(), out);
+            }
+        }
+    }
+
+    private void applyExpandedState(List<ConfigEntryModel> entries, java.util.Set<String> expandedLabels) {
+        for (ConfigEntryModel e : entries) {
+            if (e.getType() == EntryType.SECTION_HEADER) {
+                if (expandedLabels.contains(e.getLabel()) && !e.isExpanded()) {
+                    e.toggleExpanded();
+                }
+                if (e.getChildren() != null) applyExpandedState(e.getChildren(), expandedLabels);
+            }
+        }
+    }
+
+    private void preseedSectionAnims(List<ConfigEntryModel> entries) {
+        for (ConfigEntryModel e : entries) {
+            if (e.getType() == EntryType.SECTION_HEADER) {
+                sectionAnims.put(sectionKey(e), e.isExpanded() ? 1f : 0f);
+                if (e.getChildren() != null) preseedSectionAnims(e.getChildren());
+            }
+        }
     }
 
     private record RenderedEntry(ConfigEntryModel entry, int x, int y, int w, int h) {
