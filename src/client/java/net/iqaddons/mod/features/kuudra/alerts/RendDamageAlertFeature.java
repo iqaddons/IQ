@@ -17,6 +17,7 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private static final float DAMAGE_MULTIPLIER = 9600f;
     private static final float BOSS_HEALTH_CAP = 25_000f;
     private static final double IGNORE_Y_THRESHOLD = 30.0;
+    private static final double MIN_TRACKING_SECONDS = 1.2;
 
     private volatile float lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
     private volatile boolean finalCheckProcessed;
@@ -51,6 +52,11 @@ public class RendDamageAlertFeature extends KuudraFeature {
         if (mc.player == null) return;
         if (!forceBossDead && mc.player.getY() > IGNORE_Y_THRESHOLD) return;
 
+        double timeSeconds = fixedTimeSeconds != null
+                ? fixedTimeSeconds
+                : getBossPhaseSeconds();
+        if (timeSeconds < MIN_TRACKING_SECONDS) return;
+
         var bossInfo = currentContext().bossInfo();
         float currentHealth = forceBossDead ? 0f : (bossInfo.isAlive() ? bossInfo.currentHealth() : 0f);
         if (currentHealth > BOSS_HEALTH_CAP) return;
@@ -58,11 +64,6 @@ public class RendDamageAlertFeature extends KuudraFeature {
         float diff = Math.max(0f, lastKuudraHealth - currentHealth);
         if (diff > MIN_REND_DAMAGE) {
             float scaledDamage = diff * DAMAGE_MULTIPLIER;
-            double timeSeconds = fixedTimeSeconds != null
-                    ? fixedTimeSeconds
-                    : stateManager.getPhaseDuration(KuudraPhase.BOSS)
-                    .map(d -> d.toMillis() / 1000.0)
-                    .orElseGet(() -> currentContext().phaseDuration().toMillis() / 1000.0);
             MessageUtil.INFO.sendMessage("§fSomeone pulled for %s%s §fdamage at §a%.2fs§f."
                     .formatted(getDamageColor(diff), formatDamage(scaledDamage), timeSeconds)
             );
@@ -97,12 +98,16 @@ public class RendDamageAlertFeature extends KuudraFeature {
         float currentHealth = bossInfo.currentHealth();
         if (currentHealth > BOSS_HEALTH_CAP) return;
 
+        double timeSeconds = getBossPhaseSeconds();
+        if (timeSeconds < MIN_TRACKING_SECONDS) {
+            // Keep baseline synced until tracking window opens to avoid inflated first diff.
+            lastKuudraHealth = currentHealth;
+            return;
+        }
+
         float diff = Math.max(0f, lastKuudraHealth - currentHealth);
         if (diff > MIN_REND_DAMAGE) {
             float scaledDamage = diff * DAMAGE_MULTIPLIER;
-            double timeSeconds = stateManager.getPhaseDuration(KuudraPhase.BOSS)
-                    .map(d -> d.toMillis() / 1000.0)
-                    .orElseGet(() -> currentContext().phaseDuration().toMillis() / 1000.0);
             MessageUtil.INFO.sendMessage("§fSomeone pulled for %s%s §fdamage at §a%.2fs§f."
                     .formatted(getDamageColor(diff), formatDamage(scaledDamage), timeSeconds)
             );
@@ -116,6 +121,12 @@ public class RendDamageAlertFeature extends KuudraFeature {
     private void resetState() {
         lastKuudraHealth = BOSS_HEALTH_CAP - 1f;
         finalCheckProcessed = false;
+    }
+
+    private double getBossPhaseSeconds() {
+        return stateManager.getPhaseDuration(KuudraPhase.BOSS)
+                .map(d -> d.toMillis() / 1000.0)
+                .orElseGet(() -> currentContext().phaseDuration().toMillis() / 1000.0);
     }
 
     private @NotNull String formatDamage(float number) {
