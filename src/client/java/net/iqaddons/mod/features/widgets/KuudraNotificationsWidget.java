@@ -18,7 +18,7 @@ public class KuudraNotificationsWidget extends HudWidget {
 
     private static final int FADE_IN_TICKS = 4;
     private static final int FADE_OUT_TICKS = 4;
-    private static final String MIN_REFERENCE_TEXT = "NOTIFICATIONS";
+    private static final String MIN_REFERENCE_TEXT = "§l§lNOTIFICATIONS";
 
     private int displayTicksRemaining = 0;
     private int fadeTicksRemaining = 0;
@@ -44,7 +44,7 @@ public class KuudraNotificationsWidget extends HudWidget {
                 ScoreboardUtils.isInArea(IQConstants.KUUDRA_AREA_ID)
         );
 
-        setExampleLines(HudLine.of("§eNotifications"));
+        setExampleLines(HudLine.of("§e§lNOTIFICATIONS"));
     }
 
     @Override

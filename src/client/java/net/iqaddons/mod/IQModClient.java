@@ -1,6 +1,7 @@
 package net.iqaddons.mod;
 
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator;
+import com.teamresourceful.resourcefulconfig.api.annotations.Config;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
@@ -28,10 +29,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,7 +51,6 @@ public class IQModClient implements ClientModInitializer {
             "(?ms)^(\\s*)\"hideUselessArmorStands\"\\s*:\\s*\\[(.*?)\\]\\s*,\\s*$"
     );
     private static final String SPLIT_COLOR_MIGRATION_MARKER_RELATIVE_PATH = "iq/migrations/splits-dark-aqua-v1.marker";
-    private static final String DEFAULT_MAIN_CONFIG_RESOURCE = "/default-config/iqaddons.jsonc";
     private static IQModClient instance;
 
     public static MinecraftClient mc = MinecraftClient.getInstance();
@@ -53,15 +59,17 @@ public class IQModClient implements ClientModInitializer {
     private @Nullable FeatureManager featureManager;
 
     private final List<LifecycleComponent> components = new ArrayList<>();
+    private final Map<Field, Object> mainConfigDefaults = new LinkedHashMap<>();
 
     @Override
     public void onInitializeClient() {
         instance = this;
 
-        ensureDefaultMainConfigExists();
         migrateLegacyHideUselessArmorStandsConfig();
         migrateSplitColorsToDarkAquaOnFirstLaunch();
-        migrateLegacyKuudraNotificationsConfig();
+
+        // Snapshot class-declared defaults before any config file is loaded/applied.
+        captureMainConfigDefaults();
 
         configurator = new Configurator(MOD_ID);
         configurator.register(Configuration.class);
@@ -161,69 +169,6 @@ public class IQModClient implements ClientModInitializer {
         }
     }
 
-    private void ensureDefaultMainConfigExists() {
-        try {
-            Path configFile = FabricLoader.getInstance().getConfigDir().resolve("iqaddons.jsonc");
-            if (Files.exists(configFile)) {
-                return;
-            }
-
-            try (var is = getClass().getResourceAsStream(DEFAULT_MAIN_CONFIG_RESOURCE)) {
-                if (is == null) {
-                    return;
-                }
-                Files.createDirectories(configFile.getParent());
-                Files.copy(is, configFile);
-                log.info("Created default iqaddons.jsonc from bundled template");
-            }
-        } catch (Exception e) {
-            log.warn("Failed to create default iqaddons.jsonc from bundled template", e);
-        }
-    }
-
-    private void migrateLegacyKuudraNotificationsConfig() {
-        try {
-            Path configFile = FabricLoader.getInstance().getConfigDir().resolve("iqaddons.jsonc");
-            if (!Files.exists(configFile)) {
-                return;
-            }
-
-            String content = Files.readString(configFile, StandardCharsets.UTF_8);
-            if (content.contains("\"kuudraNotificationsConfig\"")) {
-                return;
-            }
-
-            Pattern legacyPattern = Pattern.compile(
-                    "(?ms)^(\\s*)\\\"kuudraNotifications\\\"\\s*:\\s*(\\{.*?^\\1\\})\\s*,\\s*\\R"
-                            + "\\1\\\"kuudraNotificationsSound\\\"\\s*:\\s*(true|false)\\s*,\\s*\\R"
-                            + "\\1\\\"abilityAnnounce\\\"\\s*:\\s*(\\{.*?^\\1\\})\\s*,"
-            );
-
-            Matcher matcher = legacyPattern.matcher(content);
-            if (!matcher.find()) {
-                return;
-            }
-
-            String indent = matcher.group(1);
-            String notificationToggles = matcher.group(2);
-            String notificationSound = matcher.group(3);
-            String abilityAnnounce = matcher.group(4);
-
-            String replacement = indent + "\"kuudraNotificationsEnabled\": true,\n"
-                    + indent + "\"kuudraNotificationsConfig\": {\n"
-                    + indent + "    \"kuudraNotificationsSound\": " + notificationSound + ",\n"
-                    + indent + "    \"kuudraNotifications\": " + notificationToggles + ",\n"
-                    + indent + "    \"abilityAnnounce\": " + abilityAnnounce + "\n"
-                    + indent + "},";
-
-            String migrated = matcher.replaceFirst(Matcher.quoteReplacement(replacement));
-            Files.writeString(configFile, migrated, StandardCharsets.UTF_8);
-            log.info("Migrated legacy Kuudra notifications config keys: kuudraNotifications, kuudraNotificationsSound, abilityAnnounce");
-        } catch (Exception e) {
-            log.warn("Failed to migrate legacy Kuudra notifications config", e);
-        }
-    }
-
     private @Nullable String replaceSplitColorConfig(@NotNull String content) {
         int keyIndex = content.indexOf("\"splitColorConfig\"");
         if (keyIndex < 0) {
@@ -294,6 +239,100 @@ public class IQModClient implements ClientModInitializer {
         }
 
         return -1;
+    }
+
+    /**
+     * Resets the main ResourcefulConfig file to class defaults and applies it immediately.
+     *
+     * <p>This deletes both legacy and current file names, recreates the configurator,
+     * re-registers {@link Configuration}, and saves right away so the file exists instantly.
+     */
+    public synchronized void resetMainConfigToDefaults() {
+        Path configDir = FabricLoader.getInstance().getConfigDir();
+        Path jsonc = configDir.resolve("iqaddons.jsonc");
+        Path json = configDir.resolve("iqaddons.json");
+
+        restoreMainConfigDefaultsInMemory();
+
+        try {
+            Files.deleteIfExists(jsonc);
+            Files.deleteIfExists(json);
+        } catch (Exception e) {
+            log.warn("Failed to delete existing IQ main config file before reset", e);
+        }
+
+        Configurator next = new Configurator(MOD_ID);
+        next.register(Configuration.class);
+        try {
+            next.saveConfig(Configuration.class);
+        } catch (Exception e) {
+            log.warn("Failed to persist regenerated default IQ config file", e);
+        }
+        this.configurator = next;
+    }
+
+    private synchronized void captureMainConfigDefaults() {
+        if (!mainConfigDefaults.isEmpty()) return;
+        captureConfigClassDefaults(Configuration.class);
+
+        Config configAnn = Configuration.class.getAnnotation(Config.class);
+        if (configAnn != null) {
+            for (Class<?> category : configAnn.categories()) {
+                captureConfigClassDefaults(category);
+            }
+        }
+    }
+
+    private void captureConfigClassDefaults(@NotNull Class<?> type) {
+        for (Field field : type.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+                continue;
+            }
+            try {
+                field.setAccessible(true);
+                Object value = field.get(null);
+                mainConfigDefaults.put(field, cloneConfigValue(value));
+            } catch (Exception e) {
+                log.warn("Failed to snapshot default for {}.{}", type.getSimpleName(), field.getName(), e);
+            }
+        }
+
+        for (Class<?> nested : type.getDeclaredClasses()) {
+            captureConfigClassDefaults(nested);
+        }
+    }
+
+    private synchronized void restoreMainConfigDefaultsInMemory() {
+        if (mainConfigDefaults.isEmpty()) {
+            captureMainConfigDefaults();
+        }
+        for (Map.Entry<Field, Object> entry : mainConfigDefaults.entrySet()) {
+            try {
+                entry.getKey().set(null, cloneConfigValue(entry.getValue()));
+            } catch (Exception e) {
+                log.warn("Failed to restore default for {}", entry.getKey().getName(), e);
+            }
+        }
+    }
+
+    private @Nullable Object cloneConfigValue(@Nullable Object value) {
+        if (value == null) return null;
+        if (value instanceof List<?> list) return new ArrayList<>(list);
+        if (value instanceof Map<?, ?> map) return new HashMap<>(map);
+        if (value instanceof java.util.Set<?> set) return new HashSet<>(set);
+        if (value.getClass().isArray()) {
+            if (value instanceof Object[] arr) return arr.clone();
+            if (value instanceof int[] arr) return arr.clone();
+            if (value instanceof long[] arr) return arr.clone();
+            if (value instanceof float[] arr) return arr.clone();
+            if (value instanceof double[] arr) return arr.clone();
+            if (value instanceof boolean[] arr) return arr.clone();
+            if (value instanceof byte[] arr) return arr.clone();
+            if (value instanceof short[] arr) return arr.clone();
+            if (value instanceof char[] arr) return arr.clone();
+        }
+        // Primitive wrappers, enums, strings and most config scalars are immutable.
+        return value;
     }
 
     private void registerCommands() {

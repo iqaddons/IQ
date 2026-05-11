@@ -23,7 +23,6 @@ public class ConfigEntryModel {
         DOUBLE_SLIDER,
         COLOR,
         SELECT,
-        STRING,
         BUTTON,
         SEPARATOR,
         SECTION_HEADER,

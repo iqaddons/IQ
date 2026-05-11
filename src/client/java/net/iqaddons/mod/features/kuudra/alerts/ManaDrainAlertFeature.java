@@ -24,7 +24,7 @@ public class ManaDrainAlertFeature extends KuudraFeature {
         super(
                 "abilityAnnounceManaDrain",
                 "Ability Announce: Mana Drain",
-                () -> KuudraGeneralConfig.KuudraNotifications.AbilityAnnounce.manaDrain,
+                () -> KuudraGeneralConfig.AbilityAnnounce.manaDrain,
                 KuudraPhase.RUN_PHASES
         );
     }

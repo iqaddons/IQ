@@ -30,5 +30,4 @@ public final class IQConstants {
     public static final String ELLE_NOT_AGAIN_MESSAGE = "[NPC] Elle: Not again!";
 
     public static final Identifier IQ_FONT_IDENTIFIER = Identifier.of("iq", "default");
-    public static final Identifier LUCKY_BUILD_SOUND = Identifier.of("iq", "lucky_build");
 }
