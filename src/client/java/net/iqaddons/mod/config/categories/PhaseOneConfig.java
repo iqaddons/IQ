@@ -152,7 +152,7 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "cratePriorityColor", translation = "Crate Priority Title Color")
         @ConfigOption.Select
         @Comment("Choose the text color used by the Crate Priority title widget.")
-        public static TextColor cratePriorityColor = TextColor.GOLD;
+        public static TextColor cratePriorityColor = TextColor.GREEN;
 
         @ConfigEntry(id = "cratePriorityDurationSeconds", translation = "Crate Priority Duration")
         @ConfigOption.Range(min = 1, max = 10)
@@ -179,7 +179,7 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "supplyWaypointColor", translation = "Supply Waypoint Color")
         @ConfigOption.Color(alpha = true)
         @Comment("Change the color of supply waypoints.")
-        public static int supplyWaypointColor = new Color(21, 142, 46, 60).getRGB();
+        public static int supplyWaypointColor = new Color(0, 255, 255, 40).getRGB();
 
         @ConfigEntry(id = "supplyWaypointStyle", translation = "Supply Hitbox Style")
         @ConfigOption.Select
