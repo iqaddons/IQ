@@ -54,7 +54,7 @@ public class PhaseFourConfig {
     )
     @ConfigOption.Range(min = 0, max = 6)
     @ConfigOption.Slider
-    @Comment("Trigger the Backbone Rend earlier by this many ticks.")
+    @Comment("Trigger the Backbone Rend earlier by this many ticks. (Recommended = 2)")
     public static int backboneAlertAdvanceTicks = 2;
 
     @ConfigEntry(
@@ -76,6 +76,6 @@ public class PhaseFourConfig {
             translation = "Kuudra Distance Display"
     )
     @Comment("Show your distance from Kuudra inside the Magma Cube.")
-    public static boolean kuudraDistanceDisplay = true;
+    public static boolean kuudraDistanceDisplay = false;
 
 }

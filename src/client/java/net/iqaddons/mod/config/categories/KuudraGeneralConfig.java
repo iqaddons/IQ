@@ -204,14 +204,14 @@ public class KuudraGeneralConfig {
                 translation = "Build Started Notification"
         )
         @Comment("Show an alert when Elle asks to build the Ballista.")
-        public static boolean buildStarted = true;
+        public static boolean buildStarted = false;
 
         @ConfigEntry(
                 id = "kuudraNotificationIchorUsed",
                 translation = "Ichor Used Notification"
         )
         @Comment("Show an alert when Ichor Pool is cast.")
-        public static boolean ichorUsed = true;
+        public static boolean ichorUsed = false;
 
         @ConfigEntry(
                 id = "kuudraNotificationNoPre",
@@ -232,14 +232,14 @@ public class KuudraGeneralConfig {
                 translation = "Phase Change Notification"
         )
         @Comment("Show an alert when the Kuudra phase changes.")
-        public static boolean phaseChange = true;
+        public static boolean phaseChange = false;
 
         @ConfigEntry(
                 id = "kuudraNotificationBuildDone",
                 translation = "Build Done Notification"
         )
         @Comment("Show an alert when the Ballista is fully built.")
-        public static boolean buildDone = true;
+        public static boolean buildDone = false;
 
         @ConfigEntry(
                 id = "kuudraNotificationSuppliesDone",
@@ -419,8 +419,8 @@ public class KuudraGeneralConfig {
         public static boolean shop = true;
 
         @ConfigEntry(id = "others", translation = "Other Areas")
-        @Comment("Hide other armour stands like bonemerangs, fireballs, etc.")
-        public static boolean others = true;
+        @Comment("Hide other armour stands like bonemerangs, pets, etc.")
+        public static boolean others = false;
 
         public static boolean anyEnabled() {
             return build || rightCannon || leftCannon || shop || others;
@@ -447,13 +447,13 @@ public class KuudraGeneralConfig {
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
         @Comment("Preset best-possible Build split used in Pace calculation.")
-        public static double build = 12;
+        public static double build = 12.5;
 
         @ConfigEntry(id = "eaten", translation = "Eaten Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
         @Comment("Preset best-possible Eaten split used in Pace calculation.")
-        public static double eaten = 4.125;
+        public static double eaten = 4.4;
 
         @ConfigEntry(id = "stun", translation = "Stun Benchmark")
         @ConfigOption.Range(min = 0, max = 60)
@@ -477,7 +477,7 @@ public class KuudraGeneralConfig {
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
         @Comment("Preset best-possible Boss split used in Pace calculation.")
-        public static double boss = 1.875;
+        public static double boss = 2.0;
     }
 
     @ConfigEntry(
@@ -485,7 +485,7 @@ public class KuudraGeneralConfig {
             translation = "Hide Kuudra Boss Bar"
     )
     @Comment("Hide Kuudra's vanilla boss bar during runs.")
-    public static boolean hideKuudraBossBar = true;
+    public static boolean hideKuudraBossBar = false;
 
     @ConfigObject
     public static class ProfitTrackerConfig {

@@ -11,12 +11,7 @@ import java.awt.*;
 )
 public class PhaseTwoConfig {
 
-    @ConfigEntry(
-            id = "luckyBuild",
-            translation = "Lucky Build Things"
-    )
-    @Comment("Give you some extra luck during the build phase ❤")
-    public static boolean luckyBuild = true;
+    @ConfigOption.Separator("Build Widgets")
 
     @ConfigEntry(
             id = "freshTimers",
@@ -45,7 +40,7 @@ public class PhaseTwoConfig {
             translation = "Build Progress Style"
     )
     @Comment("Choose the build progress overlay style: ")
-    public static boolean simpleBuildProgressOverlay = false;
+    public static boolean simpleBuildProgressOverlay = true;
 
     @ConfigEntry(
             id = "buildStartCountdownOverlay",
@@ -77,7 +72,7 @@ public class PhaseTwoConfig {
     @ConfigOption.Range(min = 0, max = 1)
     @ConfigOption.Slider
     @Comment("Change the opacity of the build helper holograms.")
-    public static float buildHelperOpacity = 0.5f;
+    public static float buildHelperOpacity = 0.3f;
 
     @ConfigEntry(
             id = "hideDefaultBuildPileText",
@@ -139,14 +134,14 @@ public class PhaseTwoConfig {
             translation = "Clean Ballista Build Sounds"
     )
     @Comment("Disable most of sounds during build for a cleaner audio experience.")
-    public static boolean cleanBallistaSounds = true;
+    public static boolean cleanBallistaSounds = false;
 
     @ConfigEntry(
             id = "replaceBallistaBuildSound",
             translation = "Replace Ballista Build Sound"
     )
     @Comment("Replace the default ballista build sound while in build phase.")
-    public static boolean replaceBallistaBuildSound = true;
+    public static boolean replaceBallistaBuildSound = false;
 
     @ConfigObject
     public static class ElleConfig {
