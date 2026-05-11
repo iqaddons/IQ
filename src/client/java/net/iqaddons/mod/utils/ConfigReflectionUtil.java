@@ -117,13 +117,6 @@ public class ConfigReflectionUtil {
                     .field(field).enumValues(type.getEnumConstants()).build();
         }
 
-        // String input
-        if (type == String.class) {
-            return ConfigEntryModel.builder()
-                    .type(EntryType.STRING).label(label).description(description)
-                    .field(field).build();
-        }
-
         // Numeric slider
         if (field.isAnnotationPresent(ConfigOption.Slider.class)) {
             ConfigOption.Range range = field.getAnnotation(ConfigOption.Range.class);

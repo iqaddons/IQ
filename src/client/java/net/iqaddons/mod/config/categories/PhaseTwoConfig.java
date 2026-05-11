@@ -10,7 +10,14 @@ import java.awt.*;
         value = "Phase 2 - Build"
 )
 public class PhaseTwoConfig {
-    @ConfigOption.Separator("Build Widgets")
+
+    @ConfigEntry(
+            id = "luckyBuild",
+            translation = "Lucky Build Things"
+    )
+    @Comment("Give you some extra luck during the build phase ❤")
+    public static boolean luckyBuild = true;
+
     @ConfigEntry(
             id = "freshTimers",
             translation = "Fresh Times"
@@ -140,14 +147,6 @@ public class PhaseTwoConfig {
     )
     @Comment("Replace the default ballista build sound while in build phase.")
     public static boolean replaceBallistaBuildSound = true;
-
-    @ConfigOption.Separator("SPECIAL")
-    @ConfigEntry(
-            id = "luckyBuild",
-            translation = "Lucky Build"
-    )
-    @Comment("Play Garota de Ipanema music during build for extra fresh luck (real).")
-    public static boolean luckyBuild = true;
 
     @ConfigObject
     public static class ElleConfig {

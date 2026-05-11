@@ -18,7 +18,7 @@ public class KuudraNotificationsWidget extends HudWidget {
 
     private static final int FADE_IN_TICKS = 4;
     private static final int FADE_OUT_TICKS = 4;
-    private static final String MIN_REFERENCE_TEXT = "NOTIFICATIONS";
+    private static final String MIN_REFERENCE_TEXT = "Notifications";
 
     private int displayTicksRemaining = 0;
     private int fadeTicksRemaining = 0;

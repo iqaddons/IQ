@@ -15,8 +15,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
         super(
                 "supplyDroppedTitle",
                 "Supply Dropped Title",
-                () -> KuudraGeneralConfig.kuudraNotifications
-                        && KuudraGeneralConfig.KuudraNotifications.NotificationToggles.supplyDropped,
+                () -> KuudraGeneralConfig.KuudraNotifications.supplyDropped,
                 KuudraPhase.SUPPLIES
         );
     }
@@ -30,13 +29,7 @@ public class SupplyDroppedAlertFeature extends KuudraFeature {
                 return;
             }
 
-            String bold = KuudraGeneralConfig.KuudraNotifications.bold ? "§l" : "";
-            String text = KuudraGeneralConfig.KuudraNotifications.NotificationStyles.supplyDroppedText;
-            if (text == null || text.isBlank()) text = "DROPPED";
-            String alertText = KuudraGeneralConfig.KuudraNotifications.NotificationStyles.supplyDroppedColor.code()
-                    + bold + text;
-            int duration = KuudraGeneralConfig.KuudraNotifications.NotificationStyles.supplyDroppedDuration;
-            MessageUtil.showAlert(alertText, duration, SoundEvents.BLOCK_ANVIL_LAND);
+            MessageUtil.showAlert("§cDropped", 15, SoundEvents.BLOCK_ANVIL_LAND);
         });
     }
 }

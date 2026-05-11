@@ -13,14 +13,11 @@ import net.iqaddons.mod.utils.BuildProgressOverlayUtil;
 import net.iqaddons.mod.utils.CountdownLagCompensationUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BuildProgressWidget extends HudWidget {
 
     private static final long CLIENT_TICK_INTERVAL_MS = 50L;
-    private static final long FRESH_DEDUP_WINDOW_MS = 1200L;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();
 
@@ -34,7 +31,6 @@ public class BuildProgressWidget extends HudWidget {
     private int freshCount = 0;
     private long countdownEndMillis = -1L;
     private long lastCountdownTickMillis = -1L;
-    private final Map<Integer, Long> lastFreshByPlayer = new HashMap<>();
 
     public BuildProgressWidget() {
         super(
@@ -74,7 +70,6 @@ public class BuildProgressWidget extends HudWidget {
         freshCount = 0;
         countdownEndMillis = -1L;
         lastCountdownTickMillis = -1L;
-        lastFreshByPlayer.clear();
 
         clearLines();
         addLines(titleLine, progressLine, buildersLine, freshLine);
@@ -93,7 +88,6 @@ public class BuildProgressWidget extends HudWidget {
         freshCount = 0;
         countdownEndMillis = -1L;
         lastCountdownTickMillis = -1L;
-        lastFreshByPlayer.clear();
         updateDisplay();
     }
 
@@ -138,11 +132,6 @@ public class BuildProgressWidget extends HudWidget {
 
     private void onPlayerFresh(@NotNull PlayerFreshEvent event) {
         if (stateManager.phase() != KuudraPhase.BUILD) return;
-
-        long previousFreshAt = lastFreshByPlayer.getOrDefault(event.playerEntityId(), -1L);
-        if (previousFreshAt > 0L && (event.freshAt() - previousFreshAt) <= FRESH_DEDUP_WINDOW_MS) return;
-
-        lastFreshByPlayer.put(event.playerEntityId(), event.freshAt());
 
         freshCount++;
         updateDisplay();

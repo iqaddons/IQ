@@ -162,8 +162,6 @@ public class IQConfigScreen extends Screen {
     private static final int CONTROL_MAX_W = 116;
     private static final int SELECT_W = 72;
     private static final int BUTTON_W = 51;
-    private static final int TEXT_INPUT_W = 116;
-    private static final int TEXT_INPUT_MAX_LEN = 64;
     private static final int SWATCH_W = 36;
     private static final int SWATCH_H = 16;
     private static final int SEARCH_H      = 18;
@@ -201,11 +199,6 @@ public class IQConfigScreen extends Screen {
     private static final DataKey<String> K_LAST_CATEGORY_ID = DataKey.of("iqconfig.lastCategoryId", String.class);
     private static final DataKey<Double> K_LAST_SCROLL = DataKey.of("iqconfig.lastScroll", Double.class);
     private static final DataKey<String> K_LAST_SEARCH = DataKey.of("iqconfig.lastSearch", String.class);
-    private static final DataKey<String> K_LAST_EXPANDED = DataKey.of("iqconfig.expandedSections", String.class);
-    private static final DataKey<Long> K_LAST_CLOSE_TIME = DataKey.of("iqconfig.lastCloseTime", Long.class);
-
-    /** Session timeout: UI state is discarded if the screen has been closed for more than this many ms. */
-    private static final long SESSION_TIMEOUT_MS = 3L * 60L * 1_000L;
 
     // ═══════════════════════════════════════════════════════════════════════
     //  State
@@ -236,8 +229,6 @@ public class IQConfigScreen extends Screen {
 
     // Color editor
     private @Nullable ConfigEntryModel editingColor;
-    private @Nullable ConfigEntryModel editingTextEntry;
-    private final StringBuilder editingTextBuffer = new StringBuilder();
     private double uiScale = 1.0;
 
     // Hit-test cache
@@ -334,14 +325,6 @@ public class IQConfigScreen extends Screen {
             if (cat != null) categories.add(cat);
         }
         boolean persistUiState = IQGlobalConfigurationScreen.isSharedUiStatePersistenceEnabled();
-        // Session expiry: discard saved state if the screen was last closed more than SESSION_TIMEOUT_MS ago.
-        if (persistUiState) {
-            long lastClose = store.getOrDefault(K_LAST_CLOSE_TIME, 0L);
-            long elapsed = System.currentTimeMillis() - lastClose;
-            if (elapsed > SESSION_TIMEOUT_MS) {
-                persistUiState = false; // treat as a fresh open — go to General at top
-            }
-        }
         if (initialCategoryId != null) {
             for (int i = 0; i < categories.size(); i++) {
                 if (categories.get(i).id().equals(initialCategoryId)) {
@@ -370,11 +353,6 @@ public class IQConfigScreen extends Screen {
             String savedSearch = store.getOrDefault(K_LAST_SEARCH, "");
             if (!savedSearch.isBlank()) {
                 searchQuery.append(savedSearch);
-            }
-            // Restore expanded/collapsed state of all section headers
-            String expandedEncoded = store.getOrDefault(K_LAST_EXPANDED, "");
-            if (!expandedEncoded.isBlank()) {
-                restoreExpandedSections(expandedEncoded);
             }
         }
         catPillY = -1f;
@@ -646,7 +624,7 @@ public class IQConfigScreen extends Screen {
             lastGroup = group;
         }
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8MODRINTH VERSION v1.0.2"),
+        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8SUPPORTER VERSION v1.0.3"),
                 gx + 10, gy + gh - client.textRenderer.fontHeight - 8, 0x22FFFFFF);
     }
 
@@ -991,7 +969,6 @@ public class IQConfigScreen extends Screen {
             }
             case INT_SLIDER, FLOAT_SLIDER, DOUBLE_SLIDER -> renderSlider(ctx, entry, re, cy);
             case SELECT -> renderSelect(ctx, entry, re, cy, hov);
-            case STRING -> renderStringInput(ctx, entry, re, cy, hov);
             case COLOR -> renderColorSwatch(ctx, entry, re, cy, hov);
             case BUTTON -> renderButton(ctx, entry, re, cy, hov);
         }
@@ -1144,38 +1121,6 @@ public class IQConfigScreen extends Screen {
         ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal(text),
                 bx + bw / 2, cy - client.textRenderer.fontHeight / 2,
                 hov ? themeActionTextHoverColor() : themeActionTextColor());
-    }
-
-    private void renderStringInput(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
-        int bw = TEXT_INPUT_W;
-        int bx = rx - bw, by = cy - CONTROL_H / 2;
-        boolean editingThis = editingTextEntry == e;
-        renderActionControl(ctx, bx, by, bw, hov || editingThis);
-
-        String raw;
-        if (editingThis) {
-            raw = editingTextBuffer.toString();
-        } else {
-            try {
-                Object value = e.getField().get(null);
-                raw = value instanceof String s ? s : "";
-            } catch (Exception ex) {
-                raw = "";
-            }
-        }
-
-        boolean blink = editingThis && (cursorTick / 10) % 2 == 0;
-        String content = raw.isEmpty() ? " " : raw;
-        String display = client.textRenderer.trimToWidth(content, bw - 12);
-        if (editingThis && blink) {
-            display = client.textRenderer.trimToWidth(display + "|", bw - 12);
-        }
-
-        ctx.drawTextWithShadow(client.textRenderer,
-                Text.literal(display),
-                bx + 6,
-                cy - client.textRenderer.fontHeight / 2,
-                hov || editingThis ? themeActionTextHoverColor() : themeActionTextColor());
     }
 
     private void renderActionControl(DrawContext ctx, int x, int y, int w, boolean hov) {
@@ -1489,9 +1434,6 @@ public class IQConfigScreen extends Screen {
                         log.warn("Button: {}", entry.getLabel(), e); }
                 }
             }
-            case STRING -> {
-                if (button == 0) startStringEdit(entry);
-            }
             case INT_SLIDER, FLOAT_SLIDER, DOUBLE_SLIDER -> {
                 if (button == 0) {
                     int sx = re2 - SLIDER_W;
@@ -1591,21 +1533,6 @@ public class IQConfigScreen extends Screen {
     @Override
     public boolean keyPressed(KeyInput input) {
         if (closingScreen) return true;
-        if (editingTextEntry != null) {
-            if (input.key() == 256) {
-                editingTextEntry = null;
-                return true;
-            }
-            if (input.key() == 257 || input.key() == 335) {
-                saveStringEdit();
-                return true;
-            }
-            if (input.key() == 259 && !editingTextBuffer.isEmpty()) {
-                editingTextBuffer.deleteCharAt(editingTextBuffer.length() - 1);
-                saveStringEdit();
-                return true;
-            }
-        }
         if (input.key() == 256) {  // ESC
             if (editingColor != null) {
                 editingColor = null;
@@ -1629,18 +1556,6 @@ public class IQConfigScreen extends Screen {
     @Override
     public boolean charTyped(CharInput input) {
         if (closingScreen) return true;
-        if (editingTextEntry != null) {
-            String s = input.asString();
-            if (!s.isEmpty() && editingTextBuffer.length() < TEXT_INPUT_MAX_LEN) {
-                char c = s.charAt(0);
-                if (c >= 32 && c != 127) {
-                    editingTextBuffer.append(c);
-                    saveStringEdit();
-                    return true;
-                }
-            }
-            return true;
-        }
         if (searchFocused) {
             searchQuery.append(input.asString());
             scrollOffset = 0;
@@ -1721,7 +1636,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = client.textRenderer.getWidth("IQ");
         int logoSubtitleW = client.textRenderer.getWidth("Config");
-        int footerW = client.textRenderer.getWidth("MODRINTH VERSION v1.0.2");
+        int footerW = client.textRenderer.getWidth("Supporter Version v1.0.3");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
@@ -2155,33 +2070,10 @@ public class IQConfigScreen extends Screen {
             case BOOLEAN -> isBuildOverlayStyleEntry(e) ? MODE_PICKER_W + 4 : TOGGLE_W + 4;
             case INT_SLIDER, FLOAT_SLIDER, DOUBLE_SLIDER -> SLIDER_W + 30;
             case SELECT -> selectControlWidth(e);
-            case STRING -> TEXT_INPUT_W + 4;
             case COLOR -> SWATCH_W + 4;
             case BUTTON -> buttonControlWidth(e);
             default -> 0;
         };
-    }
-
-    private void startStringEdit(ConfigEntryModel entry) {
-        editingTextEntry = entry;
-        editingTextBuffer.setLength(0);
-        try {
-            Object value = entry.getField().get(null);
-            if (value instanceof String text) {
-                editingTextBuffer.append(text);
-            }
-        } catch (Exception ex) {
-            log.warn("String edit start: {}", entry.getLabel(), ex);
-        }
-    }
-
-    private void saveStringEdit() {
-        if (editingTextEntry == null || editingTextEntry.getField() == null) return;
-        try {
-            editingTextEntry.getField().set(null, editingTextBuffer.toString());
-        } catch (Exception ex) {
-            log.warn("String edit save: {}", editingTextEntry.getLabel(), ex);
-        }
     }
 
     private int selectControlWidth(ConfigEntryModel e) {
@@ -2690,79 +2582,6 @@ public class IQConfigScreen extends Screen {
         }
         store.set(K_LAST_SCROLL, Math.max(0, scrollOffset));
         store.set(K_LAST_SEARCH, searchQuery.toString());
-        store.set(K_LAST_EXPANDED, buildExpandedSectionsString());
-        store.set(K_LAST_CLOSE_TIME, System.currentTimeMillis());
-    }
-
-    /**
-     * Encodes all currently-expanded SECTION_HEADER entries across every category as a single
-     * string.  Format: {@code categoryId~label1[~label2...];...} where {@code ~} separates path
-     * segments and {@code ;} separates individual entries.  Nested sections are stored with their
-     * full ancestor path so they can be restored independently of the parent's order.
-     */
-    private String buildExpandedSectionsString() {
-        StringBuilder sb = new StringBuilder();
-        for (ConfigCategory cat : categories) {
-            collectExpandedPaths(cat.id(), cat.entries(), new java.util.ArrayDeque<>(), sb);
-        }
-        return sb.toString();
-    }
-
-    private void collectExpandedPaths(String categoryId, List<ConfigEntryModel> entries,
-                                      java.util.Deque<String> parentPath, StringBuilder sb) {
-        for (ConfigEntryModel entry : entries) {
-            if (entry.getType() != EntryType.SECTION_HEADER) continue;
-            // Sanitise label — replace reserved chars so the format stays parseable.
-            String safeLabel = entry.getLabel().replace("~", " ").replace(";", " ");
-            parentPath.addLast(safeLabel);
-            if (entry.isExpanded()) {
-                if (sb.length() > 0) sb.append(';');
-                sb.append(categoryId).append('~');
-                sb.append(String.join("~", parentPath));
-            }
-            if (entry.getChildren() != null && !entry.getChildren().isEmpty()) {
-                collectExpandedPaths(categoryId, entry.getChildren(), parentPath, sb);
-            }
-            parentPath.removeLast();
-        }
-    }
-
-    /**
-     * Parses the string produced by {@link #buildExpandedSectionsString()} and sets the
-     * corresponding SECTION_HEADER entries to expanded.
-     */
-    private void restoreExpandedSections(String encoded) {
-        for (String part : encoded.split(";")) {
-            String trimmed = part.trim();
-            if (trimmed.isEmpty()) continue;
-            String[] segments = trimmed.split("~", -1);
-            if (segments.length < 2) continue;
-            String targetCategoryId = segments[0];
-            List<String> path = Arrays.asList(segments).subList(1, segments.length);
-            for (ConfigCategory cat : categories) {
-                if (cat.id().equals(targetCategoryId)) {
-                    setExpandedByPath(cat.entries(), path, 0);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void setExpandedByPath(List<ConfigEntryModel> entries, List<String> path, int depth) {
-        if (depth >= path.size()) return;
-        String label = path.get(depth);
-        for (ConfigEntryModel entry : entries) {
-            if (entry.getType() != EntryType.SECTION_HEADER) continue;
-            String safeLabel = entry.getLabel().replace("~", " ").replace(";", " ");
-            if (!safeLabel.equals(label)) continue;
-            if (depth == path.size() - 1) {
-                // This is the target — expand it if not already expanded.
-                if (!entry.isExpanded()) entry.toggleExpanded();
-            }
-            if (entry.getChildren() != null) {
-                setExpandedByPath(entry.getChildren(), path, depth + 1);
-            }
-        }
     }
 
     private record RenderedEntry(ConfigEntryModel entry, int x, int y, int w, int h) {

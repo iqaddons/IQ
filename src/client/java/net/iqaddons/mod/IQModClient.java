@@ -44,7 +44,6 @@ public class IQModClient implements ClientModInitializer {
             "(?ms)^(\\s*)\"hideUselessArmorStands\"\\s*:\\s*\\[(.*?)\\]\\s*,\\s*$"
     );
     private static final String SPLIT_COLOR_MIGRATION_MARKER_RELATIVE_PATH = "iq/migrations/splits-dark-aqua-v1.marker";
-    private static final String DEFAULT_MAIN_CONFIG_RESOURCE = "/default-config/iqaddons.jsonc";
     private static IQModClient instance;
 
     public static MinecraftClient mc = MinecraftClient.getInstance();
@@ -58,10 +57,8 @@ public class IQModClient implements ClientModInitializer {
     public void onInitializeClient() {
         instance = this;
 
-        ensureDefaultMainConfigExists();
         migrateLegacyHideUselessArmorStandsConfig();
         migrateSplitColorsToDarkAquaOnFirstLaunch();
-        migrateLegacyKuudraNotificationsConfig();
 
         configurator = new Configurator(MOD_ID);
         configurator.register(Configuration.class);
@@ -158,69 +155,6 @@ public class IQModClient implements ClientModInitializer {
             Files.writeString(markerFile, "applied", StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.warn("Failed to migrate Custom Splits colors to DARK_AQUA", e);
-        }
-    }
-
-    private void ensureDefaultMainConfigExists() {
-        try {
-            Path configFile = FabricLoader.getInstance().getConfigDir().resolve("iqaddons.jsonc");
-            if (Files.exists(configFile)) {
-                return;
-            }
-
-            try (var is = getClass().getResourceAsStream(DEFAULT_MAIN_CONFIG_RESOURCE)) {
-                if (is == null) {
-                    return;
-                }
-                Files.createDirectories(configFile.getParent());
-                Files.copy(is, configFile);
-                log.info("Created default iqaddons.jsonc from bundled template");
-            }
-        } catch (Exception e) {
-            log.warn("Failed to create default iqaddons.jsonc from bundled template", e);
-        }
-    }
-
-    private void migrateLegacyKuudraNotificationsConfig() {
-        try {
-            Path configFile = FabricLoader.getInstance().getConfigDir().resolve("iqaddons.jsonc");
-            if (!Files.exists(configFile)) {
-                return;
-            }
-
-            String content = Files.readString(configFile, StandardCharsets.UTF_8);
-            if (content.contains("\"kuudraNotificationsConfig\"")) {
-                return;
-            }
-
-            Pattern legacyPattern = Pattern.compile(
-                    "(?ms)^(\\s*)\\\"kuudraNotifications\\\"\\s*:\\s*(\\{.*?^\\1\\})\\s*,\\s*\\R"
-                            + "\\1\\\"kuudraNotificationsSound\\\"\\s*:\\s*(true|false)\\s*,\\s*\\R"
-                            + "\\1\\\"abilityAnnounce\\\"\\s*:\\s*(\\{.*?^\\1\\})\\s*,"
-            );
-
-            Matcher matcher = legacyPattern.matcher(content);
-            if (!matcher.find()) {
-                return;
-            }
-
-            String indent = matcher.group(1);
-            String notificationToggles = matcher.group(2);
-            String notificationSound = matcher.group(3);
-            String abilityAnnounce = matcher.group(4);
-
-            String replacement = indent + "\"kuudraNotificationsEnabled\": true,\n"
-                    + indent + "\"kuudraNotificationsConfig\": {\n"
-                    + indent + "    \"kuudraNotificationsSound\": " + notificationSound + ",\n"
-                    + indent + "    \"kuudraNotifications\": " + notificationToggles + ",\n"
-                    + indent + "    \"abilityAnnounce\": " + abilityAnnounce + "\n"
-                    + indent + "},";
-
-            String migrated = matcher.replaceFirst(Matcher.quoteReplacement(replacement));
-            Files.writeString(configFile, migrated, StandardCharsets.UTF_8);
-            log.info("Migrated legacy Kuudra notifications config keys: kuudraNotifications, kuudraNotificationsSound, abilityAnnounce");
-        } catch (Exception e) {
-            log.warn("Failed to migrate legacy Kuudra notifications config", e);
         }
     }
 
