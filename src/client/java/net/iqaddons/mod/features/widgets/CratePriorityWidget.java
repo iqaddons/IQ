@@ -21,7 +21,7 @@ public class CratePriorityWidget extends HudWidget {
 
     private static final int FADE_TICKS = 4;
     private static final int SLIDE_OFFSET_PIXELS = 8;
-    private static final String MIN_REFERENCE_TEXT = "Go X Cannon";
+    private static final String MIN_REFERENCE_TEXT = "§lGO X CANNON";
 
     private @NotNull String text = "";
     private int totalTicks = 0;

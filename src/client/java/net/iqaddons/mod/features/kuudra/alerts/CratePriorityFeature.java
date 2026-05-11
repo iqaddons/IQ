@@ -160,26 +160,26 @@ public class CratePriorityFeature extends KuudraFeature {
     private @Nullable String getDefaultDestination(@NotNull PreSpot currentPre, int missingPre) {
         return switch (currentPre) {
             case X -> switch (missingPre) {
-                case MISSING_X -> "Shop";
-                case MISSING_X_CANNON -> "Square";
-                case MISSING_SLASH, MISSING_SQUARE, MISSING_EQUALS, MISSING_TRIANGLE, MISSING_SHOP -> "X Cannon";
+                case MISSING_X -> "SHOP";
+                case MISSING_X_CANNON -> "SQUARE";
+                case MISSING_SLASH, MISSING_SQUARE, MISSING_EQUALS, MISSING_TRIANGLE, MISSING_SHOP -> "X CANNON";
                 default -> null;
             };
             case SLASH -> switch (missingPre) {
-                case MISSING_SLASH -> "Shop";
-                case MISSING_SQUARE -> "X Cannon";
-                case MISSING_X, MISSING_X_CANNON, MISSING_EQUALS, MISSING_TRIANGLE, MISSING_SHOP -> "Square";
+                case MISSING_SLASH -> "SHOP";
+                case MISSING_SQUARE -> "X CANNON";
+                case MISSING_X, MISSING_X_CANNON, MISSING_EQUALS, MISSING_TRIANGLE, MISSING_SHOP -> "SQUARE";
                 default -> null;
             };
             case EQUALS -> switch (missingPre) {
-                case MISSING_EQUALS, MISSING_SQUARE, MISSING_X_CANNON -> "Shop";
-                case MISSING_SHOP, MISSING_TRIANGLE, MISSING_X, MISSING_SLASH -> "Square";
+                case MISSING_EQUALS, MISSING_SQUARE, MISSING_X_CANNON -> "SHOP";
+                case MISSING_SHOP, MISSING_TRIANGLE, MISSING_X, MISSING_SLASH -> "SQUARE";
                 default -> null;
             };
             case TRIANGLE -> switch (missingPre) {
-                case MISSING_TRIANGLE, MISSING_SQUARE, MISSING_X_CANNON -> "Shop";
-                case MISSING_X, MISSING_SHOP -> "X Cannon";
-                case MISSING_SLASH, MISSING_EQUALS -> "Square";
+                case MISSING_TRIANGLE, MISSING_SQUARE, MISSING_X_CANNON -> "SHOP";
+                case MISSING_X, MISSING_SHOP -> "X CANNON";
+                case MISSING_SLASH, MISSING_EQUALS -> "SQUARE";
                 default -> null;
             };
         };

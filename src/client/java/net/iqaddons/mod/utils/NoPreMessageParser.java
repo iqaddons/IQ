@@ -42,13 +42,13 @@ public class NoPreMessageParser {
                 .replaceAll("[^a-z]", "");
 
         return switch (normalized) {
-            case "triangle", "tri" -> "Triangle";
-            case "equals", "eq" -> "Equals";
-            case "slash" -> "Slash";
-            case "shop" -> "Shop";
-            case "square" -> "Square";
+            case "triangle", "tri" -> "TRIANGLE";
+            case "equals", "eq" -> "EQUALS";
+            case "slash" -> "SLASH";
+            case "shop" -> "SHOP";
+            case "square" -> "SQUARE";
             case "x" -> "X";
-            case "xc", "xcannon" -> "X Cannon";
+            case "xc", "xcannon" -> "X CANNON";
             default -> null;
         };
     }

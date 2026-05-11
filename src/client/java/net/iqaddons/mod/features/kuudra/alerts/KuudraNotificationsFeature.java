@@ -27,27 +27,27 @@ public class KuudraNotificationsFeature extends Feature {
     private static final List<KuudraNotificationRule> NOTIFICATION_RULES = List.of(
             new KuudraNotificationRule(
                     Pattern.compile(".*It's time to build the Ballista again! Cover me!"),
-                    "§aBuild Started",
+                    "§a§BUILD STARTED",
                     () -> KuudraGeneralConfig.KuudraNotifications.buildStarted
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Casting Spell: Ichor Pool!"),
-                    "§bIchor Used",
+                    "§b§lICHOR",
                     () -> KuudraGeneralConfig.KuudraNotifications.ichorUsed
             ),
             new KuudraNotificationRule(
                     Pattern.compile(".*Starting in 4 seconds\\.{1,3}.*"),
-                    "§b§lSOS Reminder",
+                    "§b§lSOS REMINDER",
                     () -> KuudraGeneralConfig.KuudraNotifications.sosReminder
             ),
             new KuudraNotificationRule(
                     Pattern.compile("You purchased Human Cannonball!"),
-                    "§eCannonball",
+                    "§e§lCANNONBALL",
                     () -> KuudraGeneralConfig.KuudraNotifications.cannonBall
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Someone else is currently trying to pick up these supplies!"),
-                    "§cAlready Picking!",
+                    "§cALREADY PICKING",
                     () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert,
                     SoundEvents.ENTITY_VILLAGER_NO
             )
@@ -80,7 +80,7 @@ public class KuudraNotificationsFeature extends Feature {
         if (KuudraGeneralConfig.KuudraNotifications.noPre) {
             NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
             if (parsed != null) {
-                showAlert("§4No " + parsed.canonicalPileName(), null);
+                showAlert("§4§lNO " + parsed.canonicalPileName().toUpperCase() + "!", null);
                 return;
             }
         }
@@ -106,7 +106,7 @@ public class KuudraNotificationsFeature extends Feature {
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
         if (KuudraGeneralConfig.KuudraNotifications.placedSupply && isLocalPlayer(event.playerName())) {
-            MessageUtil.showAlert("§aPLACED", 40, SoundEvents.BLOCK_NOTE_BLOCK_PLING.value());
+            MessageUtil.showAlert("§a§lPLACED", 20, SoundEvents.BLOCK_NOTE_BLOCK_PLING.value());
         }
 
         if (!KuudraGeneralConfig.KuudraNotifications.suppliesDone) return;
@@ -118,7 +118,7 @@ public class KuudraNotificationsFeature extends Feature {
     private void onSupplyPickup(@NotNull SupplyPickupEvent event) {
         if (!KuudraGeneralConfig.KuudraNotifications.supplyPickedUp) return;
 
-        MessageUtil.showAlert("§a§lPicked Up", 40);
+        MessageUtil.showAlert("§a§lPICKED UP", 20);
     }
 
     private static boolean isAnyNotificationEnabled() {
