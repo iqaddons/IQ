@@ -27,7 +27,7 @@ public class KuudraNotificationsFeature extends Feature {
     private static final List<KuudraNotificationRule> NOTIFICATION_RULES = List.of(
             new KuudraNotificationRule(
                     Pattern.compile(".*It's time to build the Ballista again! Cover me!"),
-                    "§a§BUILD STARTED",
+                    "§a§lBUILD STARTED",
                     () -> KuudraGeneralConfig.KuudraNotifications.buildStarted
             ),
             new KuudraNotificationRule(
@@ -47,7 +47,7 @@ public class KuudraNotificationsFeature extends Feature {
             ),
             new KuudraNotificationRule(
                     Pattern.compile("Someone else is currently trying to pick up these supplies!"),
-                    "§cALREADY PICKING",
+                    "§c§lALREADY PICKING",
                     () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert,
                     SoundEvents.ENTITY_VILLAGER_NO
             )
@@ -101,7 +101,7 @@ public class KuudraNotificationsFeature extends Feature {
         if (!KuudraGeneralConfig.KuudraNotifications.buildDone) return;
         if (event.currentPhase() != KuudraPhase.EATEN) return;
 
-        showAlert("§ABuild Completed%", null);
+        showAlert("§a§lBUILD COMPLETED", null);
     }
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
