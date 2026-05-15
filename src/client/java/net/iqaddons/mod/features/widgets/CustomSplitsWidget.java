@@ -1,8 +1,8 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
@@ -34,7 +34,7 @@ public class CustomSplitsWidget extends HudWidget {
             KuudraPhase.BUILD, new double[]{12, 13.5, 15.0, 17.0, 19.0, 20.0},
             KuudraPhase.EATEN, new double[]{4.0, 4.4, 5.0, 5.5, 6.0, 7.0},
             KuudraPhase.STUN, new double[]{0.0, 0.0, 0.0, 0.1, 0.3, 0.8},
-            KuudraPhase.DPS, new double[]{3.0, 3.3, 3.6, 3.8, 4.2, 4.5},
+            KuudraPhase.DPS, new double[]{2.5, 3.2, 3.6, 3.8, 4.2, 4.5},
             KuudraPhase.SKIP, new double[]{3.5, 4.0, 4.6, 4.8, 5.0, 5.2},
             KuudraPhase.BOSS, new double[]{1.7, 2.0, 2.3, 2.8, 3.3, 4.0}
     );

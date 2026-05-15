@@ -125,7 +125,7 @@ public class CratePriorityFeature extends KuudraFeature {
         lastDecisionKey = decisionKey;
 
         int durationTicks = Math.max(20, Math.min(200, PhaseOneConfig.CratePriorityConfig.cratePriorityDurationSeconds * 20));
-        EventBus.post(new CratePriorityHudEvent("Go " + destination, durationTicks));
+        EventBus.post(new CratePriorityHudEvent("§lGO " + destination, durationTicks));
         log.debug("Crate priority update from {} => pre={}, missing={}, action=Go {}",
                 source, currentPre, pendingMissingPre, destination);
     }

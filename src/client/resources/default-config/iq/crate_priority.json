@@ -22,40 +22,40 @@
   "version": 1,
   "priorities": {
     "X": {
-      "X": "Shop",
-      "X_CANNON": "Square",
-      "SLASH": "X Cannon",
-      "SQUARE": "X Cannon",
-      "EQUALS": "X Cannon",
-      "TRIANGLE": "X Cannon",
-      "SHOP": "X Cannon"
+      "X": "§lSHOP!",
+      "X_CANNON": "§lSQUARE!",
+      "SLASH": "§lX CANNON!",
+      "SQUARE": "§lX CANNON!",
+      "EQUALS": "§lX CANNON!",
+      "TRIANGLE": "§lX CANNON!",
+      "SHOP": "§lX CANNON!"
     },
     "SLASH": {
-      "SLASH": "Shop",
-      "SQUARE": "X Cannon",
-      "X": "Square",
-      "X_CANNON": "Square",
-      "EQUALS": "Square",
-      "TRIANGLE": "Square",
-      "SHOP": "Square"
+      "SLASH": "§lSHOP!",
+      "SQUARE": "§lX CANNON!",
+      "X": "§lSQUARE!",
+      "X_CANNON": "§lSQUARE!",
+      "EQUALS": "§lSQUARE!",
+      "TRIANGLE": "§lSQUARE!",
+      "SHOP": "§lSQUARE!"
     },
     "EQUALS": {
-      "SHOP": "Square",
-      "EQUALS": "Shop",
-      "SQUARE": "Shop",
-      "X_CANNON": "Shop",
-      "TRIANGLE": "Square",
-      "X": "Square",
-      "SLASH": "Square"
+      "SHOP": "§lSQUARE!",
+      "EQUALS": "§lSHOP!",
+      "SQUARE": "§lSHOP!",
+      "X_CANNON": "§lSHOP!",
+      "TRIANGLE": "§lSQUARE!",
+      "X": "§lSQUARE!",
+      "SLASH": "§lSQUARE!"
     },
     "TRIANGLE": {
-      "TRIANGLE": "Shop",
-      "SQUARE": "Shop",
-      "X_CANNON": "Shop",
-      "X": "X Cannon",
-      "SHOP": "X Cannon",
-      "SLASH": "Square",
-      "EQUALS": "Square"
+      "TRIANGLE": "§lSHOP!",
+      "SQUARE": "§lSHOP!",
+      "X_CANNON": "§lSHOP!",
+      "X": "§lX CANNON!",
+      "SHOP": "§lX CANNON!",
+      "SLASH": "§lSQUARE!",
+      "EQUALS": "§lSQUARE!"
     }
   }
 }
