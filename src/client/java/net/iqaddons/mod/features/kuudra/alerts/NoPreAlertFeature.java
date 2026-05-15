@@ -263,9 +263,6 @@ public class NoPreAlertFeature extends KuudraFeature {
 
             supplyState.setMissingPre(preSpot.getMissingPreValue());
             MessageUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!");
-
-            String titleText = "&c&lNO " + preSpot.getDisplayName().toUpperCase() + "!";
-            MessageUtil.showTitle(titleText, "", 10, 80, 10);
             
             log.debug("No pre supply detected for {}, announced to party", preSpot.getDisplayName());
         }

@@ -27,14 +27,12 @@ public class PhaseSplitsPBTrackerFeature extends Feature {
     }
 
     private void onPhaseChange(@NotNull KuudraPhaseChangeEvent event) {
-        if (event.isEnteringKuudra()) {
+        if (event.isEnteringKuudra() || event.isExitingKuudra()) {
             return;
         }
 
-        if (!event.isRunCompleted()) return;
-
         KuudraPhase finishedPhase = event.previousPhase();
-        if (finishedPhase != KuudraPhase.BOSS) return;
+        if (!finishedPhase.isInRun()) return;
         if (KuudraStateManager.get().context().tier() != KuudraTier.INFERNAL) return;
 
         long millis = event.phaseDurationMillis();

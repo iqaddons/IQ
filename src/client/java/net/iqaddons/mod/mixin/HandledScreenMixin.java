@@ -38,7 +38,7 @@ public class HandledScreenMixin {
     }
 
     @Inject(method = "drawSlot", at = @At("TAIL"))
-    private void iq$highlightOpenedCroesusChests(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void iq$highlightOpenedCroesusChests(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
         HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
         EventBus.post(new ScreenDrawSlotEvent(
                 screen,

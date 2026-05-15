@@ -29,8 +29,6 @@ public class SupplyTimerWidget extends HudWidget {
 
     private static final long SUPPLY_SPAWN_COUNTDOWN_MS = 8850L;
     private static final long INSTANCE_EXIT_CONFIRMATION_MS = 1200L;
-    private static final String DARK_PURPLE_BOLD = "§5§l";
-    private static final String WHITE_BOLD = "§f§l";
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
@@ -231,7 +229,7 @@ public class SupplyTimerWidget extends HudWidget {
             supplySpawnCountdownEndMillis = -1L;
         }
 
-        String displayColor = resolveDisplayColorForPlacement(event.playerName());
+        String displayColor = resolveDisplayColorForPlacement();
 
         pickupHistory.add(new SupplyPickupEntry(
                 event.playerName(),
@@ -243,25 +241,8 @@ public class SupplyTimerWidget extends HudWidget {
         updateDisplay();
     }
 
-    private @NotNull String resolveDisplayColorForPlacement(@NotNull String playerName) {
-        String timeColor = supplyState.getTimeColor();
-        if (!DARK_PURPLE_BOLD.equals(timeColor)) {
-            return timeColor;
-        }
-
-        // Dark purple is reserved for repeat placements by the same player.
-        return playerHasPriorPlacement(playerName) ? timeColor : WHITE_BOLD;
-    }
-
-    private boolean playerHasPriorPlacement(@NotNull String playerName) {
-        synchronized (pickupHistory) {
-            for (SupplyPickupEntry entry : pickupHistory) {
-                if (entry.playerName().equals(playerName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    private @NotNull String resolveDisplayColorForPlacement() {
+        return supplyState.getTimeColor();
     }
 
     private void updateDisplay() {

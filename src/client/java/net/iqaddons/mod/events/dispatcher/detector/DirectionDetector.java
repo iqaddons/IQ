@@ -17,6 +17,8 @@ import static net.iqaddons.mod.utils.KuudraLocationUtil.SpawnDirection.UNKNOWN;
 public class DirectionDetector {
 
     private volatile KuudraLocationUtil.SpawnDirection currentDirection = UNKNOWN;
+    private long lastDirectionChangeTime = 0;
+    private static final long DIRECTION_CHANGE_COOLDOWN_MS = 1000; // 1 second cooldown
 
     public void detect(@NotNull ClientTickEvent event, KuudraContext context, Consumer<Event> postEvent) {
         if (!event.isInGame()) return;
@@ -32,18 +34,23 @@ public class DirectionDetector {
         if (kuudraEntity == null || !kuudraEntity.isAlive()) return;
 
         var direction = KuudraLocationUtil.getDirection(kuudraEntity);
-        if (direction != UNKNOWN && direction != currentDirection) {
+        long currentTime = System.currentTimeMillis();
+
+        if (direction != UNKNOWN && direction != currentDirection &&
+                (currentTime - lastDirectionChangeTime) >= DIRECTION_CHANGE_COOLDOWN_MS) {
             postEvent.accept(new KuudraDirectionChangeEvent(
                     currentDirection,
                     direction
             ));
 
             currentDirection = direction;
+            lastDirectionChangeTime = currentTime;
             log.info("Kuudra direction changed: {}", direction);
         }
     }
 
     public void reset() {
         currentDirection = UNKNOWN;
+        lastDirectionChangeTime = 0;
     }
 }
