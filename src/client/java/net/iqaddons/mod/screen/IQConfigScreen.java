@@ -1470,7 +1470,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = client.textRenderer.getWidth("IQ");
         int logoSubtitleW = client.textRenderer.getWidth("Config");
-        int footerW = client.textRenderer.getWidth("Modrinth Version v1.0.2");
+        int footerW = client.textRenderer.getWidth("MODRINTH VERSION v1.0.2");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
