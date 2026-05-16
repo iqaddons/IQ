@@ -521,7 +521,7 @@ public class IQConfigScreen extends Screen {
             lastGroup = group;
         }
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8SUPPORTER VERSION v1.0.3"),
+        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8MODRINTH VERSION v1.0.2"),
                 gx + 10, gy + gh - client.textRenderer.fontHeight - 8, 0x22FFFFFF);
     }
 
@@ -1470,7 +1470,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = client.textRenderer.getWidth("IQ");
         int logoSubtitleW = client.textRenderer.getWidth("Config");
-        int footerW = client.textRenderer.getWidth("Supporter Version v1.0.3");
+        int footerW = client.textRenderer.getWidth("Modrinth Version v1.0.2");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
