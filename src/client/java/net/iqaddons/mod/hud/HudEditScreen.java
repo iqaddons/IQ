@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.hud.config.HudElementConfig;
 import net.iqaddons.mod.hud.element.HudElement;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -36,36 +36,36 @@ public class HudEditScreen extends Screen {
     private boolean snapToGrid = false;
 
     public HudEditScreen() {
-        super(Text.literal(TITLE));
+        super(Component.literal(TITLE));
     }
 
     @Override
-    public void render(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
-        renderDarkening(context);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float a) {
+        extractMenuBackground(context);
         if (showGrid) {
             renderGrid(context);
         }
 
-        HudManager.get().renderAll(context, mouseX, mouseY, delta);
+        HudManager.get().renderAll(context, mouseX, mouseY, a);
 
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, a);
         renderHelpText(context);
     }
 
-    private void renderGrid(@NotNull DrawContext context) {
+    private void renderGrid(@NotNull GuiGraphicsExtractor context) {
         int gridColor = new Color(255, 255, 255, 30).getRGB();
 
         for (int x = 0; x < width; x += GRID_SIZE) {
-            context.drawVerticalLine(x, 0, height, gridColor);
+            context.verticalLine(x, 0, height, gridColor);
         }
 
         for (int y = 0; y < height; y += GRID_SIZE) {
-            context.drawHorizontalLine(0, width, y, gridColor);
+            context.horizontalLine(0, width, y, gridColor);
         }
     }
 
-    private void renderHelpText(@NotNull DrawContext context) {
-        if (client == null || client.textRenderer == null) return;
+    private void renderHelpText(@NotNull GuiGraphicsExtractor context) {
+        if (minecraft == null || minecraft.font == null) return;
 
         List<String> helpLines = List.of(
                 "§e[Drag]§7 Move element",
@@ -76,34 +76,34 @@ public class HudEditScreen extends Screen {
                 "§e[R]§7 Reset selected | §e[ESC]§7 Save & close"
         );
 
-        int lineHeight = client.textRenderer.fontHeight + 1;
+        int lineHeight = minecraft.font.lineHeight + 1;
         int padding = 5;
         int x = 5;
         int y = height - (helpLines.size() * lineHeight) - padding;
 
         int maxWidth = 0;
         for (String line : helpLines) {
-            maxWidth = Math.max(maxWidth, client.textRenderer.getWidth(line));
+            maxWidth = Math.max(maxWidth, minecraft.font.width(line));
         }
 
         for (String line : helpLines) {
-            context.drawTextWithShadow(client.textRenderer, line, x, y, 0xFFFFFFFF);
+            context.text(minecraft.font, line, x, y, 0xFFFFFFFF);
             y += lineHeight;
         }
 
         String snapStatus = snapToGrid ? "Snap: ON" : "Snap: OFF";
         int snapColor = snapToGrid ? 0xFF55FF55 : 0xFFFF5555;
-        context.drawTextWithShadow(
-                client.textRenderer,
+        context.text(
+                minecraft.font,
                 snapStatus,
-                width - client.textRenderer.getWidth(snapStatus) - 5,
+                width - minecraft.font.width(snapStatus) - 5,
                 5,
                 snapColor
         );
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() == 0) {
             selectedElement = findElementAt(click.x(), click.y());
             if (selectedElement != null) {
@@ -122,7 +122,7 @@ public class HudEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (isDragging() && selectedElement != null && click.button() == 0) {
             float newX = selectedElement.getX() + (float) offsetX;
             float newY = selectedElement.getY() + (float) offsetY;
@@ -140,7 +140,7 @@ public class HudEditScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (click.button() == 0 && isDragging()) {
             setDragging(false);
             if (selectedElement instanceof HudWidget widget) {
@@ -164,9 +164,9 @@ public class HudEditScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         int keyCode = input.key();
-        boolean shift = input.hasShift();
+        boolean shift = input.hasShiftDown();
         float step = shift ? POSITION_STEP_FAST : POSITION_STEP;
 
         if (selectedElement != null) {
@@ -331,7 +331,7 @@ public class HudEditScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 

@@ -87,19 +87,19 @@ public class PartyCommandsFeature extends Feature {
     }
 
     private void runRawCommand(@NotNull String command) {
-        if (mc.player == null || mc.player.networkHandler == null) return;
-        mc.player.networkHandler.sendChatCommand(command);
+        if (mc.player == null || mc.player.connection == null) return;
+        mc.player.connection.sendCommand(command);
     }
 
     private void sendPing() {
-        if (!Configuration.PartyCommands.partyCommandPing || mc.player == null || mc.player.networkHandler == null) return;
+        if (!Configuration.PartyCommands.partyCommandPing || mc.player == null || mc.player.connection == null) return;
 
         var averagePing = ServerUtils.getAveragePing();
         MessageUtil.PARTY.sendMessage(String.format("[IQ] %,dms", averagePing.toMillis()));
     }
 
     private void sendTps() {
-        if (!Configuration.PartyCommands.partyCommandTps || mc.world == null) return;
+        if (!Configuration.PartyCommands.partyCommandTps || mc.level == null) return;
 
         float tps = ServerUtils.getAverageTps();
         MessageUtil.PARTY.sendMessage(String.format(Locale.ROOT, "[IQ] %.1f", tps));

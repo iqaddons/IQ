@@ -6,8 +6,8 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -19,12 +19,12 @@ import static net.iqaddons.mod.utils.EntityDetectorUtil.findPlayerByName;
 @Slf4j
 public class FreshDetector {
 
-    private static final MinecraftClient client = MinecraftClient.getInstance();
+    private static final Minecraft client = Minecraft.getInstance();
 
     public void detect(ChatReceivedEvent event, @NotNull String message, Consumer<Event> postEvent) {
         int buildProgress = getBuildingProgress();
         if (message.contains(FRESH_TOOLS_MESSAGE)) {
-            ClientPlayerEntity player = client.player;
+            LocalPlayer player = client.player;
             if (player == null) return;
 
             postEvent.accept(new PlayerFreshEvent(
@@ -37,7 +37,7 @@ public class FreshDetector {
 
         Matcher partyMatcher = PARTY_FRESH_PATTERN.matcher(message);
         if (partyMatcher.find()) {
-            if (client.world == null) return;
+            if (client.level == null) return;
 
             String playerName = StringUtils.extractFormattedPlayerName(event.getMessage());
             String plainPlayerName = StringUtils.stripFormatting(playerName);

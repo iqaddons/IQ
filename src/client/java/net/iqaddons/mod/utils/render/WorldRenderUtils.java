@@ -1,20 +1,30 @@
 package net.iqaddons.mod.utils.render;
 
+import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.platform.CompareOp;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderPipelines;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.ShapeRenderer;
+import net.minecraft.client.renderer.rendertype.LayeringTransform;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
@@ -22,15 +32,15 @@ import org.joml.Vector3f;
 @UtilityClass
 public class WorldRenderUtils {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     public static void drawFilled(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, @NotNull Box box, boolean throughWalls, @NotNull RenderColor color
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, @NotNull AABB box, boolean throughWalls, @NotNull RenderColor color
     ) {
-        matrices.push();
+        matrices.pushPose();
 
-        Vec3d camPos = camera.getCameraPos().negate();
+        Vec3 camPos = camera.pos.reverse();
         matrices.translate(camPos.x, camPos.y, camPos.z);
 
         VertexConsumer buffer = throughWalls ? consumer.getBuffer(Layers.BoxFilledNoCull) : consumer.getBuffer(Layers.BoxFilled);
@@ -40,15 +50,15 @@ public class WorldRenderUtils {
                 (float) box.maxX, (float) box.maxY, (float) box.maxZ,
                 color.r, color.g, color.b, color.a
         );
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static void drawOutline(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, Box box, boolean throughWalls, @NotNull RenderColor color
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, AABB box, boolean throughWalls, @NotNull RenderColor color
     ) {
-        matrices.push();
-        Vec3d camPos = camera.getCameraPos().negate();
+        matrices.pushPose();
+        Vec3 camPos = camera.pos.reverse();
         matrices.translate(camPos.x, camPos.y, camPos.z);
 
         VertexConsumer buffer = throughWalls
@@ -56,17 +66,17 @@ public class WorldRenderUtils {
                 : consumer.getBuffer(Layers.BoxOutline);
 
         drawBox(
-                matrices.peek(), buffer, box,
+                matrices.last(), buffer, box,
                 color.argb, 1
         );
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static void drawFilledCircle(
-            @NotNull MatrixStack matrices,
-            VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera,
-            @NotNull Vec3d center,
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
             float radius,
             int segments,
             boolean throughWalls,
@@ -74,12 +84,12 @@ public class WorldRenderUtils {
     ) {
         if (segments < 3) segments = 3;
 
-        matrices.push();
+        matrices.pushPose();
 
-        Vec3d camPos = camera.getCameraPos();
+        Vec3 camPos = camera.pos;
         matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 
-        MatrixStack.Entry entry = matrices.peek();
+        PoseStack.Pose entry = matrices.last();
 
         VertexConsumer buffer = consumer.getBuffer(
                 throughWalls ? Layers.CircleFilledNoCull : Layers.CircleFilled
@@ -95,22 +105,22 @@ public class WorldRenderUtils {
             float x2 = (float) (center.x + Math.cos(angle2) * radius);
             float z2 = (float) (center.z + Math.sin(angle2) * radius);
 
-            buffer.vertex(entry, (float) center.x, (float) center.y, (float) center.z)
-                    .color(color.r, color.g, color.b, color.a);
-            buffer.vertex(entry, x1, (float) center.y, z1)
-                    .color(color.r, color.g, color.b, color.a);
-            buffer.vertex(entry, x2, (float) center.y, z2)
-                    .color(color.r, color.g, color.b, color.a);
+            buffer.addVertex(entry, (float) center.x, (float) center.y, (float) center.z)
+                    .setColor(color.r, color.g, color.b, color.a);
+            buffer.addVertex(entry, x1, (float) center.y, z1)
+                    .setColor(color.r, color.g, color.b, color.a);
+            buffer.addVertex(entry, x2, (float) center.y, z2)
+                    .setColor(color.r, color.g, color.b, color.a);
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static void drawCircleOutline(
-            @NotNull MatrixStack matrices,
-            VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera,
-            @NotNull Vec3d center,
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
             float radius,
             int segments,
             boolean throughWalls,
@@ -118,12 +128,12 @@ public class WorldRenderUtils {
     ) {
         if (segments < 3) segments = 3;
 
-        matrices.push();
+        matrices.pushPose();
 
-        Vec3d camPos = camera.getCameraPos();
+        Vec3 camPos = camera.pos;
         matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 
-        MatrixStack.Entry entry = matrices.peek();
+        PoseStack.Pose entry = matrices.last();
 
         VertexConsumer buffer = consumer.getBuffer(
                 throughWalls ? Layers.CircleOutlineNoCull : Layers.CircleOutline
@@ -135,20 +145,20 @@ public class WorldRenderUtils {
             float y = (float) center.y;
             float z = (float) (center.z + Math.sin(angle) * radius);
 
-            buffer.vertex(entry, x, y, z)
-                    .color(color.r, color.g, color.b, color.a);
+            buffer.addVertex(entry, x, y, z)
+                    .setColor(color.r, color.g, color.b, color.a);
         }
 
-        matrices.pop();
+        matrices.popPose();
     }
 
     public static void drawText(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, @NotNull Vec3d pos, Text text,
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, @NotNull Vec3 pos, Component text,
             float scale, boolean throughWalls, @NotNull RenderColor color
     ) {
-        matrices.push();
-        Vec3d camPos = camera.getCameraPos();
+        matrices.pushPose();
+        Vec3 camPos = camera.pos;
 
         matrices.translate(
                 pos.x - camPos.x,
@@ -156,43 +166,43 @@ public class WorldRenderUtils {
                 pos.z - camPos.z
         );
 
-        matrices.multiply(camera.getRotation());
+        matrices.mulPose(camera.orientation);
         matrices.scale(scale, -scale, scale);
 
-        mc.textRenderer.draw(
+        mc.font.drawInBatch(
                 text,
-                -mc.textRenderer.getWidth(text) / 2f,
+                -mc.font.width(text) / 2f,
                 0,
                 color.argb,
                 true,
-                matrices.peek().getPositionMatrix(),
+                matrices.last().pose(),
                 consumer,
                 throughWalls
-                        ? TextRenderer.TextLayerType.SEE_THROUGH
-                        : TextRenderer.TextLayerType.NORMAL,
+                        ? Font.DisplayMode.SEE_THROUGH
+                        : Font.DisplayMode.NORMAL,
                 0,
-                LightmapTextureManager.MAX_LIGHT_COORDINATE
+                LightCoordsUtil.FULL_BRIGHT
         );
 
-        consumer.draw();
-        matrices.pop();
+        consumer.endBatch();
+        matrices.popPose();
     }
 
     public static void drawBeam(
-            MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            Camera camera, Vec3d pos, int height,
+            PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            CameraRenderState camera, Vec3 pos, int height,
             boolean throughWalls, RenderColor color
     ) {
         drawFilled(
                 matrices, consumer, camera,
-                Box.of(pos, 0.5, 0, 0.5).stretch(0, height, 0),
+                AABB.ofSize(pos, 0.5, 0, 0.5).expandTowards(0, height, 0),
                 throughWalls, color
         );
     }
 
     public static void drawStyledBox(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, @NotNull Box box, boolean throughWalls,
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, @NotNull AABB box, boolean throughWalls,
             @NotNull RenderColor color, @NotNull RenderStyle style
     ) {
         switch (style) {
@@ -206,58 +216,58 @@ public class WorldRenderUtils {
     }
 
     public static void drawStyledHitBox(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, @NotNull Entity entity, @NotNull RenderTickCounter tickCounter,
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, @NotNull Entity entity, @NotNull DeltaTracker tickCounter,
             boolean throughWalls, @NotNull RenderColor color, RenderStyle style
     ) {
-        float tickDelta = tickCounter.getTickProgress(true);
-        Box box = getBox(entity, tickDelta);
+        float tickDelta = tickCounter.getGameTimeDeltaPartialTick(true);
+        AABB box = getBox(entity, tickDelta);
 
         drawStyledBox(matrices, consumer, camera, box, throughWalls, color, style);
     }
 
     public static void drawTracer(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.@NotNull Immediate consumer,
-            @NotNull Camera camera, @NotNull Vec3d pos, @NotNull RenderColor color
+            @NotNull PoseStack matrices, MultiBufferSource.@NotNull BufferSource consumer,
+            @NotNull CameraRenderState camera, @NotNull Vec3 pos, @NotNull RenderColor color
     ) {
-        Vec3d camPos = camera.getCameraPos();
+        Vec3 camPos = camera.pos;
 
-        matrices.push();
-        matrices.translate(-camPos.getX(), -camPos.getY(), -camPos.getZ());
+        matrices.pushPose();
+        matrices.translate(-camPos.x(), -camPos.y(), -camPos.z());
 
-        MatrixStack.Entry entry = matrices.peek();
+        PoseStack.Pose entry = matrices.last();
         VertexConsumer buffer = consumer.getBuffer(Layers.GuiLine);
-        Vec3d point = camPos.add(Vec3d.fromPolar(camera.getPitch(), camera.getYaw()));
+        Vec3 point = camPos.add(Vec3.directionFromRotation(camera.xRot, camera.yRot));
 
         Vector3f normal = pos.toVector3f()
-                .sub((float) point.getX(), (float) point.getY(), (float) point.getZ())
+                .sub((float) point.x(), (float) point.y(), (float) point.z())
                 .normalize(new Vector3f(1.0f, 1.0f, 1.0f));
 
-        buffer.vertex(entry, (float) point.getX(), (float) point.getY(), (float) point.getZ()).color(color.r, color.g, color.b, color.a).normal(entry, normal);
-        buffer.vertex(entry, (float) pos.getX(), (float) pos.getY(), (float) pos.getZ()).color(color.r, color.g, color.b, color.a).normal(entry, normal);
-        matrices.pop();
+        buffer.addVertex(entry, (float) point.x(), (float) point.y(), (float) point.z()).setColor(color.r, color.g, color.b, color.a).setNormal(entry, normal);
+        buffer.addVertex(entry, (float) pos.x(), (float) pos.y(), (float) pos.z()).setColor(color.r, color.g, color.b, color.a).setNormal(entry, normal);
+        matrices.popPose();
     }
 
     public static void drawHitBox(
-            @NotNull MatrixStack matrices, VertexConsumerProvider.Immediate consumer,
-            @NotNull Camera camera, Entity entity, @NotNull RenderTickCounter tickCounter,
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, Entity entity, @NotNull DeltaTracker tickCounter,
             boolean troughWalls, RenderColor color
     ) {
-        float tickDelta = tickCounter.getTickProgress(true);
+        float tickDelta = tickCounter.getGameTimeDeltaPartialTick(true);
         drawOutline(matrices, consumer, camera, getBox(entity, tickDelta), troughWalls, color);
     }
 
     @Contract("_, _ -> new")
-    private static @NotNull Box getBox(@NotNull Entity entity, float tickDelta) {
-        double x = entity.lastX + (entity.getX() - entity.lastX) * tickDelta;
-        double y = entity.lastY + (entity.getY() - entity.lastY) * tickDelta;
-        double z = entity.lastZ + (entity.getZ() - entity.lastZ) * tickDelta;
+    private static @NotNull AABB getBox(@NotNull Entity entity, float tickDelta) {
+        double x = entity.xo + (entity.getX() - entity.xo) * tickDelta;
+        double y = entity.yo + (entity.getY() - entity.yo) * tickDelta;
+        double z = entity.zo + (entity.getZ() - entity.zo) * tickDelta;
 
-        float width = entity.getWidth();
-        float height = entity.getHeight();
+        float width = entity.getBbWidth();
+        float height = entity.getBbHeight();
         float halfWidth = width / 2.0f;
 
-        return new Box(
+        return new AABB(
                 x - halfWidth,
                 y,
                 z - halfWidth,
@@ -267,15 +277,15 @@ public class WorldRenderUtils {
         );
     }
 
-    private static void drawBox(MatrixStack.Entry entry, VertexConsumer consumer, Box box, int color, float lineWidth) {
-        MatrixStack matrices = new MatrixStack();
-        matrices.peek().getPositionMatrix().set(entry.getPositionMatrix());
-        matrices.peek().getNormalMatrix().set(entry.getNormalMatrix());
+    private static void drawBox(PoseStack.Pose entry, VertexConsumer consumer, AABB box, int color, float lineWidth) {
+        PoseStack matrices = new PoseStack();
+        matrices.last().pose().set(entry.pose());
+        matrices.last().normal().set(entry.normal());
 
-        VertexRendering.drawOutline(
+        ShapeRenderer.renderShape(
                 matrices,
                 consumer,
-                VoxelShapes.cuboid(box),
+                Shapes.create(box),
                 0.0,
                 0.0,
                 0.0,
@@ -285,13 +295,13 @@ public class WorldRenderUtils {
     }
 
     public static void drawFilledBox(
-            MatrixStack matrices,
+            PoseStack matrices,
             VertexConsumer consumer,
             float minX, float minY, float minZ,
             float maxX, float maxY, float maxZ,
             float r, float g, float b, float a
     ) {
-        MatrixStack.Entry entry = matrices.peek();
+        PoseStack.Pose entry = matrices.last();
 
         quad(consumer, entry, maxX, minY, minZ, maxX, maxY, minZ, maxX, maxY, maxZ, maxX, minY, maxZ, r, g, b, a);
         quad(consumer, entry, minX, minY, minZ, minX, minY, maxZ, minX, maxY, maxZ, minX, maxY, minZ, r, g, b, a);
@@ -303,17 +313,17 @@ public class WorldRenderUtils {
 
     private static void quad(
             VertexConsumer consumer,
-            MatrixStack.Entry entry,
+            PoseStack.Pose entry,
             float x1, float y1, float z1,
             float x2, float y2, float z2,
             float x3, float y3, float z3,
             float x4, float y4, float z4,
             float r, float g, float b, float a
     ) {
-        consumer.vertex(entry, x1, y1, z1).color(r, g, b, a);
-        consumer.vertex(entry, x2, y2, z2).color(r, g, b, a);
-        consumer.vertex(entry, x3, y3, z3).color(r, g, b, a);
-        consumer.vertex(entry, x4, y4, z4).color(r, g, b, a);
+        consumer.addVertex(entry, x1, y1, z1).setColor(r, g, b, a);
+        consumer.addVertex(entry, x2, y2, z2).setColor(r, g, b, a);
+        consumer.addVertex(entry, x3, y3, z3).setColor(r, g, b, a);
+        consumer.addVertex(entry, x4, y4, z4).setColor(r, g, b, a);
     }
 
     public enum RenderStyle {
@@ -322,72 +332,67 @@ public class WorldRenderUtils {
 
     public static class Pipelines {
 
-        public static final RenderPipeline.Snippet filledSnippet = RenderPipelines.POSITION_COLOR_SNIPPET;
-        public static final RenderPipeline.Snippet outlineSnippet = RenderPipelines.RENDERTYPE_LINES_SNIPPET;
+        public static final RenderPipeline.Snippet filledSnippet = RenderPipelines.DEBUG_FILLED_SNIPPET;
+        public static final RenderPipeline.Snippet outlineSnippet = RenderPipelines.LINES_SNIPPET;
 
         public static final RenderPipeline filledNoCull = RenderPipelines.register(
                 RenderPipeline.builder(filledSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_filled_no_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.QUADS)
-                        .withDepthWrite(false)
-                        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_filled_no_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
+                        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
                         .build()
         );
 
         public static final RenderPipeline filledCull = RenderPipelines.register(
                 RenderPipeline.builder(filledSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_filled_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.QUADS)
-                        .withDepthWrite(false)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_filled_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
+                        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
                         .build()
         );
 
         public static final RenderPipeline outlineNoCull = RenderPipelines.register(RenderPipeline.builder(outlineSnippet)
-                .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_outline_no_cull"))
-                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_outline_no_cull"))
                 .build());
 
         public static final RenderPipeline outlineCull = RenderPipelines.register(RenderPipeline.builder(outlineSnippet)
-                .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_outline_cull"))
+                .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_outline_cull"))
                 .build());
 
         public static final RenderPipeline lineNoCull = RenderPipelines.register(RenderPipeline.builder(outlineSnippet)
-                .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_line_no_cull"))
-                .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINE_STRIP)
+                .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_line_no_cull"))
+                .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
                 .withVertexShader("core/position_color")
                 .withFragmentShader("core/position_color")
-                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
                 .build());
 
         public static final RenderPipeline circleFilledNoCull = RenderPipelines.register(
                 RenderPipeline.builder(filledSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_filled_no_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
-                        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_circle_filled_no_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
                         .build()
         );
 
         public static final RenderPipeline circleFilledCull = RenderPipelines.register(
                 RenderPipeline.builder(filledSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_filled_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLES)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_circle_filled_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
                         .build()
         );
 
         public static final RenderPipeline circleOutlineNoCull = RenderPipelines.register(
                 RenderPipeline.builder(outlineSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_outline_no_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINE_STRIP)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_circle_outline_no_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
                         .withVertexShader("core/position_color")
                         .withFragmentShader("core/position_color")
-                        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
                         .build()
         );
 
         public static final RenderPipeline circleOutlineCull = RenderPipelines.register(
                 RenderPipeline.builder(outlineSnippet)
-                        .withLocation(Identifier.of("iqaddons", "pipeline/iqaddons_circle_outline_cull"))
-                        .withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.DEBUG_LINE_STRIP)
+                        .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_circle_outline_cull"))
+                        .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
                         .withVertexShader("core/position_color")
                         .withFragmentShader("core/position_color")
                         .build()
@@ -397,100 +402,100 @@ public class WorldRenderUtils {
     public static class Parameters {
 
         public static final RenderSetup FILLED = RenderSetup.builder(Pipelines.filledCull)
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .expectedBufferSize(RenderLayer.field_64010)
-                .build();
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                .createRenderSetup();
 
         public static final RenderSetup FILLED_NO_CULL = RenderSetup.builder(Pipelines.filledNoCull)
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .expectedBufferSize(RenderLayer.field_64010)
-                .build();
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                .createRenderSetup();
 
         public static final RenderSetup LINES = RenderSetup.builder(Pipelines.outlineCull)
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .expectedBufferSize(RenderLayer.field_64010)
-                .build();
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                .createRenderSetup();
 
         public static final RenderSetup LINES_NO_CULL = RenderSetup.builder(Pipelines.outlineNoCull)
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .expectedBufferSize(RenderLayer.field_64010)
-                .build();
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                .createRenderSetup();
     }
 
     public static class Layers {
 
-        public static final RenderLayer BoxFilled = RenderLayer.of(
+        public static final RenderType BoxFilled = RenderType.create(
                 "iqaddons_box_filled",
                 RenderSetup.builder(Pipelines.filledCull)
-                        .translucent()
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .sortOnUpload()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer BoxFilledNoCull = RenderLayer.of(
+        public static final RenderType BoxFilledNoCull = RenderType.create(
                 "iqaddons_box_filled_no_cull",
                 RenderSetup.builder(Pipelines.filledNoCull)
-                        .translucent()
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .sortOnUpload()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer BoxOutline = RenderLayer.of(
+        public static final RenderType BoxOutline = RenderType.create(
                 "iqaddons_box_outline",
                 RenderSetup.builder(Pipelines.outlineCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer BoxOutlineNoCull = RenderLayer.of(
+        public static final RenderType BoxOutlineNoCull = RenderType.create(
                 "iqaddons_box_outline_no_cull",
                 RenderSetup.builder(Pipelines.outlineNoCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer GuiLine = RenderLayer.of(
+        public static final RenderType GuiLine = RenderType.create(
                 "iqaddons_gui_line",
                 RenderSetup.builder(Pipelines.lineNoCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer CircleFilled = RenderLayer.of(
+        public static final RenderType CircleFilled = RenderType.create(
                 "iqaddons_circle_filled",
                 RenderSetup.builder(Pipelines.circleFilledCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer CircleFilledNoCull = RenderLayer.of(
+        public static final RenderType CircleFilledNoCull = RenderType.create(
                 "iqaddons_circle_filled_no_cull",
                 RenderSetup.builder(Pipelines.circleFilledNoCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer CircleOutline = RenderLayer.of(
+        public static final RenderType CircleOutline = RenderType.create(
                 "iqaddons_circle_outline",
                 RenderSetup.builder(Pipelines.circleOutlineCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
 
-        public static final RenderLayer CircleOutlineNoCull = RenderLayer.of(
+        public static final RenderType CircleOutlineNoCull = RenderType.create(
                 "iqaddons_circle_outline_no_cull",
                 RenderSetup.builder(Pipelines.circleOutlineNoCull)
-                        .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .expectedBufferSize(RenderLayer.field_64010)
-                        .build()
+                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                        .bufferSize(RenderType.TRANSIENT_BUFFER_SIZE)
+                        .createRenderSetup()
         );
     }
 }

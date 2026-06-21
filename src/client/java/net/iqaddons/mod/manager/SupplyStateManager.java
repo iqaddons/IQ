@@ -6,7 +6,7 @@ import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.model.spot.SupplyPosition;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +64,7 @@ public final class SupplyStateManager {
         return Collections.unmodifiableList(activeSupplies);
     }
 
-    public boolean tryDetectPreSpot(@NotNull Vec3d playerPos) {
+    public boolean tryDetectPreSpot(@NotNull Vec3 playerPos) {
         if (preSpotLocked) return false;
 
         PreSpot detected = PreSpot.fromPlayerPosition(playerPos);
@@ -81,7 +81,7 @@ public final class SupplyStateManager {
     public boolean hasPreSupply() {
         if (detectedPreSpot == null) return false;
 
-        Vec3d preLoc = detectedPreSpot.getLocation();
+        Vec3 preLoc = detectedPreSpot.getLocation();
         double radius = 18.0;
 
         return activeSupplies.stream()
@@ -93,21 +93,21 @@ public final class SupplyStateManager {
             return null;
         }
 
-        Vec3d secondaryLoc = detectedPreSpot.getSecondaryLocation();
+        Vec3 secondaryLoc = detectedPreSpot.getSecondaryLocation();
         double radius = detectedPreSpot.getSecondaryCheckRadius();
 
         return activeSupplies.stream()
                 .anyMatch(supply -> supply.isNear(secondaryLoc, radius));
     }
 
-    public @Nullable SupplyPosition findSupplyNear(@NotNull Vec3d location, double radius) {
+    public @Nullable SupplyPosition findSupplyNear(@NotNull Vec3 location, double radius) {
         return activeSupplies.stream()
                 .filter(supply -> supply.isNear(location, radius))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void markPileCompleted(@NotNull Vec3d armorStandPos) {
+    public void markPileCompleted(@NotNull Vec3 armorStandPos) {
         remainingPiles.removeIf(pile -> pile.isNearby(armorStandPos));
     }
 

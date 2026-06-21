@@ -27,11 +27,11 @@ public class HideMobNametagsFeature extends KuudraFeature {
         if (!isActive()) return;
 
         var state = event.getRenderState();
-        if (state == null || state.displayName == null) {
+        if (state == null || state.nameTag == null) {
             return;
         }
 
-        String name = state.displayName.getString();
+        String name = state.nameTag.getString();
         String stripped = name.replaceAll("§.", "");
         if (stripped.contains("[Lv")) {
             event.setCancelled(true);

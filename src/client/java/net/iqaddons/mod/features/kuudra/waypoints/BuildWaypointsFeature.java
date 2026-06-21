@@ -10,10 +10,10 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,15 +78,15 @@ public class BuildWaypointsFeature extends KuudraFeature {
         if (!PhaseTwoConfig.hideDefaultBuildPileText) return;
 
         var state = event.getRenderState();
-        if (state == null || state.displayName == null) return;
+        if (state == null || state.nameTag == null) return;
 
-        String stripped = state.displayName.getString().replaceAll("§.", "");
+        String stripped = state.nameTag.getString().replaceAll("§.", "");
         if (stripped.contains("PROGRESS:") && stripped.contains("%")) {
             event.setCancelled(true);
         }
     }
 
-    private boolean isProgressStand(@NotNull ArmorStandEntity stand) {
+    private boolean isProgressStand(@NotNull ArmorStand stand) {
         if (!stand.hasCustomName() || stand.getCustomName() == null) {
             return false;
         }
@@ -95,13 +95,13 @@ public class BuildWaypointsFeature extends KuudraFeature {
         return name.contains("PROGRESS:") && name.contains("%");
     }
 
-    private @Nullable BuildPile createBuildPile(@NotNull ArmorStandEntity stand) {
+    private @Nullable BuildPile createBuildPile(@NotNull ArmorStand stand) {
         String name = Objects.requireNonNull(stand.getCustomName()).getString();
         int progress = extractProgress(name);
         if (progress < 0) return null;
 
         return new BuildPile(
-                new Vec3d(stand.getX(), stand.getY(), stand.getZ()),
+                new Vec3(stand.getX(), stand.getY(), stand.getZ()),
                 name,
                 progress
         );
@@ -131,13 +131,13 @@ public class BuildWaypointsFeature extends KuudraFeature {
         for (BuildPile pile : buildPiles) {
             var progressColor = getColorForProgress(pile.progress);
 
-            Vec3d beaconPos = new Vec3d(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
-            event.drawStyledWithBeam(Box.from(beaconPos), 25, false,
+            Vec3 beaconPos = new Vec3(pile.position.x - 0.5, pile.position.y, pile.position.z - 0.5);
+            event.drawStyledWithBeam(AABB.unitCubeFromLowerCorner(beaconPos), 25, false,
                     progressColor.withOpacity(PhaseTwoConfig.buildHelperOpacity), WorldRenderUtils.RenderStyle.BOTH
             );
 
-            Vec3d textPos = new Vec3d(pile.position.x, pile.position.y + 2, pile.position.z);
-            event.drawText(textPos, Text.literal(pile.displayName), 0.05f, true, progressColor);
+            Vec3 textPos = new Vec3(pile.position.x, pile.position.y + 2, pile.position.z);
+            event.drawText(textPos, Component.literal(pile.displayName), 0.05f, true, progressColor);
         }
     }
 
@@ -150,7 +150,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
     }
 
     private record BuildPile(
-            Vec3d position,
+            Vec3 position,
             String displayName,
             int progress
     ) {}

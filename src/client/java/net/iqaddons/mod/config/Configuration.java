@@ -4,7 +4,7 @@ import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.config.categories.*;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 @Config(
         value = "iqaddons",
@@ -26,7 +26,7 @@ import net.minecraft.client.MinecraftClient;
 
 public class Configuration {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     @ConfigButton(
             title = "HUD Editor",

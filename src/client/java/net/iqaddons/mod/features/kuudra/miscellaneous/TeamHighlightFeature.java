@@ -8,8 +8,8 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -60,7 +60,7 @@ public class TeamHighlightFeature extends KuudraFeature {
     }
 
     private void updateTeammateHighlights() {
-        if (mc.world == null || mc.player == null) {
+        if (mc.level == null || mc.player == null) {
             clearAllHighlights();
             return;
         }
@@ -68,7 +68,7 @@ public class TeamHighlightFeature extends KuudraFeature {
         Set<Integer> currentTeammates = new HashSet<>();
         RenderColor teamColor = RenderColor.fromArgb(PhaseTwoConfig.teamHighlightColor);
 
-        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+        for (AbstractClientPlayer player : mc.level.players()) {
             if (player == mc.player) continue;
             if (!isRealPlayer(player)) continue;
 
@@ -92,10 +92,10 @@ public class TeamHighlightFeature extends KuudraFeature {
         highlightedPlayers.removeAll(toRemove);
     }
 
-    private boolean isRealPlayer(@NotNull AbstractClientPlayerEntity player) {
-        if (mc.getNetworkHandler() == null) return false;
+    private boolean isRealPlayer(@NotNull AbstractClientPlayer player) {
+        if (mc.getConnection() == null) return false;
 
-        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        PlayerInfo entry = mc.getConnection().getPlayerInfo(player.getUUID());
         if (entry == null) return false;
 
         return entry.getLatency() == REAL_PLAYER_PING;

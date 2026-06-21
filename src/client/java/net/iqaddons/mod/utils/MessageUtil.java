@@ -3,10 +3,10 @@ package net.iqaddons.mod.utils;
 import lombok.RequiredArgsConstructor;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudNotificationEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
@@ -18,7 +18,7 @@ public enum MessageUtil {
     ERROR("§c"),
     PARTY();
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     private static final String PREFIX = "§d§l[IQ] §r";
 
     private final String color;
@@ -29,23 +29,23 @@ public enum MessageUtil {
 
     public void sendMessage(String message) {
         mc.execute(() -> {
-            ClientPlayerEntity player = mc.player;
+            LocalPlayer player = mc.player;
             if (player != null) {
                 if (this == PARTY) {
-                    player.networkHandler.sendChatCommand("pc " + message);
+                    player.connection.sendCommand("pc " + message);
                     return;
                 }
 
-                player.sendMessage(Text.literal(PREFIX + color + message), false);
+                player.sendSystemMessage(Component.literal(PREFIX + color + message));
             }
         });
     }
 
     public static void sendFormattedMessage(@NotNull String message) {
         mc.execute(() -> {
-            ClientPlayerEntity player = mc.player;
+            LocalPlayer player = mc.player;
             if (player != null) {
-                player.sendMessage(Text.literal(PREFIX + message.replace('&', '§')), false);
+                player.sendSystemMessage(Component.literal(PREFIX + message.replace('&', '§')));
             }
         });
     }
@@ -58,21 +58,21 @@ public enum MessageUtil {
             int fadeOut
     ) {
         showTitle(
-                Text.literal(title.replace('&', '§')),
+                Component.literal(title.replace('&', '§')),
                 subtitle != null && !subtitle.isEmpty()
-                        ? Text.literal(subtitle.replace('&', '§'))
-                        : Text.empty(),
+                        ? Component.literal(subtitle.replace('&', '§'))
+                        : Component.empty(),
                 fadeIn, stay, fadeOut
         );
     }
 
-    public static void showTitle(Text title, Text subtitle, int fadeIn, int stay, int fadeOut) {
+    public static void showTitle(Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
         mc.execute(() -> {
-            if (mc.inGameHud == null) return;
+            if (mc.gui == null) return;
 
-            mc.inGameHud.setTitle(title);
-            mc.inGameHud.setSubtitle(subtitle);
-            mc.inGameHud.setTitleTicks(fadeIn, stay, fadeOut);
+            mc.gui.setTitle(title);
+            mc.gui.setSubtitle(subtitle);
+            mc.gui.setTimes(fadeIn, stay, fadeOut);
         });
     }
 

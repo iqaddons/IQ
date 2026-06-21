@@ -1,7 +1,7 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

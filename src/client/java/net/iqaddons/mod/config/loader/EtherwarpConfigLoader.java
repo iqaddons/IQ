@@ -10,7 +10,7 @@ import net.iqaddons.mod.model.etherwarp.EtherwarpCategory;
 import net.iqaddons.mod.model.etherwarp.EtherwarpWaypoint;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -149,7 +149,7 @@ public class EtherwarpConfigLoader {
         try {
             String name = obj.get("name").getAsString();
 
-            List<Vec3d> positions = parsePositions(obj);
+            List<Vec3> positions = parsePositions(obj);
 
             // Parse color
             int colorRgb = parseColor(obj.get("color"));
@@ -204,8 +204,8 @@ public class EtherwarpConfigLoader {
         }
     }
 
-    private @NotNull List<Vec3d> parsePositions(@NotNull JsonObject obj) {
-        Set<Vec3d> unique = new LinkedHashSet<>();
+    private @NotNull List<Vec3> parsePositions(@NotNull JsonObject obj) {
+        Set<Vec3> unique = new LinkedHashSet<>();
 
         if (obj.has("positions") && obj.get("positions").isJsonArray()) {
             JsonArray positionsArray = obj.getAsJsonArray("positions");
@@ -223,13 +223,13 @@ public class EtherwarpConfigLoader {
         return List.copyOf(unique);
     }
 
-    private Optional<Vec3d> parseVec3d(@NotNull JsonArray arr) {
+    private Optional<Vec3> parseVec3d(@NotNull JsonArray arr) {
         if (arr.size() != 3) {
             return Optional.empty();
         }
 
         try {
-            return Optional.of(new Vec3d(
+            return Optional.of(new Vec3(
                     arr.get(0).getAsDouble(),
                     arr.get(1).getAsDouble(),
                     arr.get(2).getAsDouble()
@@ -272,14 +272,14 @@ public class EtherwarpConfigLoader {
             JsonArray minArr = boxObj.getAsJsonArray("min");
             JsonArray maxArr = boxObj.getAsJsonArray("max");
 
-            Optional<Vec3d> min = minArr != null ? parseVec3d(minArr) : Optional.empty();
-            Optional<Vec3d> max = maxArr != null ? parseVec3d(maxArr) : Optional.empty();
+            Optional<Vec3> min = minArr != null ? parseVec3d(minArr) : Optional.empty();
+            Optional<Vec3> max = maxArr != null ? parseVec3d(maxArr) : Optional.empty();
             if (min.isEmpty() || max.isEmpty()) {
                 return EtherwarpWaypoint.BoxSpec.DEFAULT;
             }
 
-            Vec3d minVec = min.get();
-            Vec3d maxVec = max.get();
+            Vec3 minVec = min.get();
+            Vec3 maxVec = max.get();
             if (maxVec.x <= minVec.x || maxVec.y <= minVec.y || maxVec.z <= minVec.z) {
                 log.warn("Invalid custom box extents, using default box");
                 return EtherwarpWaypoint.BoxSpec.DEFAULT;

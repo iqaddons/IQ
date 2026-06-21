@@ -5,11 +5,11 @@ import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.ScreenDrawSlotEvent;
 import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.hud.HudManager;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,28 +18,28 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(HandledScreen.class)
-public class HandledScreenMixin {
+@Mixin(AbstractContainerScreen.class)
+public class AbstractContainerScreenMixin {
 
     @Shadow
-    protected int x;
+    protected int leftPos;
 
     @Shadow
-    protected int y;
+    protected int topPos;
 
-    @Inject(method = "render", at = @At("TAIL"))
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void iq$renderHudOverHandledScreen(
-            DrawContext context,
+            GuiGraphicsExtractor context,
             int mouseX, int mouseY,
-            float deltaTicks,
+            float a,
             CallbackInfo ci
     ) {
-        HudManager.get().renderOnHandledScreen(context, mouseX, mouseY, deltaTicks);
+        HudManager.get().renderOnHandledScreen(context, mouseX, mouseY, a);
     }
 
-    @Inject(method = "drawSlot", at = @At("TAIL"))
-    private void iq$highlightOpenedCroesusChests(DrawContext context, Slot slot, int x, int y, CallbackInfo ci) {
-        HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
+    @Inject(method = "extractSlot", at = @At("TAIL"))
+    private void iq$highlightOpenedCroesusChests(GuiGraphicsExtractor context, Slot slot, int x, int y, CallbackInfo ci) {
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         EventBus.post(new ScreenDrawSlotEvent(
                 screen,
                 context,
@@ -49,14 +49,14 @@ public class HandledScreenMixin {
     }
 
     @Inject(
-            method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V",
+            method = "slotClicked",
             at = @At("HEAD"),
             cancellable = true
     )
     private void onSlotClick(Slot slot, int slotId, int button,
-            SlotActionType actionType, CallbackInfo ci
+                             ContainerInput actionType, CallbackInfo ci
     ) {
-        HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
+        AbstractContainerScreen<?> screen = (AbstractContainerScreen<?>) (Object) this;
         ScreenClickEvent event = EventBus.post(new ScreenClickEvent(
                 screen,
                 slot,
@@ -74,9 +74,9 @@ public class HandledScreenMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void iq$onKeyPressed(@NotNull KeyInput input, CallbackInfoReturnable<Boolean> cir) {
+    private void iq$onKeyPressed(@NotNull KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
         ScreenKeyPressEvent event = EventBus.post(
-                new ScreenKeyPressEvent((HandledScreen<?>) (Object) this, input.key(), input.scancode(), input.modifiers())
+                new ScreenKeyPressEvent((AbstractContainerScreen<?>) (Object) this, input.key(), input.scancode(), input.modifiers())
         );
 
         if (event.isCancelled()) {

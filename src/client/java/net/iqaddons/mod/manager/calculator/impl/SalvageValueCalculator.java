@@ -3,7 +3,7 @@ package net.iqaddons.mod.manager.calculator.impl;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.manager.calculator.ItemValueCalculator;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -14,7 +14,7 @@ public class SalvageValueCalculator implements ItemValueCalculator {
 
     @Override
     public double calculateValue(@NotNull ItemStack stack, String itemId, int quantity) {
-        int stars = countStars(stack.getName().getString());
+        int stars = countStars(stack.getHoverName().getString());
         int totalStarCost = 0;
         for (int star = 1; star <= stars; star++) {
             totalStarCost += 20 + (star * 5);

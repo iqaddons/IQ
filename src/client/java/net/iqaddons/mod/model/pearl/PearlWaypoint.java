@@ -1,13 +1,13 @@
 package net.iqaddons.mod.model.pearl;
 
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public record PearlWaypoint(
-        @NotNull Vec3d target,
+        @NotNull Vec3 target,
         @NotNull RenderColor color,
-        Vec3d standBlock,
+        Vec3 standBlock,
         Integer preSupply,
         Integer hideForPre,
         float size,

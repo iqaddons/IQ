@@ -9,11 +9,11 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.utils.ScoreboardUtils;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +27,7 @@ public class ChestCounterWidget extends HudWidget {
      * This avoids the "white square" bug caused by some mods (e.g. ImmediatelyFast) that
      * interfere with custom font providers, causing the glyph to fall back to a blank white box.
      */
-    private static final Identifier KUUDRA_TEXTURE = Identifier.of("iq", "textures/widgets/kuudra_icon.png");
+    private static final Identifier KUUDRA_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/widgets/kuudra_icon.png");
     private static final int KUUDRA_TEXTURE_SIZE = 284;
     // Visible icon bounds inside kuudra_icon.png (avoids scaling transparent margins).
     private static final int ICON_U = 49;
@@ -81,18 +81,18 @@ public class ChestCounterWidget extends HudWidget {
     // ── Rendering ────────────────────────────────────────────────────────────
 
     @Override
-    protected float getLineStartX(@NotNull TextRenderer textRenderer) {
+    protected float getLineStartX(@NotNull Font textRenderer) {
         return getIconRenderWidth() + ICON_GAP;
     }
 
     @Override
     protected void renderBeforeLines(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             float x,
             float y,
             int width,
             int height,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {
         drawKuudraIcon(context, x, y, textRenderer);
     }
@@ -108,38 +108,38 @@ public class ChestCounterWidget extends HudWidget {
 
     @Override
     public int getHeight() {
-        return Math.max(super.getHeight(), getIconRenderHeight(mc.textRenderer));
+        return Math.max(super.getHeight(), getIconRenderHeight(mc.font));
     }
 
     private void drawKuudraIcon(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             float x,
             float y,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {
         int iconWidth = getIconRenderWidth();
         int iconHeight = getIconRenderHeight(textRenderer);
         int iconX = Math.round(x);
         int iconY = Math.round(y) + ICON_Y_OFFSET;
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, KUUDRA_TEXTURE,
+        context.blit(RenderPipelines.GUI_TEXTURED, KUUDRA_TEXTURE,
                 iconX, iconY, (float) ICON_U, (float) ICON_V,
                 iconWidth, iconHeight,
                 ICON_SOURCE_WIDTH, ICON_SOURCE_HEIGHT,
                 KUUDRA_TEXTURE_SIZE, KUUDRA_TEXTURE_SIZE);
     }
 
-    private int getIconRenderHeight(TextRenderer textRenderer) {
+    private int getIconRenderHeight(Font textRenderer) {
         if (textRenderer == null) {
             return ICON_SIZE_FALLBACK;
         }
 
-        return Math.max(1, textRenderer.fontHeight);
+        return Math.max(1, textRenderer.lineHeight);
     }
 
     private int getIconRenderWidth() {
         float aspect = ICON_SOURCE_WIDTH / (float) ICON_SOURCE_HEIGHT;
-        int iconHeight = getIconRenderHeight(mc.textRenderer);
+        int iconHeight = getIconRenderHeight(mc.font);
         return Math.max(1, Math.round(iconHeight * aspect));
     }
 
@@ -164,7 +164,7 @@ public class ChestCounterWidget extends HudWidget {
     }
 
     /** Counter text only — the icon is painted separately via {@link #drawKuudraIcon}. */
-    private Text buildText(String color, int chests) {
-        return Text.literal(String.format("%s%d§7/%d", color, chests, ChestCounterManager.MAX_CHESTS));
+    private Component buildText(String color, int chests) {
+        return Component.literal(String.format("%s%d§7/%d", color, chests, ChestCounterManager.MAX_CHESTS));
     }
 }

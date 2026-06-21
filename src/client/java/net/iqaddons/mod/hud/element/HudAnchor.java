@@ -1,6 +1,6 @@
 package net.iqaddons.mod.hud.element;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
 public enum HudAnchor {
@@ -84,10 +84,10 @@ public enum HudAnchor {
     }
 
     public static int @NotNull [] getScreenDimensions() {
-        MinecraftClient mc = MinecraftClient.getInstance();
+        Minecraft mc = Minecraft.getInstance();
         return new int[]{
-                mc.getWindow().getScaledWidth(),
-                mc.getWindow().getScaledHeight()
+                mc.getWindow().getGuiScaledWidth(),
+                mc.getWindow().getGuiScaledHeight()
         };
     }
 }

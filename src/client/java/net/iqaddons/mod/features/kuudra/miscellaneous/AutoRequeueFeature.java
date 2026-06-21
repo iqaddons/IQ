@@ -65,19 +65,19 @@ public class AutoRequeueFeature extends Feature {
             return;
         }
 
-        if (mc.player == null || mc.player.networkHandler == null) {
+        if (mc.player == null || mc.player.connection == null) {
             log.debug("Skipping auto-requeue because player context is not ready");
             return;
         }
 
-        if (mc.world == null || mc.currentScreen != null) {
+        if (mc.level == null || mc.screen != null) {
             log.debug("Auto-requeue pending, waiting for world/screen to be ready");
             return;
         }
 
         pendingRequeueTicks = -1;
         waitingForRequeueResponse = true;
-        mc.player.networkHandler.sendChatCommand("instancerequeue");
+        mc.player.connection.sendCommand("instancerequeue");
         MessageUtil.INFO.sendMessage("§aAuto Requeue: executing §f/instancerequeue§a.");
         log.info("Executed auto-requeue command");
     }

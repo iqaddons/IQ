@@ -2,8 +2,8 @@ package net.iqaddons.mod.model.etherwarp;
 
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public record EtherwarpWaypoint(
         @NotNull String name,
-        @NotNull List<Vec3d> positions,
+        @NotNull List<Vec3> positions,
         int colorRgb,                     // Cor default em formato RGB
         @NotNull List<Integer> colorsRgb, // Cores por posicao (opcional)
         float alpha,                      // 0.0 - 1.0
@@ -45,13 +45,13 @@ public record EtherwarpWaypoint(
         return colorsRgb.get(colorsRgb.size() - 1);
     }
 
-    public record BoxSpec(@NotNull Vec3d min, @NotNull Vec3d max) {
-        public static final BoxSpec DEFAULT = new BoxSpec(new Vec3d(-0.5, 0.0, -0.5), new Vec3d(0.5, 1.0, 0.5));
+    public record BoxSpec(@NotNull Vec3 min, @NotNull Vec3 max) {
+        public static final BoxSpec DEFAULT = new BoxSpec(new Vec3(-0.5, 0.0, -0.5), new Vec3(0.5, 1.0, 0.5));
 
-        public Box toWorldBox(@NotNull Vec3d center) {
-            return new Box(
-                    center.getX() + min.getX(), center.getY() + min.getY(), center.getZ() + min.getZ(),
-                    center.getX() + max.getX(), center.getY() + max.getY(), center.getZ() + max.getZ()
+        public AABB toWorldBox(@NotNull Vec3 center) {
+            return new AABB(
+                    center.x() + min.x(), center.y() + min.y(), center.z() + min.z(),
+                    center.x() + max.x(), center.y() + max.y(), center.z() + max.z()
             );
         }
     }
@@ -71,27 +71,27 @@ public record EtherwarpWaypoint(
         CUSTOM
     }
 
-    public Box getRenderBox(@NotNull Vec3d center) {
+    public AABB getRenderBox(@NotNull Vec3 center) {
         return switch (shape) {
-            case TOP -> new Box(center.getX() - 0.5, center.getY() + 0.875, center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5);
-            case BOTTOM -> new Box(center.getX() - 0.5, center.getY(), center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 0.125, center.getZ() + 0.5);
-            case SLAB_LOWER, HALF_LOWER -> new Box(center.getX() - 0.5, center.getY(), center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5);
-            case SLAB_UPPER, HALF_UPPER -> new Box(center.getX() - 0.5, center.getY() + 0.5, center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5);
-            case CENTER_PLATE -> new Box(center.getX() - 0.25, center.getY() + 0.45, center.getZ() - 0.25,
-                    center.getX() + 0.25, center.getY() + 0.55, center.getZ() + 0.25);
-            case EDGE_TOP -> new Box(center.getX() - 0.5, center.getY() + 0.95, center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5);
-            case EDGE_BOTTOM -> new Box(center.getX() - 0.5, center.getY(), center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 0.05, center.getZ() + 0.5);
-            case PILLAR -> new Box(center.getX() - 0.2, center.getY(), center.getZ() - 0.2,
-                    center.getX() + 0.2, center.getY() + 1.0, center.getZ() + 0.2);
+            case TOP -> new AABB(center.x() - 0.5, center.y() + 0.875, center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 1.0, center.z() + 0.5);
+            case BOTTOM -> new AABB(center.x() - 0.5, center.y(), center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 0.125, center.z() + 0.5);
+            case SLAB_LOWER, HALF_LOWER -> new AABB(center.x() - 0.5, center.y(), center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 0.5, center.z() + 0.5);
+            case SLAB_UPPER, HALF_UPPER -> new AABB(center.x() - 0.5, center.y() + 0.5, center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 1.0, center.z() + 0.5);
+            case CENTER_PLATE -> new AABB(center.x() - 0.25, center.y() + 0.45, center.z() - 0.25,
+                    center.x() + 0.25, center.y() + 0.55, center.z() + 0.25);
+            case EDGE_TOP -> new AABB(center.x() - 0.5, center.y() + 0.95, center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 1.0, center.z() + 0.5);
+            case EDGE_BOTTOM -> new AABB(center.x() - 0.5, center.y(), center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 0.05, center.z() + 0.5);
+            case PILLAR -> new AABB(center.x() - 0.2, center.y(), center.z() - 0.2,
+                    center.x() + 0.2, center.y() + 1.0, center.z() + 0.2);
             case CUSTOM -> boxSpec.toWorldBox(center);
-            case FULL -> new Box(center.getX() - 0.5, center.getY(), center.getZ() - 0.5,
-                    center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5);
+            case FULL -> new AABB(center.x() - 0.5, center.y(), center.z() - 0.5,
+                    center.x() + 0.5, center.y() + 1.0, center.z() + 0.5);
         };
     }
 
@@ -112,12 +112,12 @@ public record EtherwarpWaypoint(
     /**
      * Gera um identificador único baseado na posição e nome.
      */
-    public String getUniqueId(@NotNull Vec3d pos) {
+    public String getUniqueId(@NotNull Vec3 pos) {
         return String.format("%s_%.3f_%.3f_%.3f", name, pos.x, pos.y, pos.z);
     }
 
     // Compatibilidade com configs/uso legados que assumiam apenas uma posição.
-    public @NotNull Vec3d firstPosition() {
+    public @NotNull Vec3 firstPosition() {
         return positions.get(0);
     }
 }

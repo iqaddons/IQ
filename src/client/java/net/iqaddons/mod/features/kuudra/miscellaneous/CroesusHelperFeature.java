@@ -7,10 +7,10 @@ import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.ChestProfitUtil;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -37,7 +37,7 @@ public class CroesusHelperFeature extends Feature {
         if (!title.contains("croesus") && !title.contains("vesuvius")) return;
 
         var slot = event.slot();
-        var hasOpenedChest = ChestProfitUtil.getLoreLines(slot.getStack()).stream()
+        var hasOpenedChest = ChestProfitUtil.getLoreLines(slot.getItem()).stream()
                 .map(String::toLowerCase)
                 .anyMatch(line -> line.contains(OPENED_CHEST_LORE.toLowerCase()));
         if (hasOpenedChest) {
@@ -49,26 +49,26 @@ public class CroesusHelperFeature extends Feature {
     }
 
     private void onScreenKeyPress(@NotNull ScreenKeyPressEvent event) {
-        if (!(event.getScreen() instanceof HandledScreen<?> handledScreen)) return;
+        if (!(event.getScreen() instanceof AbstractContainerScreen<?> handledScreen)) return;
         if (!isCroesusScreen(event.getScreenTitle())) return;
 
         Optional<Slot> navigationSlot;
-        if (IQKeyBindings.getAdvanceCroesusPageKey().matchesKey(new KeyInput(event.getKeyCode(), event.getScanCode(), 0))) {
+        if (IQKeyBindings.getAdvanceCroesusPageKey().matches(new KeyEvent(event.getKeyCode(), event.getScanCode(), 0))) {
             navigationSlot = findNavigationSlot(handledScreen, "next");
-        } else if (IQKeyBindings.getGoBackCroesusPageKey().matchesKey(new KeyInput(event.getKeyCode(), event.getScanCode(), 0))) {
+        } else if (IQKeyBindings.getGoBackCroesusPageKey().matches(new KeyEvent(event.getKeyCode(), event.getScanCode(), 0))) {
             navigationSlot = findNavigationSlot(handledScreen, "previous", "back");
         } else {
             return;
         }
 
-        if (navigationSlot.isEmpty() || mc.player == null || mc.interactionManager == null) return;
+        if (navigationSlot.isEmpty() || mc.player == null || mc.gameMode == null) return;
 
         event.setCancelled(true);
-        mc.interactionManager.clickSlot(
-                handledScreen.getScreenHandler().syncId,
-                navigationSlot.get().id,
+        mc.gameMode.handleContainerInput(
+                handledScreen.getMenu().containerId,
+                navigationSlot.get().index,
                 0,
-                SlotActionType.CLONE,
+                ContainerInput.CLONE,
                 mc.player
         );
     }
@@ -78,15 +78,15 @@ public class CroesusHelperFeature extends Feature {
         return normalizedTitle.contains("croesus") || normalizedTitle.contains("vesuvius");
     }
 
-    private @NotNull Optional<Slot> findNavigationSlot(@NotNull HandledScreen<?> screen, @NotNull String @NotNull ... labels) {
-        return screen.getScreenHandler().slots.stream()
+    private @NotNull Optional<Slot> findNavigationSlot(@NotNull AbstractContainerScreen<?> screen, @NotNull String @NotNull ... labels) {
+        return screen.getMenu().slots.stream()
                 .filter(slot -> hasAnyLabel(slot, labels))
                 .findFirst();
     }
 
     private boolean hasAnyLabel(@NotNull Slot slot, @NotNull String @NotNull ... labels) {
-        if (!slot.hasStack()) return false;
-        String stackName = StringUtils.stripFormatting(slot.getStack().getName().getString()).toLowerCase(Locale.ROOT);
+        if (!slot.hasItem()) return false;
+        String stackName = StringUtils.stripFormatting(slot.getItem().getHoverName().getString()).toLowerCase(Locale.ROOT);
         for (String label : labels) {
             if (stackName.contains(label)) {
                 return true;

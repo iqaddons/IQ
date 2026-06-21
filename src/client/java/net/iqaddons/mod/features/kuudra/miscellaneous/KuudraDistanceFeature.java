@@ -6,7 +6,7 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -31,13 +31,13 @@ public class KuudraDistanceFeature extends KuudraFeature {
         var bossInfo = currentContext().bossInfo();
         if (!bossInfo.isAlive() || mc.player == null) return;
 
-        var kuudraPos = bossInfo.bossEntity().getEntityPos();
-        var playerPos = mc.player.getEntityPos();
+        var kuudraPos = bossInfo.bossEntity().position();
+        var playerPos = mc.player.position();
         var distance = playerPos.distanceTo(kuudraPos);
 
         event.drawText(
                 kuudraPos.add(0, 8.5, 0),
-                Text.literal(String.format(Locale.ROOT, "%.1fm", distance)),
+                Component.literal(String.format(Locale.ROOT, "%.1fm", distance)),
                 0.20f,
                 true,
                 getDistanceColor(distance)

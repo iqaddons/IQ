@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.Feature;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Pattern;
@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class PartyJoinSoundFeature extends Feature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     private static final Pattern PARTY_JOIN_PATTERN = Pattern.compile("^\\w+ joined the party[.!]?$");
 
     public PartyJoinSoundFeature() {
@@ -34,14 +34,14 @@ public class PartyJoinSoundFeature extends Feature {
         String message = event.getStrippedMessage();
 
         if (isPartyJoinMessage(message)) {
-            if (mc.player == null || mc.world == null) {
+            if (mc.player == null || mc.level == null) {
                 return;
             }
 
-            mc.world.playSound(
-                    mc.player, mc.player.getBlockPos(),
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
-                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            mc.level.playSound(
+                    mc.player, mc.player.blockPosition(),
+                    SoundEvents.NOTE_BLOCK_PLING.value(),
+                    SoundSource.PLAYERS, 2.0f, 1.0f
             );
         }
     }

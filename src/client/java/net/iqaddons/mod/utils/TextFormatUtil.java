@@ -1,8 +1,8 @@
 package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,23 +18,23 @@ public class TextFormatUtil {
      * Converts a Text component to a string with legacy formatting codes (§).
      * This preserves colors and formatting that would otherwise be lost.
      */
-    public static @NotNull String toLegacyString(@NotNull Text text) {
+    public static @NotNull String toLegacyString(@NotNull Component text) {
         StringBuilder result = new StringBuilder();
         appendTextWithFormatting(text, result);
         return result.toString();
     }
 
-    private static void appendTextWithFormatting(@NotNull Text text, @NotNull StringBuilder builder) {
+    private static void appendTextWithFormatting(@NotNull Component text, @NotNull StringBuilder builder) {
         Style style = text.getStyle();
         String formatCodes = styleToLegacyCodes(style);
         if (!formatCodes.isEmpty()) {
             builder.append(formatCodes);
         }
         
-        String content = text.copyContentOnly().getString();
+        String content = text.plainCopy().getString();
         builder.append(content);
         
-        for (Text sibling : text.getSiblings()) {
+        for (Component sibling : text.getSiblings()) {
             appendTextWithFormatting(sibling, builder);
         }
     }
@@ -42,7 +42,7 @@ public class TextFormatUtil {
     private static @NotNull String styleToLegacyCodes(@NotNull Style style) {
         StringBuilder codes = new StringBuilder();
         if (style.getColor() != null) {
-            String colorCode = colorToLegacyCode(style.getColor().getName());
+            String colorCode = colorToLegacyCode(style.getColor().serialize());
             if (colorCode != null) {
                 codes.append(colorCode);
             }
@@ -84,7 +84,7 @@ public class TextFormatUtil {
      * Extracts a player name with formatting from a chat message.
      * Looks for the player name before "recovered" and preserves color codes.
      */
-    public static @NotNull String extractPlayerNameFormatted(@NotNull Text text, @NotNull String plainPlayerName) {
+    public static @NotNull String extractPlayerNameFormatted(@NotNull Component text, @NotNull String plainPlayerName) {
         StringBuilder result = new StringBuilder();
         extractPlayerNameFromText(text, plainPlayerName, result, new StringBuilder());
         
@@ -93,14 +93,14 @@ public class TextFormatUtil {
     }
 
     private static boolean extractPlayerNameFromText(
-            @NotNull Text text,
+            @NotNull Component text,
             @NotNull String targetName,
             @NotNull StringBuilder result,
             @NotNull StringBuilder currentPath
     ) {
         Style style = text.getStyle();
         String formatCodes = styleToLegacyCodes(style);
-        String content = text.copyContentOnly().getString();
+        String content = text.plainCopy().getString();
         
         currentPath.append(formatCodes).append(content);
         if (currentPath.toString().contains(targetName)) {
@@ -111,7 +111,7 @@ public class TextFormatUtil {
             return true;
         }
         
-        for (Text sibling : text.getSiblings()) {
+        for (Component sibling : text.getSiblings()) {
             if (extractPlayerNameFromText(sibling, targetName, result, currentPath)) {
                 return true;
             }

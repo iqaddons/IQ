@@ -10,9 +10,9 @@ import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TextColor;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -63,7 +63,7 @@ public class CratePriorityWidget extends HudWidget {
         markDimensionsDirty();
 
         if (PhaseOneConfig.CratePriorityConfig.cratePrioritySound && mc.player != null) {
-            mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(), 1.6f, 1.0f);
+            mc.player.playSound(SoundEvents.NOTE_BLOCK_PLING.value(), 1.6f, 1.0f);
         }
     }
 
@@ -81,22 +81,22 @@ public class CratePriorityWidget extends HudWidget {
     }
 
     @Override
-    public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+    public void render(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
         renderWidget(context, mouseX, mouseY, false);
     }
 
     @Override
-    public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+    public void renderExample(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
         renderWidget(context, mouseX, mouseY, true);
     }
 
-    private void renderWidget(@NotNull DrawContext context, double mouseX, double mouseY, boolean preview) {
+    private void renderWidget(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, boolean preview) {
         String renderText = getRenderText(preview);
         if (renderText.isEmpty()) {
             return;
         }
 
-        var textRenderer = mc.textRenderer;
+        var textRenderer = mc.font;
         if (textRenderer == null) {
             return;
         }
@@ -115,8 +115,8 @@ public class CratePriorityWidget extends HudWidget {
         int centerX = Math.round(scaledX + (widgetWidth / 2.0f));
         int textY = Math.round(scaledY);
 
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
 
         if (preview) {
             renderEditorOverlay(context, mouseX, mouseY, textRenderer, (int) scaledX, textY, widgetWidth, widgetHeight);
@@ -124,29 +124,29 @@ public class CratePriorityWidget extends HudWidget {
 
         HudRenderer.drawCenteredText(context, renderText, centerX, textY, textArgb);
 
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
     }
 
     @Override
     public int getWidth() {
-        var textRenderer = mc.textRenderer;
+        var textRenderer = mc.font;
         if (textRenderer == null) {
             return 20;
         }
 
-        int referenceWidth = textRenderer.getWidth(MIN_REFERENCE_TEXT);
-        int dynamicWidth = text.isEmpty() ? 0 : textRenderer.getWidth(text);
+        int referenceWidth = textRenderer.width(MIN_REFERENCE_TEXT);
+        int dynamicWidth = text.isEmpty() ? 0 : textRenderer.width(text);
         return Math.max(referenceWidth, dynamicWidth);
     }
 
     @Override
     public int getHeight() {
-        var textRenderer = mc.textRenderer;
+        var textRenderer = mc.font;
         if (textRenderer == null) {
             return 1;
         }
 
-        return textRenderer.fontHeight;
+        return textRenderer.lineHeight;
     }
 
     private float getAlpha() {
@@ -215,10 +215,10 @@ public class CratePriorityWidget extends HudWidget {
     }
 
     private void renderEditorOverlay(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             double mouseX,
             double mouseY,
-            @NotNull TextRenderer textRenderer,
+            @NotNull Font textRenderer,
             int x,
             int y,
             int width,
@@ -234,8 +234,8 @@ public class CratePriorityWidget extends HudWidget {
     }
 
     private void renderSelectionBorder(
-            @NotNull DrawContext context,
-            @NotNull TextRenderer textRenderer,
+            @NotNull GuiGraphicsExtractor context,
+            @NotNull Font textRenderer,
             int x,
             int y,
             int width,
@@ -251,18 +251,18 @@ public class CratePriorityWidget extends HudWidget {
         String widgetName = getDisplayName();
         String widgetLocation = String.format("X: %.0f Y: %.0f", getX(), getY());
 
-        int nameX = x + (width - textRenderer.getWidth(widgetName)) / 2;
-        int locationX = x + (width - textRenderer.getWidth(widgetLocation)) / 2;
+        int nameX = x + (width - textRenderer.width(widgetName)) / 2;
+        int locationX = x + (width - textRenderer.width(widgetLocation)) / 2;
 
-        context.drawTextWithShadow(
+        context.text(
                 textRenderer,
                 widgetName,
                 nameX,
-                y - textRenderer.fontHeight - 2,
+                y - textRenderer.lineHeight - 2,
                 new Color(255, 255, 255, 220).getRGB()
         );
 
-        context.drawTextWithShadow(
+        context.text(
                 textRenderer,
                 widgetLocation,
                 locationX,

@@ -28,7 +28,7 @@ public class LimboAlertFeature extends Feature {
             MessageUtil.PARTY.sendMessage("[IQ] Kicked, will be back in 60s probably.");
 
             mc.player.playSound(
-                    net.minecraft.sound.SoundEvents.ENTITY_ENDER_DRAGON_GROWL,
+                    net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL,
                     2.0f, 1.0f
             );
         }

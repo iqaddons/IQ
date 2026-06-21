@@ -7,7 +7,7 @@ import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.BoundingBox2D;
-import net.minecraft.client.render.entity.state.ArmorStandEntityRenderState;
+import net.minecraft.client.renderer.entity.state.ArmorStandRenderState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -38,19 +38,19 @@ public class HideUselessArmorStandsFeature extends KuudraFeature {
         }
     }
 
-    private boolean shouldHide(ArmorStandEntityRenderState state) {
+    private boolean shouldHide(ArmorStandRenderState state) {
         EnumSet<HiddenArmorStandType> selected = selectedTypes();
         if (selected.isEmpty()) return false;
 
         for (HiddenArmorStandType type : selected) {
             if (type == HiddenArmorStandType.OTHERS) continue;
             if (type.getArea() != null && type.getArea().contains(state.x, state.z)) {
-                return state.displayName == null;
+                return state.nameTag == null;
             }
         }
 
         if (!selected.contains(HiddenArmorStandType.OTHERS)) return false;
-        if (state.displayName != null) return false;
+        if (state.nameTag != null) return false;
 
         for (HiddenArmorStandType type : HiddenArmorStandType.values()) {
             if (type == HiddenArmorStandType.OTHERS || type.getArea() == null) {

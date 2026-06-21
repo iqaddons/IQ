@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.URI;
@@ -59,8 +59,8 @@ public final class ModrinthUpdateChecker {
         executor.shutdownNow();
     }
 
-    private void onServerJoin(@NotNull MinecraftClient client) {
-        if (client.getCurrentServerEntry() == null) {
+    private void onServerJoin(@NotNull Minecraft client) {
+        if (client.getCurrentServer() == null) {
             return;
         }
 

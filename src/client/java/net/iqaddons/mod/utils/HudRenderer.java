@@ -1,11 +1,11 @@
 package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -15,63 +15,63 @@ import java.util.List;
 @UtilityClass
 public class HudRenderer {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     public static void drawText(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             @NotNull String text,
             int x, int y,
             int color
     ) {
-        TextRenderer textRenderer = mc.textRenderer;
+        Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        context.drawTextWithShadow(textRenderer, text, x, y, color);
+        context.text(textRenderer, text, x, y, color);
     }
 
     public static void drawCenteredText(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             @NotNull String text,
             int centerX, int y,
             int color
     ) {
-        TextRenderer textRenderer = mc.textRenderer;
+        Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        int width = textRenderer.getWidth(text);
-        context.drawTextWithShadow(textRenderer, text, centerX - width / 2, y, color);
+        int width = textRenderer.width(text);
+        context.text(textRenderer, text, centerX - width / 2, y, color);
     }
 
     public static void drawTooltip(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             @NotNull String text,
             double mouseX,
             double mouseY,
             float scale
     ) {
-        TextRenderer textRenderer = mc.textRenderer;
+        Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
         String[] lines = text.split("\n");
-        List<OrderedText> orderedLines = new ArrayList<>();
+        List<FormattedCharSequence> orderedLines = new ArrayList<>();
         int maxWidth = 0;
 
         for (String line : lines) {
-            OrderedText ordered = Text.of(line).asOrderedText();
+            FormattedCharSequence ordered = Component.nullToEmpty(line).getVisualOrderText();
             orderedLines.add(ordered);
-            maxWidth = Math.max(maxWidth, textRenderer.getWidth(ordered));
+            maxWidth = Math.max(maxWidth, textRenderer.width(ordered));
         }
 
         int x = (int) (mouseX / scale) + 8;
         int y = (int) (mouseY / scale) - 4;
 
         int padding = 4;
-        int lineHeight = textRenderer.fontHeight + 2;
+        int lineHeight = textRenderer.lineHeight + 2;
         int boxWidth = maxWidth + padding * 2;
         int boxHeight = orderedLines.size() * lineHeight + padding * 2 - 2;
 
-        int screenWidth = mc.getWindow().getScaledWidth();
-        int screenHeight = mc.getWindow().getScaledHeight();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
 
         if (x + boxWidth > screenWidth / scale) {
             x = (int) (mouseX / scale) - boxWidth - 8;
@@ -87,14 +87,14 @@ public class HudRenderer {
         context.fill(x, y, x + boxWidth, y + boxHeight, bgColor);
 
         int textY = y + padding;
-        for (OrderedText line : orderedLines) {
-            context.drawText(textRenderer, line, x + padding, textY, -1, true);
+        for (FormattedCharSequence line : orderedLines) {
+            context.text(textRenderer, line, x + padding, textY, -1, true);
             textY += lineHeight;
         }
     }
 
     public static void drawSimpleTooltip(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             @NotNull String text,
             double mouseX,
             double mouseY
@@ -103,14 +103,14 @@ public class HudRenderer {
     }
 
     public static void drawBox(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height,
             int fillColor,
             int borderColor
     ) {
         context.fill(x, y, x + width, y + height, fillColor);
-        context.drawStrokedRectangle(
+        context.outline(
                 x, y,
                 width, height,
                 borderColor
@@ -118,7 +118,7 @@ public class HudRenderer {
     }
 
     public static void drawBackground(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height,
             int alpha
@@ -128,7 +128,7 @@ public class HudRenderer {
     }
 
     public static void drawHighlight(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height
     ) {
@@ -137,14 +137,14 @@ public class HudRenderer {
     }
 
     public static void drawProgressBar(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height,
             float progress,
             int fillColor,
             int emptyColor
     ) {
-        if (mc.currentScreen != null) return;
+        if (mc.screen != null) return;
         progress = Math.clamp(progress, 0.0f, 1.0f);
         int filledWidth = (int) (width * progress);
 
@@ -156,7 +156,7 @@ public class HudRenderer {
             context.fill(x, y, x + filledWidth, y + height, fillColor);
         }
 
-        context.drawStrokedRectangle(
+        context.outline(
                 x, y,
                 width, height,
                 0xFF3C3C3C
@@ -164,7 +164,7 @@ public class HudRenderer {
     }
 
     public static void drawProgressBarAuto(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height,
             float progress
@@ -190,21 +190,21 @@ public class HudRenderer {
     }
 
     public static double @NotNull [] getScaledMousePosition() {
-        double scaleFactor = mc.getWindow().getScaleFactor();
-        double mouseX = mc.mouse.getX() / scaleFactor;
-        double mouseY = mc.mouse.getY() / scaleFactor;
+        double scaleFactor = mc.getWindow().getGuiScale();
+        double mouseX = mc.mouseHandler.xpos() / scaleFactor;
+        double mouseY = mc.mouseHandler.ypos() / scaleFactor;
         return new double[]{mouseX, mouseY};
     }
 
-    public static @NotNull TextRenderer getTextRenderer() {
-        return mc.textRenderer;
+    public static @NotNull Font getTextRenderer() {
+        return mc.font;
     }
 
     public static int getFontHeight() {
-        return mc.textRenderer.fontHeight;
+        return mc.font.lineHeight;
     }
 
     public static int getTextWidth(@NotNull String text) {
-        return mc.textRenderer.getWidth(text);
+        return mc.font.width(text);
     }
 }

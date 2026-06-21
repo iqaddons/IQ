@@ -16,13 +16,13 @@ import net.iqaddons.mod.model.profit.chest.data.ChestContents;
 import net.iqaddons.mod.model.profit.chest.data.ChestData;
 import net.iqaddons.mod.model.profit.chest.type.ChestKeyType;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +72,7 @@ public final class ChestProfitUtil {
                 continue;
             }
 
-            ItemStack stack = slots.get(slotId).getStack();
+            ItemStack stack = slots.get(slotId).getItem();
             if (stack == null || stack.isEmpty()) {
                 continue;
             }
@@ -91,7 +91,7 @@ public final class ChestProfitUtil {
                     itemValue -= bonusValue;
 
                     items.add(new ChestItemValue(
-                            Text.literal("§dCrimson Essence Bonus"),
+                            Component.literal("§dCrimson Essence Bonus"),
                             bonusQuantity,
                             bonusValue
                     ));
@@ -99,7 +99,7 @@ public final class ChestProfitUtil {
             }
 
             items.add(new ChestItemValue(
-                    stack.getName(),
+                    stack.getHoverName(),
                     Math.max(1, stack.getCount()),
                     itemValue
             ));
@@ -133,7 +133,7 @@ public final class ChestProfitUtil {
                 continue;
             }
 
-            ItemStack stack = slots.get(slotId).getStack();
+            ItemStack stack = slots.get(slotId).getItem();
             if (stack == null || stack.isEmpty()) {
                 continue;
             }
@@ -171,7 +171,7 @@ public final class ChestProfitUtil {
             return false;
         }
 
-        String title = Formatting.strip(stack.getName().getString()).toLowerCase();
+        String title = ChatFormatting.stripFormatting(stack.getHoverName().getString()).toLowerCase();
         if (!title.contains("reroll")) return false;
 
         String loreJoined = getLoreLines(stack).stream()
@@ -183,7 +183,7 @@ public final class ChestProfitUtil {
     }
 
     public static int resolveItemQuantity(@NotNull ItemStack stack) {
-        String name = StringUtils.stripFormatting(stack.getName().getString());
+        String name = StringUtils.stripFormatting(stack.getHoverName().getString());
         int index = name.lastIndexOf(" x");
         if (index == -1) {
             return stack.getCount();
@@ -201,7 +201,7 @@ public final class ChestProfitUtil {
         if (isFreeChest(slots)) return ChestKeyType.FREE;
         if (INFO_SLOT >= slots.size()) return ChestKeyType.UNKNOWN;
 
-        ItemStack infoStack = slots.get(49).getStack();
+        ItemStack infoStack = slots.get(49).getItem();
         if (infoStack == null || infoStack.isEmpty()) {
             return ChestKeyType.UNKNOWN;
         }
@@ -224,7 +224,7 @@ public final class ChestProfitUtil {
 
     private static boolean isFreeChest(@NotNull List<Slot> slots) {
         if (BUY_SLOT >= slots.size()) return false;
-        ItemStack buyStack = slots.get(BUY_SLOT).getStack();
+        ItemStack buyStack = slots.get(BUY_SLOT).getItem();
         if (buyStack == null || buyStack.isEmpty()) {
             return false;
         }
@@ -249,7 +249,7 @@ public final class ChestProfitUtil {
         }
 
         String displayName = StringUtils
-                .stripFormatting(stack.getName().getString())
+                .stripFormatting(stack.getHoverName().getString())
                 .toUpperCase()
                 .trim();
 
@@ -259,7 +259,7 @@ public final class ChestProfitUtil {
 
     private static @Nullable String resolveShardId(@NotNull ItemStack stack) {
         String name = StringUtils
-                .stripFormatting(stack.getName().getString())
+                .stripFormatting(stack.getHoverName().getString())
                 .trim()
                 .toUpperCase();
 
@@ -296,10 +296,10 @@ public final class ChestProfitUtil {
     }
 
     private static @Nullable String getSkyblockItemId(@NotNull ItemStack stack) {
-        NbtComponent customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+        CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
         if (customData == null) return null;
 
-        var nbt = customData.copyNbt();
+        var nbt = customData.copyTag();
         if (!nbt.contains("id")) {
             return null;
         }
@@ -308,7 +308,7 @@ public final class ChestProfitUtil {
     }
 
     public static @NotNull List<String> getLoreLines(@NotNull ItemStack stack) {
-        LoreComponent lore = stack.get(DataComponentTypes.LORE);
+        ItemLore lore = stack.get(DataComponents.LORE);
         if (lore == null) {
             return List.of();
         }

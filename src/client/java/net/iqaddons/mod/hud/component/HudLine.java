@@ -1,11 +1,11 @@
 package net.iqaddons.mod.hud.component;
 
 import lombok.Data;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,8 +17,8 @@ import java.util.function.UnaryOperator;
 public class HudLine {
 
     private String text;
-    private Text textComponent;
-    private OrderedText orderedText;
+    private Component textComponent;
+    private FormattedCharSequence orderedText;
 
     private boolean shadow = true;
     private boolean lineBreak = true;
@@ -28,7 +28,7 @@ public class HudLine {
     private @Nullable Runnable clickAction;
     private @Nullable Runnable mouseEnterAction;
     private @Nullable Runnable mouseLeaveAction;
-    private @Nullable BiConsumer<DrawContext, TextRenderer> hoverAction;
+    private @Nullable BiConsumer<GuiGraphicsExtractor, Font> hoverAction;
 
     private boolean hovered = false;
     private BooleanSupplier visibilityCondition = () -> true;
@@ -36,10 +36,10 @@ public class HudLine {
     private Style minecraftStyle = Style.EMPTY;
 
     private HudLine(@NotNull String text) {
-        this(Text.literal(text));
+        this(Component.literal(text));
     }
 
-    private HudLine(@NotNull Text textComponent) {
+    private HudLine(@NotNull Component textComponent) {
         updateTextComponent(textComponent);
     }
 
@@ -47,7 +47,7 @@ public class HudLine {
         return new HudLine(text);
     }
 
-    public static @NotNull HudLine of(@NotNull Text textComponent) {
+    public static @NotNull HudLine of(@NotNull Component textComponent) {
         return new HudLine(textComponent);
     }
 
@@ -66,11 +66,11 @@ public class HudLine {
     }
 
     public @NotNull HudLine text(@NotNull String text) {
-        updateTextComponent(Text.literal(text));
+        updateTextComponent(Component.literal(text));
         return this;
     }
 
-    public HudLine text(@NotNull Text text) {
+    public HudLine text(@NotNull Component text) {
         updateTextComponent(text);
         return this;
     }
@@ -81,7 +81,7 @@ public class HudLine {
         return this;
     }
 
-    private void updateTextComponent(@NotNull Text newTextComponent) {
+    private void updateTextComponent(@NotNull Component newTextComponent) {
         this.textComponent = newTextComponent.copy();
         this.text = newTextComponent.getString();
         refreshOrderedText();
@@ -89,14 +89,14 @@ public class HudLine {
 
     private void refreshOrderedText() {
         this.orderedText = textComponent.copy()
-                .styled(style -> style.withParent(minecraftStyle))
-                .asOrderedText();
+                .withStyle(style -> style.applyTo(minecraftStyle))
+                .getVisualOrderText();
         this.cachedWidth = -1;
     }
 
-    public int getWidth(@NotNull TextRenderer textRenderer) {
+    public int getWidth(@NotNull Font textRenderer) {
         if (cachedWidth < 0) {
-            cachedWidth = textRenderer.getWidth(orderedText);
+            cachedWidth = textRenderer.width(orderedText);
         }
 
         return cachedWidth;
@@ -117,7 +117,7 @@ public class HudLine {
         return this;
     }
 
-    public @NotNull HudLine onHover(@NotNull BiConsumer<DrawContext, TextRenderer> action) {
+    public @NotNull HudLine onHover(@NotNull BiConsumer<GuiGraphicsExtractor, Font> action) {
         this.hoverAction = action;
         return this;
     }
@@ -148,13 +148,13 @@ public class HudLine {
     public boolean isMouseOver(
             double mouseX, double mouseY,
             float lineX, float lineY,
-            @NotNull TextRenderer textRenderer,
+            @NotNull Font textRenderer,
             float scale
     ) {
         if (text.isEmpty()) return false;
 
         float width = getWidth(textRenderer) * scale;
-        float height = (textRenderer.fontHeight + 1) * scale - 1;
+        float height = (textRenderer.lineHeight + 1) * scale - 1;
 
         return mouseX >= lineX && mouseX <= lineX + width
                 && mouseY >= lineY && mouseY <= lineY + height;
@@ -163,7 +163,7 @@ public class HudLine {
     public void updateHoverState(
             double mouseX, double mouseY,
             float lineX, float lineY,
-            @NotNull TextRenderer textRenderer,
+            @NotNull Font textRenderer,
             float scale
     ) {
         if (!isInteractive() || text.isEmpty()) return;
@@ -182,7 +182,7 @@ public class HudLine {
     public boolean handleClick(
             double mouseX, double mouseY,
             float lineX, float lineY,
-            @NotNull TextRenderer textRenderer,
+            @NotNull Font textRenderer,
             float scale
     ) {
         if (clickAction == null || text.isEmpty()) return false;
@@ -196,16 +196,16 @@ public class HudLine {
     }
 
     public void render(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {
         if (text.isEmpty()) return;
 
-        context.drawText(textRenderer, orderedText, x, y, -1, shadow);
+        context.text(textRenderer, orderedText, x, y, -1, shadow);
     }
 
-    public void renderHover(@NotNull DrawContext context, @NotNull TextRenderer textRenderer) {
+    public void renderHover(@NotNull GuiGraphicsExtractor context, @NotNull Font textRenderer) {
         if (hovered && hoverAction != null) {
             hoverAction.accept(context, textRenderer);
         }

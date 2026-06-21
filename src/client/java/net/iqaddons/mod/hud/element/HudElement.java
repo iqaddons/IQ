@@ -1,6 +1,6 @@
 package net.iqaddons.mod.hud.element;
 
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BooleanSupplier;
@@ -10,7 +10,7 @@ public interface HudElement {
     @NotNull String getId();
     @NotNull String getDisplayName();
 
-    void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta);
+    void render(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta);
 
     boolean onClick(double mouseX, double mouseY, int button);
 
@@ -55,7 +55,7 @@ public interface HudElement {
 
     void onConfigChanged();
 
-    default void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+    default void renderExample(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
         render(context, mouseX, mouseY, delta);
     }
 }

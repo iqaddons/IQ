@@ -10,8 +10,8 @@ import net.iqaddons.mod.model.WaypointData;
 import net.iqaddons.mod.utils.TextFormatUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.tracking.WaypointTracker;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,10 +51,10 @@ public class WaypointFeature extends Feature {
             var player = mc.player;
             if (player == null) return;
 
-            var distance = waypoint.distanceFrom(player.getEntityPos());
+            var distance = waypoint.distanceFrom(player.position());
             var distanceColor = getDistanceColor(distance);
 
-            event.drawStyledWithBeam(Box.from(waypoint.position()), 100, true, distanceColor.withOpacity(Configuration.Waypoints.opacity), Configuration.Waypoints.style);
+            event.drawStyledWithBeam(AABB.unitCubeFromLowerCorner(waypoint.position()), 100, true, distanceColor.withOpacity(Configuration.Waypoints.opacity), Configuration.Waypoints.style);
             event.drawText(waypoint.position(),
                     waypoint.playerName(),
                     0.1f, true,
@@ -62,7 +62,7 @@ public class WaypointFeature extends Feature {
             );
 
             event.drawText(waypoint.position().subtract(0, -1, 0),
-                    Text.of(String.format("§f%.2fm", distance)),
+                    Component.nullToEmpty(String.format("§f%.2fm", distance)),
                     0.1f, true,
                     distanceColor
             );

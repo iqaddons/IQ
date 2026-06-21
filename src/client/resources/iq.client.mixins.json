@@ -5,14 +5,14 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "ArmorStandRendererMixin",
-    "BossBarHudMixin",
+    "BossHealthOverlayMixin",
     "EntityGlowMixin",
     "EntityMixin",
-    "HandledScreenMixin",
+    "AbstractContainerScreenMixin",
     "HudClickMixin",
-    "InGameHudMixin",
+    "GuiMixin",
     "ItemUseMixin",
-    "WorldRendererMixin",
+    "LevelRendererMixin",
     "feature.BallistaBuildSoundMixin",
     "feature.FishingCastSoundMixin",
     "feature.MuteTerminatorCooldownSoundMixin"
@@ -24,7 +24,7 @@
     "requireAnnotations": true
   },
   "mixins": [
-    "ClientConnectionMixin",
+    "ConnectionMixin",
     "EntityGlowMixin",
     "feature.FishingBooberFixMixin"
   ]

@@ -1,7 +1,7 @@
 package net.iqaddons.mod.model.profit.chest.data;
 
 import net.iqaddons.mod.model.profit.chest.type.ChestKeyType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 

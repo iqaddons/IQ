@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.SubscriptionOwner;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.component.HudLine;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -22,7 +22,7 @@ import java.util.function.BooleanSupplier;
 @EqualsAndHashCode(callSuper = true)
 public abstract class HudWidget extends SubscriptionOwner implements HudElement {
 
-    protected static final MinecraftClient mc = MinecraftClient.getInstance();
+    protected static final Minecraft mc = Minecraft.getInstance();
 
     private final String id;
     private final String displayName;
@@ -125,7 +125,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     }
 
     private void recalculateDimensions() {
-        TextRenderer textRenderer = mc.textRenderer;
+        Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
         List<HudLine> renderLines = getCurrentRenderableLines();
@@ -143,14 +143,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             if (line.hasLineBreak()) {
                 maxWidth = Math.max(maxWidth, currentLineWidth);
                 currentLineWidth = 0;
-                totalHeight += textRenderer.fontHeight + 1;
+                totalHeight += textRenderer.lineHeight + 1;
             }
         }
 
         maxWidth = Math.max(maxWidth, currentLineWidth);
 
         cachedWidth = Math.max(maxWidth, 20);
-        cachedHeight = Math.max(totalHeight, textRenderer.fontHeight);
+        cachedHeight = Math.max(totalHeight, textRenderer.lineHeight);
         dimensionsDirty = false;
     }
 
@@ -258,22 +258,22 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     protected void onDeactivate() {}
 
-    protected float getLineStartX(@NotNull TextRenderer textRenderer) {
+    protected float getLineStartX(@NotNull Font textRenderer) {
         return 0.0f;
     }
 
     protected void renderBeforeLines(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             float x,
             float y,
             int width,
             int height,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {}
 
     @Override
-    public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        var textRenderer = mc.textRenderer;
+    public void render(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
+        var textRenderer = mc.font;
         if (textRenderer == null) return;
 
         var renderLines = getRenderableLines();
@@ -283,8 +283,8 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     }
 
     @Override
-    public void renderExample(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
-        var textRenderer = mc.textRenderer;
+    public void renderExample(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
+        var textRenderer = mc.font;
         if (textRenderer == null) return;
 
         List<HudLine> renderLines = getCurrentRenderableLines();
@@ -297,13 +297,13 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     }
 
     private void renderInternal(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             double mouseX, double mouseY,
             @NotNull List<HudLine> renderLines,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
@@ -334,14 +334,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             line.render(context, (int) currentX, (int) currentY, textRenderer);
 
             if (line.hasLineBreak()) {
-                currentY += textRenderer.fontHeight + 1;
+                currentY += textRenderer.lineHeight + 1;
                 currentX = scaledX + getLineStartX(textRenderer);
             } else {
                 currentX += line.getWidth(textRenderer);
             }
         }
 
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
 
         for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
@@ -350,18 +350,18 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     }
 
     private void renderEmptyPlaceholder(
-            @NotNull DrawContext context,
-            @NotNull TextRenderer textRenderer
+            @NotNull GuiGraphicsExtractor context,
+            @NotNull Font textRenderer
     ) {
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
 
         String placeholder = "§7[" + displayName + "]";
-        int width = textRenderer.getWidth(placeholder);
-        int height = textRenderer.fontHeight;
+        int width = textRenderer.width(placeholder);
+        int height = textRenderer.lineHeight;
 
         context.fill(
                 (int) scaledX - 2, (int) scaledY - 2,
@@ -369,7 +369,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 new Color(0, 0, 0, 150).getRGB()
         );
 
-        context.drawTextWithShadow(
+        context.text(
                 textRenderer,
                 placeholder,
                 (int) scaledX,
@@ -381,14 +381,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             renderSelectionBorder(context, (int) scaledX - 2, (int) scaledY - 2, width + 4, height + 4, textRenderer);
         }
 
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
     }
 
     private void renderSelectionBorder(
-            @NotNull DrawContext context,
+            @NotNull GuiGraphicsExtractor context,
             int x, int y,
             int width, int height,
-            @NotNull TextRenderer textRenderer
+            @NotNull Font textRenderer
     ) {
         int borderColor = new Color(255, 0, 0, 170).getRGB();
 
@@ -400,21 +400,21 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         String widgetName = displayName;
         String widgetLocation = String.format("X: %.0f Y: %.0f", this.x, this.y);
 
-        int nameWidth = textRenderer.getWidth(widgetName);
-        int locationWidth = textRenderer.getWidth(widgetLocation);
+        int nameWidth = textRenderer.width(widgetName);
+        int locationWidth = textRenderer.width(widgetLocation);
 
         int nameX = x + (width - nameWidth) / 2;
         int locationX = x + (width - locationWidth) / 2;
 
-        context.drawTextWithShadow(
+        context.text(
                 textRenderer,
                 widgetName,
                 nameX,
-                y - textRenderer.fontHeight - 2,
+                y - textRenderer.lineHeight - 2,
                 new Color(255, 255, 255, 220).getRGB()
         );
 
-        context.drawTextWithShadow(
+        context.text(
                 textRenderer,
                 widgetLocation,
                 locationX,
@@ -428,7 +428,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         if (button != 0) return false;
         if (!isMouseOver(mouseX, mouseY)) return false;
 
-        TextRenderer textRenderer = mc.textRenderer;
+        Font textRenderer = mc.font;
         if (textRenderer == null) return false;
 
         float scaledX = getAbsoluteX() / scale;
@@ -444,7 +444,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             }
 
             if (line.hasLineBreak()) {
-                currentY += textRenderer.fontHeight + 1;
+                currentY += textRenderer.lineHeight + 1;
                 currentX = scaledX + getLineStartX(textRenderer);
             } else {
                 currentX += line.getWidth(textRenderer);

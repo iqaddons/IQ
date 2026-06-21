@@ -1,8 +1,12 @@
 package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.scoreboard.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.PlayerScoreEntry;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -14,7 +18,7 @@ import java.util.stream.Collectors;
 @UtilityClass
 public final class ScoreboardUtils {
 
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static final Minecraft MC = Minecraft.getInstance();
     private static final Pattern AREA_SYMBOL_PATTERN = Pattern.compile("[⏣ф]");
 
     public static @NotNull String getTitle() {
@@ -52,26 +56,26 @@ public final class ScoreboardUtils {
         return getArea().startsWith(areaName);
     }
 
-    private static Optional<ScoreboardObjective> getObjective() {
-        if (MC.world == null) return Optional.empty();
+    private static Optional<Objective> getObjective() {
+        if (MC.level == null) return Optional.empty();
 
-        Scoreboard scoreboard = MC.world.getScoreboard();
-        return Optional.ofNullable(scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.SIDEBAR));
+        Scoreboard scoreboard = MC.level.getScoreboard();
+        return Optional.ofNullable(scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR));
     }
 
-    private static List<String> extractLines(@NotNull ScoreboardObjective objective) {
-        Scoreboard scoreboard = MC.world.getScoreboard();
+    private static List<String> extractLines(@NotNull Objective objective) {
+        Scoreboard scoreboard = MC.level.getScoreboard();
 
-        return scoreboard.getScoreboardEntries(objective).stream()
+        return scoreboard.listPlayerScores(objective).stream()
                 .map(entry -> buildLineText(scoreboard, entry))
                 .collect(Collectors.toList());
     }
 
-    private static String buildLineText(@NotNull Scoreboard scoreboard, @NotNull ScoreboardEntry entry) {
-        Team team = scoreboard.getScoreHolderTeam(entry.owner());
+    private static String buildLineText(@NotNull Scoreboard scoreboard, @NotNull PlayerScoreEntry entry) {
+        PlayerTeam team = scoreboard.getPlayersTeam(entry.owner());
         if (team == null) {
             return entry.owner();
         }
-        return team.getPrefix().getString() + team.getSuffix().getString();
+        return team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString();
     }
 }

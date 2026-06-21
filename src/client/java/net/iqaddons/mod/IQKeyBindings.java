@@ -2,14 +2,14 @@ package net.iqaddons.mod;
 
 import lombok.Getter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.*;
 import net.iqaddons.mod.screen.IQConfigScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -17,45 +17,45 @@ import java.util.List;
 
 public class IQKeyBindings {
 
-    private static final KeyBinding.Category IQ_CATEGORY = KeyBinding.Category.create(Identifier.of("iq"));
+    private static final KeyMapping.Category IQ_CATEGORY = KeyMapping.Category.register(Identifier.parse("iq"));
 
-    private static KeyBinding openConfigKey;
-    private static KeyBinding openWardrobeKey;
-
-    @Getter
-    private static KeyBinding advanceCroesusPageKey;
+    private static KeyMapping openConfigKey;
+    private static KeyMapping openWardrobeKey;
 
     @Getter
-    private static KeyBinding goBackCroesusPageKey;
+    private static KeyMapping advanceCroesusPageKey;
 
     @Getter
-    private static List<KeyBinding> wardrobeSlotKeys = List.of();
+    private static KeyMapping goBackCroesusPageKey;
+
+    @Getter
+    private static List<KeyMapping> wardrobeSlotKeys = List.of();
 
     public static void register() {
-        openConfigKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        openConfigKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-config",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_K,
                 IQ_CATEGORY
         ));
 
-        advanceCroesusPageKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        advanceCroesusPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.advance-croesus-page",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_RIGHT,
                 IQ_CATEGORY
         ));
 
-        goBackCroesusPageKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        goBackCroesusPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.go-back-croesus-page",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT,
                 IQ_CATEGORY
         ));
 
-        openWardrobeKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+        openWardrobeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-wardrobe",
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
                 IQ_CATEGORY
         ));
@@ -73,19 +73,19 @@ public class IQKeyBindings {
         );
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openConfigKey.wasPressed()) {
+            while (openConfigKey.consumeClick()) {
                 openConfigScreen(client);
             }
 
-            while (openWardrobeKey.wasPressed()) {
-                if (client.player != null && client.player.networkHandler != null) {
-                    client.player.networkHandler.sendChatCommand("wd");
+            while (openWardrobeKey.consumeClick()) {
+                if (client.player != null && client.player.connection != null) {
+                    client.player.connection.sendCommand("wd");
                 }
             }
         });
     }
 
-    public static void openConfigScreen(@NotNull MinecraftClient client) {
+    public static void openConfigScreen(@NotNull Minecraft client) {
         client.setScreen(new IQConfigScreen(null,
                 Configuration.class,
                 KuudraGeneralConfig.class,
@@ -94,10 +94,10 @@ public class IQKeyBindings {
         ));
     }
 
-    private static @NotNull KeyBinding registerWardrobeSlotKey(int slotNumber, int defaultKeyCode) {
-        return KeyBindingHelper.registerKeyBinding(new KeyBinding(
+    private static @NotNull KeyMapping registerWardrobeSlotKey(int slotNumber, int defaultKeyCode) {
+        return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.wardrobe-slot-" + slotNumber,
-                InputUtil.Type.KEYSYM,
+                InputConstants.Type.KEYSYM,
                 defaultKeyCode,
                 IQ_CATEGORY
         ));

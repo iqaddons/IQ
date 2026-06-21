@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.SubscriptionOwner;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
@@ -14,7 +14,7 @@ import java.util.function.BooleanSupplier;
 @RequiredArgsConstructor
 public abstract class Feature extends SubscriptionOwner {
 
-    protected static final MinecraftClient mc = MinecraftClient.getInstance();
+    protected static final Minecraft mc = Minecraft.getInstance();
 
     private final String id;
     private final String name;

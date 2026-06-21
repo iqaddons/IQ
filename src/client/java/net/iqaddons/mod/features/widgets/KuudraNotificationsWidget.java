@@ -9,8 +9,8 @@ import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.utils.ScoreboardUtils;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -73,7 +73,7 @@ public class KuudraNotificationsWidget extends HudWidget {
         if (mc.player != null) {
             var soundEvent = event.soundEvent() != null
                     ? event.soundEvent()
-                    : SoundEvents.BLOCK_NOTE_BLOCK_PLING.value();
+                    : SoundEvents.NOTE_BLOCK_PLING.value();
 
             mc.player.playSound(soundEvent, 2.0f, 1.0f);
         }
@@ -119,9 +119,9 @@ public class KuudraNotificationsWidget extends HudWidget {
     }
 
     @Override
-    public void render(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+    public void render(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float a) {
         if (HudManager.get().isEditorOpen()) {
-            super.render(context, mouseX, mouseY, delta);
+            super.render(context, mouseX, mouseY, a);
             return;
         }
 
@@ -130,7 +130,7 @@ public class KuudraNotificationsWidget extends HudWidget {
         }
 
         float alpha = getFadeAlpha();
-        var textRenderer = mc.textRenderer;
+        var textRenderer = mc.font;
         if (textRenderer == null) return;
 
         int widgetWidth = getWidth();
@@ -143,9 +143,9 @@ public class KuudraNotificationsWidget extends HudWidget {
         int alphaByte = Math.max(0, Math.min(255, (int) (alpha * 255.0f)));
         int color = (alphaByte << 24) | 0xFFFFFF;
 
-        context.getMatrices().pushMatrix();
-        context.getMatrices().scale(scale, scale);
-        context.drawText(
+        context.pose().pushMatrix();
+        context.pose().scale(scale, scale);
+        context.text(
                 textRenderer,
                 notificationLine.getOrderedText(),
                 (int) scaledX,
@@ -153,7 +153,7 @@ public class KuudraNotificationsWidget extends HudWidget {
                 color,
                 true
         );
-        context.getMatrices().popMatrix();
+        context.pose().popMatrix();
     }
 
     private float getFadeAlpha() {
@@ -178,12 +178,12 @@ public class KuudraNotificationsWidget extends HudWidget {
     @Override
     public int getWidth() {
         int baseWidth = super.getWidth();
-        var textRenderer = mc.textRenderer;
+        var textRenderer = mc.font;
         if (textRenderer == null) {
             return baseWidth;
         }
 
-        return Math.max(baseWidth, textRenderer.getWidth(MIN_REFERENCE_TEXT));
+        return Math.max(baseWidth, textRenderer.width(MIN_REFERENCE_TEXT));
     }
 
     private void resetNotification() {

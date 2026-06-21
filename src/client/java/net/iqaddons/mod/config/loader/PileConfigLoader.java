@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.model.spot.PileLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -111,7 +111,7 @@ public class PileConfigLoader {
                 return Optional.empty();
             }
 
-            Vec3d position = new Vec3d(
+            Vec3 position = new Vec3(
                     positionArray.get(0).getAsDouble(),
                     positionArray.get(1).getAsDouble(),
                     positionArray.get(2).getAsDouble()

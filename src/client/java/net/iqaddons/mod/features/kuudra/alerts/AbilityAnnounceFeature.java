@@ -5,7 +5,7 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -67,7 +67,7 @@ public class AbilityAnnounceFeature extends KuudraFeature {
     private @NotNull String formatPlayerPosition() {
         if (mc.player == null) return "?, ?, ?";
 
-        BlockPos pos = mc.player.getBlockPos();
+        BlockPos pos = mc.player.blockPosition();
         return "%d, %d, %d".formatted(pos.getX(), pos.getY(), pos.getZ());
     }
 

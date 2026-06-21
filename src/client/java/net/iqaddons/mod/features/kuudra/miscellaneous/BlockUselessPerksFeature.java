@@ -43,7 +43,7 @@ public class BlockUselessPerksFeature extends KuudraFeature {
         String title = event.getScreen().getTitle().getString();
         if (!title.contains("Perk Menu")) return;
 
-        String itemName = event.getSlot().getStack().getName().getString();
+        String itemName = event.getSlot().getItem().getHoverName().getString();
         if (shouldBlockPerk(itemName)) {
             event.setCancelled(true);
         }

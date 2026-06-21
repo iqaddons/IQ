@@ -2,8 +2,8 @@ package net.iqaddons.mod.manager.calculator.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.manager.calculator.ItemValueCalculator;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -15,16 +15,16 @@ public class EnchantedBookValueCalculator implements ItemValueCalculator {
             return manager.getItemPrice(itemId) * quantity;
         }
 
-        var customData = stack.get(DataComponentTypes.CUSTOM_DATA);
+        var customData = stack.get(DataComponents.CUSTOM_DATA);
         if (customData == null) return 0D;
 
-        var tag = customData.copyNbt();
+        var tag = customData.copyTag();
         if (!tag.contains("enchantments")) return 0D;
 
         var enchants = tag.getCompound("enchantments");
         if (enchants.isEmpty()) return 0D;
 
-        for (String enchant : enchants.get().getKeys()) {
+        for (String enchant : enchants.get().keySet()) {
             var level = enchants.get().getInt(enchant);
             if (level.isEmpty()) return 0D;
 

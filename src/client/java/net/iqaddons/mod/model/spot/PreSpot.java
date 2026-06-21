@@ -2,7 +2,7 @@ package net.iqaddons.mod.model.spot;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,25 +13,25 @@ public enum PreSpot {
 
     TRIANGLE(
             "Triangle",
-            new Vec3d(-67.5, 77, -122.5),
+            new Vec3(-67.5, 77, -122.5),
             "Shop",
-            new Vec3d(-81, 76, -143),
+            new Vec3(-81, 76, -143),
             15.0,
             6,  // Triangle pile missing
             7   // Shop pile missing (secondary)
     ),
     X(
             "X",
-            new Vec3d(-142.5, 77, -151),
+            new Vec3(-142.5, 77, -151),
             "X Cannon",
-            new Vec3d(-143, 76, -125),
+            new Vec3(-143, 76, -125),
             30.0,
             1,  // X pile missing
             2   // X Cannon pile missing (secondary)
     ),
     EQUALS(
             "Equals",
-            new Vec3d(-65.5, 76, -87.5),
+            new Vec3(-65.5, 76, -87.5),
             null,
             null,
             15.0,
@@ -40,25 +40,25 @@ public enum PreSpot {
     ),
     SLASH(
             "Slash",
-            new Vec3d(-113.5, 77, -68.5),
+            new Vec3(-113.5, 77, -68.5),
             "Square",
-            new Vec3d(-143, 76, -80),
+            new Vec3(-143, 76, -80),
             15.0,
             4,  // Slash pile missing
             3   // Square pile missing (secondary) - Note: This maps to square waypoints
     );
 
     private final String displayName;
-    private final Vec3d location;
+    private final Vec3 location;
 
     private final String secondaryName;
-    private final Vec3d secondaryLocation;
+    private final Vec3 secondaryLocation;
     private final double detectionRadius;
 
     private final int missingPreValue;
     private final int secondaryMissingValue;
 
-    public static @Nullable PreSpot fromPlayerPosition(@NotNull Vec3d playerPos) {
+    public static @Nullable PreSpot fromPlayerPosition(@NotNull Vec3 playerPos) {
         for (PreSpot spot : values()) {
             if (spot.isPlayerNearby(playerPos)) {
                 return spot;
@@ -105,8 +105,8 @@ public enum PreSpot {
         };
     }
 
-    public boolean isPlayerNearby(@NotNull Vec3d playerPos) {
-        return playerPos.squaredDistanceTo(location) < detectionRadius * detectionRadius;
+    public boolean isPlayerNearby(@NotNull Vec3 playerPos) {
+        return playerPos.distanceToSqr(location) < detectionRadius * detectionRadius;
     }
 
     public boolean hasSecondaryLocation() {
