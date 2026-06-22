@@ -3,10 +3,10 @@ package net.iqaddons.mod.manager.pricing;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.manager.IQPersistentDataStore;
-import net.iqaddons.mod.model.profit.chest.data.ChestData;
-import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
+import net.iqaddons.mod.model.profit.chest.data.ChestData;
+import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.data.DataKey;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.nio.file.Files;
 @Slf4j
 public final class KuudraProfitTrackerManager {
 
-    private static final long SESSION_TIMEOUT_MILLIS = 5L * 60L * 1000L;
+    private static final long SESSION_TIMEOUT_MILLIS = 30L * 60L * 1000L;
 
     private static final DataKey<PersistentKuudraProfit> PROFIT_KEY = DataKey.of("kuudraProfit", PersistentKuudraProfit.class);
     private static final KuudraProfitTrackerManager INSTANCE = new KuudraProfitTrackerManager();

@@ -2,11 +2,7 @@ package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerScoreEntry;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -20,6 +16,11 @@ public final class ScoreboardUtils {
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final Pattern AREA_SYMBOL_PATTERN = Pattern.compile("[⏣ф]");
+
+    private static final long AREA_STICKY_MS = 3000L;
+
+    private static volatile String lastSeenArea = "";
+    private static volatile long lastSeenAreaAt = 0L;
 
     public static @NotNull String getTitle() {
         return getObjective()
@@ -44,12 +45,22 @@ public final class ScoreboardUtils {
     }
 
     public static @NotNull String getArea() {
-        return findLine("⏣")
-                .or(() -> findLine("ф"))
-                .map(StringUtils::stripFormatting)
-                .map(line -> AREA_SYMBOL_PATTERN.matcher(line).replaceAll(""))
-                .map(String::trim)
-                .orElse("");
+        Optional<String> found = findLine("⏣").or(() -> findLine("ф"));
+
+        if (found.isPresent()) {
+            String cleaned = StringUtils.stripFormatting(found.get());
+            cleaned = AREA_SYMBOL_PATTERN.matcher(cleaned).replaceAll("").trim();
+            // update cache
+            lastSeenArea = cleaned;
+            lastSeenAreaAt = System.currentTimeMillis();
+            return cleaned;
+        }
+
+        if (!lastSeenArea.isEmpty() && (System.currentTimeMillis() - lastSeenAreaAt) <= AREA_STICKY_MS) {
+            return lastSeenArea;
+        }
+
+        return "";
     }
 
     public static boolean isInArea(@NotNull String areaName) {

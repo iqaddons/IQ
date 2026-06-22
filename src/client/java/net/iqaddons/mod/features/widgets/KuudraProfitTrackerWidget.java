@@ -6,7 +6,9 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.HudRenderer;
@@ -69,9 +71,23 @@ public class KuudraProfitTrackerWidget extends HudWidget {
 
         setEnabledSupplier(() -> KuudraGeneralConfig.kuudraProfitTracker);
         setVisibilityCondition(() -> {
-            if (KuudraGeneralConfig.ProfitTrackerConfig.profitTrackerVisibility == KuudraGeneralConfig.ProfitTrackerVisibility.ALWAYS) {
+            KuudraGeneralConfig.ProfitTrackerVisibility visibility = KuudraGeneralConfig.ProfitTrackerConfig.profitTrackerVisibility;
+            KuudraPhase currentPhase = KuudraStateManager.get().phase();
+
+
+            boolean isRunActive = currentPhase.isActive() && currentPhase != KuudraPhase.COMPLETED;
+
+
+            if (isRunActive && !KuudraGeneralConfig.ProfitTrackerConfig.renderDuringRun) {
+                return false;
+            }
+
+
+            if (visibility == KuudraGeneralConfig.ProfitTrackerVisibility.ALWAYS) {
                 return true;
             }
+
+            // KUUDRA_AREAS
             String area = ScoreboardUtils.getArea();
             return ALLOWED_AREAS.stream().anyMatch(area::startsWith);
         });
@@ -82,7 +98,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 .onHover((context, textRenderer) -> {
                     double[] mouse = HudRenderer.getScaledMousePosition();
                     HudRenderer.drawSimpleTooltip(context,
-                            "Tracks stats for the current session.\nResets after 5 min of inactivity.",
+                            "Tracks stats for the current session.\nResets after 30 min of inactivity.",
                             mouse[0], mouse[1]);
                 })
                 .onMouseEnter(() -> { hoveringSessionOption = true;  updateTrackingSelector(); })

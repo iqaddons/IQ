@@ -128,7 +128,9 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        List<HudLine> renderLines = getCurrentRenderableLines();
+        // Snapshot the list to avoid ConcurrentModificationException if lines are
+        // added/removed while recalculating dimensions (e.g. from event handlers)
+        List<HudLine> renderLines = new ArrayList<>(getCurrentRenderableLines());
 
         int maxWidth = 0;
         int currentLineWidth = 0;
@@ -328,7 +330,10 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
         renderBeforeLines(context, scaledX, scaledY, totalWidth, totalHeight, textRenderer);
 
-        for (HudLine line : renderLines) {
+        // Iterate over a snapshot to avoid ConcurrentModificationException if
+        // render-time callbacks mutate the underlying list (add/remove lines).
+        List<HudLine> renderSnapshot = new ArrayList<>(renderLines);
+        for (HudLine line : renderSnapshot) {
             if (!line.shouldRender()) continue;
             line.updateHoverState(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale);
             line.render(context, (int) currentX, (int) currentY, textRenderer);
@@ -343,7 +348,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
         context.pose().popMatrix();
 
-        for (HudLine line : renderLines) {
+        for (HudLine line : new ArrayList<>(renderLines)) {
             if (!line.shouldRender()) continue;
             line.renderHover(context, textRenderer);
         }
@@ -437,7 +442,8 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float currentX = scaledX + getLineStartX(textRenderer);
         float currentY = scaledY;
 
-        for (HudLine line : getRenderableLines()) {
+        List<HudLine> clickSnapshot = new ArrayList<>(getRenderableLines());
+        for (HudLine line : clickSnapshot) {
             if (!line.shouldRender()) continue;
             if (line.handleClick(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale)) {
                 return true;

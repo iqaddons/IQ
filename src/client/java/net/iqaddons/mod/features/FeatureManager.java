@@ -38,7 +38,14 @@ public final class FeatureManager {
     public void stop() {
         EventBus.unsubscribe(tickSubscription);
 
-        features.values().forEach(Feature::deactivate);
+
+        for (Feature feature : new ArrayList<>(features.values())) {
+            try {
+                feature.deactivate();
+            } catch (Exception e) {
+                log.warn("Failed to deactivate feature {}", feature.getName(), e);
+            }
+        }
     }
 
     public @Nullable Feature get(@NotNull String id) {
@@ -64,7 +71,8 @@ public final class FeatureManager {
     }
 
     private void syncAllFeatures() {
-        for (Feature feature : features.values()) {
+
+        for (Feature feature : new java.util.ArrayList<>(features.values())) {
             boolean shouldBeActive = feature.isEnabled();
 
             if (shouldBeActive && !feature.isActive()) {

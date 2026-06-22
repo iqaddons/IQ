@@ -3,7 +3,7 @@ package net.iqaddons.mod.utils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 public final class BuildProgressOverlayUtil {
 
 	private static final Pattern PROGRESS_PATTERN = Pattern.compile("Building Progress:?\\s*(\\d+)%");
+	private static final Pattern SIMPLE_PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(\\d+)%?");
     private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
 	public static final long BUILD_START_COUNTDOWN_MS = 6200L;
 
@@ -47,8 +48,40 @@ public final class BuildProgressOverlayUtil {
 		return String.format(Locale.ROOT, "%.2f", seconds);
 	}
 
+
 	public static @Nullable BuildProgressData getBuildProgressFromArmorStand() {
-		for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
+		int sum = 0;
+		int found = 0;
+		for (ArmorStandEntity stand : EntityDetectorUtil.getAllArmorStands()) {
+			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
+			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");
+			if (!stripped.contains("PROGRESS")) continue;
+
+			// Check for "PROGRESS: COMPLETE" first
+			if (stripped.contains("COMPLETE")) {
+				sum += 100;
+				found++;
+				continue;
+			}
+
+			// Otherwise try to match numeric pattern
+			Matcher m = SIMPLE_PROGRESS_PATTERN.matcher(stripped);
+			if (!m.find()) continue;
+			try {
+				int p = Integer.parseInt(m.group(1));
+				sum += p;
+				found++;
+			} catch (NumberFormatException e) {
+				log.debug("Failed to parse simple PROGRESS value from armor stand: {}", stripped);
+			}
+		}
+
+		if (found > 0) {
+			int averaged = (int) Math.round((double) sum / 6.0);
+			return new BuildProgressData(averaged, 0);
+		}
+
+		for (ArmorStandEntity stand : EntityDetectorUtil.getAllArmorStands()) {
 			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
 
 			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");

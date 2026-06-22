@@ -1,12 +1,12 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
+import net.fabricmc.loader.api.FabricLoader;
+import net.iqaddons.mod.config.screen.EtherwarpCategorySelectorScreen;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 import net.iqaddons.mod.utils.TextColor;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Util;
-import net.iqaddons.mod.config.screen.EtherwarpCategorySelectorScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -493,6 +493,10 @@ public class KuudraGeneralConfig {
         @ConfigOption.Select
         @Comment("Control when the profit tracker is visible.")
         public static ProfitTrackerVisibility profitTrackerVisibility = ProfitTrackerVisibility.KUUDRA_AREAS;
+
+        @ConfigEntry(id = "renderDuringRun", translation = "Render Widget During Run")
+        @Comment("Show the widget while a run is active. When disabled, the widget only appears after the run is completed.")
+        public static boolean renderDuringRun = false;
 
         @ConfigEntry(id = "bazaarPricingMode", translation = "Bazaar Pricing Mode")
         @ConfigOption.Select
