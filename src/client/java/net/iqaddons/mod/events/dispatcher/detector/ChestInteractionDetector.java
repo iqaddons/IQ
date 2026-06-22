@@ -9,10 +9,10 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraChestRerollEvent;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -34,7 +34,7 @@ public final class ChestInteractionDetector {
     private final Map<Integer, ChestWindowState> windowStates = new ConcurrentHashMap<>();
 
     public void detect(@NotNull ScreenClickEvent event, long tickCount, @NotNull Consumer<Event> postEvent) {
-        if (!(event.getScreen() instanceof GenericContainerScreen screen)) {
+        if (!(event.getScreen() instanceof ContainerScreen screen)) {
             return;
         }
 
@@ -43,10 +43,10 @@ public final class ChestInteractionDetector {
         if (chestType == ChestType.UNKNOWN) return;
 
         Slot slot = event.getSlot();
-        if (slot == null || isOpened(slot.getStack())) return;
+        if (slot == null || isOpened(slot.getItem())) return;
 
-        ScreenHandler handler = screen.getScreenHandler();
-        int windowId = handler.syncId;
+        AbstractContainerMenu handler = screen.getMenu();
+        int windowId = handler.containerId;
         ChestWindowState state = windowStates.computeIfAbsent(windowId, key -> new ChestWindowState());
         state.lastInteractionTick = tickCount;
 
@@ -58,13 +58,13 @@ public final class ChestInteractionDetector {
             state.shardRerolled = false;
         }
 
-        if (slot.id == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this chest")) {
+        if (slot.index == REROLL_SLOT && !state.rerolled && ChestProfitUtil.canUseReroll(slot.getItem(), "rerolled this chest")) {
             state.rerolled = true;
             postEvent.accept(new KuudraChestRerollEvent(windowId, KuudraChestRerollEvent.RerollType.ITEMS));
             return;
         }
 
-        if (slot.id == SHARD_REROLL_SLOT && !state.shardRerolled && ChestProfitUtil.canUseReroll(slot.getStack(), "rerolled this shard")) {
+        if (slot.index == SHARD_REROLL_SLOT && !state.shardRerolled && ChestProfitUtil.canUseReroll(slot.getItem(), "rerolled this shard")) {
             state.shardRerolled = true;
             postEvent.accept(new KuudraChestRerollEvent(
                     windowId,
@@ -73,11 +73,11 @@ public final class ChestInteractionDetector {
             return;
         }
 
-        if (slot.id != BUY_SLOT) return;
+        if (slot.index != BUY_SLOT) return;
         // Allow empty slot: on fast clicks the server slot-update packet may not have arrived
         // yet, so the stack appears empty even though this is a valid buy action.
         // Only reject if the item is present but explicitly not a buy action.
-        if (!slot.getStack().isEmpty() && !isBuyAction(slot.getStack())) return;
+        if (!slot.getItem().isEmpty() && !isBuyAction(slot.getItem())) return;
 
         state.pendingOpens.addLast(new PendingChestOpen(
                 windowId,

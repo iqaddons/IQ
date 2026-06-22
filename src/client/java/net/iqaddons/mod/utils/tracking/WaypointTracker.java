@@ -4,8 +4,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.WaypointData;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -40,12 +40,12 @@ public class WaypointTracker {
                 playerRaw = playerRaw.substring("party >".length()).trim();
             }
 
-            Text playerName = parsePlayerName(playerRaw);
+            Component playerName = parsePlayerName(playerRaw);
 
             double x = Double.parseDouble(matcher.group(1));
             double y = Double.parseDouble(matcher.group(2));
             double z = Double.parseDouble(matcher.group(3));
-            Vec3d position = new Vec3d(x, y, z);
+            Vec3 position = new Vec3(x, y, z);
 
             String suffix = matcher.group(4).trim();
             boolean isUrgent = suffix.contains("|");
@@ -61,9 +61,9 @@ public class WaypointTracker {
         }
     }
 
-    private @NotNull Text parsePlayerName(@NotNull String raw) {
+    private @NotNull Component parsePlayerName(@NotNull String raw) {
         String formatted = raw.replaceFirst("\\[\\d+]\\s*", "");
 
-        return Text.literal(StringUtils.formatPlayerNick(formatted));
+        return Component.literal(StringUtils.formatPlayerNick(formatted));
     }
 }

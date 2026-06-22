@@ -3,7 +3,7 @@ package net.iqaddons.mod.utils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.categories.PhaseTwoConfig;
-import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +48,7 @@ public final class BuildProgressOverlayUtil {
 	}
 
 	public static @Nullable BuildProgressData getBuildProgressFromArmorStand() {
-		for (ArmorStandEntity stand : EntityDetectorUtil.getAllArmorStands()) {
+		for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
 			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
 
 			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");

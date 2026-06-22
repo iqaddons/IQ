@@ -5,7 +5,7 @@ import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.impl.GenericValueCalculator;
 import net.iqaddons.mod.model.profit.chest.data.ChestContents;
 import net.iqaddons.mod.utils.ChestProfitUtil;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

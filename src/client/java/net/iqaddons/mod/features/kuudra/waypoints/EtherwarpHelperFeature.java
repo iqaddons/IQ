@@ -12,8 +12,8 @@ import net.iqaddons.mod.model.etherwarp.EtherwarpWaypoint;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class EtherwarpHelperFeature extends KuudraFeature {
         }
 
         Set<String> renderedThisFrame = new HashSet<>();
-        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        Vec3 playerPos = new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ());
 
         for (EtherwarpWaypoint waypoint : visibleWaypoints) {
             if (!waypoint.shouldShowInPhase(phase)) {
@@ -89,7 +89,7 @@ public class EtherwarpHelperFeature extends KuudraFeature {
             }
 
             for (int i = 0; i < waypoint.positions().size(); i++) {
-                Vec3d pos = waypoint.positions().get(i);
+                Vec3 pos = waypoint.positions().get(i);
                 if (waypoint.maxRenderDistance() > 0
                         && playerPos.distanceTo(pos) > waypoint.maxRenderDistance()) {
                     continue;
@@ -130,8 +130,8 @@ public class EtherwarpHelperFeature extends KuudraFeature {
     /**
      * Renderiza um waypoint individual.
      */
-    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull EtherwarpWaypoint waypoint, @NotNull Vec3d pos, int colorIndex) {
-        Box box = waypoint.getRenderBox(pos);
+    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull EtherwarpWaypoint waypoint, @NotNull Vec3 pos, int colorIndex) {
+        AABB box = waypoint.getRenderBox(pos);
         RenderColor color = RenderColor.fromHex(waypoint.getColorForIndex(colorIndex)).withOpacity(waypoint.alpha());
 
         if (waypoint.renderStyle() == WorldRenderUtils.RenderStyle.SOLID) {
@@ -146,13 +146,13 @@ public class EtherwarpHelperFeature extends KuudraFeature {
         drawOutlineWithThickness(event, box, color, waypoint.lineWidth());
     }
 
-    private void drawOutlineWithThickness(@NotNull WorldRenderEvent event, @NotNull Box box, @NotNull RenderColor color, float lineWidth) {
+    private void drawOutlineWithThickness(@NotNull WorldRenderEvent event, @NotNull AABB box, @NotNull RenderColor color, float lineWidth) {
         int layers = Math.max(1, Math.round(lineWidth));
         event.drawOutline(box, true, color);
 
         for (int i = 1; i < layers; i++) {
             double grow = OUTLINE_STEP * i;
-            event.drawOutline(box.expand(grow), true, color);
+            event.drawOutline(box.inflate(grow), true, color);
         }
     }
 

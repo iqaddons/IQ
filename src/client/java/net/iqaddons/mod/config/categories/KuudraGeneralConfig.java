@@ -6,7 +6,7 @@ import net.iqaddons.mod.utils.TextColor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Util;
 import net.iqaddons.mod.config.screen.EtherwarpCategorySelectorScreen;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -364,8 +364,8 @@ public class KuudraGeneralConfig {
     @Comment("Choose which Etherwarp categories are active.")
     @SuppressWarnings("unused")
     public static final Runnable openEtherwarpCategorySelector = () -> {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.execute(() -> mc.setScreen(new EtherwarpCategorySelectorScreen(mc.currentScreen)));
+        Minecraft mc = Minecraft.getInstance();
+        mc.execute(() -> mc.setScreen(new EtherwarpCategorySelectorScreen(mc.screen)));
     };
 
     @ConfigButton(
@@ -378,7 +378,7 @@ public class KuudraGeneralConfig {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
             Files.createDirectories(configDir);
-            Util.getOperatingSystem().open(configDir.toFile());
+            Util.getPlatform().openFile(configDir.toFile());
         } catch (Exception ignored) {
         }
     };

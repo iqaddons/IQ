@@ -10,7 +10,7 @@ import net.iqaddons.mod.model.pearl.PearlWaypoint;
 import net.iqaddons.mod.model.pearl.WaypointArea;
 import net.iqaddons.mod.utils.BoundingBox2D;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -132,7 +132,7 @@ public class WaypointConfigLoader {
     private Optional<PearlWaypoint> parseWaypoint(JsonObject obj) {
         try {
             JsonArray coords = obj.getAsJsonArray("coords");
-            Vec3d target = new Vec3d(
+            Vec3 target = new Vec3(
                     coords.get(0).getAsDouble(),
                     coords.get(1).getAsDouble(),
                     coords.get(2).getAsDouble()
@@ -146,10 +146,10 @@ public class WaypointConfigLoader {
                     0xff
             );
 
-            Vec3d standBlock = null;
+            Vec3 standBlock = null;
             if (obj.has("block")) {
                 JsonArray block = obj.getAsJsonArray("block");
-                standBlock = new Vec3d(
+                standBlock = new Vec3(
                         block.get(0).getAsDouble(),
                         block.get(1).getAsDouble(),
                         block.get(2).getAsDouble()

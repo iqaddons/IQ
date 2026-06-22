@@ -1,8 +1,8 @@
 package net.iqaddons.mod.mixin;
 
 import net.iqaddons.mod.hud.HudManager;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.screens.ChatScreen;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +17,7 @@ public abstract class HudClickMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void iq$onMouseClicked(@NotNull Click click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
+    private void iq$onMouseClicked(@NotNull MouseButtonEvent click, boolean doubled, CallbackInfoReturnable<Boolean> cir) {
         if (HudManager.get().handleClick(click.x(), click.y(), click.button())) {
             cir.setReturnValue(true);
         }

@@ -1,7 +1,7 @@
 package net.iqaddons.mod.manager.calculator;
 
 import net.iqaddons.mod.manager.pricing.ItemPriceManager;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public interface ItemValueCalculator {

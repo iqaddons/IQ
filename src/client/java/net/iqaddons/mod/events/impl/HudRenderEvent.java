@@ -1,10 +1,10 @@
 package net.iqaddons.mod.events.impl;
 
 import net.iqaddons.mod.events.Event;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public record HudRenderEvent(
-        DrawContext drawContext,
+        GuiGraphicsExtractor drawContext,
         float tickDelta,
         int screenWidth,
         int screenHeight

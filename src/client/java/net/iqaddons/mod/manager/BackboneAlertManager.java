@@ -2,12 +2,12 @@ package net.iqaddons.mod.manager;
 
 import lombok.Getter;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +30,7 @@ public final class BackboneAlertManager {
     private final Set<Integer> hitEntityIds = new HashSet<>();
     private int trackedBoneEntityId = -1;
     private int throwScanTicks = 0;
-    private Vec3d throwOrigin = Vec3d.ZERO;
+    private Vec3 throwOrigin = Vec3.ZERO;
 
     public static BackboneAlertManager get() {
         return INSTANCE;
@@ -45,7 +45,7 @@ public final class BackboneAlertManager {
         hitEntityIds.clear();
     }
 
-    public void setThrowOrigin(@NotNull Vec3d throwOrigin) {
+    public void setThrowOrigin(@NotNull Vec3 throwOrigin) {
         this.throwOrigin = throwOrigin;
     }
 
@@ -75,21 +75,21 @@ public final class BackboneAlertManager {
         return new BoneResult(shouldTriggerRend);
     }
 
-    public boolean trackBackHit(@NotNull PlayerEntity player) {
+    public boolean trackBackHit(@NotNull Player player) {
         if (ticksRemaining <= 0 || isRendActive()) {
             return false;
         }
 
-        ArmorStandEntity boneStand = getTrackedBoneStand(player);
+        ArmorStand boneStand = getTrackedBoneStand(player);
         if (boneStand == null) {
             return false;
         }
 
-        Vec3d bonePos = boneStand.getEntityPos();
+        Vec3 bonePos = boneStand.position();
         Optional<LivingEntity> hit = EntityDetectorUtil.getEntitiesOfType(LivingEntity.class).stream()
                 .filter(entity -> entity.isAlive() && entity.getId() != player.getId())
-                .filter(entity -> !(entity instanceof ArmorStandEntity))
-                .filter(entity -> entity.squaredDistanceTo(bonePos) <= getHitDistanceSq(entity))
+                .filter(entity -> !(entity instanceof ArmorStand))
+                .filter(entity -> entity.distanceToSqr(bonePos) <= getHitDistanceSq(entity))
                 .filter(entity -> isBehindTarget(entity, bonePos))
                 .filter(entity -> hitEntityIds.add(entity.getId()))
                 .findFirst();
@@ -142,12 +142,12 @@ public final class BackboneAlertManager {
         cooldownTicks = 0;
         trackedBoneEntityId = -1;
         throwScanTicks = 0;
-        throwOrigin = Vec3d.ZERO;
+        throwOrigin = Vec3.ZERO;
         hitEntityIds.clear();
     }
 
-    private ArmorStandEntity getTrackedBoneStand(@NotNull PlayerEntity player) {
-        if (player.getEntityWorld().getEntityById(trackedBoneEntityId) instanceof ArmorStandEntity armorStand && isBoneStand(armorStand)) {
+    private ArmorStand getTrackedBoneStand(@NotNull Player player) {
+        if (player.level().getEntity(trackedBoneEntityId) instanceof ArmorStand armorStand && isBoneStand(armorStand)) {
             return armorStand;
         }
 
@@ -156,24 +156,24 @@ public final class BackboneAlertManager {
             return null;
         }
 
-        Vec3d viewDirection = player.getRotationVec(1.0f).normalize();
-        ArmorStandEntity nearest = null;
+        Vec3 viewDirection = player.getViewVector(1.0f).normalize();
+        ArmorStand nearest = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (ArmorStandEntity stand : EntityDetectorUtil.getAllArmorStands()) {
+        for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
             if (!isBoneStand(stand)) continue;
 
-            Vec3d standPos = stand.getEntityPos();
-            double throwDistance = standPos.squaredDistanceTo(throwOrigin);
+            Vec3 standPos = stand.position();
+            double throwDistance = standPos.distanceToSqr(throwOrigin);
             if (throwDistance > 26.0 * 26.0) continue;
 
-            Vec3d fromPlayer = standPos.subtract(player.getEntityPos());
-            if (fromPlayer.lengthSquared() <= 0.01) continue;
+            Vec3 fromPlayer = standPos.subtract(player.position());
+            if (fromPlayer.lengthSqr() <= 0.01) continue;
 
-            double alignment = fromPlayer.normalize().dotProduct(viewDirection);
+            double alignment = fromPlayer.normalize().dot(viewDirection);
             if (alignment < 0.35) continue;
 
-            double distance = fromPlayer.lengthSquared();
+            double distance = fromPlayer.lengthSqr();
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearest = stand;
@@ -188,26 +188,26 @@ public final class BackboneAlertManager {
         return nearest;
     }
 
-    private boolean isBoneStand(@NotNull ArmorStandEntity stand) {
-        ItemStack heldItem = stand.getMainHandStack();
-        return !heldItem.isEmpty() && heldItem.isOf(Items.BONE);
+    private boolean isBoneStand(@NotNull ArmorStand stand) {
+        ItemStack heldItem = stand.getMainHandItem();
+        return !heldItem.isEmpty() && heldItem.is(Items.BONE);
     }
 
     private double getHitDistanceSq(@NotNull LivingEntity entity) {
-        double radius = 0.6 + (entity.getWidth() / 2.0);
+        double radius = 0.6 + (entity.getBbWidth() / 2.0);
         return radius * radius;
     }
 
-    private boolean isBehindTarget(@NotNull LivingEntity target, @NotNull Vec3d bonePos) {
-        Vec3d toBone = bonePos.subtract(target.getEntityPos());
-        Vec3d horizontalToBone = new Vec3d(toBone.x, 0.0, toBone.z);
-        if (horizontalToBone.lengthSquared() <= 1.0E-4) return false;
+    private boolean isBehindTarget(@NotNull LivingEntity target, @NotNull Vec3 bonePos) {
+        Vec3 toBone = bonePos.subtract(target.position());
+        Vec3 horizontalToBone = new Vec3(toBone.x, 0.0, toBone.z);
+        if (horizontalToBone.lengthSqr() <= 1.0E-4) return false;
 
-        Vec3d look = target.getRotationVec(1.0f);
-        Vec3d horizontalLook = new Vec3d(look.x, 0.0, look.z);
-        if (horizontalLook.lengthSquared() <= 1.0E-4) return false;
+        Vec3 look = target.getViewVector(1.0f);
+        Vec3 horizontalLook = new Vec3(look.x, 0.0, look.z);
+        if (horizontalLook.lengthSqr() <= 1.0E-4) return false;
 
-        double dot = horizontalLook.normalize().dotProduct(horizontalToBone.normalize());
+        double dot = horizontalLook.normalize().dot(horizontalToBone.normalize());
         return dot < -0.35;
     }
 

@@ -2,7 +2,7 @@ package net.iqaddons.mod.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.model.pearl.WaypointArea;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,7 @@ import java.util.Objects;
 @Slf4j
 public class AreaDetectionUtil {
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Minecraft mc = Minecraft.getInstance();
 
     private volatile List<WaypointArea> areas = List.of();
     private volatile @Nullable WaypointArea currentArea = null;

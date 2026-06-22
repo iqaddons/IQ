@@ -11,10 +11,10 @@ import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.entity.mob.GiantEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.monster.Giant;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -46,12 +46,12 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         if (!event.isInGame()) return;
         if (!event.isNthTick(UPDATE_INTERVAL_TICKS)) return;
 
-        List<GiantEntity> carriers = EntityDetectorUtil.getSupplyCarriers();
+        List<Giant> carriers = EntityDetectorUtil.getSupplyCarriers();
         List<SupplyPosition> positions = carriers.stream()
                 .map(giant -> SupplyPosition.fromGiant(
                         giant.getX(),
                         giant.getZ(),
-                        giant.getYaw(),
+                        giant.getYRot(),
                         giant.getId()
                 ))
                 .toList();
@@ -63,13 +63,13 @@ public class SupplyWaypointsFeature extends KuudraFeature {
         List<SupplyPosition> supplies = supplyState.getActiveSupplies();
         if (supplies.isEmpty()) return;
 
-        List<ZombieEntity> zombies = PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox
-                ? EntityDetectorUtil.getEntitiesOfType(ZombieEntity.class)
+        List<Zombie> zombies = PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox
+                ? EntityDetectorUtil.getEntitiesOfType(Zombie.class)
                 : List.of();
 
         double halfBox = PhaseOneConfig.SupplyWaypointsConfig.supplyWaypointBoxSize / 2.0;
         for (SupplyPosition supply : supplies) {
-            Box renderBox = new Box(
+            AABB renderBox = new AABB(
                     supply.position().x + 0.5 - halfBox,
                     supply.position().y - 1,
                     supply.position().z + 1.5 - halfBox,
@@ -85,7 +85,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
             );
 
             if (PhaseOneConfig.SupplyWaypointsConfig.supplyPullCircle) {
-                event.drawCircleOutline(new Vec3d(
+                event.drawCircleOutline(new Vec3(
                         supply.position().x + 0.5,
                         supply.position().y,
                         supply.position().z + 1.5
@@ -94,7 +94,7 @@ public class SupplyWaypointsFeature extends KuudraFeature {
 
             if (PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox) {
                 zombies.stream()
-                        .filter(zombie -> zombie.squaredDistanceTo(supply.position()) < 9)
+                        .filter(zombie -> zombie.distanceToSqr(supply.position()) < 9)
                         .forEach(zombie -> {
                             event.drawStyledHitbox(
                                     zombie, false,

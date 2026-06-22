@@ -9,10 +9,10 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -69,7 +69,7 @@ public class FreshAlertFeature extends KuudraFeature {
 
     private void onWorldRender(@NotNull WorldRenderEvent event) {
         if (freshPlayers.isEmpty()) return;
-        if (mc.world == null) return;
+        if (mc.level == null) return;
         if (!PhaseTwoConfig.freshCountdown) return;
 
         long now = System.currentTimeMillis();
@@ -84,17 +84,17 @@ public class FreshAlertFeature extends KuudraFeature {
             long remaining = FRESH_DURATION_MS - elapsed;
             if (remaining <= 0) continue;
 
-            float tickDelta = event.tickCounter().getTickProgress(true);
-            double x = player.lastX + (player.getX() - player.lastX) * tickDelta;
-            double y = player.lastY + (player.getY() - player.lastY) * tickDelta + 2.5;
-            double z = player.lastZ + (player.getZ() - player.lastZ) * tickDelta;
-            Vec3d hologramPos = new Vec3d(x, y, z);
+            float tickDelta = event.tickCounter().getGameTimeDeltaPartialTick(true);
+            double x = player.xo + (player.getX() - player.xo) * tickDelta;
+            double y = player.yo + (player.getY() - player.yo) * tickDelta + 2.5;
+            double z = player.zo + (player.getZ() - player.zo) * tickDelta;
+            Vec3 hologramPos = new Vec3(x, y, z);
 
             double remainingSeconds = remaining / 1000.0;
             var textColor = getTextRenderColor(remainingSeconds);
             event.drawText(
                     hologramPos,
-                    Text.literal(String.format("%.1fs", remainingSeconds)),
+                    Component.literal(String.format("%.1fs", remainingSeconds)),
                     0.05f, true, textColor
             );
         }
@@ -105,10 +105,10 @@ public class FreshAlertFeature extends KuudraFeature {
             MessageUtil.showTitle("§a§lFRESH!", "", 0, 20, 5);
             MessageUtil.PARTY.sendMessage("FRESH! (%d%%)".formatted(event.buildingProgress()));
 
-            mc.world.playSound(
-                    mc.player, mc.player.getBlockPos(),
-                    SoundEvents.ENTITY_PLAYER_SPLASH,
-                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            mc.level.playSound(
+                    mc.player, mc.player.blockPosition(),
+                    SoundEvents.PLAYER_SPLASH,
+                    SoundSource.PLAYERS, 2.0f, 1.0f
             );
         }
 

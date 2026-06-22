@@ -10,12 +10,12 @@ import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import java.util.Comparator;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.GiantEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Giant;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +59,7 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
     }
 
     private void onSupplyProgress(@NotNull SupplyProgressEvent event) {
-        if (mc.player == null || mc.world == null || event.getCurrentProgress() <= 0 || event.getCurrentProgress() >= 100) {
+        if (mc.player == null || mc.level == null || event.getCurrentProgress() <= 0 || event.getCurrentProgress() >= 100) {
             highlightedGiantId = -1;
             highlightedAlertLevel = AlertLevel.NONE;
             return;
@@ -72,16 +72,16 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
             return;
         }
 
-        GiantEntity giant = detectionResult.giant();
+        Giant giant = detectionResult.giant();
         AlertLevel currentLevel = detectionResult.alertLevel();
 
         if (currentLevel == AlertLevel.PRIMARY && (highlightedGiantId != giant.getId() || highlightedAlertLevel != AlertLevel.PRIMARY)) {
             MessageUtil.showTitle(DOUBLE_PEARL_TITLE, "", TITLE_FADE_IN_TICKS, TITLE_STAY_TICKS, TITLE_FADE_OUT_TICKS);
-            mc.world.playSound(
+            mc.level.playSound(
                     mc.player,
-                    mc.player.getBlockPos(),
-                    SoundEvents.ENTITY_VILLAGER_NO,
-                    SoundCategory.PLAYERS,
+                    mc.player.blockPosition(),
+                    SoundEvents.VILLAGER_NO,
+                    SoundSource.PLAYERS,
                     1.0f,
                     1.15f
             );
@@ -92,14 +92,14 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
     }
 
     private @Nullable DetectionResult findMatchingCarrier(@NotNull SupplyProgressEvent event) {
-        if (mc.player == null || mc.world == null) return null;
+        if (mc.player == null || mc.level == null) return null;
 
-        Vec3d eyePos = mc.player.getEyePos();
-        Box playerBox = mc.player.getBoundingBox();
+        Vec3 eyePos = mc.player.getEyePosition();
+        AABB playerBox = mc.player.getBoundingBox();
         SupplyPosition position = event.getPosition();
         if (position != null) {
-            Entity trackedEntity = mc.world.getEntityById(position.entityId());
-            if (trackedEntity instanceof GiantEntity trackedGiant) {
+            Entity trackedEntity = mc.level.getEntity(position.entityId());
+            if (trackedEntity instanceof Giant trackedGiant) {
                 AlertLevel level = getAlertLevel(trackedGiant, eyePos, playerBox);
                 if (level != AlertLevel.NONE) {
                     return new DetectionResult(trackedGiant, level);
@@ -112,12 +112,12 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
                 .filter(result -> result.alertLevel() != AlertLevel.NONE)
                 .min(Comparator
                         .comparingInt((DetectionResult result) -> result.alertLevel().priority()).reversed()
-                        .thenComparingDouble(result -> result.giant().squaredDistanceTo(mc.player)))
+                        .thenComparingDouble(result -> result.giant().distanceToSqr(mc.player)))
                 .orElse(null);
     }
 
-    private @NotNull AlertLevel getAlertLevel(@NotNull GiantEntity giant, @NotNull Vec3d eyePos, @NotNull Box playerBox) {
-        Box giantBox = giant.getBoundingBox();
+    private @NotNull AlertLevel getAlertLevel(@NotNull Giant giant, @NotNull Vec3 eyePos, @NotNull AABB playerBox) {
+        AABB giantBox = giant.getBoundingBox();
         if (giantBox.contains(eyePos)) {
             return AlertLevel.PRIMARY;
         }
@@ -130,10 +130,10 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
     }
 
     private void onRender(@NotNull WorldRenderEvent event) {
-        if (mc.world == null || highlightedGiantId < 0) return;
+        if (mc.level == null || highlightedGiantId < 0) return;
 
-        Entity entity = mc.world.getEntityById(highlightedGiantId);
-        if (!(entity instanceof GiantEntity giant)) {
+        Entity entity = mc.level.getEntity(highlightedGiantId);
+        if (!(entity instanceof Giant giant)) {
             highlightedGiantId = -1;
             highlightedAlertLevel = AlertLevel.NONE;
             return;
@@ -142,10 +142,10 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
         renderAlertHitbox(event, giant, highlightedAlertLevel);
     }
 
-    private void renderAlertHitbox(@NotNull WorldRenderEvent event, @NotNull GiantEntity giant, @NotNull AlertLevel alertLevel) {
+    private void renderAlertHitbox(@NotNull WorldRenderEvent event, @NotNull Giant giant, @NotNull AlertLevel alertLevel) {
         if (alertLevel == AlertLevel.NONE) return;
 
-        Box alertBox = getInterpolatedGiantBox(giant, event).expand(ALERT_BOX_EXPAND);
+        AABB alertBox = getInterpolatedGiantBox(giant, event).inflate(ALERT_BOX_EXPAND);
         RenderColor fillColor = alertLevel == AlertLevel.PRIMARY ? PRIMARY_ALERT_COLOR : SECONDARY_ALERT_COLOR;
         RenderColor outlineColor = alertLevel == AlertLevel.PRIMARY ? PRIMARY_ALERT_OUTLINE_COLOR : SECONDARY_ALERT_OUTLINE_COLOR;
         int outlineLayers = alertLevel == AlertLevel.PRIMARY ? OUTLINE_LAYERS : SECONDARY_OUTLINE_LAYERS;
@@ -160,28 +160,28 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
         drawStrongOutline(event, alertBox, outlineColor, outlineLayers);
     }
 
-    private void drawStrongOutline(@NotNull WorldRenderEvent event, @NotNull Box box, @NotNull RenderColor color, int layers) {
+    private void drawStrongOutline(@NotNull WorldRenderEvent event, @NotNull AABB box, @NotNull RenderColor color, int layers) {
         event.drawOutline(box, true, color);
 
         for (int i = 1; i < layers; i++) {
-            event.drawOutline(box.expand(OUTLINE_LAYER_STEP * i), true, color);
+            event.drawOutline(box.inflate(OUTLINE_LAYER_STEP * i), true, color);
         }
     }
 
-    private @NotNull Box getInterpolatedGiantBox(@NotNull GiantEntity giant, @NotNull WorldRenderEvent event) {
-        float tickDelta = event.tickCounter().getTickProgress(true);
+    private @NotNull AABB getInterpolatedGiantBox(@NotNull Giant giant, @NotNull WorldRenderEvent event) {
+        float tickDelta = event.tickCounter().getGameTimeDeltaPartialTick(true);
 
-        double x = giant.lastX + (giant.getX() - giant.lastX) * tickDelta;
-        double y = giant.lastY + (giant.getY() - giant.lastY) * tickDelta;
-        double z = giant.lastZ + (giant.getZ() - giant.lastZ) * tickDelta;
+        double x = giant.xo + (giant.getX() - giant.xo) * tickDelta;
+        double y = giant.yo + (giant.getY() - giant.yo) * tickDelta;
+        double z = giant.zo + (giant.getZ() - giant.zo) * tickDelta;
 
-        float halfWidth = giant.getWidth() / 2.0f;
-        return new Box(
+        float halfWidth = giant.getBbWidth() / 2.0f;
+        return new AABB(
                 x - halfWidth,
                 y,
                 z - halfWidth,
                 x + halfWidth,
-                y + giant.getHeight(),
+                y + giant.getBbHeight(),
                 z + halfWidth
         );
     }
@@ -203,7 +203,7 @@ public class SupplyGiantHitboxAlertFeature extends KuudraFeature {
     }
 
     private record DetectionResult(
-            @NotNull GiantEntity giant,
+            @NotNull Giant giant,
             @NotNull AlertLevel alertLevel
     ) {
     }

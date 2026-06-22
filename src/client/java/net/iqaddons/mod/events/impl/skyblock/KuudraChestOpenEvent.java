@@ -2,7 +2,7 @@ package net.iqaddons.mod.events.impl.skyblock;
 
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;

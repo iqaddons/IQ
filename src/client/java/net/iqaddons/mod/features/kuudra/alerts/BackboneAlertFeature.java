@@ -8,11 +8,11 @@ import net.iqaddons.mod.events.impl.skyblock.BackboneStateChangeEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.BackboneAlertManager;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class BackboneAlertFeature extends Feature {
@@ -46,14 +46,14 @@ public class BackboneAlertFeature extends Feature {
     }
 
     private void onItemUse(@NotNull ItemUseEvent event) {
-        if (mc.player == null || event.getHand() != Hand.MAIN_HAND) {
+        if (mc.player == null || event.getHand() != InteractionHand.MAIN_HAND) {
             return;
         }
 
         ItemStack stack = event.getItemStack();
         if (stack.isEmpty()) return;
 
-        String itemName = StringUtils.stripFormatting(stack.getName().getString()).toLowerCase();
+        String itemName = StringUtils.stripFormatting(stack.getHoverName().getString()).toLowerCase();
         if (!itemName.contains("bonemerang") || manager.isOnCooldown()) {
             return;
         }
@@ -75,7 +75,7 @@ public class BackboneAlertFeature extends Feature {
 
         if (PhaseFourConfig.backboneAlertSound) {
             mc.player.playSound(
-                    SoundEvents.BLOCK_NOTE_BLOCK_BELL.value(),
+                    SoundEvents.NOTE_BLOCK_BELL.value(),
                     2.0f, 1.0f
             );
         }
@@ -90,7 +90,7 @@ public class BackboneAlertFeature extends Feature {
         ));
     }
 
-    private @NotNull Vec3d getPlayerEyePos(@NotNull ClientPlayerEntity player) {
-        return player.getEntityPos().add(0.0, player.getStandingEyeHeight(), 0.0);
+    private @NotNull Vec3 getPlayerEyePos(@NotNull LocalPlayer player) {
+        return player.position().add(0.0, player.getEyeHeight(), 0.0);
     }
 }

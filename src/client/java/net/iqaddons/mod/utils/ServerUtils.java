@@ -1,7 +1,7 @@
 package net.iqaddons.mod.utils;
 
 import lombok.Getter;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -30,10 +30,10 @@ public class ServerUtils {
     }
 
     public static @NotNull List<Long> getPreviousPings() {
-        var pingLogger = MinecraftClient.getInstance().getDebugHud().getPingLog();
+        var pingLogger = Minecraft.getInstance().getDebugOverlay().getPingLogger();
 
         List<Long> list = new ArrayList<>();
-        for (int i = 0; i < pingLogger.getLength(); i++) {
+        for (int i = 0; i < pingLogger.size(); i++) {
             list.add(pingLogger.get(i));
         }
         return list;

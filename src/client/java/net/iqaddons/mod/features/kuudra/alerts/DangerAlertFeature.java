@@ -6,12 +6,12 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,11 +36,11 @@ public class DangerAlertFeature extends KuudraFeature {
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
         if (!event.isNthTick(DANGER_CHECK_INTERVAL_TICKS)) return;
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
         DangerLevel currentDangerLevel = null;
         for (int i = 0; i < 5; i++) {
-            BlockPos blockPos = mc.player.getBlockPos().down(i);
+            BlockPos blockPos = mc.player.blockPosition().below(i);
             DangerLevel level = getDangerLevel(blockPos);
             if (level != null) {
                 currentDangerLevel = level;
@@ -52,10 +52,10 @@ public class DangerAlertFeature extends KuudraFeature {
             if (currentDangerLevel.shouldJump()) {
                 MessageUtil.showTitle("", "§e§lJUMP!", 0, 10, 5);
 
-                mc.world.playSound(
-                        mc.player, mc.player.getBlockPos(),
-                        SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
-                        SoundCategory.PLAYERS, 2.0f, 2.0f
+                mc.level.playSound(
+                        mc.player, mc.player.blockPosition(),
+                        SoundEvents.NOTE_BLOCK_PLING.value(),
+                        SoundSource.PLAYERS, 2.0f, 2.0f
                 );
             } else {
                 MessageUtil.showTitle("", "§c§lDANGER", 0, 10, 5);
@@ -64,7 +64,7 @@ public class DangerAlertFeature extends KuudraFeature {
     }
 
     private @Nullable DangerLevel getDangerLevel(BlockPos blockPos) {
-        BlockState state = mc.world.getBlockState(blockPos);
+        BlockState state = mc.level.getBlockState(blockPos);
         Block block = state.getBlock();
 
         return switch (block) {

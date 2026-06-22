@@ -8,7 +8,7 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -87,6 +87,6 @@ public class ChestCounterTrackerFeature extends Feature {
 
     private void playLevelUp(float pitch) {
         if (mc.player == null) return;
-        mc.player.playSound(SoundEvents.ENTITY_PLAYER_LEVELUP, 1.0f, pitch);
+        mc.player.playSound(SoundEvents.PLAYER_LEVELUP, 1.0f, pitch);
     }
 }

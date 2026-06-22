@@ -16,11 +16,11 @@ import net.iqaddons.mod.model.pearl.PearlWaypoint;
 import net.iqaddons.mod.model.pearl.WaypointArea;
 import net.iqaddons.mod.utils.AreaDetectionUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -143,7 +143,7 @@ public class PearlWaypointFeature extends KuudraFeature {
         WaypointArea area = areaDetection.getCurrentArea();
         if (area == null) return;
 
-        Vec3d commonStandBlockCenter = null;
+        Vec3 commonStandBlockCenter = null;
         PearlWaypoint standBlockWaypoint = null;
         for (PearlWaypoint waypoint : area.waypoints()) {
             if (waypoint.hasStandBlock()) {
@@ -173,17 +173,17 @@ public class PearlWaypointFeature extends KuudraFeature {
             outlineColor = RenderColor.fromArgb(PhaseOneConfig.PearlWaypointsConfig.pearlWaypointColor);
         }
 
-        Vec3d block = standBlockWaypoint.standBlock();
-        Box blockBox = new Box(
-                block.getX(), block.getY(), block.getZ(),
-                block.getX() + 1, block.getY() + 1, block.getZ() + 1
+        Vec3 block = standBlockWaypoint.standBlock();
+        AABB blockBox = new AABB(
+                block.x(), block.y(), block.z(),
+                block.x() + 1, block.y() + 1, block.z() + 1
         );
 
         event.drawOutline(blockBox, true, outlineColor);
     }
 
-    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
-        Vec3d target = getRenderTarget(area, waypoint, commonStandBlockCenter);
+    private void renderWaypoint(@NotNull WorldRenderEvent event, @NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3 commonStandBlockCenter) {
+        Vec3 target = getRenderTarget(area, waypoint, commonStandBlockCenter);
         if (target.x == 0 && target.y == 0 && target.z == 0) return;
 
         float adjustedScale = PhaseOneConfig.PearlWaypointsConfig.pearlWaypointsScale;
@@ -193,9 +193,9 @@ public class PearlWaypointFeature extends KuudraFeature {
         float size = (float) Math.max(0.05, waypoint.size() * sizeMultiplier);
         float half = size / 2f;
 
-        Box targetBox = new Box(
-                target.getX() - half - 0.5, target.getY(), target.getZ() - half - 0.5,
-                target.getX() + half - 0.5, target.getY() + size, target.getZ() + half - 0.5
+        AABB targetBox = new AABB(
+                target.x() - half - 0.5, target.y(), target.z() - half - 0.5,
+                target.x() + half - 0.5, target.y() + size, target.z() + half - 0.5
         );
 
         RenderColor waypointColor = waypoint.color();
@@ -256,8 +256,8 @@ public class PearlWaypointFeature extends KuudraFeature {
             RenderColor labelColor = getAlertColor(waypoint, targetIndex);
 
             if (shouldRenderText()) {
-                Vec3d textPos = new Vec3d(target.getX() - 0.5, target.getY() + PEARL_LABEL_Y_OFFSET, target.getZ() - 0.5);
-                event.drawText(textPos, Text.literal(displayLabel),
+                Vec3 textPos = new Vec3(target.x() - 0.5, target.y() + PEARL_LABEL_Y_OFFSET, target.z() - 0.5);
+                event.drawText(textPos, Component.literal(displayLabel),
                         adjustedScale, true,
                         labelColor
                 );
@@ -270,8 +270,8 @@ public class PearlWaypointFeature extends KuudraFeature {
                         ? adjustedScale * 0.85f
                         : adjustedScale;
 
-                Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
-                event.drawText(timerPos, Text.literal(formatTimerText(remainingTimerMs)),
+                Vec3 timerPos = new Vec3(target.x() - 0.5, target.y() + timerYOffset, target.z() - 0.5);
+                event.drawText(timerPos, Component.literal(formatTimerText(remainingTimerMs)),
                         scale, true,
                         getPearlTimerColor(remainingTimerMs, targetIndex)
                 );
@@ -281,16 +281,16 @@ public class PearlWaypointFeature extends KuudraFeature {
                         ? adjustedScale * 0.85f
                         : adjustedScale;
 
-                Vec3d timerPos = new Vec3d(target.getX() - 0.5, target.getY() + timerYOffset, target.getZ() - 0.5);
-                event.drawText(timerPos, Text.literal("READY"), scale, true, new RenderColor(0, 255, 0, 0xff));
+                Vec3 timerPos = new Vec3(target.x() - 0.5, target.y() + timerYOffset, target.z() - 0.5);
+                event.drawText(timerPos, Component.literal("READY"), scale, true, new RenderColor(0, 255, 0, 0xff));
             }
         }
 
 
         if (isReady && !shouldRenderTimer()) {
             double readyYOffset = getReadyYOffset();
-            Vec3d readyPos = new Vec3d(target.getX() - 0.5, target.getY() + size + readyYOffset, target.getZ() - 0.5);
-            event.drawText(readyPos, Text.literal("READY"), adjustedScale, true, new RenderColor(0, 255, 0, 0xff));
+            Vec3 readyPos = new Vec3(target.x() - 0.5, target.y() + size + readyYOffset, target.z() - 0.5);
+            event.drawText(readyPos, Component.literal("READY"), adjustedScale, true, new RenderColor(0, 255, 0, 0xff));
         }
     }
 
@@ -303,14 +303,14 @@ public class PearlWaypointFeature extends KuudraFeature {
                 || PhaseOneConfig.PearlWaypointsConfig.pearlWaypointTimes == PhaseOneConfig.PearlWaypointType.TIMER_SECONDS;
     }
 
-    private @NotNull Vec3d getRenderTarget(@NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3d commonStandBlockCenter) {
-        Vec3d target = waypoint.target();
+    private @NotNull Vec3 getRenderTarget(@NotNull WaypointArea area, @NotNull PearlWaypoint waypoint, Vec3 commonStandBlockCenter) {
+        Vec3 target = waypoint.target();
         if (!PhaseOneConfig.PearlWaypointsConfig.dynamicPearlWaypoints || commonStandBlockCenter == null || mc.player == null) {
             return target;
         }
 
-        Vec3d playerPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        Vec3d offset = playerPos.subtract(commonStandBlockCenter);
+        Vec3 playerPos = new Vec3(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        Vec3 offset = playerPos.subtract(commonStandBlockCenter);
 
         Boolean invertForwardBackward = area.invertForwardBackward();
         Boolean invertLeftRight = area.invertLeftRight();
@@ -323,12 +323,12 @@ public class PearlWaypointFeature extends KuudraFeature {
                     * forwardBackwardDirection;
         }
 
-        Vec3d adjustedOffset = getVec3d(invertLeftRight, offset, heightAdjustment);
+        Vec3 adjustedOffset = getVec3d(invertLeftRight, offset, heightAdjustment);
 
         return target.subtract(adjustedOffset);
     }
 
-    private static @NotNull Vec3d getVec3d(Boolean invertLeftRight, Vec3d offset, double heightAdjustment) {
+    private static @NotNull Vec3 getVec3d(Boolean invertLeftRight, Vec3 offset, double heightAdjustment) {
         double lateralHeightAdjustment = 0.0;
         if (invertLeftRight != null) {
             double leftRightDirection = invertLeftRight ? -1.0 : 1.0;
@@ -336,7 +336,7 @@ public class PearlWaypointFeature extends KuudraFeature {
                     * DYNAMIC_LEFT_RIGHT_ADJUSTMENT_FACTOR
                     * leftRightDirection;
         }
-        Vec3d adjustedOffset = new Vec3d(
+        Vec3 adjustedOffset = new Vec3(
                 0.0,
                 (offset.y * DYNAMIC_Y_MULTIPLIER)
                         + heightAdjustment
@@ -466,7 +466,7 @@ public class PearlWaypointFeature extends KuudraFeature {
     }
 
     private void tryPlayThrowAlert(int previousIndex, int currentIndex) {
-        if (currentIndex <= previousIndex || mc.player == null || mc.world == null) return;
+        if (currentIndex <= previousIndex || mc.player == null || mc.level == null) return;
 
         WaypointArea area = areaDetection.getCurrentArea();
         if (area == null) return;
@@ -477,11 +477,11 @@ public class PearlWaypointFeature extends KuudraFeature {
 
             int targetIndex = getAdjustedTargetIndex(getAdjustedPercentage(waypoint.label()));
             if (targetIndex >= 0 && previousIndex < targetIndex && currentIndex == targetIndex) {
-                mc.world.playSound(
+                mc.level.playSound(
                         mc.player,
-                        mc.player.getBlockPos(),
-                        SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
-                        SoundCategory.PLAYERS,
+                        mc.player.blockPosition(),
+                        SoundEvents.NOTE_BLOCK_PLING.value(),
+                        SoundSource.PLAYERS,
                         1.3f,
                         1.6f
                 );

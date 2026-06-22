@@ -5,15 +5,15 @@ import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.features.Feature;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.inventory.ContainerInput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 @Slf4j
 public class WardrobeFeature extends Feature {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     private static final String WARDROBE_TITLE = "Wardrobe";
     private static final int WARDROBE_SLOT_OFFSET = 36;
@@ -50,10 +50,10 @@ public class WardrobeFeature extends Feature {
         clickWardrobeSlot(slotIndex);
 
         if (Configuration.wardrobeSound) {
-            mc.world.playSound(
-                    mc.player, mc.player.getBlockPos(),
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
-                    SoundCategory.PLAYERS, 2.0f, 1.0f
+            mc.level.playSound(
+                    mc.player, mc.player.blockPosition(),
+                    SoundEvents.NOTE_BLOCK_PLING.value(),
+                    SoundSource.PLAYERS, 2.0f, 1.0f
             );
         }
 
@@ -61,9 +61,9 @@ public class WardrobeFeature extends Feature {
     }
 
     private int keyCodeToWardrobeSlot(int keyCode, int scanCode) {
-        List<KeyBinding> wardrobeSlotKeys = IQKeyBindings.getWardrobeSlotKeys();
+        List<KeyMapping> wardrobeSlotKeys = IQKeyBindings.getWardrobeSlotKeys();
         for (int slot = 0; slot < wardrobeSlotKeys.size(); slot++) {
-            if (wardrobeSlotKeys.get(slot).matchesKey(new KeyInput(keyCode, scanCode, 0))) {
+            if (wardrobeSlotKeys.get(slot).matches(new KeyEvent(keyCode, scanCode, 0))) {
                 return WARDROBE_SLOT_OFFSET + slot;
             }
         }
@@ -72,18 +72,18 @@ public class WardrobeFeature extends Feature {
     }
 
     private void clickWardrobeSlot(int slotIndex) {
-        ClientPlayerEntity player = mc.player;
-        if (player == null || mc.interactionManager == null) return;
-        if (!(mc.currentScreen instanceof HandledScreen<?> handledScreen)) return;
+        LocalPlayer player = mc.player;
+        if (player == null || mc.gameMode == null) return;
+        if (!(mc.screen instanceof AbstractContainerScreen<?> handledScreen)) return;
 
-        ScreenHandler handler = handledScreen.getScreenHandler();
+        AbstractContainerMenu handler = handledScreen.getMenu();
         if (slotIndex < 0 || slotIndex >= handler.slots.size()) return;
 
-        mc.interactionManager.clickSlot(
-                handler.syncId,
+        mc.gameMode.handleContainerInput(
+                handler.containerId,
                 slotIndex,
                 0,
-                SlotActionType.PICKUP,
+                ContainerInput.PICKUP,
                 player
         );
     }

@@ -6,7 +6,7 @@ import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ import static net.iqaddons.mod.IQConstants.SKYBLOCK_AREA_ID;
 @RequiredArgsConstructor
 public final class KuudraStateValidator {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     private static final Pattern SUPPLIES_PATTERN = Pattern.compile("Rescue supplies");
     private static final Pattern BUILD_PATTERN = Pattern.compile("Protect Elle\\s*\\((\\d+)%\\)");
@@ -105,7 +105,7 @@ public final class KuudraStateValidator {
     }
 
     public @NotNull ValidationResult validate(@NotNull KuudraContext context) {
-        if (mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.level == null) {
             return new ValidationResult.PlayerNotInWorld();
         }
 

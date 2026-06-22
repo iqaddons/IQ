@@ -7,9 +7,9 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.hud.config.HudConfigManager;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Setter
 public final class HudManager {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     private static HudManager instance;
 
     private final HudConfigManager configManager;
@@ -109,17 +109,17 @@ public final class HudManager {
     }
 
     private void onHudRender(@NotNull HudRenderEvent event) {
-        if (mc.currentScreen instanceof HandledScreen<?>) return;
+        if (mc.screen instanceof AbstractContainerScreen<?>) return;
 
         double[] mousePos = getScaledMousePosition();
         renderWidgets(event.drawContext(), mousePos[0], mousePos[1], event.tickDelta());
     }
 
-    public void renderOnHandledScreen(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!(mc.currentScreen instanceof HandledScreen<?>)) return;
+    public void renderOnHandledScreen(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        if (!(mc.screen instanceof AbstractContainerScreen<?>)) return;
         if (mc.player == null) return;
-        if (mc.options.hudHidden) return;
-        if (mc.options.playerListKey.isPressed()) return;
+        if (mc.options.hideGui) return;
+        if (mc.options.keyPlayerList.isDown()) return;
 
         for (HudWidget widget : widgets) {
             if (!widget.isActive() && widget.shouldRender()) {
@@ -132,7 +132,7 @@ public final class HudManager {
         }
     }
 
-    public void renderAll(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderAll(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         for (HudWidget widget : widgets) {
             if (!widget.getEnabledSupplier().getAsBoolean()) continue;
 
@@ -150,11 +150,11 @@ public final class HudManager {
         }
     }
 
-    private void renderWidgets(@NotNull DrawContext context, double mouseX, double mouseY, float delta) {
+    private void renderWidgets(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float delta) {
         if (mc.player == null) return;
-        if (mc.options.hudHidden) return;
-        if (mc.currentScreen instanceof HudEditScreen) return;
-        if (mc.options.playerListKey.isPressed()) return;
+        if (mc.options.hideGui) return;
+        if (mc.screen instanceof HudEditScreen) return;
+        if (mc.options.keyPlayerList.isDown()) return;
 
         for (HudWidget widget : widgets) {
             updateWidgetActivation(widget);
@@ -166,7 +166,7 @@ public final class HudManager {
     }
 
     public void openEditor() {
-        if (mc.currentScreen instanceof HudEditScreen) {
+        if (mc.screen instanceof HudEditScreen) {
             return;
         }
         mc.setScreen(new HudEditScreen());
@@ -193,10 +193,10 @@ public final class HudManager {
     }
 
     private static double @NotNull [] getScaledMousePosition() {
-        double scaleFactor = mc.getWindow().getScaleFactor();
+        double scaleFactor = mc.getWindow().getGuiScale();
         return new double[]{
-                mc.mouse.getX() / scaleFactor,
-                mc.mouse.getY() / scaleFactor
+                mc.mouseHandler.xpos() / scaleFactor,
+                mc.mouseHandler.ypos() / scaleFactor
         };
     }
 

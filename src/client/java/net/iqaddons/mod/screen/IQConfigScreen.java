@@ -9,14 +9,14 @@ import net.iqaddons.mod.screen.model.ConfigEntryModel;
 import net.iqaddons.mod.screen.model.ConfigEntryModel.EntryType;
 import net.iqaddons.mod.utils.ConfigReflectionUtil;
 import net.iqaddons.mod.utils.data.DataKey;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,12 +29,12 @@ public class IQConfigScreen extends Screen {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(IQConfigScreen.class);
 
-    private static final Identifier LOGO_TEXTURE = Identifier.of("iq", "textures/icon.png");
-    private static final Identifier DISCORD_ICON_TEXTURE = Identifier.of("iq", "textures/social/discord.png");
-    private static final Identifier MODRINTH_ICON_TEXTURE = Identifier.of("iq", "textures/social/modrinth.png");
-    private static final Identifier PATREON_ICON_TEXTURE = Identifier.of("iq", "textures/social/patreon.png");
-    private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.of("iq", "textures/social/settings.png");
-    private static final Identifier CLOSE_ICON_TEXTURE = Identifier.of("iq", "textures/social/close.png");
+    private static final Identifier LOGO_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/icon.png");
+    private static final Identifier DISCORD_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/discord.png");
+    private static final Identifier MODRINTH_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/modrinth.png");
+    private static final Identifier PATREON_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/patreon.png");
+    private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/settings.png");
+    private static final Identifier CLOSE_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/close.png");
     private static final int LOGO_TEX_SIZE = 160;
     private static final int LOGO_SIZE = 24;
 
@@ -221,7 +221,7 @@ public class IQConfigScreen extends Screen {
     private @Nullable String initialCategoryId = null;
 
     public IQConfigScreen(@Nullable Screen parent, Class<?>... configClasses) {
-        super(Text.literal("IQ Addons · Config"));
+        super(Component.literal("IQ Addons · Config"));
         this.parent        = parent;
         this.configClasses = configClasses;
     }
@@ -299,10 +299,10 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public boolean shouldPause() { return false; }
+    public boolean isPauseScreen() { return false; }
 
     @Override
-    public void render(@NotNull DrawContext ctx, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor ctx, int mouseX, int mouseY, float a) {
         refreshSharedUiSettings();
         updateScreenTransition();
         frameMouseX = mouseX;
@@ -342,7 +342,7 @@ public class IQConfigScreen extends Screen {
 
     }
 
-    private void drawGlowBorder(DrawContext ctx, int x, int y, int w, int h) {
+    private void drawGlowBorder(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
         if (!sharedOutlineShadow) {
             drawRoundedHollowRect(ctx, x, y, w, h, themedBorderBright(), CORNER_R_LARGE);
             return;
@@ -357,7 +357,7 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, x, y, w, h, themedBorderBright(), CORNER_R_LARGE);
     }
 
-    private void renderHeader(DrawContext ctx) {
+    private void renderHeader(GuiGraphicsExtractor ctx) {
         int x = cachedGx + cachedSidebarW, y = cachedGy, w = cachedGw - cachedSidebarW;
 
         drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), CORNER_R_MED);
@@ -386,9 +386,9 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, sbX, sbY, sbW, SEARCH_H,
                 searchFocused ? BORDER_BRIGHT : (sbHov ? BORDER_MID : BORDER_DIM));
 
-        int iconY = sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2;
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("⌕"), sbX + 5, iconY, 0xA0E64BA8);
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("⌕"), sbX + 4, iconY, 0xE8FFFFFF);
+        int iconY = sbY + (SEARCH_H - minecraft.font.lineHeight) / 2;
+        ctx.text(minecraft.font, Component.literal("⌕"), sbX + 5, iconY, 0xA0E64BA8);
+        ctx.text(minecraft.font, Component.literal("⌕"), sbX + 4, iconY, 0xE8FFFFFF);
 
         String q = searchQuery.toString();
         boolean blink = searchFocused && (cursorTick / 10) % 2 == 0;
@@ -396,17 +396,17 @@ public class IQConfigScreen extends Screen {
         if (q.isEmpty() && !searchFocused) {
             display = "§8Search…";
         } else {
-            String trimmed = client.textRenderer.trimToWidth(q, sbW - 32);
+            String trimmed = minecraft.font.plainSubstrByWidth(q, sbW - 32);
             display = "§f" + trimmed + (blink ? "§7|" : "");
         }
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal(display),
-                sbX + 15, sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2, T_MAIN);
+        ctx.text(minecraft.font, Component.literal(display),
+                sbX + 15, sbY + (SEARCH_H - minecraft.font.lineHeight) / 2, T_MAIN);
 
         if (!q.isEmpty()) {
             boolean clrHov = isIn(frameMouseX, frameMouseY, sbX + sbW - 15, sbY, 12, SEARCH_H);
-            ctx.drawTextWithShadow(client.textRenderer,
-                    Text.literal(clrHov ? "§c✕" : "§8✕"),
-                    sbX + sbW - 14, sbY + (SEARCH_H - client.textRenderer.fontHeight) / 2, T_MUTED);
+            ctx.text(minecraft.font,
+                    Component.literal(clrHov ? "§c✕" : "§8✕"),
+                    sbX + sbW - 14, sbY + (SEARCH_H - minecraft.font.lineHeight) / 2, T_MUTED);
         }
 
          int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
@@ -434,12 +434,12 @@ public class IQConfigScreen extends Screen {
          int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
          int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
 
-         ctx.drawTexture(RenderPipelines.GUI_TEXTURED, SETTINGS_ICON_TEXTURE,
+         ctx.blit(RenderPipelines.GUI_TEXTURED, SETTINGS_ICON_TEXTURE,
                  settingsIconX, iconY2, 0f, 0f,
                  iconSize, iconSize,
                  SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H,
                  SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H);
-         ctx.drawTexture(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
+         ctx.blit(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
                  closeIconX, iconY2, 0f, 0f,
                  iconSize, iconSize,
                  CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE,
@@ -449,7 +449,7 @@ public class IQConfigScreen extends Screen {
          if (closeHov) pendingTooltip = "Close config";
     }
 
-    private void renderSidebar(DrawContext ctx) {
+    private void renderSidebar(GuiGraphicsExtractor ctx) {
         int gx = cachedGx, gy = cachedGy, gh = cachedGh, sidebarW = cachedSidebarW;
         boolean searchActive = isSearchActive();
 
@@ -461,16 +461,16 @@ public class IQConfigScreen extends Screen {
 
         int lx = gx + 10, ly = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2;
 
-        ctx.drawTexture(RenderPipelines.GUI_TEXTURED, LOGO_TEXTURE,
+        ctx.blit(RenderPipelines.GUI_TEXTURED, LOGO_TEXTURE,
                 lx, ly, 0f, 0f,
                 LOGO_SIZE, LOGO_SIZE,
                 LOGO_TEX_SIZE, LOGO_TEX_SIZE,
                 LOGO_TEX_SIZE, LOGO_TEX_SIZE);
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§d§lIQ"),
+        ctx.text(minecraft.font, Component.literal("§d§lIQ"),
                 lx + LOGO_SIZE + 8, ly + 4, T_ACCENT);
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8Config"),
-                lx + LOGO_SIZE + 8, ly + 4 + client.textRenderer.fontHeight + 3, 0x44FFFFFF);
+        ctx.text(minecraft.font, Component.literal("§8Config"),
+                lx + LOGO_SIZE + 8, ly + 4 + minecraft.font.lineHeight + 3, 0x44FFFFFF);
 
         renderExternalLinkButtons(ctx, gx, gy, sidebarW);
 
@@ -512,20 +512,20 @@ public class IQConfigScreen extends Screen {
             }
 
             String name = getSidebarDisplayName(category);
-            if (client.textRenderer.getWidth(name) > sidebarW - 28)
-                name = client.textRenderer.trimToWidth(name, sidebarW - 36) + "…";
+            if (minecraft.font.width(name) > sidebarW - 28)
+                name = minecraft.font.plainSubstrByWidth(name, sidebarW - 36) + "…";
 
             int col = active ? themeSidebarTextActive() : (hovered ? themeSidebarTextHover() : themeSidebarTextMuted());
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal(name),
-                    gx + 16, slot.y() + (SIDEBAR_ROW_H - client.textRenderer.fontHeight) / 2, col);
+            ctx.text(minecraft.font, Component.literal(name),
+                    gx + 16, slot.y() + (SIDEBAR_ROW_H - minecraft.font.lineHeight) / 2, col);
             lastGroup = group;
         }
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("§8SUPPORTER VERSION v1.0.3"),
-                gx + 10, gy + gh - client.textRenderer.fontHeight - 8, 0x22FFFFFF);
+        ctx.text(minecraft.font, Component.literal("§8SUPPORTER VERSION v1.0.3"),
+                gx + 10, gy + gh - minecraft.font.lineHeight - 8, 0x22FFFFFF);
     }
 
-     private void renderExternalLinkButtons(DrawContext ctx, int gx, int gy, int sidebarW) {
+     private void renderExternalLinkButtons(GuiGraphicsExtractor ctx, int gx, int gy, int sidebarW) {
         int bx = getExternalLinksStartX(gx, sidebarW);
         int by = getExternalLinksY(gy);
 
@@ -538,7 +538,7 @@ public class IQConfigScreen extends Screen {
 
             int ix = bx + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
             int iy = by + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
-            ctx.drawTexture(RenderPipelines.GUI_TEXTURED, link.iconTexture(),
+            ctx.blit(RenderPipelines.GUI_TEXTURED, link.iconTexture(),
                     ix, iy, 0f, 0f,
                     LINK_ICON_SIZE, LINK_ICON_SIZE,
                     SOCIAL_ICON_TEX_SIZE, SOCIAL_ICON_TEX_SIZE,
@@ -558,7 +558,7 @@ public class IQConfigScreen extends Screen {
         return iqLabelY + 1;
     }
 
-    private void renderContent(DrawContext ctx, int cx, int cy, int cw, int ch) {
+    private void renderContent(GuiGraphicsExtractor ctx, int cx, int cy, int cw, int ch) {
         if (categories.isEmpty()) return;
         ctx.fill(cx, cy, cx + cw, cy + ch, themePanelColor());
 
@@ -594,8 +594,8 @@ public class IQConfigScreen extends Screen {
         }
 
         if (entries.isEmpty() && !searchQuery.isEmpty()) {
-            ctx.drawCenteredTextWithShadow(client.textRenderer,
-                    Text.literal("§8No results for §7\"" + searchQuery + "\""),
+            ctx.centeredText(minecraft.font,
+                    Component.literal("§8No results for §7\"" + searchQuery + "\""),
                     cx + cw / 2, cy + ch / 2, T_MUTED);
         }
     }
@@ -652,7 +652,7 @@ public class IQConfigScreen extends Screen {
         return t != EntryType.SEPARATOR && t != EntryType.SECTION_HEADER && t != EntryType.UNSUPPORTED;
     }
 
-    private int renderEntries(DrawContext ctx, List<ConfigEntryModel> entries,
+    private int renderEntries(GuiGraphicsExtractor ctx, List<ConfigEntryModel> entries,
                               int cx, int startY, int cw, int ch, int clipTop, int indent) {
         int y = startY, used = 0;
         int ew = cw - 14 - indent - SCROLL_W - 4;
@@ -711,7 +711,7 @@ public class IQConfigScreen extends Screen {
         return used;
     }
 
-    private void renderRow(DrawContext ctx, ConfigEntryModel e,
+    private void renderRow(GuiGraphicsExtractor ctx, ConfigEntryModel e,
                            int x, int y, int w, int h, boolean hov, boolean isChild) {
         switch (e.getType()) {
             case SEPARATOR -> renderSeparator(ctx, x, y, w, h, e.getSeparatorLabel());
@@ -722,7 +722,7 @@ public class IQConfigScreen extends Screen {
         }
     }
 
-    private void renderSeparator(DrawContext ctx, int x, int y, int w, int h, @Nullable String lbl) {
+    private void renderSeparator(GuiGraphicsExtractor ctx, int x, int y, int w, int h, @Nullable String lbl) {
         int centerY = y + (h - 1) / 2;
         int sepLine = themeSepLine();
         if (lbl == null || lbl.isBlank()) {
@@ -741,25 +741,25 @@ public class IQConfigScreen extends Screen {
             return;
         }
 
-        Text separatorText = Text.literal(up).copy().styled(style -> style.withBold(true));
+        Component separatorText = Component.literal(up).copy().withStyle(style -> style.withBold(true));
         int textPaddingX = 5;
         int textPaddingY = 2;
         int minPillW = 24;
         int maxPillW = Math.max(minPillW, w - 28);
 
-        int textWRaw = client.textRenderer.getWidth(separatorText);
+        int textWRaw = minecraft.font.width(separatorText);
         int textW = Math.max(1, (int) Math.ceil(textWRaw * SEP_TEXT_SCALE));
         int pillW = Math.min(maxPillW, Math.max(minPillW, textW + (textPaddingX * 2)));
         if (textW + (textPaddingX * 2) > maxPillW) {
             int maxTextW = Math.max(10, (int) Math.floor((maxPillW - (textPaddingX * 2)) / SEP_TEXT_SCALE));
-            String trimmed = client.textRenderer.trimToWidth(up, maxTextW);
-            separatorText = Text.literal(trimmed).copy().styled(style -> style.withBold(true));
-            textWRaw = client.textRenderer.getWidth(separatorText);
+            String trimmed = minecraft.font.plainSubstrByWidth(up, maxTextW);
+            separatorText = Component.literal(trimmed).copy().withStyle(style -> style.withBold(true));
+            textWRaw = minecraft.font.width(separatorText);
             textW = Math.max(1, (int) Math.ceil(textWRaw * SEP_TEXT_SCALE));
             pillW = Math.min(maxPillW, Math.max(minPillW, textW + (textPaddingX * 2)));
         }
 
-        int scaledFontH = Math.max(1, (int) Math.ceil(client.textRenderer.fontHeight * SEP_TEXT_SCALE));
+        int scaledFontH = Math.max(1, (int) Math.ceil(minecraft.font.lineHeight * SEP_TEXT_SCALE));
         int pillH = Math.max(10, scaledFontH + (textPaddingY * 2));
         int pillX = x + (w - pillW) / 2;
         int pillY = centerY - (pillH / 2);
@@ -782,14 +782,14 @@ public class IQConfigScreen extends Screen {
 
         int tx = pillX + (pillW - textW) / 2;
         int ty = pillY + (pillH - scaledFontH) / 2;
-        ctx.getMatrices().pushMatrix();
-        ctx.getMatrices().translate(tx, ty);
-        ctx.getMatrices().scale(SEP_TEXT_SCALE, SEP_TEXT_SCALE);
-        ctx.drawTextWithShadow(client.textRenderer, separatorText, 0, 0, themeSepText());
-        ctx.getMatrices().popMatrix();
+        ctx.pose().pushMatrix();
+        ctx.pose().translate(tx, ty);
+        ctx.pose().scale(SEP_TEXT_SCALE, SEP_TEXT_SCALE);
+        ctx.text(minecraft.font, separatorText, 0, 0, themeSepText());
+        ctx.pose().popMatrix();
     }
 
-    private void renderSectionHeader(DrawContext ctx, ConfigEntryModel entry,
+    private void renderSectionHeader(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
                                      int x, int y, int w, int h, boolean hov) {
         boolean exp = entry.isExpanded();
 
@@ -802,20 +802,20 @@ public class IQConfigScreen extends Screen {
         drawRoundedRect(ctx, x, y, 2, h, themeAccentColor(), CORNER_R_SMALL);
         if (exp) drawRoundedRect(ctx, x, y, 2, 3, withAlpha(themeAccentColor(), 0xFF), CORNER_R_SMALL);
 
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal(entry.getLabel()),
-                x + 10, y + (h - client.textRenderer.fontHeight) / 2, themeTextMain());
+        ctx.text(minecraft.font, Component.literal(entry.getLabel()),
+                x + 10, y + (h - minecraft.font.lineHeight) / 2, themeTextMain());
 
         int count = entry.getChildren() != null ? countControls(entry.getChildren()) : 0;
         String hint = count + (exp ? " ▾" : " ▸");
-        int hintW = client.textRenderer.getWidth(hint);
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal(hint),
+        int hintW = minecraft.font.width(hint);
+        ctx.text(minecraft.font, Component.literal(hint),
                 x + w - hintW - PADDING,
-                y + (h - client.textRenderer.fontHeight) / 2, themeTextMuted());
+                y + (h - minecraft.font.lineHeight) / 2, themeTextMuted());
 
         drawRoundedHollowRect(ctx, x, y, w, h, lerpArgb(themedBorderDim(), themedBorderBright(), hAnim * (exp ? 1f : 0.4f)));
     }
 
-    private void renderEntry(DrawContext ctx, ConfigEntryModel entry,
+    private void renderEntry(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
                              int x, int y, int w, int h, boolean hov, boolean isChild) {
         String hKey = entryKey(entry);
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
@@ -833,22 +833,22 @@ public class IQConfigScreen extends Screen {
 
         if (hasDesc) {
             int labelY = y + 7;
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal(entry.getLabel()),
+            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
                     x + PADDING, labelY, themeFeatureTitleColor());
 
             List<String> lines = wrapText(entry.getDescription(), Math.max(60, descAvailW));
-            int descY = labelY + client.textRenderer.fontHeight + 3;
+            int descY = labelY + minecraft.font.lineHeight + 3;
             for (int li = 0; li < Math.min(2, lines.size()); li++) {
                 String ln = lines.get(li);
                 if (li == 1 && lines.size() > 2)
-                    ln = client.textRenderer.trimToWidth(ln, descAvailW - 10) + "…";
-                ctx.drawTextWithShadow(client.textRenderer, Text.literal(ln),
-                        x + PADDING, descY + li * (client.textRenderer.fontHeight + 1), themeFeatureDescriptionColor());
+                    ln = minecraft.font.plainSubstrByWidth(ln, descAvailW - 10) + "…";
+                ctx.text(minecraft.font, Component.literal(ln),
+                        x + PADDING, descY + li * (minecraft.font.lineHeight + 1), themeFeatureDescriptionColor());
             }
             if (hov && lines.size() > 2) pendingTooltip = entry.getDescription();
         } else {
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal(entry.getLabel()),
-                    x + PADDING, y + (h - client.textRenderer.fontHeight) / 2, themeFeatureTitleColor());
+            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
+                    x + PADDING, y + (h - minecraft.font.lineHeight) / 2, themeFeatureTitleColor());
         }
 
         int re = x + w - PADDING, cy = y + h / 2;
@@ -867,7 +867,7 @@ public class IQConfigScreen extends Screen {
         }
     }
 
-    private void renderBuildOverlayModeControl(DrawContext ctx, int rx, int cy, boolean hov) {
+    private void renderBuildOverlayModeControl(GuiGraphicsExtractor ctx, int rx, int cy, boolean hov) {
         int w = MODE_PICKER_W;
         int h = CONTROL_H;
         int x = rx - w;
@@ -894,13 +894,13 @@ public class IQConfigScreen extends Screen {
         ctx.fill(splitX + 1, innerY, innerX + innerW, innerY + innerH, normal ? activeBg : idleBg);
         ctx.fill(splitX, innerY + 2, splitX + 1, innerY + innerH - 2, 0x2E8EA3BF);
 
-        ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("Simple"),
-                innerX + (segW / 2), cy - client.textRenderer.fontHeight / 2, simple ? activeText : idleText);
-        ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("Normal"),
-                splitX + ((innerW - segW) / 2), cy - client.textRenderer.fontHeight / 2, normal ? activeText : idleText);
+        ctx.centeredText(minecraft.font, Component.literal("Simple"),
+                innerX + (segW / 2), cy - minecraft.font.lineHeight / 2, simple ? activeText : idleText);
+        ctx.centeredText(minecraft.font, Component.literal("Normal"),
+                splitX + ((innerW - segW) / 2), cy - minecraft.font.lineHeight / 2, normal ? activeText : idleText);
     }
 
-    private void renderToggle(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
+    private void renderToggle(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
         try {
             boolean val = (boolean) e.getField().get(null);
             float tTarget = val ? 1f : 0f;
@@ -928,7 +928,7 @@ public class IQConfigScreen extends Screen {
         }
     }
 
-    private void renderSlider(DrawContext ctx, ConfigEntryModel e, int rx, int cy) {
+    private void renderSlider(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy) {
         try {
             double v = getDouble(e.getField());
             double t = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
@@ -944,15 +944,15 @@ public class IQConfigScreen extends Screen {
             int hx = sx + fw - 4, hh = drag ? 14 : 10;
             ctx.fill(hx, cy - hh / 2, hx + 8, cy + hh / 2, SLIDER_HANDLE);
             String vs = formatSlider(e, v);
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal(vs),
-                    sx - client.textRenderer.getWidth(vs) - 5,
-                    cy - client.textRenderer.fontHeight / 2, themeTextMuted());
+            ctx.text(minecraft.font, Component.literal(vs),
+                    sx - minecraft.font.width(vs) - 5,
+                    cy - minecraft.font.lineHeight / 2, themeTextMuted());
         } catch (Exception ex) {
             log.warn("Slider: {}", e.getLabel(), ex);
         }
     }
 
-    private void renderSelect(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
+    private void renderSelect(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
         try {
             Object val = e.getField().get(null);
             String vs = toTitleCase(val != null ? val.toString() : "?");
@@ -973,9 +973,9 @@ public class IQConfigScreen extends Screen {
                     : (vs + " >");
 
             ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-            ctx.drawCenteredTextWithShadow(client.textRenderer,
-                    Text.literal(label),
-                    bx + bw / 2 - xOff, cy - client.textRenderer.fontHeight / 2,
+            ctx.centeredText(minecraft.font,
+                    Component.literal(label),
+                    bx + bw / 2 - xOff, cy - minecraft.font.lineHeight / 2,
                     hov ? themeActionTextHoverColor() : themeActionTextColor());
             ctx.disableScissor();
         } catch (Exception ex) {
@@ -983,31 +983,31 @@ public class IQConfigScreen extends Screen {
         }
     }
 
-    private void renderColorSwatch(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
+    private void renderColorSwatch(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
         try {
             int argb = (int) e.getField().get(null);
             int sx = rx - SWATCH_W, sy = cy - SWATCH_H / 2;
             renderCheckerboard(ctx, sx, sy, SWATCH_W, SWATCH_H);
             ctx.fill(sx, sy, sx + SWATCH_W, sy + SWATCH_H, argb);
             drawHollowRect(ctx, sx - 1, sy - 1, SWATCH_W + 2, SWATCH_H + 2, hov ? themeAccentColor() : BORDER_MID);
-            if (hov) ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("§f✎"),
-                    sx + SWATCH_W / 2, cy - client.textRenderer.fontHeight / 2, 0xFFFFFFFF);
+            if (hov) ctx.centeredText(minecraft.font, Component.literal("§f✎"),
+                    sx + SWATCH_W / 2, cy - minecraft.font.lineHeight / 2, 0xFFFFFFFF);
         } catch (Exception ex) {
             log.warn("Swatch: {}", e.getLabel(), ex);
         }
     }
 
-    private void renderButton(DrawContext ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
+    private void renderButton(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
         String text = e.getButtonText() != null ? e.getButtonText() : "RUN";
         int bw = buttonControlWidth(e);
         int bx = rx - bw, by = cy - CONTROL_H / 2;
         renderActionControl(ctx, bx, by, bw, hov);
-        ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal(text),
-                bx + bw / 2, cy - client.textRenderer.fontHeight / 2,
+        ctx.centeredText(minecraft.font, Component.literal(text),
+                bx + bw / 2, cy - minecraft.font.lineHeight / 2,
                 hov ? themeActionTextHoverColor() : themeActionTextColor());
     }
 
-    private void renderActionControl(DrawContext ctx, int x, int y, int w, boolean hov) {
+    private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {
         int top = hov ? themeControlTopHover() : themeControlTop();
         int bottom = hov ? themeControlBottomHover() : themeControlBottom();
         int border = hov ? themedBorderHighlight() : themedBorderMid();
@@ -1020,7 +1020,7 @@ public class IQConfigScreen extends Screen {
         ctx.fill(x + 1, y + CONTROL_H - 2, x + w - 1, y + CONTROL_H - 1, 0x22000000);
     }
 
-    private void renderScrollbar(DrawContext ctx, int sx, int top, int ch) {
+    private void renderScrollbar(GuiGraphicsExtractor ctx, int sx, int top, int ch) {
         ScrollbarMetrics metrics = getScrollbarMetrics();
         if (metrics == null) return;
         ctx.fill(sx, top, sx + SCROLL_W, top + ch, 0x14FFFFFF);
@@ -1042,7 +1042,7 @@ public class IQConfigScreen extends Screen {
         return new ScrollbarMetrics(sx, cy, ch, thumbY, thumbH);
     }
 
-    private void renderColorEditor(DrawContext ctx) {
+    private void renderColorEditor(GuiGraphicsExtractor ctx) {
         if (editingColor == null) return;
         ColorEditorLayout layout = getColorEditorLayout();
         int ceH = layout.h();
@@ -1055,9 +1055,9 @@ public class IQConfigScreen extends Screen {
         ctx.fill(px, py, px + ceW, py + ceH, BG_COLOR_ED);
         drawGlowBorder(ctx, px, py, ceW, ceH);
 
-        ctx.drawCenteredTextWithShadow(client.textRenderer, Text.literal("Edit Color"),
+        ctx.centeredText(minecraft.font, Component.literal("Edit Color"),
                 px + ceW / 2, py + 9, themeHubAccentTextColor());
-        ctx.drawTextWithShadow(client.textRenderer, Text.literal("✕"), layout.closeX(), py + 9, themeTextMuted());
+        ctx.text(minecraft.font, Component.literal("✕"), layout.closeX(), py + 9, themeTextMuted());
 
         try {
             int argb = (int) editingColor.getField().get(null);
@@ -1072,8 +1072,8 @@ public class IQConfigScreen extends Screen {
             renderCheckerboard(ctx, prevX, prevY, layout.previewW(), 18);
             ctx.fill(prevX, prevY, prevX + layout.previewW(), prevY + 18, argb);
             drawHollowRect(ctx, prevX - 1, prevY - 1, layout.previewW() + 2, 20, BORDER_BRIGHT);
-            ctx.drawCenteredTextWithShadow(client.textRenderer,
-                    Text.literal(String.format("#%08X", argb)),
+            ctx.centeredText(minecraft.font,
+                    Component.literal(String.format("#%08X", argb)),
                     px + ceW / 2, prevY + 22, themeTextMuted());
 
             int svX = layout.svX(), svY = layout.svY(), svSize = layout.svSize();
@@ -1086,20 +1086,20 @@ public class IQConfigScreen extends Screen {
             drawHueTrack(ctx, tx, layout.hueY(), tw);
             int hx = tx + (int) (h * tw);
             drawHollowRect(ctx, hx - 2, layout.hueY() - 2, 5, 12, 0xFFFFFFFF);
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal("H"), tx - 10, layout.hueY() - 1, themeTextMuted());
+            ctx.text(minecraft.font, Component.literal("H"), tx - 10, layout.hueY() - 1, themeTextMuted());
 
             if (editingColor.isHasAlpha()) {
                 renderCheckerboard(ctx, tx, layout.alphaY(), tw, 8);
                 drawAlphaTrack(ctx, tx, layout.alphaY(), tw, h, s, v);
                 int ax = tx + (int) ((a / 255f) * tw);
                 drawHollowRect(ctx, ax - 2, layout.alphaY() - 2, 5, 12, 0xFFFFFFFF);
-                ctx.drawTextWithShadow(client.textRenderer, Text.literal("A"), tx - 10, layout.alphaY() - 1, themeTextMuted());
+                ctx.text(minecraft.font, Component.literal("A"), tx - 10, layout.alphaY() - 1, themeTextMuted());
             }
         } catch (Exception e) {
             log.warn("Color editor render", e); }
     }
 
-    private void drawSvSquare(DrawContext ctx, int x, int y, int size, float hue) {
+    private void drawSvSquare(GuiGraphicsExtractor ctx, int x, int y, int size, float hue) {
         int step = 2;
         for (int yy = 0; yy < size; yy += step) {
             float v = 1f - (yy / (float) Math.max(1, size - 1));
@@ -1112,7 +1112,7 @@ public class IQConfigScreen extends Screen {
         drawHollowRect(ctx, x - 1, y - 1, size + 2, size + 2, themedBorderMid());
     }
 
-    private void drawHueTrack(DrawContext ctx, int x, int y, int w) {
+    private void drawHueTrack(GuiGraphicsExtractor ctx, int x, int y, int w) {
         final int trackH = 8;
         int step = 2;
         for (int xx = 0; xx < w; xx += step) {
@@ -1123,7 +1123,7 @@ public class IQConfigScreen extends Screen {
         drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
     }
 
-    private void drawAlphaTrack(DrawContext ctx, int x, int y, int w, float hue, float sat, float val) {
+    private void drawAlphaTrack(GuiGraphicsExtractor ctx, int x, int y, int w, float hue, float sat, float val) {
         final int trackH = 8;
         int step = 2;
         for (int xx = 0; xx < w; xx += step) {
@@ -1134,7 +1134,7 @@ public class IQConfigScreen extends Screen {
         drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
     }
 
-    private void renderCheckerboard(DrawContext ctx, int x, int y, int w, int h) {
+    private void renderCheckerboard(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
         int sz = 4;
         for (int ry = y; ry < y + h; ry += sz)
             for (int rx = x; rx < x + w; rx += sz) {
@@ -1144,10 +1144,10 @@ public class IQConfigScreen extends Screen {
             }
     }
 
-    private void renderTooltip(DrawContext ctx, String text) {
+    private void renderTooltip(GuiGraphicsExtractor ctx, String text) {
         List<String> lines = wrapText(text, 240);
-        int fh = client.textRenderer.fontHeight, lh = fh + 2;
-        int tw = lines.stream().mapToInt(l -> client.textRenderer.getWidth(l)).max().orElse(60);
+        int fh = minecraft.font.lineHeight, lh = fh + 2;
+        int tw = lines.stream().mapToInt(l -> minecraft.font.width(l)).max().orElse(60);
         int bw = tw + 14, bh = lines.size() * lh + 10;
         int tx = frameMouseX + 12, ty = frameMouseY + 12;
         if (tx + bw > width - 4) tx = frameMouseX - bw - 8;
@@ -1156,12 +1156,12 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, tx, ty, bw, bh, themeTooltipBorderColor(), CORNER_R_SMALL);
         ctx.fill(tx + 1, ty + 1, tx + 3, ty + bh - 1, withAlpha(themeAccentColor(), 0x8A));
         for (int i = 0; i < lines.size(); i++)
-            ctx.drawTextWithShadow(client.textRenderer, Text.literal(lines.get(i)),
+            ctx.text(minecraft.font, Component.literal(lines.get(i)),
                     tx + 7, ty + 5 + i * lh, themeTooltipTextColor());
     }
 
     @Override
-     public boolean mouseClicked(Click click, boolean doubled) {
+     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
          if (closingScreen) return true;
          int imx = (int) click.x(), imy = (int) click.y();
 
@@ -1169,13 +1169,13 @@ public class IQConfigScreen extends Screen {
          int headerBtnX = getHeaderActionButtonsStartX(cachedGx + cachedSidebarW, cachedGw - cachedSidebarW);
          
          if (editingColor == null && isIn(imx, imy, headerBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
-             if (client != null) client.setScreen(new net.iqaddons.mod.screen.IQGlobalConfigurationScreen(this, configClasses));
+             if (minecraft != null) minecraft.setScreen(new net.iqaddons.mod.screen.IQGlobalConfigurationScreen(this, configClasses));
              return true;
          }
          
          int closeBtnX = headerBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
          if (editingColor == null && isIn(imx, imy, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
-             close();
+             onClose();
              return true;
          }
 
@@ -1204,7 +1204,7 @@ public class IQConfigScreen extends Screen {
             for (ExternalLinkButton link : EXTERNAL_LINKS) {
                 if (isIn(imx, imy, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE)) {
                     try {
-                        Util.getOperatingSystem().open(link.url());
+                        Util.getPlatform().openUri(link.url());
                     } catch (Exception e) {
                         log.warn("Failed to open {} link", link.name(), e);
                     }
@@ -1325,7 +1325,7 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(Click click, double offsetX, double offsetY) {
+    public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (closingScreen) return true;
         if (editingColor != null) {
             draggingScrollbar = false;
@@ -1358,7 +1358,7 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(MouseButtonEvent click) {
         if (closingScreen) return true;
         draggingScrollbar = false;
         draggingSlider = null;
@@ -1374,7 +1374,7 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
+    public boolean keyPressed(KeyEvent input) {
         if (closingScreen) return true;
         if (input.key() == 256) {
             if (editingColor != null) {
@@ -1386,7 +1386,7 @@ public class IQConfigScreen extends Screen {
                 scrollOffset = 0;
                 return true;
             }
-            close();
+            onClose();
             return true;
         }
         if (searchFocused && input.key() == 259 && !searchQuery.isEmpty()) {
@@ -1397,10 +1397,10 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
+    public boolean charTyped(CharacterEvent input) {
         if (closingScreen) return true;
         if (searchFocused) {
-            searchQuery.append(input.asString());
+            searchQuery.append(input.codepointAsString());
             scrollOffset = 0;
             return true;
         }
@@ -1460,17 +1460,17 @@ public class IQConfigScreen extends Screen {
 
     private int computeSidebarWidth() {
         int maxSidebarW = Math.max(SIDEBAR_BASE_W, cachedGw - CONTENT_MIN_W);
-        if (client == null) return SIDEBAR_BASE_W;
+        if (minecraft == null) return SIDEBAR_BASE_W;
 
         int categoryTextW = categories.stream()
                 .map(ConfigCategory::name)
-                .mapToInt(client.textRenderer::getWidth)
+                .mapToInt(minecraft.font::width)
                 .max()
                 .orElse(0);
 
-        int logoTitleW = client.textRenderer.getWidth("IQ");
-        int logoSubtitleW = client.textRenderer.getWidth("Config");
-        int footerW = client.textRenderer.getWidth("Supporter Version v1.0.3");
+        int logoTitleW = minecraft.font.width("IQ");
+        int logoSubtitleW = minecraft.font.width("Config");
+        int footerW = minecraft.font.width("Supporter Version v1.0.3");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
@@ -1808,11 +1808,11 @@ public class IQConfigScreen extends Screen {
     }
 
     private int selectControlWidth(ConfigEntryModel e) {
-        if (client == null) return SELECT_W;
+        if (minecraft == null) return SELECT_W;
         try {
             Object val = e.getField().get(null);
             String vs = toTitleCase(val != null ? val.toString() : "?");
-            int textW = client.textRenderer.getWidth(vs + " >");
+            int textW = minecraft.font.width(vs + " >");
             return clampControlWidth(textW + (CONTROL_TEXT_PAD_X * 2));
         } catch (Exception ignored) {
             return SELECT_W;
@@ -1820,9 +1820,9 @@ public class IQConfigScreen extends Screen {
     }
 
     private int buttonControlWidth(ConfigEntryModel e) {
-        if (client == null) return BUTTON_W;
+        if (minecraft == null) return BUTTON_W;
         String text = e.getButtonText() != null ? e.getButtonText() : "RUN";
-        int textW = client.textRenderer.getWidth(text);
+        int textW = minecraft.font.width(text);
         return clampControlWidth(textW + (CONTROL_TEXT_PAD_X * 2));
     }
 
@@ -1905,12 +1905,12 @@ public class IQConfigScreen extends Screen {
     }
 
     private List<String> wrapText(String text, int maxWidth) {
-        if (client == null) return List.of(text);
+        if (minecraft == null) return List.of(text);
         String cacheKey = maxWidth + "\n" + text;
         List<String> cached = wrapTextCache.get(cacheKey);
         if (cached != null) return cached;
 
-        List<String> wrapped = ScreenUiUtil.wrapTextParagraphs(client.textRenderer, text, maxWidth);
+        List<String> wrapped = ScreenUiUtil.wrapTextParagraphs(minecraft.font, text, maxWidth);
         List<String> snapshot = List.copyOf(wrapped);
         if (wrapTextCache.size() >= 512) wrapTextCache.clear();
         wrapTextCache.put(cacheKey, snapshot);
@@ -1961,7 +1961,7 @@ public class IQConfigScreen extends Screen {
             if (closingScreen && !closeHandled) finalizeClose();
             return;
         }
-        long now = Util.getMeasuringTimeMs();
+        long now = Util.getMillis();
         if (lastTransitionTimeMs < 0L) {
             lastTransitionTimeMs = now;
         }
@@ -2003,7 +2003,7 @@ public class IQConfigScreen extends Screen {
         return ScreenUiUtil.lerpArgb(c0, c1, t);
     }
 
-    private void drawSeparatorGradientLine(DrawContext ctx, int x0, int x1, int y, boolean reverse,
+    private void drawSeparatorGradientLine(GuiGraphicsExtractor ctx, int x0, int x1, int y, boolean reverse,
                                            int dimColor, int brightColor) {
         if (x1 <= x0) return;
         int span = Math.max(1, x1 - x0 - 1);
@@ -2039,15 +2039,15 @@ public class IQConfigScreen extends Screen {
         return used;
     }
 
-    private void drawRoundedRect(DrawContext ctx, int x, int y, int w, int h, int color, int radius) {
+    private void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
     }
 
-    private void drawRoundedHollowRect(DrawContext ctx, int x, int y, int w, int h, int color) {
+    private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
         drawRoundedHollowRect(ctx, x, y, w, h, color, CORNER_R_SMALL);
     }
 
-    private void drawRoundedHollowRect(DrawContext ctx, int x, int y, int w, int h, int color, int radius) {
+    private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedHollowRect(ctx, x, y, w, h, color, radius);
     }
 
@@ -2140,7 +2140,7 @@ public class IQConfigScreen extends Screen {
         return ((ai & 0xFF) << 24) | ((ri & 0xFF) << 16) | ((gi & 0xFF) << 8) | (bi & 0xFF);
     }
 
-    private void drawHeaderActionButton(DrawContext ctx, int x, int y, float hover) {
+    private void drawHeaderActionButton(GuiGraphicsExtractor ctx, int x, int y, float hover) {
         int size = HEADER_ACTION_BTN_SIZE;
         int accRgb = themeAccentColor() & 0x00FFFFFF;
         int glow = lerpArgb(0x10000000, (0x34 << 24) | accRgb, hover);
@@ -2162,7 +2162,7 @@ public class IQConfigScreen extends Screen {
         drawHollowRect(ctx, x, y, size, size, border);
     }
 
-    private void drawHollowRect(DrawContext ctx, int x, int y, int w, int h, int color) {
+    private void drawHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
         ScreenUiUtil.drawHollowRect(ctx, x, y, w, h, color);
     }
 
@@ -2183,7 +2183,7 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         requestClose(parent);
     }
 
@@ -2207,7 +2207,7 @@ public class IQConfigScreen extends Screen {
         } catch (Exception e) {
             log.warn("Failed to save config on close", e);
         }
-        if (client != null) client.setScreen(closeTarget);
+        if (minecraft != null) minecraft.setScreen(closeTarget);
     }
 
     private void saveUiState() {

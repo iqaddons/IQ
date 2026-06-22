@@ -1,11 +1,11 @@
 package net.iqaddons.mod.model.spot;
 
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public record SupplyPosition(
-        @NotNull Vec3d position,
+        @NotNull Vec3 position,
         float carrierYaw,
         int entityId
 ) {
@@ -24,27 +24,27 @@ public record SupplyPosition(
         double crateZ = giantZ + (CRATE_OFFSET * Math.sin(angleRad));
 
         return new SupplyPosition(
-                new Vec3d(crateX, CRATE_Y, crateZ),
+                new Vec3(crateX, CRATE_Y, crateZ),
                 yaw,
                 entityId
         );
     }
 
-    public boolean isNear(@NotNull Vec3d target, double radius) {
-        return position.squaredDistanceTo(target) < radius * radius;
+    public boolean isNear(@NotNull Vec3 target, double radius) {
+        return position.distanceToSqr(target) < radius * radius;
     }
 
-    public Vec3d getBeaconPosition() {
+    public Vec3 getBeaconPosition() {
         return position;
     }
 
     @Contract(value = " -> new", pure = true)
-    public @NotNull Vec3d getBoxMin() {
-        return new Vec3d(position.x, position.y - 1, position.z);
+    public @NotNull Vec3 getBoxMin() {
+        return new Vec3(position.x, position.y - 1, position.z);
     }
 
     @Contract(value = " -> new", pure = true)
-    public @NotNull Vec3d getBoxMax() {
-        return new Vec3d(position.x + 1, position.y, position.z + 1);
+    public @NotNull Vec3 getBoxMax() {
+        return new Vec3(position.x + 1, position.y, position.z + 1);
     }
 }

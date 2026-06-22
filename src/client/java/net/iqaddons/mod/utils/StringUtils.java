@@ -1,10 +1,10 @@
 package net.iqaddons.mod.utils;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
 @UtilityClass
 public class StringUtils {
 
-    private static final MinecraftClient client = MinecraftClient.getInstance();
+    private static final Minecraft client = Minecraft.getInstance();
 
     private static final Pattern MINECRAFT_NAME_PATTERN = Pattern.compile("([A-Za-z0-9_]{3,16})(?!.*[A-Za-z0-9_]{3,16})");
     private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("§([0-9a-fA-F])");
 
     public @NotNull String normalizeItemName(@NotNull ItemStack stack) {
-        return normalizeText(StringUtils.stripFormatting(stack.getName().getString()));
+        return normalizeText(StringUtils.stripFormatting(stack.getHoverName().getString()));
     }
 
     public @NotNull String normalizeText(@NotNull String text) {
@@ -55,17 +55,17 @@ public class StringUtils {
     }
 
     @NotNull
-    public String getPlayerNick(@NotNull ClientPlayerEntity player) {
-        if (client.getNetworkHandler() == null) {
+    public String getPlayerNick(@NotNull LocalPlayer player) {
+        if (client.getConnection() == null) {
             return "§7" + player.getName().getString();
         }
 
-        PlayerListEntry entry = client.getNetworkHandler().getPlayerListEntry(player.getUuid());
-        if (entry == null || entry.getDisplayName() == null) {
+        PlayerInfo entry = client.getConnection().getPlayerInfo(player.getUUID());
+        if (entry == null || entry.getTabListDisplayName() == null) {
             return "§7" + player.getName().getString();
         }
 
-        String displayName = TextFormatUtil.toLegacyString(entry.getDisplayName());
+        String displayName = TextFormatUtil.toLegacyString(entry.getTabListDisplayName());
         return StringUtils.formatPlayerNick(displayName);
     }
 

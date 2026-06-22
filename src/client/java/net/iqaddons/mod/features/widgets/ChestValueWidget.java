@@ -9,8 +9,8 @@ import net.iqaddons.mod.model.profit.chest.ChestItemValue;
 import net.iqaddons.mod.model.profit.chest.ChestValueBreakdown;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
 import net.iqaddons.mod.utils.ChestProfitUtil;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.network.chat.Component;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -60,8 +60,8 @@ public class ChestValueWidget extends HudWidget {
             return;
         }
 
-        GenericContainerScreen screen = (GenericContainerScreen) mc.currentScreen;
-        ChestValueBreakdown breakdown = ChestProfitUtil.analyzeChest(screen.getScreenHandler().slots);
+        ContainerScreen screen = (ContainerScreen) mc.screen;
+        ChestValueBreakdown breakdown = ChestProfitUtil.analyzeChest(screen.getMenu().slots);
 
         lines.add(HudLine.of("§7Total Value: §6" + formatCoins(breakdown.totalValue())));
 
@@ -71,10 +71,10 @@ public class ChestValueWidget extends HudWidget {
 
         for (ChestItemValue item : breakdown.items()) {
             lines.add(HudLine.of(item.displayName().copy()
-                    .append(Text.literal(item.count() > 1
+                    .append(Component.literal(item.count() > 1
                             ? " §8x" + item.count()
                             : ""))
-                    .append(Text.literal("§f: §6" + formatCoins(item.value())))
+                    .append(Component.literal("§f: §6" + formatCoins(item.value())))
             ));
         }
 
@@ -89,7 +89,7 @@ public class ChestValueWidget extends HudWidget {
     }
 
     private boolean isKuudraChestScreenOpen() {
-        if (!(mc.currentScreen instanceof GenericContainerScreen screen)) {
+        if (!(mc.screen instanceof ContainerScreen screen)) {
             return false;
         }
 

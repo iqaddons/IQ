@@ -1,13 +1,13 @@
 package net.iqaddons.mod.model;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.Vec3;
 
 import java.time.Instant;
 
 public record WaypointData(
-        Text playerName,
-        Vec3d position,
+        Component playerName,
+        Vec3 position,
         Instant expiresAt,
         boolean isUrgent
 ) {
@@ -16,7 +16,7 @@ public record WaypointData(
         return Instant.now().isAfter(expiresAt);
     }
 
-    public double distanceFrom(Vec3d other) {
+    public double distanceFrom(Vec3 other) {
         return position.distanceTo(other);
     }
 

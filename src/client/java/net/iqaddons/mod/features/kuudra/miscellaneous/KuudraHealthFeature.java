@@ -6,7 +6,7 @@ import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
@@ -36,10 +36,10 @@ public class KuudraHealthFeature extends KuudraFeature {
         var bossInfo = currentContext().bossInfo();
         if (!bossInfo.isAlive()) return;
 
-        var kuudraPos = bossInfo.bossEntity().getEntityPos();
+        var kuudraPos = bossInfo.bossEntity().position();
         event.drawText(
                 kuudraPos.add(0, 10, 0),
-                Text.literal(formatHealth(bossInfo.currentHealth())),
+                Component.literal(formatHealth(bossInfo.currentHealth())),
                 0.25f,
                 true,
                 RenderColor.fromArgb(getHealthColor(bossInfo.currentHealth()))

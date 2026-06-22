@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -38,12 +38,11 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-1.21.9:${project.resourcefulconfig_version}")
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    implementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-26.1:${project.resourcefulconfig_version}")
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation 'net.hypixel:mod-api:1.0.1'
     implementation include("dev.firstdark.discordrpc:discord-rpc:${project.discord_rpc_version}")
@@ -67,7 +66,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = 25
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Cancellable;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 @Slf4j
 public class TitleReceivedEvent implements Event, Cancellable {
 
-    private final Text title;
-    private final Text subtitle;
+    private final Component title;
+    private final Component subtitle;
 
     private final String message;
     private final String strippedMessage;
@@ -24,11 +24,11 @@ public class TitleReceivedEvent implements Event, Cancellable {
     @Setter
     private boolean cancelled;
 
-    public TitleReceivedEvent(@Nullable Text title, @Nullable Text subtitle) {
-        this.title = title == null ? Text.empty() : title;
-        this.subtitle = subtitle == null ? Text.empty() : subtitle;
+    public TitleReceivedEvent(@Nullable Component title, @Nullable Component subtitle) {
+        this.title = title == null ? Component.empty() : title;
+        this.subtitle = subtitle == null ? Component.empty() : subtitle;
 
-        Text primaryText = this.title.getString().isEmpty()
+        Component primaryText = this.title.getString().isEmpty()
                 ? this.subtitle
                 : this.title;
 

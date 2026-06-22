@@ -3,10 +3,10 @@ package net.iqaddons.mod.config.screen;
 import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.features.kuudra.waypoints.EtherwarpHelperFeature;
 import net.iqaddons.mod.manager.EtherwarpCategoryToggleManager;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +23,7 @@ public class EtherwarpCategorySelectorScreen extends Screen {
     private final @Nullable Screen parent;
 
     public EtherwarpCategorySelectorScreen(@Nullable Screen parent) {
-        super(Text.literal("Etherwarp Helper Categories"));
+        super(Component.literal("Etherwarp Helper Categories"));
         this.parent = parent;
     }
 
@@ -34,7 +34,7 @@ public class EtherwarpCategorySelectorScreen extends Screen {
     }
 
     private void rebuildButtons() {
-        clearChildren();
+        clearWidgets();
 
         Map<String, Boolean> all = EtherwarpCategoryToggleManager.get().getAll();
         List<String> names = new ArrayList<>(all.keySet());
@@ -44,7 +44,7 @@ public class EtherwarpCategorySelectorScreen extends Screen {
 
         for (String name : names) {
             boolean enabled = all.getOrDefault(name, true);
-            addDrawableChild(ButtonWidget.builder(
+            addRenderableWidget(Button.builder(
                             labelFor(name, enabled),
                             button -> {
                                 boolean newValue = !EtherwarpCategoryToggleManager.get().isCategoryEnabled(name);
@@ -52,17 +52,17 @@ public class EtherwarpCategorySelectorScreen extends Screen {
                                 refreshEtherwarpFeature();
                                 rebuildButtons();
                             })
-                    .dimensions(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
+                    .bounds(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
                     .build());
 
             y += BUTTON_HEIGHT + ROW_GAP;
             if (y > height - 60) break;
         }
 
-        addDrawableChild(ButtonWidget.builder(
-                        Text.literal("Done"),
-                        button -> close())
-                .dimensions((width - 100) / 2, height - 28, 100, 20)
+        addRenderableWidget(Button.builder(
+                        Component.literal("Done"),
+                        button -> onClose())
+                .bounds((width - 100) / 2, height - 28, 100, 20)
                 .build());
     }
 
@@ -76,21 +76,21 @@ public class EtherwarpCategorySelectorScreen extends Screen {
         }
     }
 
-    private Text labelFor(@NotNull String categoryName, boolean enabled) {
+    private Component labelFor(@NotNull String categoryName, boolean enabled) {
         String state = enabled ? "§aON" : "§cOFF";
-        return Text.literal(categoryName + " §8- " + state);
+        return Component.literal(categoryName + " §8- " + state);
     }
 
     @Override
-    public void render(@NotNull DrawContext context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float a) {
         // Avoid calling the blur background twice in the same frame.
         context.fill(0, 0, width, height, 0xA0101010);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, a);
 
-        context.drawCenteredTextWithShadow(textRenderer, title, width / 2, 12, 0xFFFFFFFF);
-        context.drawCenteredTextWithShadow(
-                textRenderer,
-                Text.literal("Toggle categories loaded from etherwarp_config.json"),
+        context.centeredText(font, title, width / 2, 12, 0xFFFFFFFF);
+        context.centeredText(
+                font,
+                Component.literal("Toggle categories loaded from etherwarp_config.json"),
                 width / 2,
                 24,
                 0xFFAAAAAA
@@ -98,14 +98,14 @@ public class EtherwarpCategorySelectorScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        if (client != null) {
-            client.setScreen(parent);
+    public void onClose() {
+        if (minecraft != null) {
+            minecraft.setScreen(parent);
         }
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 }

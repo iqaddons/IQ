@@ -12,7 +12,7 @@ import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TimeUtils;
-import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screens.ChatScreen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -205,7 +205,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     }
 
     private boolean isChatSelectionOpen() {
-        return mc.currentScreen instanceof ChatScreen;
+        return mc.screen instanceof ChatScreen;
     }
 
     private void selectScope(@NotNull ProfitScope scope) {

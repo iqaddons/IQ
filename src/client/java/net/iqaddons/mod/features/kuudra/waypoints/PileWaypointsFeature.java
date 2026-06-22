@@ -13,10 +13,10 @@ import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -64,9 +64,9 @@ public class PileWaypointsFeature extends KuudraFeature {
         if (!event.isInGame()) return;
         if (!event.isNthTick(UPDATE_INTERVAL_TICKS)) return;
 
-        List<ArmorStandEntity> completedStands = EntityDetectorUtil.getCompletedPileStands();
-        for (ArmorStandEntity stand : completedStands) {
-            Vec3d standPos = new Vec3d(stand.getX(), stand.getY(), stand.getZ());
+        List<ArmorStand> completedStands = EntityDetectorUtil.getCompletedPileStands();
+        for (ArmorStand stand : completedStands) {
+            Vec3 standPos = new Vec3(stand.getX(), stand.getY(), stand.getZ());
             supplyState.markPileCompleted(standPos);
         }
     }
@@ -81,13 +81,13 @@ public class PileWaypointsFeature extends KuudraFeature {
                     ? RenderColor.fromArgb(PhaseOneConfig.PileWaypointsConfig.noPrePileColor)
                     : RenderColor.fromArgb(PhaseOneConfig.PileWaypointsConfig.normalPileColor);
 
-            event.drawStyledWithBeam(Box.from(pile.position()), BEACON_HEIGHT,
+            event.drawStyledWithBeam(AABB.unitCubeFromLowerCorner(pile.position()), BEACON_HEIGHT,
                     false, color, WorldRenderUtils.RenderStyle.BOTH
             );
 
             if (PhaseOneConfig.PileWaypointsConfig.pileWaypointNames) {
                 event.drawText(pile.position().add(0, 2.5, 0),
-                        Text.literal(pile.name()), 0.05f,
+                        Component.literal(pile.name()), 0.05f,
                         true, color.withOpacity(100)
                 );
             }

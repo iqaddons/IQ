@@ -2,10 +2,10 @@ package net.iqaddons.mod.utils;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.MagmaCubeEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.MagmaCube;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,14 +15,14 @@ import java.util.Optional;
 @UtilityClass
 public class KuudraLocationUtil {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     private static final int KUUDRA_SIZE = 30;
     private static final float MIN_KUUDRA_MAX_HEALTH = 10_000f;
 
-    private static MagmaCubeEntity cachedKuudra = null;
+    private static MagmaCube cachedKuudra = null;
 
-    public static @NotNull Optional<MagmaCubeEntity> findKuudra() {
-        ClientWorld world = mc.world;
+    public static @NotNull Optional<MagmaCube> findKuudra() {
+        ClientLevel world = mc.level;
         if (world == null) {
             cachedKuudra = null;
             return Optional.empty();
@@ -36,12 +36,12 @@ public class KuudraLocationUtil {
         return Optional.ofNullable(cachedKuudra);
     }
 
-    private static @Nullable MagmaCubeEntity findKuudraBoss(@NotNull ClientWorld world) {
-        MagmaCubeEntity kuudra = null;
+    private static @Nullable MagmaCube findKuudraBoss(@NotNull ClientLevel world) {
+        MagmaCube kuudra = null;
         double maxY = 0;
         int cubesFound = 0;
-        for (Entity entity : world.getEntities()) {
-            if (!(entity instanceof MagmaCubeEntity cube)) continue;
+        for (Entity entity : world.entitiesForRendering()) {
+            if (!(entity instanceof MagmaCube cube)) continue;
             if (cube.getSize() != KUUDRA_SIZE) continue;
 
             double y = cube.getY();
@@ -62,7 +62,7 @@ public class KuudraLocationUtil {
         return kuudra;
     }
 
-    public static boolean isKuudra(@Nullable MagmaCubeEntity entity) {
+    public static boolean isKuudra(@Nullable MagmaCube entity) {
         if (entity == null) return false;
         if (entity.getMaxHealth() < MIN_KUUDRA_MAX_HEALTH) {
             return false;

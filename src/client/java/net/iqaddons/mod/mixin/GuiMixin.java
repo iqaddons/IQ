@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,20 +19,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Slf4j
-@Mixin(InGameHud.class)
-public abstract class InGameHudMixin {
+@Mixin(Gui.class)
+public abstract class GuiMixin {
 
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     @Shadow
     @Nullable
-    private Text title;
+    private Component title;
 
     @Shadow
     @Nullable
-    private Text subtitle;
+    private Component subtitle;
 
     @Unique
     private String iq$lastTitleMessage = "";
@@ -41,23 +41,23 @@ public abstract class InGameHudMixin {
     @Unique
     private boolean iq$lastTitleCancelled;
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void iq$onRenderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (client.player == null) return;
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void iq$onRenderHud(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
+        if (minecraft.player == null) return;
 
-        int width = client.getWindow().getScaledWidth();
-        int height = client.getWindow().getScaledHeight();
+        int width = minecraft.getWindow().getGuiScaledWidth();
+        int height = minecraft.getWindow().getGuiScaledHeight();
 
         EventBus.post(new HudRenderEvent(
                 context,
-                tickCounter.getTickProgress(true),
+                tickCounter.getGameTimeDeltaPartialTick(true),
                 width,
                 height
         ));
     }
 
-    @Inject(method = "renderTitleAndSubtitle", at = @At("HEAD"), cancellable = true)
-    private void iq$onRenderTitleAndSubtitle(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractTitle", at = @At("HEAD"), cancellable = true)
+    private void iq$onRenderTitleAndSubtitle(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
         boolean hasTitle = title != null && !title.getString().isEmpty();
         boolean hasSubtitle = subtitle != null && !subtitle.getString().isEmpty();
         if (!hasTitle && !hasSubtitle) {

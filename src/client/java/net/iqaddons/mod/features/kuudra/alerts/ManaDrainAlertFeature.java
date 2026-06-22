@@ -6,8 +6,8 @@ import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
@@ -47,12 +47,12 @@ public class ManaDrainAlertFeature extends KuudraFeature {
     }
 
     private int countAffectedPlayers() {
-        if (mc.player == null || mc.world == null) {
+        if (mc.player == null || mc.level == null) {
             return 0;
         }
 
         int count = 0;
-        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+        for (AbstractClientPlayer player : mc.level.players()) {
             if (player == mc.player) continue;
 
             double distance = mc.player.distanceTo(player);
@@ -63,10 +63,10 @@ public class ManaDrainAlertFeature extends KuudraFeature {
         return count;
     }
 
-    private boolean isRealPlayer(@NotNull AbstractClientPlayerEntity player) {
-        if (mc.getNetworkHandler() == null) return false;
+    private boolean isRealPlayer(@NotNull AbstractClientPlayer player) {
+        if (mc.getConnection() == null) return false;
 
-        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        PlayerInfo entry = mc.getConnection().getPlayerInfo(player.getUUID());
         if (entry == null) return false;
 
         return entry.getLatency() == REAL_PLAYER_PING;

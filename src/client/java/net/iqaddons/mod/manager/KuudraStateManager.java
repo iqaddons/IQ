@@ -56,7 +56,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
         var player = event.client().player;
         if (player == null) return;
-        if (player.getEntityPos().getY() < 10
+        if (player.position().y() < 10
                 && (context().phase() == KuudraPhase.SKIP
                 || context().phase() == KuudraPhase.DPS)
         ) {

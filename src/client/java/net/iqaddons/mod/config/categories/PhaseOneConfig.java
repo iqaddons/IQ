@@ -206,7 +206,7 @@ public class PhaseOneConfig {
             try {
                 Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
                 Files.createDirectories(configDir);
-                Util.getOperatingSystem().open(configDir.toFile());
+                Util.getPlatform().openFile(configDir.toFile());
             } catch (Exception e) {
                 // Silently fail
             }
@@ -267,7 +267,7 @@ public class PhaseOneConfig {
             try {
                 Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
                 Files.createDirectories(configDir);
-                Util.getOperatingSystem().open(configDir.toFile());
+                Util.getPlatform().openFile(configDir.toFile());
             } catch (Exception e) {
                 // Silently fail
             }

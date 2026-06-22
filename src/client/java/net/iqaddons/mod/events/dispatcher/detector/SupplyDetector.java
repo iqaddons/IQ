@@ -13,7 +13,7 @@ import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.utils.StringUtils;
 import net.iqaddons.mod.utils.TextFormatUtil;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -24,7 +24,7 @@ import static net.iqaddons.mod.IQConstants.*;
 @Slf4j
 public final class SupplyDetector {
 
-    private static final MinecraftClient client = MinecraftClient.getInstance();
+    private static final Minecraft client = Minecraft.getInstance();
 
     private final SupplyStateManager supplyStateManager;
 
@@ -37,7 +37,7 @@ public final class SupplyDetector {
             var player = client.player;
             if (player == null) return;
 
-            var playerPos = player.getEntityPos();
+            var playerPos = player.position();
             if (playerPos == null) return;
 
             event.setCancelled(PhaseOneConfig.supplyRecoverMessage);
@@ -90,7 +90,7 @@ public final class SupplyDetector {
             var player = client.player;
             if (player == null) return;
 
-            var playerPos = player.getEntityPos();
+            var playerPos = player.position();
             if (playerPos == null) return;
 
             var progressEvent = new SupplyProgressEvent(

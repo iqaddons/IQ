@@ -8,7 +8,7 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraRunEndEvent;
 import net.iqaddons.mod.events.impl.skyblock.SkyblockAreaChangeEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -68,7 +68,7 @@ public class IchorPoolWaypointFeature extends Feature {
         double y = Double.parseDouble(matcher.group(2));
         double z = Double.parseDouble(matcher.group(3));
 
-        activePools.add(new IchorPoolArea(new Vec3d(x + 0.5, y + 0.05, z + 0.5), System.currentTimeMillis() + ICHOR_DURATION_MS));
+        activePools.add(new IchorPoolArea(new Vec3(x + 0.5, y + 0.05, z + 0.5), System.currentTimeMillis() + ICHOR_DURATION_MS));
     }
 
     private void onAreaChange(@NotNull SkyblockAreaChangeEvent event) {
@@ -118,6 +118,6 @@ public class IchorPoolWaypointFeature extends Feature {
                 || (message.contains("Starting in ") && message.contains(" seconds"));
     }
 
-    private record IchorPoolArea(Vec3d center, long expiresAtMs) {
+    private record IchorPoolArea(Vec3 center, long expiresAtMs) {
     }
 }

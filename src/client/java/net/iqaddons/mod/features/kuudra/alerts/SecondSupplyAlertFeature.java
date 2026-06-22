@@ -12,8 +12,8 @@ import net.iqaddons.mod.model.spot.SupplyPosition;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.ServerUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,9 +34,9 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private static final long SUPPLY_SPAWN_DESYNC_GRACE_MS = 250L;
     private static final int PARTIAL_SPAWN_MAX_SUPPLIES = 2;
 
-    private static final Vec3d TRIANGLE_ZONE = new Vec3d(-67.5, 77, -122.5);
-    private static final Vec3d X_ZONE = new Vec3d(-134.5, 77, -138.5);
-    private static final Vec3d SLASH_ZONE = new Vec3d(-111.5, 76, -68.5);
+    private static final Vec3 TRIANGLE_ZONE = new Vec3(-67.5, 77, -122.5);
+    private static final Vec3 X_ZONE = new Vec3(-134.5, 77, -138.5);
+    private static final Vec3 SLASH_ZONE = new Vec3(-111.5, 76, -68.5);
     private static final double ZONE_RADIUS = 20.0;
 
     private volatile boolean inTriangle = false;
@@ -53,7 +53,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private long firstSupplySeenAtMs = 0L;
     private int consecutiveEmptyScans = 0;
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Minecraft mc = Minecraft.getInstance();
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     public SecondSupplyAlertFeature() {
@@ -197,7 +197,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
                 .map(giant -> SupplyPosition.fromGiant(
                         giant.getX(),
                         giant.getZ(),
-                        giant.getYaw(),
+                        giant.getYRot(),
                         giant.getId()
                 ))
                 .toList();
@@ -209,7 +209,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     private void detectZoneFromPlayerPosition() {
         if (mc.player == null || hasTrackedZone()) return;
 
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 playerPos = mc.player.position();
         if (isNear(playerPos, TRIANGLE_ZONE)) {
             inTriangle = true;
             log.debug("Player detected in Triangle zone");
@@ -253,8 +253,8 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
         );
     }
 
-    private boolean isNear(@NotNull Vec3d pos1, @NotNull Vec3d pos2) {
-        return pos1.squaredDistanceTo(pos2) < ZONE_RADIUS * ZONE_RADIUS;
+    private boolean isNear(@NotNull Vec3 pos1, @NotNull Vec3 pos2) {
+        return pos1.distanceToSqr(pos2) < ZONE_RADIUS * ZONE_RADIUS;
     }
 
     private void resetState() {

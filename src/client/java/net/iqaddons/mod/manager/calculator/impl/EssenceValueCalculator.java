@@ -2,7 +2,7 @@ package net.iqaddons.mod.manager.calculator.impl;
 
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.manager.calculator.ItemValueCalculator;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class EssenceValueCalculator implements ItemValueCalculator {

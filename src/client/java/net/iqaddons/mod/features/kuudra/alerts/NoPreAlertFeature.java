@@ -15,7 +15,7 @@ import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.NoPreMessageParser;
 import net.iqaddons.mod.utils.ServerUtils;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -198,7 +198,7 @@ public class NoPreAlertFeature extends KuudraFeature {
     private void detectPreSpotFromPlayerPosition() {
         if (mc.player == null) return;
 
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 playerPos = mc.player.position();
         boolean detected = supplyState.tryDetectPreSpot(playerPos);
         if (detected) {
             PreSpot preSpot = supplyState.getDetectedPreSpot();
@@ -214,7 +214,7 @@ public class NoPreAlertFeature extends KuudraFeature {
                 .map(giant -> SupplyPosition.fromGiant(
                         giant.getX(),
                         giant.getZ(),
-                        giant.getYaw(),
+                        giant.getYRot(),
                         giant.getId()
                 ))
                 .toList();
@@ -229,7 +229,7 @@ public class NoPreAlertFeature extends KuudraFeature {
 
         PreSpot preSpot = supplyState.getDetectedPreSpot();
         if (preSpot == null) {
-            Vec3d playerPos = mc.player.getEntityPos();
+            Vec3 playerPos = mc.player.position();
             boolean detected = supplyState.tryDetectPreSpot(playerPos);
             if (!detected) {
                 if (notifyDetectionFailure) {

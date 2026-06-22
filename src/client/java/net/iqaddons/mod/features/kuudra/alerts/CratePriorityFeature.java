@@ -13,7 +13,7 @@ import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.spot.PreSpot;
 import net.iqaddons.mod.utils.NoPreMessageParser;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -140,7 +140,7 @@ public class CratePriorityFeature extends KuudraFeature {
             return null;
         }
 
-        Vec3d playerPos = mc.player.getEntityPos();
+        Vec3 playerPos = mc.player.position();
         if (!supplyState.tryDetectPreSpot(playerPos)) {
             return null;
         }

@@ -1,6 +1,6 @@
 package net.iqaddons.mod;
 
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 import java.util.regex.Pattern;
 
@@ -29,5 +29,5 @@ public final class IQConstants {
     public static final String ELLE_HEAD_OVER_MESSAGE = "[NPC] Elle: Head over to the main platform";
     public static final String ELLE_NOT_AGAIN_MESSAGE = "[NPC] Elle: Not again!";
 
-    public static final Identifier IQ_FONT_IDENTIFIER = Identifier.of("iq", "default");
+    public static final Identifier IQ_FONT_IDENTIFIER = Identifier.fromNamespaceAndPath("iq", "default");
 }

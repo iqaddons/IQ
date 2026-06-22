@@ -1,9 +1,9 @@
 package net.iqaddons.mod.model.profit.chest;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public record ChestItemValue(
-        Text displayName,
+        Component displayName,
         int count,
         double value
 ) {

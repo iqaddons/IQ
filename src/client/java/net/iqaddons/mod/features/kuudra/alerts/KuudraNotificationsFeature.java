@@ -12,8 +12,8 @@ import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.NoPreMessageParser;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.StringUtils;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +49,7 @@ public class KuudraNotificationsFeature extends Feature {
                     Pattern.compile("Someone else is currently trying to pick up these supplies!"),
                     "§c§lALREADY PICKING",
                     () -> KuudraGeneralConfig.KuudraNotifications.supplyPickingAlert,
-                    SoundEvents.ENTITY_VILLAGER_NO
+                    SoundEvents.VILLAGER_NO
             )
     );
 
@@ -106,7 +106,7 @@ public class KuudraNotificationsFeature extends Feature {
 
     private void onSupplyPlace(@NotNull SupplyPlaceEvent event) {
         if (KuudraGeneralConfig.KuudraNotifications.placedSupply && isLocalPlayer(event.playerName())) {
-            MessageUtil.showAlert("§a§lPLACED", 20, SoundEvents.BLOCK_NOTE_BLOCK_PLING.value());
+            MessageUtil.showAlert("§a§lPLACED", 20, SoundEvents.NOTE_BLOCK_PLING.value());
         }
 
         if (!KuudraGeneralConfig.KuudraNotifications.suppliesDone) return;

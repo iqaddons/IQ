@@ -5,18 +5,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.iqaddons.mod.events.Cancellable;
 import net.iqaddons.mod.events.Event;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.world.inventory.ContainerInput;
+import net.minecraft.world.inventory.Slot;
 
 @Getter
 @RequiredArgsConstructor
 public class ScreenClickEvent implements Event, Cancellable {
 
-    private final HandledScreen<?> screen;
+    private final AbstractContainerScreen<?> screen;
     private final Slot slot;
     private final int button;
-    private final SlotActionType actionType;
+    private final ContainerInput actionType;
 
     @Setter
     private boolean cancelled;

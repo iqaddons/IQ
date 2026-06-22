@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.commands.IQCommand;
 import net.iqaddons.mod.config.Configuration;
@@ -20,9 +19,9 @@ import net.iqaddons.mod.lifecycle.modules.FeatureModule;
 import net.iqaddons.mod.lifecycle.modules.KuudraModule;
 import net.iqaddons.mod.lifecycle.modules.WidgetModule;
 import net.iqaddons.mod.utils.update.ModrinthUpdateChecker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BlockRenderLayer;
-import net.minecraft.fluid.Fluids;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,7 +45,7 @@ public class IQModClient implements ClientModInitializer {
     private static final String SPLIT_COLOR_MIGRATION_MARKER_RELATIVE_PATH = "iq/migrations/splits-dark-aqua-v1.marker";
     private static IQModClient instance;
 
-    public static MinecraftClient mc = MinecraftClient.getInstance();
+    public static Minecraft mc = Minecraft.getInstance();
 
     private Configurator configurator;
     private @Nullable FeatureManager featureManager;
@@ -79,7 +78,7 @@ public class IQModClient implements ClientModInitializer {
         registerCommands();
         ModrinthUpdateChecker.INSTANCE.register();
 
-        BlockRenderLayerMap.putFluids(BlockRenderLayer.TRANSLUCENT, Fluids.LAVA, Fluids.FLOWING_LAVA);
+//        ChunkSectionLayerMap.putFluids(ChunkSectionLayer.TRANSLUCENT, Fluids.LAVA, Fluids.FLOWING_LAVA); 26.1 changed how this works based on textures now?
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             components.forEach(LifecycleComponent::stop);
 

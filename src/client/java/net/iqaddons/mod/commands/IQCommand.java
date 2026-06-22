@@ -23,8 +23,8 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.etherwarp.EtherwarpCategory;
 import net.iqaddons.mod.model.spot.PileLocation;
 import net.iqaddons.mod.model.profit.ProfitScope;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,30 +38,30 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 
 public class IQCommand {
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
 
     public static void register(@NotNull CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(
                 literal("iq")
                         .executes(ctx -> {
-                            mc.send(() -> IQKeyBindings.openConfigScreen(mc));
+                            mc.schedule(() -> IQKeyBindings.openConfigScreen(mc));
                             return 1;
                         })
                         .then(literal("hud").executes(ctx -> {
-                            mc.send(() -> HudManager.get().openEditor());
+                            mc.schedule(() -> HudManager.get().openEditor());
                             return 1;
                         }))
                         .then(literal("etherwarps").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
                         .then(literal("etherwarp").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
                         .then(literal("reload").executes(ctx -> {
-                            mc.send(() -> {
+                            mc.schedule(() -> {
                                 List<PileLocation> pileLocations = PileConfigLoader.get().reload();
                                 SupplyStateManager.get().reloadPileLocations(pileLocations);
                                 CratePriorityConfigLoader.get().reload();
@@ -90,47 +90,47 @@ public class IQCommand {
                                 EtherwarpCategoryToggleManager.get().syncWithCategories(categories);
                                 CratePriorityConfigLoader.get().reload();
                             });
-                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fWaypoints and configs reloaded."));
+                            ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fWaypoints and configs reloaded."));
                             return 1;
                         }))
                           .then(literal("pearls").executes(ctx -> {
                               try {
                                   Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
                                   Files.createDirectories(configDir);
-                                  Util.getOperatingSystem().open(configDir.toFile());
-                                  ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fOpening pearl waypoints config folder..."));
+                                  Util.getPlatform().openFile(configDir.toFile());
+                                  ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fOpening pearl waypoints config folder..."));
                               } catch (Exception e) {
-                                  ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§cFailed to open config folder."));
+                                  ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§cFailed to open config folder."));
                               }
                               return 1;
                           }))
                         .then(literal("discord").executes(ctx -> {
-                            Util.getOperatingSystem().open("https://discord.gg/HdhXhCWcW9");
-                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fOpening IQ Discord invite..."));
+                            Util.getPlatform().openUri("https://discord.gg/HdhXhCWcW9");
+                            ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fOpening IQ Discord invite..."));
                             return 1;
                         }))
                         .then(literal("resetchests").executes(ctx -> {
                             ChestCounterManager.get().reset();
-                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reseted."));
+                            ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fChest counter reseted."));
                             return 1;
                         }))
                         .then(literal("chests")
                                 .executes(ctx -> {
                                     int current = ChestCounterManager.get().getChests();
-                                    ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter: §e" + current + "§7/" + ChestCounterManager.MAX_CHESTS));
-                                    ctx.getSource().sendFeedback(Text.literal("§8Use §f/iq chests set <amount>§8 or §f/iq chests reset§8."));
+                                    ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fChest counter: §e" + current + "§7/" + ChestCounterManager.MAX_CHESTS));
+                                    ctx.getSource().sendFeedback(Component.literal("§8Use §f/iq chests set <amount>§8 or §f/iq chests reset§8."));
                                     return 1;
                                 })
                                 .then(literal("set")
                                         .then(argument("amount", integer(0, ChestCounterManager.MAX_CHESTS)).executes(ctx -> {
                                             int amount = getInteger(ctx, "amount");
                                             ChestCounterManager.get().set(amount);
-                                            ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter set to §e" + amount + "§7/" + ChestCounterManager.MAX_CHESTS + "§f."));
+                                            ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fChest counter set to §e" + amount + "§7/" + ChestCounterManager.MAX_CHESTS + "§f."));
                                             return 1;
                                         })))
                                 .then(literal("reset").executes(ctx -> {
                                     ChestCounterManager.get().reset();
-                                    ctx.getSource().sendFeedback(Text.literal("§d§l[IQ] §r§fChest counter reset to §e0§f."));
+                                    ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fChest counter reset to §e0§f."));
                                     return 1;
                                 }))
                         )
@@ -151,7 +151,7 @@ public class IQCommand {
     }
 
     private static int updateConfigToDefault(@NotNull FabricClientCommandSource source) {
-        mc.send(() -> {
+        mc.schedule(() -> {
             try {
                 Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
                 
@@ -190,35 +190,35 @@ public class IQCommand {
                     }
                 }
             } catch (Exception e) {
-                source.sendFeedback(Text.literal("§d§l[IQ] §r§cFailed to update configs: " + e.getMessage()));
+                source.sendFeedback(Component.literal("§d§l[IQ] §r§cFailed to update configs: " + e.getMessage()));
             }
         });
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fConfig files updated to default successfully."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fConfig files updated to default successfully."));
         return 1;
     }
 
     private static int openEtherwarpCategories(@NotNull FabricClientCommandSource source) {
-        mc.send(KuudraGeneralConfig.openEtherwarpCategorySelector);
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fOpening Etherwarp categories..."));
+        mc.schedule(KuudraGeneralConfig.openEtherwarpCategorySelector);
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fOpening Etherwarp categories..."));
         return 1;
     }
 
     private static int sendProfitTrackerMode(@NotNull FabricClientCommandSource source) {
         ProfitScope scope = KuudraProfitTrackerManager.get().scope();
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode: §e" + scope.name()));
-        source.sendFeedback(Text.literal("§8Use §f/iq profit toggle§8, §f/iq profit session§8 or §f/iq profit lifetime§8."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode: §e" + scope.name()));
+        source.sendFeedback(Component.literal("§8Use §f/iq profit toggle§8, §f/iq profit session§8 or §f/iq profit lifetime§8."));
         return 1;
     }
 
     private static int toggleProfitTrackerMode(@NotNull FabricClientCommandSource source) {
         ProfitScope scope = KuudraProfitTrackerManager.get().toggleScope();
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode changed to §e" + scope.name() + "§f."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode changed to §e" + scope.name() + "§f."));
         return 1;
     }
 
     private static int setProfitTrackerMode(@NotNull FabricClientCommandSource source, @NotNull ProfitScope scope) {
         KuudraProfitTrackerManager.get().setScope(scope);
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode set to §e" + scope.name() + "§f."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fKuudra Profit Tracker mode set to §e" + scope.name() + "§f."));
         return 1;
     }
 
@@ -227,20 +227,20 @@ public class IQCommand {
         if (scope == ProfitScope.SESSION) manager.resetSession();
         else manager.resetLifetime();
 
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker §e" + scope.name() + "§f data reset."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fKuudra Profit Tracker §e" + scope.name() + "§f data reset."));
         return 1;
     }
 
     private static int resetProfitTrackerAll(@NotNull FabricClientCommandSource source) {
         KuudraProfitTrackerManager.get().resetAll();
-        source.sendFeedback(Text.literal("§d§l[IQ] §r§fKuudra Profit Tracker §eALL§f data reset."));
+        source.sendFeedback(Component.literal("§d§l[IQ] §r§fKuudra Profit Tracker §eALL§f data reset."));
         return 1;
     }
 
     private static int sendPersonalBest(@NotNull FabricClientCommandSource source) {
         PersonalBestManager personalBestManager = PersonalBestManager.get();
         if (!personalBestManager.hasPersonalBest()) {
-            source.sendFeedback(Text.literal("§d§l[IQ] §r§7No Personal Best recorded yet."));
+            source.sendFeedback(Component.literal("§d§l[IQ] §r§7No Personal Best recorded yet."));
             return 0;
         }
 
@@ -252,51 +252,51 @@ public class IQCommand {
 
         final String sep = "§8§m──────────────────────";
 
-        source.sendFeedback(Text.literal(sep));
-        source.sendFeedback(Text.literal("  §d§l[IQ] §bPersonal Best §8> §3"
+        source.sendFeedback(Component.literal(sep));
+        source.sendFeedback(Component.literal("  §d§l[IQ] §bPersonal Best §8> §3"
                 + formatSeconds(personalBestManager.getBestTimeMillis())
                 + " §8(Tier §b" + personalBestManager.getTier().getDisplayName() + "§8)"));
-        source.sendFeedback(Text.literal("  §bData: §3" + formatPbDate(personalBestManager.getRecordedAtEpochMillis())
+        source.sendFeedback(Component.literal("  §bData: §3" + formatPbDate(personalBestManager.getRecordedAtEpochMillis())
                 + " §8- §bHour: §3" + formatPbHour(personalBestManager.getRecordedAtEpochMillis())));
-        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Component.literal(sep));
 
-        source.sendFeedback(Text.literal("  §bSplits:"));
+        source.sendFeedback(Component.literal("  §bSplits:"));
         for (KuudraPhase phase : KuudraPhase.RUN_PHASES) {
             long millis = splits.getOrDefault(phase, 0L);
             String phaseColor = getPhaseSplitColor(phase);
             String value = millis > 0 ? phaseColor + formatSeconds(millis) : "§8-";
-            source.sendFeedback(Text.literal("    " + phaseColor + phase.getDisplayName() + " §8> " + value));
+            source.sendFeedback(Component.literal("    " + phaseColor + phase.getDisplayName() + " §8> " + value));
         }
 
-        source.sendFeedback(Text.literal("  §bSupplies §8[§3" + supplyTimings.size() + "§8]:"));
+        source.sendFeedback(Component.literal("  §bSupplies §8[§3" + supplyTimings.size() + "§8]:"));
         if (supplyTimings.isEmpty()) {
-            source.sendFeedback(Text.literal("    §8-"));
+            source.sendFeedback(Component.literal("    §8-"));
         } else {
             for (net.iqaddons.mod.model.PersonalBest.SupplyTiming timing : supplyTimings) {
-                source.sendFeedback(Text.literal("    " + timing.playerName()
+                source.sendFeedback(Component.literal("    " + timing.playerName()
                         + " §8(§b" + timing.currentSupply() + "§8/§36§8) §3"
                         + String.format(Locale.ROOT, "%.2fs", timing.seconds())));
             }
         }
 
-        source.sendFeedback(Text.literal("  §bFreshs §8[§3" + freshTimings.size() + "§8]:"));
+        source.sendFeedback(Component.literal("  §bFreshs §8[§3" + freshTimings.size() + "§8]:"));
         if (freshTimings.isEmpty()) {
-            source.sendFeedback(Text.literal("    §8-"));
+            source.sendFeedback(Component.literal("    §8-"));
         } else {
             for (net.iqaddons.mod.model.PersonalBest.FreshTiming timing : freshTimings) {
-                source.sendFeedback(Text.literal("    " + timing.playerName() + " §8- §3"
+                source.sendFeedback(Component.literal("    " + timing.playerName() + " §8- §3"
                         + String.format(Locale.ROOT, "%.2fs", timing.seconds())));
             }
         }
 
-        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Component.literal(sep));
         return 1;
     }
 
     private static int sendPhaseSplitsPBs(@NotNull FabricClientCommandSource source) {
         PhaseSplitsPBManager pbManager = PhaseSplitsPBManager.get();
         if (!pbManager.hasAnyPB()) {
-            source.sendFeedback(Text.literal("§d§l[IQ] §r§7No Phase Split PBs recorded yet. Complete a T5 Infernal run!"));
+            source.sendFeedback(Component.literal("§d§l[IQ] §r§7No Phase Split PBs recorded yet. Complete a T5 Infernal run!"));
             return 0;
         }
 
@@ -304,15 +304,15 @@ public class IQCommand {
         Integer buildFreshCount = pbManager.getBuildPbFreshCount();
         final String sep = "§8§m──────────────────────";
 
-        source.sendFeedback(Text.literal(sep));
-        source.sendFeedback(Text.literal("  §d§l[IQ]  §b§lPhase Split PBs  §8(§3T5 Infernal§8)"));
-        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Component.literal(sep));
+        source.sendFeedback(Component.literal("  §d§l[IQ]  §b§lPhase Split PBs  §8(§3T5 Infernal§8)"));
+        source.sendFeedback(Component.literal(sep));
 
         for (KuudraPhase phase : KuudraPhase.RUN_PHASES) {
             sendPbPhaseLine(source, splits, phase, buildFreshCount);
         }
 
-        source.sendFeedback(Text.literal(sep));
+        source.sendFeedback(Component.literal(sep));
         return 1;
     }
 
@@ -331,7 +331,7 @@ public class IQCommand {
             phaseLabel += " §8(§b" + buildFreshCount + "§8)";
         }
 
-        source.sendFeedback(Text.literal("    §8▸ " + phaseColor + phaseLabel + " §8» " + timeStr));
+        source.sendFeedback(Component.literal("    §8▸ " + phaseColor + phaseLabel + " §8» " + timeStr));
     }
 
     private static @NotNull String getPhaseSplitColor(@NotNull KuudraPhase phase) {
