@@ -521,7 +521,7 @@ public class IQConfigScreen extends Screen {
             lastGroup = group;
         }
 
-        ctx.text(minecraft.font, Component.literal("§8SUPPORTER VERSION v1.0.4"),
+        ctx.text(minecraft.font, Component.literal("§8MODRINTH VERSION v1.0.3"),
                 gx + 10, gy + gh - minecraft.font.lineHeight - 8, 0x22FFFFFF);
     }
 
@@ -1495,7 +1495,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = minecraft.font.width("IQ");
         int logoSubtitleW = minecraft.font.width("Config");
-        int footerW = minecraft.font.width("Supporter Version v1.0.4");
+        int footerW = minecraft.font.width("Modrinth Version v1.0.3");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
