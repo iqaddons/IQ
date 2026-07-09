@@ -13,6 +13,7 @@ import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.world.entity.monster.Giant;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +25,8 @@ public class SupplyWaypointsFeature extends KuudraFeature {
 
     private static final int UPDATE_INTERVAL_TICKS = 2;
     private static final int BEACON_HEIGHT = 100;
+    private static final double SUPPLY_PULL_RADIUS = 5.0;
+    private static final double SUPPLY_VERTICAL_MARGIN = 4.0;
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
 
@@ -85,20 +88,24 @@ public class SupplyWaypointsFeature extends KuudraFeature {
             );
 
             if (PhaseOneConfig.SupplyWaypointsConfig.supplyPullCircle) {
+                RenderColor pullCircleColor = isBobberInsideSupplyPullRange(supply) ? RenderColor.green : color;
                 event.drawCircleOutline(new Vec3(
                         supply.position().x + 0.5,
                         supply.position().y,
                         supply.position().z + 1.5
-                ), 5, 60, false, color);
+                ), 5, 60, false, pullCircleColor);
             }
 
             if (PhaseOneConfig.SupplyWaypointsConfig.supplyHitBox) {
                 zombies.stream()
                         .filter(zombie -> zombie.distanceToSqr(supply.position()) < 9)
                         .forEach(zombie -> {
+                            var zombieDistance = zombie.distanceTo(mc.player);
+                            var interactionDistance = 3d;
+
                             event.drawStyledHitbox(
                                     zombie, false,
-                                    zombie.distanceTo(mc.player) > 3 ?
+                                    zombieDistance > interactionDistance ?
                                             color :
                                             RenderColor.green,
                                     WorldRenderUtils.RenderStyle.BOTH
@@ -106,5 +113,23 @@ public class SupplyWaypointsFeature extends KuudraFeature {
                         });
             }
         }
+    }
+
+    private boolean isBobberInsideSupplyPullRange(@NotNull SupplyPosition supply) {
+        if (mc.player == null) return false;
+        FishingHook bobber = mc.player.fishing;
+        if (bobber == null) return false;
+
+        Vec3 bobberPos = bobber.position();
+        // Matches SupplyRodPullRecastFeature pull range logic.
+        double centerX = supply.position().x + 0.5;
+        double centerZ = supply.position().z + 1.5;
+        double dx = bobberPos.x - centerX;
+        double dz = bobberPos.z - centerZ;
+        if ((dx * dx) + (dz * dz) > SUPPLY_PULL_RADIUS * SUPPLY_PULL_RADIUS) return false;
+
+        Vec3 min = supply.getBoxMin();
+        Vec3 max = supply.getBoxMax();
+        return bobberPos.y >= min.y - SUPPLY_VERTICAL_MARGIN && bobberPos.y <= max.y + SUPPLY_VERTICAL_MARGIN;
     }
 }

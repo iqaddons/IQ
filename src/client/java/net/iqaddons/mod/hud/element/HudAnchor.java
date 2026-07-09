@@ -18,6 +18,10 @@ public enum HudAnchor {
     private final float xFactor;
     private final float yFactor;
 
+    // Offsets are stored against a reference GUI size and scaled at runtime.
+    public static final float REFERENCE_WIDTH = 960.0f;
+    public static final float REFERENCE_HEIGHT = 540.0f;
+
     HudAnchor(float xFactor, float yFactor) {
         this.xFactor = xFactor;
         this.yFactor = yFactor;
@@ -61,6 +65,16 @@ public enum HudAnchor {
             case CENTER_LEFT, CENTER, CENTER_RIGHT -> absoluteY - anchorY + (elementHeight / 2.0f);
             default -> absoluteY - anchorY;
         };
+    }
+
+    public static float scaleDeltaX(float screenDeltaX, int screenWidth) {
+        if (screenWidth <= 0) return 0.0f;
+        return screenDeltaX * (REFERENCE_WIDTH / screenWidth);
+    }
+
+    public static float scaleDeltaY(float screenDeltaY, int screenHeight) {
+        if (screenHeight <= 0) return 0.0f;
+        return screenDeltaY * (REFERENCE_HEIGHT / screenHeight);
     }
 
     public static @NotNull HudAnchor suggestAnchor(float x, float y, int screenWidth, int screenHeight) {

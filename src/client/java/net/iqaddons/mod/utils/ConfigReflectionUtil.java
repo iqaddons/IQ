@@ -3,6 +3,7 @@ package net.iqaddons.mod.utils;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.screen.model.ConfigCategory;
 import net.iqaddons.mod.screen.model.ConfigEntryModel;
 import net.iqaddons.mod.screen.model.ConfigEntryModel.EntryType;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Reads ResourcefulConfig annotations reflectively and builds {@link ConfigCategory} instances.
@@ -78,7 +80,7 @@ public class ConfigReflectionUtil {
             if (isConfigObject) {
                 if (sep != null) entries.add(ConfigEntryModel.separator(sep.value()));
                 List<ConfigEntryModel> children = processClass(field.getType());
-                entries.add(ConfigEntryModel.sectionHeader(label, description, children));
+                entries.add(ConfigEntryModel.sectionHeader(label, description, resolveDescriptionSupplier(field), children));
                 continue;
             }
 
@@ -136,5 +138,13 @@ public class ConfigReflectionUtil {
     private @Nullable String normalizeComment(@Nullable String comment) {
         if (comment == null || comment.isBlank()) return comment;
         return comment.replace("\r\n", "\n").replace('\r', '\n');
+    }
+
+    private @Nullable Supplier<String> resolveDescriptionSupplier(Field field) {
+        if (field.getDeclaringClass() == KuudraGeneralConfig.class
+                && "customSplitsBenchmarks".equals(field.getName())) {
+            return KuudraGeneralConfig.CustomSplitsBenchmarks::sectionDescription;
+        }
+        return null;
     }
 }

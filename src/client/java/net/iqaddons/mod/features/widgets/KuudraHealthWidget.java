@@ -18,7 +18,7 @@ import java.util.Locale;
 public class KuudraHealthWidget extends HudWidget {
 
     private static final float BOSS_PHASE_MAX_HEALTH = 24_000f;
-    private static final float PRE_BOSS_MIN_HEALTH = 24_000f;
+    private static final float PRE_BOSS_MIN_HEALTH = 25_000f;
     private static final float PRE_BOSS_MAX_HEALTH = 100_000f;
 
     private final KuudraStateManager stateManager = KuudraStateManager.get();

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,11 +17,10 @@ public final class ScoreboardUtils {
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final Pattern AREA_SYMBOL_PATTERN = Pattern.compile("[⏣ф]");
+    private static final Pattern LEADING_DECORATION_PATTERN = Pattern.compile("^[^\\p{L}\\p{N}]+");
 
-    private static final long AREA_STICKY_MS = 3000L;
-
-    private static volatile String lastSeenArea = "";
-    private static volatile long lastSeenAreaAt = 0L;
+    private static final String KUUDRA_AREA_TEXT = "Kuudra's Hollow";
+    private static final String KUUDRA_AREA_TEXT_ALT = "Kuudra’s Hollow";
 
     public static @NotNull String getTitle() {
         return getObjective()
@@ -45,26 +45,41 @@ public final class ScoreboardUtils {
     }
 
     public static @NotNull String getArea() {
-        Optional<String> found = findLine("⏣").or(() -> findLine("ф"));
-
-        if (found.isPresent()) {
-            String cleaned = StringUtils.stripFormatting(found.get());
-            cleaned = AREA_SYMBOL_PATTERN.matcher(cleaned).replaceAll("").trim();
-            // update cache
-            lastSeenArea = cleaned;
-            lastSeenAreaAt = System.currentTimeMillis();
-            return cleaned;
-        }
-
-        if (!lastSeenArea.isEmpty() && (System.currentTimeMillis() - lastSeenAreaAt) <= AREA_STICKY_MS) {
-            return lastSeenArea;
-        }
-
-        return "";
+        return findLine("⏣")
+                .or(() -> findLine("ф"))
+                .or(ScoreboardUtils::findAreaLineByText)
+                .map(ScoreboardUtils::normalizeAreaLine)
+                .orElse("");
     }
 
     public static boolean isInArea(@NotNull String areaName) {
-        return getArea().startsWith(areaName);
+        String normalizedArea = normalizeAreaName(getArea());
+        String normalizedExpected = normalizeAreaName(areaName);
+        return normalizedArea.contains(normalizedExpected);
+    }
+
+    private static @NotNull Optional<String> findAreaLineByText() {
+        return getLines().stream()
+                .map(StringUtils::stripFormatting)
+                .filter(line -> line.contains(KUUDRA_AREA_TEXT)
+                        || line.contains(KUUDRA_AREA_TEXT_ALT)
+                        || line.contains("Dungeon Hub")
+                        || line.contains("Forgotten Skull"))
+                .findFirst();
+    }
+
+    private static @NotNull String normalizeAreaLine(@NotNull String line) {
+        String stripped = StringUtils.stripFormatting(line);
+        String normalizedApostrophe = stripped.replace('’', '\'');
+        String withoutLegacySymbols = AREA_SYMBOL_PATTERN.matcher(normalizedApostrophe).replaceAll("");
+        return LEADING_DECORATION_PATTERN.matcher(withoutLegacySymbols).replaceFirst("").trim();
+    }
+
+    private static @NotNull String normalizeAreaName(@NotNull String areaName) {
+        return areaName
+                .replace('’', '\'')
+                .toLowerCase(Locale.ROOT)
+                .trim();
     }
 
     private static Optional<Objective> getObjective() {

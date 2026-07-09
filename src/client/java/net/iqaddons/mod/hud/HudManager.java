@@ -35,6 +35,7 @@ public final class HudManager {
     private final Map<String, HudWidget> widgetById = new LinkedHashMap<>();
 
     private boolean editorOpen = false;
+    private boolean centerGuidesEnabled = true;
     private boolean initialized = false;
 
     public HudManager() {
@@ -172,6 +173,11 @@ public final class HudManager {
         mc.setScreen(new HudEditScreen());
     }
 
+    public boolean toggleCenterGuides() {
+        centerGuidesEnabled = !centerGuidesEnabled;
+        return centerGuidesEnabled;
+    }
+
     public void saveConfig() {
         for (HudWidget widget : widgets) {
             configManager.saveFromWidget(widget);
@@ -205,6 +211,10 @@ public final class HudManager {
             throw new IllegalStateException("HudManager not initialized yet!");
         }
 
+        return instance;
+    }
+
+    public static @Nullable HudManager getIfInitialized() {
         return instance;
     }
 }

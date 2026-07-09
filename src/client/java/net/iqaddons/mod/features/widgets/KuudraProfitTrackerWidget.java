@@ -8,7 +8,6 @@ import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.HudRenderer;
@@ -64,32 +63,24 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     public KuudraProfitTrackerWidget() {
         super("kuudraProfitTrackerWidget",
                 "Profit Tracker",
-                815.0f, 30.0f,
+                0.0f, 40.0f,
                 1.0f,
-                HudAnchor.TOP_LEFT
+                HudAnchor.TOP_CENTER
         );
 
         setEnabledSupplier(() -> KuudraGeneralConfig.kuudraProfitTracker);
         setVisibilityCondition(() -> {
-            KuudraGeneralConfig.ProfitTrackerVisibility visibility = KuudraGeneralConfig.ProfitTrackerConfig.profitTrackerVisibility;
-            KuudraPhase currentPhase = KuudraStateManager.get().phase();
-
-
-            boolean isRunActive = currentPhase.isActive() && currentPhase != KuudraPhase.COMPLETED;
-
-
-            if (isRunActive && !KuudraGeneralConfig.ProfitTrackerConfig.renderDuringRun) {
-                return false;
-            }
-
-
-            if (visibility == KuudraGeneralConfig.ProfitTrackerVisibility.ALWAYS) {
+            if (KuudraGeneralConfig.ProfitTrackerConfig.profitTrackerVisibility == KuudraGeneralConfig.ProfitTrackerVisibility.ALWAYS) {
                 return true;
             }
-
-            // KUUDRA_AREAS
-            String area = ScoreboardUtils.getArea();
-            return ALLOWED_AREAS.stream().anyMatch(area::startsWith);
+            boolean isInAllowedArea = ALLOWED_AREAS.stream().anyMatch(ScoreboardUtils::isInArea);
+            if (!isInAllowedArea) {
+                return false;
+            }
+            if (KuudraGeneralConfig.ProfitTrackerConfig.hideWidgetDuringRunPhase && KuudraStateManager.get().isInRun()) {
+                return false;
+            }
+            return true;
         });
 
         // [Session] button
@@ -98,7 +89,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 .onHover((context, textRenderer) -> {
                     double[] mouse = HudRenderer.getScaledMousePosition();
                     HudRenderer.drawSimpleTooltip(context,
-                            "Tracks stats for the current session.\nResets after 30 min of inactivity.",
+                            "Tracks stats for the current session.\nResets after 5 min of inactivity.",
                             mouse[0], mouse[1]);
                 })
                 .onMouseEnter(() -> { hoveringSessionOption = true;  updateTrackingSelector(); })

@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class StunWaypointsFeature extends KuudraFeature {
 
-    private static final Vec3d ENTER_POS = new Vec3d(-161, 49, -186);
+    private static final Vec3 ENTER_POS = new Vec3(-161, 49, -186);
     private static final double EATEN_Y_THRESHOLD = 50.0;
 
     private volatile boolean stunPhase = false;
@@ -105,9 +105,9 @@ public class StunWaypointsFeature extends KuudraFeature {
     @Getter
     @RequiredArgsConstructor
     public enum StunWaypoint {
-        RIGHT_POD(new Vec3d(-167.5, 28, -167.5)),
-        LEFT_POD(new Vec3d(-152.5, 27, -172.5)),
-        BACK_POD(new Vec3d(-154.5, 29, -156.5)),
+        RIGHT_POD(new Vec3(-167.5, 28, -167.5)),
+        LEFT_POD(new Vec3(-152.5, 27, -172.5)),
+        BACK_POD(new Vec3(-154.5, 28, -156.5)),
         ;
 
         private final Vec3 pos;

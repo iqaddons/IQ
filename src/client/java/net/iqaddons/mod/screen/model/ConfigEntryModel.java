@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * Represents a single renderable config entry.
@@ -34,6 +35,9 @@ public class ConfigEntryModel {
 
     @Nullable
     private final String description;
+    @Builder.Default
+    @Nullable
+    private final Supplier<String> descriptionSupplier = null;
     @Nullable
     private final Field field;
 
@@ -75,8 +79,15 @@ public class ConfigEntryModel {
 
     public static ConfigEntryModel sectionHeader(String label, @Nullable String description,
                                                  List<ConfigEntryModel> children) {
+        return sectionHeader(label, description, null, children);
+    }
+
+    public static ConfigEntryModel sectionHeader(String label, @Nullable String description,
+                                                 @Nullable Supplier<String> descriptionSupplier,
+                                                 List<ConfigEntryModel> children) {
         return ConfigEntryModel.builder()
                 .type(EntryType.SECTION_HEADER).label(label).description(description)
+                .descriptionSupplier(descriptionSupplier)
                 .children(children).expanded(new AtomicBoolean(false)).build();
     }
 
@@ -92,6 +103,11 @@ public class ConfigEntryModel {
 
     public boolean isExpanded() {
         return expanded != null && expanded.get();
+    }
+
+    public @Nullable String getDescription() {
+        if (descriptionSupplier != null) return descriptionSupplier.get();
+        return description;
     }
 
     public void toggleExpanded() {

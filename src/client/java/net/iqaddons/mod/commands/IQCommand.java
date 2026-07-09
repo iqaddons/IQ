@@ -6,23 +6,19 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
+import net.iqaddons.mod.config.loader.CratePriorityConfigLoader;
 import net.iqaddons.mod.config.loader.EtherwarpConfigLoader;
 import net.iqaddons.mod.config.loader.PileConfigLoader;
 import net.iqaddons.mod.config.loader.WaypointConfigLoader;
-import net.iqaddons.mod.config.loader.CratePriorityConfigLoader;
 import net.iqaddons.mod.features.kuudra.waypoints.EtherwarpHelperFeature;
 import net.iqaddons.mod.features.kuudra.waypoints.PearlWaypointFeature;
 import net.iqaddons.mod.hud.HudManager;
-import net.iqaddons.mod.manager.ChestCounterManager;
-import net.iqaddons.mod.manager.EtherwarpCategoryToggleManager;
-import net.iqaddons.mod.manager.PersonalBestManager;
-import net.iqaddons.mod.manager.PhaseSplitsPBManager;
-import net.iqaddons.mod.manager.SupplyStateManager;
+import net.iqaddons.mod.manager.*;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
-import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.etherwarp.EtherwarpCategory;
-import net.iqaddons.mod.model.spot.PileLocation;
+import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.model.profit.ProfitScope;
+import net.iqaddons.mod.model.spot.PileLocation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
@@ -38,10 +34,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
 
 public class IQCommand {
 
@@ -54,10 +50,13 @@ public class IQCommand {
                             mc.schedule(() -> IQKeyBindings.openConfigScreen(mc));
                             return 1;
                         })
-                        .then(literal("hud").executes(ctx -> {
-                            mc.schedule(() -> HudManager.get().openEditor());
-                            return 1;
-                        }))
+                        .then(literal("hud")
+                                .executes(ctx -> {
+                                    mc.schedule(() -> HudManager.get().openEditor());
+                                    ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fHUD Editor opened. §dY§f toggles center guides."));
+                                    return 1;
+                                })
+                        )
                         .then(literal("etherwarps").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
                         .then(literal("etherwarp").executes(ctx -> openEtherwarpCategories(ctx.getSource())))
                         .then(literal("reload").executes(ctx -> {

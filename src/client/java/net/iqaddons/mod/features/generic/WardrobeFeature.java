@@ -5,14 +5,14 @@ import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.features.Feature;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +23,7 @@ public class WardrobeFeature extends Feature {
 
     private static final Minecraft mc = Minecraft.getInstance();
 
-    private static final String WARDROBE_TITLE = "Wardrobe";
+    private static final String WARDROBE_TITLE = "Armor Sets";
     private static final int WARDROBE_SLOT_OFFSET = 36;
 
     public WardrobeFeature() {

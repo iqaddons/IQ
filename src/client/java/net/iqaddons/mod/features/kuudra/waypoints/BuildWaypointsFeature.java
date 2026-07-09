@@ -10,8 +10,8 @@ import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -76,12 +76,31 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
     private void onArmorStandRender(@NotNull ArmorStandRenderEvent event) {
         if (!PhaseTwoConfig.hideDefaultBuildPileText) return;
+        if (!PhaseTwoConfig.hideDefaultBuildPileTextConfig.anyEnabled()) return;
 
         var state = event.getRenderState();
         if (state == null || state.nameTag == null) return;
 
         String stripped = state.nameTag.getString().replaceAll("§.", "");
-        if (stripped.contains("PROGRESS:") && stripped.contains("%")) {
+
+        boolean shouldHide = false;
+
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.progress &&
+                stripped.contains("PROGRESS:") && stripped.contains("%")) {
+            shouldHide = true;
+        }
+
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.sneakPunch &&
+                stripped.contains("SNEAK") && stripped.contains("PUNCH")) {
+            shouldHide = true;
+        }
+
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.supplyPile &&
+                stripped.contains("SUPPLY PILE")) {
+            shouldHide = true;
+        }
+
+        if (shouldHide) {
             event.setCancelled(true);
         }
     }
@@ -136,7 +155,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
                     progressColor.withOpacity(PhaseTwoConfig.buildHelperOpacity), WorldRenderUtils.RenderStyle.BOTH
             );
 
-            Vec3 textPos = new Vec3(pile.position.x, pile.position.y + 2, pile.position.z);
+            Vec3 textPos = new Vec3(pile.position.x, pile.position.y + 2.0, pile.position.z);
             event.drawText(textPos, Component.literal(pile.displayName), 0.05f, true, progressColor);
         }
     }

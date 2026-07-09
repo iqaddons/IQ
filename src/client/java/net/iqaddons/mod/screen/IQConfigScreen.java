@@ -10,11 +10,11 @@ import net.iqaddons.mod.screen.model.ConfigEntryModel.EntryType;
 import net.iqaddons.mod.utils.ConfigReflectionUtil;
 import net.iqaddons.mod.utils.data.DataKey;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
@@ -521,7 +521,7 @@ public class IQConfigScreen extends Screen {
             lastGroup = group;
         }
 
-        ctx.text(minecraft.font, Component.literal("§8SUPPORTER VERSION v1.0.3"),
+        ctx.text(minecraft.font, Component.literal("§8SUPPORTER VERSION v1.0.4"),
                 gx + 10, gy + gh - minecraft.font.lineHeight - 8, 0x22FFFFFF);
     }
 
@@ -792,6 +792,7 @@ public class IQConfigScreen extends Screen {
     private void renderSectionHeader(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
                                      int x, int y, int w, int h, boolean hov) {
         boolean exp = entry.isExpanded();
+        boolean hasDesc = entry.getDescription() != null && !entry.getDescription().isBlank();
 
         String hKey = "secHov#" + sectionKey(entry);
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
@@ -802,15 +803,33 @@ public class IQConfigScreen extends Screen {
         drawRoundedRect(ctx, x, y, 2, h, themeAccentColor(), CORNER_R_SMALL);
         if (exp) drawRoundedRect(ctx, x, y, 2, 3, withAlpha(themeAccentColor(), 0xFF), CORNER_R_SMALL);
 
-        ctx.text(minecraft.font, Component.literal(entry.getLabel()),
-                x + 10, y + (h - minecraft.font.lineHeight) / 2, themeTextMain());
-
-        int count = entry.getChildren() != null ? countControls(entry.getChildren()) : 0;
-        String hint = count + (exp ? " ▾" : " ▸");
+        String hint = sectionHint(entry);
         int hintW = minecraft.font.width(hint);
-        ctx.text(minecraft.font, Component.literal(hint),
-                x + w - hintW - PADDING,
-                y + (h - minecraft.font.lineHeight) / 2, themeTextMuted());
+        int hintX = x + w - hintW - PADDING;
+
+        if (hasDesc) {
+            int labelY = y + 7;
+            int descAvailW = Math.max(60, hintX - (x + 10) - 8);
+            ctx.text(minecraft.font, Component.literal(entry.getLabel()), x + 10, labelY, themeTextMain());
+
+            List<String> lines = wrapText(entry.getDescription(), descAvailW);
+            int descY = labelY + minecraft.font.lineHeight + 3;
+            for (int li = 0; li < Math.min(2, lines.size()); li++) {
+                String ln = lines.get(li);
+                if (li == 1 && lines.size() > 2) {
+                    ln = minecraft.font.plainSubstrByWidth(ln, descAvailW - 10) + "…";
+                }
+                ctx.text(minecraft.font, Component.literal(ln),
+                        x + 10, descY + li * (minecraft.font.lineHeight + 1), themeFeatureDescriptionColor());
+            }
+            if (hov && lines.size() > 2) pendingTooltip = entry.getDescription();
+            ctx.text(minecraft.font, Component.literal(hint), hintX, labelY, themeTextMuted());
+        } else {
+            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
+                    x + 10, y + (h - minecraft.font.lineHeight) / 2, themeTextMain());
+            ctx.text(minecraft.font, Component.literal(hint),
+                    hintX, y + (h - minecraft.font.lineHeight) / 2, themeTextMuted());
+        }
 
         drawRoundedHollowRect(ctx, x, y, w, h, lerpArgb(themedBorderDim(), themedBorderBright(), hAnim * (exp ? 1f : 0.4f)));
     }
@@ -1446,7 +1465,13 @@ public class IQConfigScreen extends Screen {
     private int rowHeight(ConfigEntryModel e) {
         return switch (e.getType()) {
             case SEPARATOR      -> SEP_H;
-            case SECTION_HEADER -> SEC_H;
+            case SECTION_HEADER -> {
+                if (e.getDescription() == null || e.getDescription().isBlank()) yield SEC_H;
+                int hintW = minecraft != null ? minecraft.font.width(sectionHint(e)) : 30;
+                int descW = cachedGw - cachedSidebarW - 14 - PADDING - hintW - 10 - PADDING;
+                List<String> lines = wrapText(e.getDescription(), Math.max(60, descW));
+                yield lines.size() > 1 ? ROW_H_FULL_2 : ROW_H_FULL_1;
+            }
             case UNSUPPORTED -> 0;
             default -> {
                 if (e.getDescription() == null || e.getDescription().isBlank()) yield ROW_H_SLIM;
@@ -1470,7 +1495,7 @@ public class IQConfigScreen extends Screen {
 
         int logoTitleW = minecraft.font.width("IQ");
         int logoSubtitleW = minecraft.font.width("Config");
-        int footerW = minecraft.font.width("Supporter Version v1.0.3");
+        int footerW = minecraft.font.width("Supporter Version v1.0.4");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
@@ -1834,6 +1859,11 @@ public class IQConfigScreen extends Screen {
         return (int) list.stream()
                 .filter(e -> e.getType() != EntryType.SEPARATOR && e.getType() != EntryType.UNSUPPORTED)
                 .count();
+    }
+
+    private String sectionHint(ConfigEntryModel entry) {
+        int count = entry.getChildren() != null ? countControls(entry.getChildren()) : 0;
+        return count + (entry.isExpanded() ? " ▾" : " ▸");
     }
 
     private boolean isBuildOverlayStyleEntry(ConfigEntryModel e) {

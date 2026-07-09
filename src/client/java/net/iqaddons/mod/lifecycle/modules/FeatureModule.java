@@ -21,8 +21,8 @@ public class FeatureModule implements LifecycleComponent {
     public void start() {
         features = new FeatureManager();
         features.register(
-                new PartyJoinSoundFeature(), new WaypointFeature(), new WardrobeFeature(),
-                new PartyCommandsFeature(), new LimboAlertFeature()
+                new PartyJoinSoundFeature(), new WaypointFeature(), new LoadoutsFeature(), new WardrobeFeature(),
+                new PartyCommandsFeature(), new LimboAlertFeature(), new ArrowTrackerFeature()
         );
 
         features.register(

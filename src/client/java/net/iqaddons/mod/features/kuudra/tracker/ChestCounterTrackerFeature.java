@@ -44,20 +44,20 @@ public class ChestCounterTrackerFeature extends Feature {
         lastRunTimestamp = System.currentTimeMillis();
         overlayVisible = true;
 
-        if (current % 10 == 0 && current < ChestCounterManager.MAX_CHESTS && KuudraGeneralConfig.chestCounterPartyAnnouncements) {
+        if (current % 10 == 0 && current < ChestCounterManager.MAX_CHESTS && KuudraGeneralConfig.ChestCounterConfig.chestCounterPartyAnnouncements) {
             MessageUtil.PARTY.sendMessage("[IQ] Completed " + current + " runs, " + (ChestCounterManager.MAX_CHESTS - current) + " left to reach my chest limit.");
             playLevelUp(0.9f);
         }
 
-        if (current == 59 && KuudraGeneralConfig.chestCounterPartyAnnouncements) {
-            MessageUtil.PARTY.sendMessage("!dt [IQ] Run 59/60, opening chests next run.");
+        if (current == 59 && KuudraGeneralConfig.ChestCounterConfig.chestCounterPartyAnnouncements) {
+            MessageUtil.PARTY.sendMessage("[IQ] Run 59/60, dont forget to !dt next run.");
         }
 
         if (current == ChestCounterManager.MAX_CHESTS) {
             playLevelUp(1.0f);
             MessageUtil.showTitle("§b§l60/60", "§aChest limit reached", 0, 30, 10);
-            if (KuudraGeneralConfig.chestCounterPartyAnnouncements) {
-                MessageUtil.PARTY.sendMessage("[IQ] Run 60/60, opening chests...");
+            if (KuudraGeneralConfig.ChestCounterConfig.chestCounterPartyAnnouncements) {
+                MessageUtil.PARTY.sendMessage("[IQ] Run 60/60, opening chests :)");
             }
 
             MessageUtil.sendFormattedMessage("§fYour chest tracker is full! Run §e/iq resetchests §fto reset your percent.");
@@ -71,6 +71,10 @@ public class ChestCounterTrackerFeature extends Feature {
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!overlayVisible || !event.isNthTick(10)) {
+            return;
+        }
+
+        if (KuudraGeneralConfig.ChestCounterConfig.chestCounterVisibility != KuudraGeneralConfig.ChestCounterVisibility.ALWAYS) {
             return;
         }
 

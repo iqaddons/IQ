@@ -56,9 +56,10 @@ public class ChestCounterWidget extends HudWidget {
         setEnabledSupplier(() -> KuudraGeneralConfig.chestCounterTracker);
         setVisibilityCondition(() -> {
             if (ChestCounterManager.get().getChests() <= 0) return false;
-            if (ChestCounterTrackerFeature.overlayVisible) return true;
-            String area = ScoreboardUtils.getArea();
-            return KUUDRA_AREAS.stream().anyMatch(area::startsWith);
+            if (KuudraGeneralConfig.ChestCounterConfig.chestCounterVisibility == KuudraGeneralConfig.ChestCounterVisibility.ALWAYS) {
+                return ChestCounterTrackerFeature.overlayVisible;
+            }
+            return KUUDRA_AREAS.stream().anyMatch(ScoreboardUtils::isInArea);
         });
 
         setExampleLines(HudLine.of(buildText("§a", 20)));

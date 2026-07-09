@@ -15,7 +15,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
         super(
                 "kuudraHitbox",
                 "Kuudra Hitbox",
-                () -> PhaseThreeConfig.KuudraHitbox.enabled,
+                () -> PhaseThreeConfig.enabled,
                 KuudraPhase.RUN_PHASES
         );
     }
@@ -35,5 +35,4 @@ public class KuudraHitboxFeature extends KuudraFeature {
         );
     }
 }
-
 

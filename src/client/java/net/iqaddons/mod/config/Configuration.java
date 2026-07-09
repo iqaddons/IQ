@@ -32,7 +32,7 @@ public class Configuration {
             title = "HUD Editor",
             text = "OPEN"
     )
-    @Comment("Open the HUD Editor to move and customize HUD elements.")
+    @Comment("Open the HUD Editor to move and customize HUD elements")
     public static final Runnable hudEditor = () -> {
         mc.execute(() -> HudManager.get().openEditor());
     };
@@ -41,39 +41,39 @@ public class Configuration {
             id = "partyJoinSound",
             translation = "Party Join Sound"
     )
-    @Comment("Play a sound when someone joins your party.")
+    @Comment("Play a sound when someone joins your party")
     public static boolean partyJoinSound = true;
 
     @ConfigEntry(id = "limboAlert", translation = "Limbo Alert")
-    @Comment("Send a alert when you being kicked into the limbo.")
+    @Comment("Send a alert when you being kicked into the limbo")
     public static boolean limboAlert = true;
 
     @ConfigEntry(
             id = "fixFishingHook",
             translation = "Fix Fishing Hook"
     )
-    @Comment("Fix the fishing hook getting stuck when throwing the rod.")
+    @Comment("Fix the fishing hook getting stuck when throwing the rod")
     public static boolean fixFishingHook = true;
 
     @ConfigEntry(
             id = "muteFishingCastSound",
             translation = "Mute Fishing Cast Sound"
     )
-    @Comment("Disable the sound played when casting a fishing rod.")
+    @Comment("Disable the sound played when casting a fishing rod")
     public static boolean muteFishingCastSound = true;
 
     @ConfigEntry(
             id = "muteTerminatorCooldownSound",
             translation = "Mute Terminator Cooldown Sound"
     )
-    @Comment("Disable the annoying Terminator ability cooldown sound/chat message.")
+    @Comment("Disable the annoying Terminator ability cooldown sound/chat message")
     public static boolean muteTerminatorCooldownSound = true;
 
     @ConfigEntry(
             id = "partyCommands",
             translation = "Party Commands"
     )
-    @Comment("Configure commands triggered by party chat messages.")
+    @Comment("Configure commands triggered by party chat messages")
     public static final PartyCommands partyCommands = new PartyCommands();
 
     @ConfigObject
@@ -83,53 +83,70 @@ public class Configuration {
                 id = "partyCommandsEnabled",
                 translation = "Enable Party Commands"
         )
-        @Comment("Allow party chat messages to trigger commands.")
+        @Comment("Allow party chat messages to trigger commands")
         public static boolean enable = true;
 
         @ConfigEntry(id = "partyCommandWarp", translation = "!warp (!w, !wp)")
-        @Comment("Run /party warp when someone sends !warp.")
+        @Comment("Run /party warp when someone sends !warp")
         public static boolean warpCommand = true;
 
         @ConfigEntry(id = "partyCommandTransfer", translation = "!pt (!ptme, !transfer)")
-        @Comment("Transfer party leader to the requester.")
+        @Comment("Transfer party leader to the requester")
         public static boolean transferCommand = true;
 
         @ConfigEntry(id = "partyCommandPing", translation = "!ping")
-        @Comment("Reply with the requester's ping in party chat.")
+        @Comment("Reply with the requester's ping in party chat")
         public static boolean partyCommandPing = true;
 
         @ConfigEntry(id = "partyCommandAllInvite", translation = "!allinvite (!allinv, !invites)")
-        @Comment("Toggle /party settings allinvite when requested.")
+        @Comment("Toggle /party settings allinvite when requested")
         public static boolean allInviteCommand = true;
 
         @ConfigEntry(id = "partyCommandTps", translation = "!tps")
-        @Comment("Reply with the current server TPS in party chat.")
+        @Comment("Reply with the current server TPS in party chat")
         public static boolean partyCommandTps = true;
 
         @ConfigEntry(id = "partyCommandPromote", translation = "!promote")
-        @Comment("Promote the requester.")
+        @Comment("Promote the requester")
         public static boolean promoteCommand = true;
 
         @ConfigEntry(id = "partyCommandKick", translation = "!kick <player>")
-        @Comment("Kick the specified player from the party.")
+        @Comment("Kick the specified player from the party")
         public static boolean partyCommandKick = true;
 
         @ConfigEntry(id = "partyCommandKuudra", translation = "!t[1-5]")
-        @Comment("Start a Kuudra run (Tier 1–5) when requested.")
+        @Comment("Start a Kuudra run (Tier 1–5) when requested")
         public static boolean kuudraCommand = true;
 
         @ConfigEntry(id = "partyCommandChests", translation = "!chests")
-        @Comment("Reply with your current chest counter percent.")
+        @Comment("Reply with your current chest counter percent")
         public static boolean partyCommandChests = true;
 
         @ConfigEntry(id = "partyCommandRuns", translation = "!runs")
-        @Comment("Reply with your current run counter percent.")
+        @Comment("Reply with your current run counter percent")
         public static boolean partyCommandRuns = true;
 
         @ConfigEntry(id = "partyCommandProfit", translation = "!profit")
-        @Comment("Reply with your current profit counter percent.")
+        @Comment("Reply with your current profit counter percent")
         public static boolean partyCommandProfit = true;
     }
+
+    @ConfigOption.Separator("Loadouts")
+
+    @ConfigEntry(
+            id = "loadoutsKeybinds",
+            translation = "Loadouts Keybinds"
+    )
+    @Comment("Enable loadouts slot selection using keybinds.\n" +
+            "Configure slot keybinds in Options → Controls → Keybinds")
+    public static boolean loadoutsKeybinds = true;
+
+    @ConfigEntry(
+            id = "loadoutsSound",
+            translation = "Loadouts Selection Sound"
+    )
+    @Comment("Play a sound after selecting a loadouts slot via keybind")
+    public static boolean loadoutsSound = true;
 
     @ConfigOption.Separator("Wardrobe")
 
@@ -145,8 +162,38 @@ public class Configuration {
             id = "wardrobeSound",
             translation = "Wardrobe Selection Sound"
     )
-    @Comment("Play a sound after selecting a wardrobe slot via keybind.")
+    @Comment("Play a sound after selecting a wardrobe slot via keybind")
     public static boolean wardrobeSound = true;
+
+    @ConfigOption.Separator("Arrow Tracker")
+
+    @ConfigEntry(
+            id = "arrowTracker",
+            translation = "Arrow Tracker"
+    )
+    @Comment("Track your arrow type and quantity on the HUD")
+    public static boolean arrowTracker = true;
+
+    @ConfigEntry(
+            id = "arrowTrackerNotifications",
+            translation = "Arrow Running Out Notifications"
+    )
+    @Comment("Show notifications when you're running out of or out of arrows")
+    public static boolean arrowTrackerNotifications = true;
+
+    @ConfigEntry(
+            id = "arrowTrackerVisibility",
+            translation = "Arrow Tracker Visibility"
+    )
+    @ConfigOption.Select
+    @Comment("Always: Shows the last tracked arrow data always.\n" +
+            "Shooting: Only appears when you are holding a bow.")
+    public static ArrowTrackerVisibility arrowTrackerVisibility = ArrowTrackerVisibility.ALWAYS;
+
+    public enum ArrowTrackerVisibility {
+        ALWAYS,
+        ONLY_SHOOTING
+    }
 
     @ConfigOption.Separator("Shared Waypoints")
 
@@ -154,7 +201,7 @@ public class Configuration {
             id = "waypointConfig",
             translation = "Shared Waypoints"
     )
-    @Comment("Configure shared waypoint creation and rendering.")
+    @Comment("Configure shared waypoint creation and rendering")
     public static final Waypoints waypointConfig = new Waypoints();
 
     @ConfigObject
@@ -164,7 +211,7 @@ public class Configuration {
                 id = "renderWaypoints",
                 translation = "Enable Shared Waypoints"
         )
-        @Comment("Create and render waypoints from Patcher-formatted coordinates.")
+        @Comment("Create and render waypoints from Patcher-formatted coordinates")
         public static boolean enabled = true;
 
         @ConfigEntry(
@@ -173,7 +220,7 @@ public class Configuration {
         )
         @ConfigOption.Range(min = 0, max = 60)
         @ConfigOption.Slider
-        @Comment("How long waypoints stay on screen. Set to 0 to keep them until cleared/expired.")
+        @Comment("How long waypoints stay on screen. Set to 0 to keep them until cleared/expired")
         public static int duration = 7;
 
         @ConfigEntry(
@@ -182,7 +229,7 @@ public class Configuration {
         )
         @ConfigOption.Range(min = 0, max = 1)
         @ConfigOption.Slider
-        @Comment("Opacity of waypoint renders.")
+        @Comment("Opacity of waypoint renders")
         public static float opacity = 0.8f;
 
         @ConfigEntry(
@@ -190,7 +237,7 @@ public class Configuration {
                 translation = "Render Style"
         )
         @ConfigOption.Select
-        @Comment("Choose how waypoints are displayed.")
+        @Comment("Choose how waypoints are displayed")
         public static WorldRenderUtils.RenderStyle style = WorldRenderUtils.RenderStyle.OUTLINE;
     }
 
@@ -201,6 +248,6 @@ public class Configuration {
             id = "discordRichPresence",
             translation = "Discord Rich Presence"
     )
-    @Comment("Show your Kuudra run status on Discord Rich Presence.")
+    @Comment("Show your Kuudra run status on Discord Rich Presence")
     public static boolean discordRichPresence = true;
 }

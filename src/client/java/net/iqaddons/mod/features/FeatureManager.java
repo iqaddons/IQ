@@ -8,10 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @NoArgsConstructor
@@ -37,7 +34,6 @@ public final class FeatureManager {
 
     public void stop() {
         EventBus.unsubscribe(tickSubscription);
-
 
         for (Feature feature : new ArrayList<>(features.values())) {
             try {
