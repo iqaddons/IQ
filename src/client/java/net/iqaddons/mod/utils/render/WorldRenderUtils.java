@@ -4,6 +4,7 @@ import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import lombok.experimental.UtilityClass;
@@ -12,16 +13,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.rendertype.LayeringTransform;
 import net.minecraft.client.renderer.rendertype.RenderSetup;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.util.LightCoordsUtil;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -339,7 +339,7 @@ public class WorldRenderUtils {
                 RenderPipeline.builder(filledSnippet)
                         .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_filled_no_cull"))
                         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
-                        .withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
+                        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                         .build()
         );
 
@@ -353,6 +353,7 @@ public class WorldRenderUtils {
 
         public static final RenderPipeline outlineNoCull = RenderPipelines.register(RenderPipeline.builder(outlineSnippet)
                 .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_outline_no_cull"))
+                .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                 .build());
 
         public static final RenderPipeline outlineCull = RenderPipelines.register(RenderPipeline.builder(outlineSnippet)
@@ -370,6 +371,7 @@ public class WorldRenderUtils {
                 RenderPipeline.builder(filledSnippet)
                         .withLocation(Identifier.fromNamespaceAndPath("iqaddons", "pipeline/iqaddons_circle_filled_no_cull"))
                         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
+                        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                         .build()
         );
 
@@ -386,6 +388,7 @@ public class WorldRenderUtils {
                         .withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.DEBUG_LINE_STRIP)
                         .withVertexShader("core/position_color")
                         .withFragmentShader("core/position_color")
+                        .withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false))
                         .build()
         );
 
