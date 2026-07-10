@@ -72,19 +72,21 @@ public class KuudraNotificationsFeature extends Feature {
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.isBlank()) return;
+
+        // Parse immediately on chat thread to avoid desync
+        if (KuudraGeneralConfig.KuudraNotifications.noPre) {
+            NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+            if (parsed != null) {
+                mc.execute(() -> showAlert("§4§lNO " + parsed.canonicalPileName().toUpperCase() + "!", null));
+                return;
+            }
+        }
 
         mc.execute(() -> handleChatMessage(message));
     }
 
     private void handleChatMessage(@NotNull String message) {
-        if (KuudraGeneralConfig.KuudraNotifications.noPre) {
-            NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
-            if (parsed != null) {
-                showAlert("§4§lNO " + parsed.canonicalPileName().toUpperCase() + "!", null);
-                return;
-            }
-        }
-
         for (KuudraNotificationRule rule : NOTIFICATION_RULES) {
             if (!rule.isEnabled()) continue;
 

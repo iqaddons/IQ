@@ -177,7 +177,7 @@ public class KuudraGeneralConfig {
                 id = "autoStopAutoRequeueOverallSeconds",
                 translation = "Auto Stop Run Time (s)"
         )
-        @Comment("Set the completed run time that will stop Auto Requeue (Current WR: 51s)")
+        @Comment("Set the completed run time that will stop Auto Requeue (Current WR: 51s).")
         @ConfigOption.Range(min = 1, max = 180)
         @ConfigOption.Slider
         public static double autoStopAutoRequeueOverallSeconds = 50.49;
@@ -540,8 +540,8 @@ public class KuudraGeneralConfig {
         public static int kuudraPetBonus = 20;
 
         @ConfigEntry(id = "hideWidgetDuringRunPhase", translation = "Hide Widget During Run")
-        @Comment("Hide the Profit Tracker widget while a Kuudra run is in progress. Only show at the beginning and end of runs")
-        public static boolean hideWidgetDuringRunPhase = false;
+        @Comment("Hide the Profit Tracker widget while a Kuudra run is in progress. Only show at the beginning and end of runs.")
+        public static boolean hideWidgetDuringRunPhase = true;
     }
 
     @ConfigObject
@@ -609,4 +609,11 @@ public class KuudraGeneralConfig {
         SALVAGE, AUCTION
     }
 
+    @ConfigOption.Separator("Screen Crosshair")
+    @ConfigEntry(
+            id = "screenCrosshair",
+            translation = "Screen Crosshair"
+    )
+    @Comment("Display thin crosshair lines at the center of your screen to help position widgets.")
+    public static boolean screenCrosshair = true;
 }

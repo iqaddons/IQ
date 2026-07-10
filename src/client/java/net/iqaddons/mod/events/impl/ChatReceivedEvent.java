@@ -23,7 +23,9 @@ public class ChatReceivedEvent implements Event, Cancellable {
     public ChatReceivedEvent(@NotNull Component text) {
         this.text = text;
         this.message = text.getString();
-        this.strippedMessage = StringUtils.stripFormatting(message);
+        this.strippedMessage = this.message.isBlank()
+                ? ""
+                : StringUtils.stripFormatting(this.message);
     }
 
     public boolean contains(@NotNull String str) {

@@ -85,7 +85,7 @@ public class PhaseTwoConfig {
             id = "hideDefaultBuildPileTextConfig",
             translation = "Hide Default Build Pile Text Config"
     )
-    @Comment("Choose which pile text elements to hide")
+    @Comment("Choose which pile text elements to hide.")
     public static final HideDefaultBuildPileTextConfig hideDefaultBuildPileTextConfig = new HideDefaultBuildPileTextConfig();
 
     @ConfigOption.Separator("Build Highlights")

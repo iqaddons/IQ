@@ -1,12 +1,12 @@
 package net.iqaddons.mod.features.widgets;
 
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.PlayerFreshEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
-import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.BuildProgressOverlayUtil;
@@ -120,13 +120,12 @@ public class BuildProgressWidget extends HudWidget {
 
         if (stateManager.phase() != KuudraPhase.BUILD) return;
 
-        BuildProgressOverlayUtil.BuildProgressData data = BuildProgressOverlayUtil.getBuildProgressFromArmorStand();
-        if (data == null) return;
+        Integer progress = BuildProgressOverlayUtil.getBuildProgressFromTowers();
+        if (progress == null) return;
 
-        if (data.progress() == currentProgress && data.builders() == builderCount) return;
+        if (progress == currentProgress) return;
 
-        currentProgress = data.progress();
-        builderCount = data.builders();
+        currentProgress = progress;
         updateDisplay();
     }
 

@@ -89,7 +89,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 .onHover((context, textRenderer) -> {
                     double[] mouse = HudRenderer.getScaledMousePosition();
                     HudRenderer.drawSimpleTooltip(context,
-                            "Tracks stats for the current session.\nResets after 5 min of inactivity.",
+                            "Tracks stats for the current session.\nResets after 20 min of inactivity.",
                             mouse[0], mouse[1]);
                 })
                 .onMouseEnter(() -> { hoveringSessionOption = true;  updateTrackingSelector(); })

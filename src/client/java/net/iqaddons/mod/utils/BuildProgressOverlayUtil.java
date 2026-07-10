@@ -7,6 +7,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -17,8 +18,9 @@ import java.util.regex.Pattern;
 public final class BuildProgressOverlayUtil {
 
 	private static final Pattern PROGRESS_PATTERN = Pattern.compile("Building Progress:?\\s*(\\d+)%");
-	private static final Pattern SIMPLE_PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(\\d+)%?");
-    private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
+	private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
+	private static final Pattern TOWER_PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(\\d+)%|PROGRESS:\\s*COMPLETE");
+	private static final int TOTAL_TOWERS = 6;
 	public static final long BUILD_START_COUNTDOWN_MS = 6200L;
 
 	public static boolean isClassicOverlayEnabled() {
@@ -48,39 +50,7 @@ public final class BuildProgressOverlayUtil {
 		return String.format(Locale.ROOT, "%.2f", seconds);
 	}
 
-
 	public static @Nullable BuildProgressData getBuildProgressFromArmorStand() {
-		int sum = 0;
-		int found = 0;
-		for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
-			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
-			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");
-			if (!stripped.contains("PROGRESS")) continue;
-
-			// Check for "PROGRESS: COMPLETE" first
-			if (stripped.contains("COMPLETE")) {
-				sum += 100;
-				found++;
-				continue;
-			}
-
-			// Otherwise try to match numeric pattern
-			Matcher m = SIMPLE_PROGRESS_PATTERN.matcher(stripped);
-			if (!m.find()) continue;
-			try {
-				int p = Integer.parseInt(m.group(1));
-				sum += p;
-				found++;
-			} catch (NumberFormatException e) {
-				log.debug("Failed to parse simple PROGRESS value from armor stand: {}", stripped);
-			}
-		}
-
-		if (found > 0) {
-			int averaged = (int) Math.round((double) sum / 6.0);
-			return new BuildProgressData(averaged, 0);
-		}
-
 		for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
 			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
 
@@ -103,9 +73,45 @@ public final class BuildProgressOverlayUtil {
 		return null;
 	}
 
-    public record BuildProgressData(
-            int progress,
-            int builders
-    ) {
-    }
+	public static @Nullable Integer getBuildProgressFromTowers() {
+		List<ArmorStand> towerStands = EntityDetectorUtil.getEntitiesOfType(
+				ArmorStand.class,
+				stand -> stand.hasCustomName() && stand.getCustomName() != null
+		);
+
+		int totalProgress = 0;
+		int completedTowers = 0;
+
+		for (ArmorStand stand : towerStands) {
+			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");
+
+			if (stripped.contains("PROGRESS: COMPLETE")) {
+				totalProgress += 100;
+				completedTowers++;
+			} else {
+				Matcher progressMatcher = TOWER_PROGRESS_PATTERN.matcher(stripped);
+				if (progressMatcher.find()) {
+					try {
+						int progress = Integer.parseInt(progressMatcher.group(1));
+						totalProgress += progress;
+						completedTowers++;
+					} catch (NumberFormatException e) {
+						log.warn("Failed to parse tower progress: {}", stripped);
+					}
+				}
+			}
+		}
+
+		if (completedTowers >= TOTAL_TOWERS) {
+			return totalProgress / TOTAL_TOWERS;
+		}
+
+		return null;
+	}
+
+	public record BuildProgressData(
+			int progress,
+			int builders
+	) {
+	}
 }

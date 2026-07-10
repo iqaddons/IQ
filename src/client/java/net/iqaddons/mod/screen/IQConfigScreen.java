@@ -64,18 +64,18 @@ public class IQConfigScreen extends Screen {
     private static final int T_ACCENT = 0xFFF7A8DC;
     private static final int T_ACTION_TEXT_HOV = 0xFFFFC2E7;
 
-     private static final int ACCENT = 0xFFD650AB;
-     private static final int SLIDER_HANDLE = 0xFFFBE9F6;
-     private static final int SEP_LINE = 0x10FFFFFF;
-     private static final int SEP_PILL_BG = 0x6B0F0D17;
-     private static final int SEP_PILL_BORDER = 0x244E3C5E;
-     private static final int SEP_PILL_GLOW = 0x03D57CB2;
-     private static final int SEP_TEXT = 0xFF9C8CAE;
-     private static final float SEP_TEXT_SCALE = 0.70f;
-     private static final int TOGGLE_HANDLE  = 0xFFFAF1FB;
-     private static final int TOGGLE_OUTLINE_IDLE = 0x664C335A;
-     private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
-     private static final int GROUP_SEP_LINE = 0x26FFFFFF;
+    private static final int ACCENT = 0xFFD650AB;
+    private static final int SLIDER_HANDLE = 0xFFFBE9F6;
+    private static final int SEP_LINE = 0x10FFFFFF;
+    private static final int SEP_PILL_BG = 0x6B0F0D17;
+    private static final int SEP_PILL_BORDER = 0x244E3C5E;
+    private static final int SEP_PILL_GLOW = 0x03D57CB2;
+    private static final int SEP_TEXT = 0xFF9C8CAE;
+    private static final float SEP_TEXT_SCALE = 0.70f;
+    private static final int TOGGLE_HANDLE = 0xFFFAF1FB;
+    private static final int TOGGLE_OUTLINE_IDLE = 0x664C335A;
+    private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
+    private static final int GROUP_SEP_LINE = 0x26FFFFFF;
 
     private static final float GUI_W_RATIO = 0.49f;
     private static final float GUI_H_RATIO = 0.47f;
@@ -116,16 +116,16 @@ public class IQConfigScreen extends Screen {
     private static final int SEARCH_H      = 18;
     private static final int MODE_PICKER_W = 94;
 
-     private static final int LINK_BTN_SIZE = 14;
-     private static final int LINK_BTN_GAP = 4;
-     private static final int LINK_ICON_SIZE = 10;
-     private static final int SOCIAL_ICON_TEX_SIZE = 64;
-     private static final int SETTINGS_ICON_TEX_W = 24;
-     private static final int SETTINGS_ICON_TEX_H = 24;
-     private static final int CLOSE_ICON_TEX_SIZE = 24;
-     private static final int HEADER_ACTION_BTN_SIZE = 19;
-     private static final int HEADER_ACTION_BTN_GAP = 6;
-     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
+    private static final int LINK_BTN_SIZE = 14;
+    private static final int LINK_BTN_GAP = 4;
+    private static final int LINK_ICON_SIZE = 10;
+    private static final int SOCIAL_ICON_TEX_SIZE = 64;
+    private static final int SETTINGS_ICON_TEX_W = 24;
+    private static final int SETTINGS_ICON_TEX_H = 24;
+    private static final int CLOSE_ICON_TEX_SIZE = 24;
+    private static final int HEADER_ACTION_BTN_SIZE = 19;
+    private static final int HEADER_ACTION_BTN_GAP = 6;
+    private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
 
     private static final int CORNER_R_SMALL = 0;
     private static final int CORNER_R_MED = 0;
@@ -177,6 +177,10 @@ public class IQConfigScreen extends Screen {
     private @Nullable ConfigEntryModel draggingSlider;
     private int sliderTrackX, sliderTrackW;
 
+    private @Nullable ConfigEntryModel editingSlider;
+    private StringBuilder sliderEditBuffer = new StringBuilder();
+    private int sliderEditValueX, sliderEditValueY, sliderEditValueW;
+
     private @Nullable ConfigEntryModel editingColor;
     private double uiScale = 1.0;
 
@@ -194,15 +198,15 @@ public class IQConfigScreen extends Screen {
     private float contentFadeAnim = 1f;
     private int lastRenderedCategory = -1;
 
-     private int frameMouseX = 0, frameMouseY = 0;
-     private int cachedGx, cachedGy, cachedGw, cachedGh;
-     private int cachedSidebarW = SIDEBAR_BASE_W;
-     private @Nullable String pendingTooltip;
-     private float screenTransition = 0f;
-     private boolean closingScreen = false;
-     private boolean closeHandled = false;
-     private @Nullable Screen closeTarget;
-     private long lastTransitionTimeMs = -1L;
+    private int frameMouseX = 0, frameMouseY = 0;
+    private int cachedGx, cachedGy, cachedGw, cachedGh;
+    private int cachedSidebarW = SIDEBAR_BASE_W;
+    private @Nullable String pendingTooltip;
+    private float screenTransition = 0f;
+    private boolean closingScreen = false;
+    private boolean closeHandled = false;
+    private @Nullable Screen closeTarget;
+    private long lastTransitionTimeMs = -1L;
 
     private int sharedThemeIndex = 0;
     private double sharedGuiOpacity = 0.5;
@@ -409,44 +413,44 @@ public class IQConfigScreen extends Screen {
                     sbX + sbW - 14, sbY + (SEARCH_H - minecraft.font.lineHeight) / 2, T_MUTED);
         }
 
-         int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
-         int settingsBtnX = getHeaderActionButtonsStartX(x, w);
-         int closeBtnX = settingsBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
-         int iconSize = 12;
+        int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
+        int settingsBtnX = getHeaderActionButtonsStartX(x, w);
+        int closeBtnX = settingsBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
+        int iconSize = 12;
 
-         boolean settingsHov = editingColor == null
-                 && isIn(frameMouseX, frameMouseY, settingsBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
-         boolean closeHov = editingColor == null
-                 && isIn(frameMouseX, frameMouseY, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
+        boolean settingsHov = editingColor == null
+                && isIn(frameMouseX, frameMouseY, settingsBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
+        boolean closeHov = editingColor == null
+                && isIn(frameMouseX, frameMouseY, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
 
-         float settingsAnim = hoverAnims.getOrDefault("hdr#settings", 0f);
-         settingsAnim += ((settingsHov ? 1f : 0f) - settingsAnim) * 0.30f;
-         hoverAnims.put("hdr#settings", settingsAnim);
+        float settingsAnim = hoverAnims.getOrDefault("hdr#settings", 0f);
+        settingsAnim += ((settingsHov ? 1f : 0f) - settingsAnim) * 0.30f;
+        hoverAnims.put("hdr#settings", settingsAnim);
 
-         float closeAnim = hoverAnims.getOrDefault("hdr#close", 0f);
-         closeAnim += ((closeHov ? 1f : 0f) - closeAnim) * 0.30f;
-         hoverAnims.put("hdr#close", closeAnim);
+        float closeAnim = hoverAnims.getOrDefault("hdr#close", 0f);
+        closeAnim += ((closeHov ? 1f : 0f) - closeAnim) * 0.30f;
+        hoverAnims.put("hdr#close", closeAnim);
 
-         drawHeaderActionButton(ctx, settingsBtnX, headerBtnY, settingsAnim);
-         drawHeaderActionButton(ctx, closeBtnX, headerBtnY, closeAnim);
+        drawHeaderActionButton(ctx, settingsBtnX, headerBtnY, settingsAnim);
+        drawHeaderActionButton(ctx, closeBtnX, headerBtnY, closeAnim);
 
-         int settingsIconX = settingsBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
-         int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
-         int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
+        int settingsIconX = settingsBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
+        int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
+        int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
 
-         ctx.blit(RenderPipelines.GUI_TEXTURED, SETTINGS_ICON_TEXTURE,
-                 settingsIconX, iconY2, 0f, 0f,
-                 iconSize, iconSize,
-                 SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H,
-                 SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H);
-         ctx.blit(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
-                 closeIconX, iconY2, 0f, 0f,
-                 iconSize, iconSize,
-                 CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE,
-                 CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE);
+        ctx.blit(RenderPipelines.GUI_TEXTURED, SETTINGS_ICON_TEXTURE,
+                settingsIconX, iconY2, 0f, 0f,
+                iconSize, iconSize,
+                SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H,
+                SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H);
+        ctx.blit(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
+                closeIconX, iconY2, 0f, 0f,
+                iconSize, iconSize,
+                CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE,
+                CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE);
 
-         if (settingsHov) pendingTooltip = "Open Configuration Hub";
-         if (closeHov) pendingTooltip = "Close config";
+        if (settingsHov) pendingTooltip = "Open Configuration Hub";
+        if (closeHov) pendingTooltip = "Close config";
     }
 
     private void renderSidebar(GuiGraphicsExtractor ctx) {
@@ -525,7 +529,7 @@ public class IQConfigScreen extends Screen {
                 gx + 10, gy + gh - minecraft.font.lineHeight - 8, 0x22FFFFFF);
     }
 
-     private void renderExternalLinkButtons(GuiGraphicsExtractor ctx, int gx, int gy, int sidebarW) {
+    private void renderExternalLinkButtons(GuiGraphicsExtractor ctx, int gx, int gy, int sidebarW) {
         int bx = getExternalLinksStartX(gx, sidebarW);
         int by = getExternalLinksY(gy);
 
@@ -950,22 +954,46 @@ public class IQConfigScreen extends Screen {
     private void renderSlider(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy) {
         try {
             double v = getDouble(e.getField());
-            double t = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
-            boolean drag = draggingSlider == e;
-            int sx = rx - SLIDER_W, ty = cy - 3;
-            ctx.fill(sx, ty, sx + SLIDER_W, ty + 6, BG_SLIDER_TRK);
-            int fw = (int)(t * SLIDER_W);
-            int accentCol = themeAccentColor();
-            if (fw > 0) {
-                ctx.fill(sx, ty, sx + fw, ty + 6, accentCol);
-                if (fw > 2) ctx.fill(sx + fw - 2, ty, sx + fw, ty + 6, withAlpha(accentCol, 0xFF));
-            }
-            int hx = sx + fw - 4, hh = drag ? 14 : 10;
-            ctx.fill(hx, cy - hh / 2, hx + 8, cy + hh / 2, SLIDER_HANDLE);
             String vs = formatSlider(e, v);
-            ctx.text(minecraft.font, Component.literal(vs),
-                    sx - minecraft.font.width(vs) - 5,
-                    cy - minecraft.font.lineHeight / 2, themeTextMuted());
+
+            if (editingSlider == e) {
+                int valueTextW = minecraft.font.width(vs) + 8;
+                int valueX = rx - SLIDER_W - 5 - valueTextW;
+                int valueY = cy - minecraft.font.lineHeight / 2 - 2;
+                int valueH = minecraft.font.lineHeight + 4;
+
+                ctx.fill(valueX - 2, valueY - 2, valueX + valueTextW + 2, valueY + valueH + 2, BG_ENTRY);
+                drawHollowRect(ctx, valueX - 2, valueY - 2, valueTextW + 4, valueH + 4, themeAccentColor());
+
+                ctx.text(minecraft.font, Component.literal(sliderEditBuffer.toString()),
+                        valueX, valueY, T_MAIN);
+
+                if ((System.currentTimeMillis() / 500) % 2 == 0) {
+                    int cursorX = valueX + minecraft.font.width(sliderEditBuffer.toString());
+                    ctx.fill(cursorX, valueY, cursorX + 1, valueY + minecraft.font.lineHeight, T_MAIN);
+                }
+            } else {
+                double t = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
+                boolean drag = draggingSlider == e;
+                int sx = rx - SLIDER_W, ty = cy - 3;
+                ctx.fill(sx, ty, sx + SLIDER_W, ty + 6, BG_SLIDER_TRK);
+                int fw = (int) (t * SLIDER_W);
+                int accentCol = themeAccentColor();
+                if (fw > 0) {
+                    ctx.fill(sx, ty, sx + fw, ty + 6, accentCol);
+                    if (fw > 2) ctx.fill(sx + fw - 2, ty, sx + fw, ty + 6, withAlpha(accentCol, 0xFF));
+                }
+                int hx = sx + fw - 4, hh = drag ? 14 : 10;
+                ctx.fill(hx, cy - hh / 2, hx + 8, cy + hh / 2, SLIDER_HANDLE);
+
+                int valueTextW = minecraft.font.width(vs);
+                sliderEditValueX = sx - valueTextW - 5;
+                sliderEditValueY = cy - minecraft.font.lineHeight / 2;
+                sliderEditValueW = valueTextW + 10;
+
+                ctx.text(minecraft.font, Component.literal(vs),
+                        sliderEditValueX, sliderEditValueY, themeTextMuted());
+            }
         } catch (Exception ex) {
             log.warn("Slider: {}", e.getLabel(), ex);
         }
@@ -1180,23 +1208,29 @@ public class IQConfigScreen extends Screen {
     }
 
     @Override
-     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-         if (closingScreen) return true;
-         int imx = (int) click.x(), imy = (int) click.y();
+    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
+        if (closingScreen) return true;
+        int imx = (int) click.x(), imy = (int) click.y();
 
-         int headerBtnY = cachedGy + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
-         int headerBtnX = getHeaderActionButtonsStartX(cachedGx + cachedSidebarW, cachedGw - cachedSidebarW);
-         
-         if (editingColor == null && isIn(imx, imy, headerBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
-             if (minecraft != null) minecraft.setScreen(new net.iqaddons.mod.screen.IQGlobalConfigurationScreen(this, configClasses));
-             return true;
-         }
-         
-         int closeBtnX = headerBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
-         if (editingColor == null && isIn(imx, imy, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
-             onClose();
-             return true;
-         }
+        int headerBtnY = cachedGy + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
+        int headerBtnX = getHeaderActionButtonsStartX(cachedGx + cachedSidebarW, cachedGw - cachedSidebarW);
+
+        if (editingColor == null && editingSlider == null && isIn(imx, imy, headerBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
+            if (minecraft != null)
+                minecraft.setScreen(new net.iqaddons.mod.screen.IQGlobalConfigurationScreen(this, configClasses));
+            return true;
+        }
+
+        int closeBtnX = headerBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
+        if (editingColor == null && editingSlider == null && isIn(imx, imy, closeBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE)) {
+            onClose();
+            return true;
+        }
+
+        if (editingSlider != null) {
+            handleSliderEditorClick(imx, imy);
+            return true;
+        }
 
         if (editingColor != null) {
             handleColorEditorClick(imx, imy);
@@ -1217,7 +1251,7 @@ public class IQConfigScreen extends Screen {
         }
         if (searchFocused) searchFocused = false;
 
-        if (click.button() == 0 && editingColor == null) {
+        if (click.button() == 0 && editingColor == null && editingSlider == null) {
             int bx = getExternalLinksStartX(cachedGx, cachedSidebarW);
             int by = getExternalLinksY(cachedGy);
             for (ExternalLinkButton link : EXTERNAL_LINKS) {
@@ -1233,7 +1267,7 @@ public class IQConfigScreen extends Screen {
             }
         }
 
-        if (click.button() == 0 && editingColor == null) {
+        if (click.button() == 0 && editingColor == null && editingSlider == null) {
             ScrollbarMetrics metrics = getScrollbarMetrics();
             if (metrics != null && isIn(imx, imy, metrics.x(), metrics.thumbY(), SCROLL_W, metrics.thumbH())) {
                 draggingScrollbar = true;
@@ -1263,12 +1297,14 @@ public class IQConfigScreen extends Screen {
 
         for (RenderedEntry re : renderedEntries) {
             if (re.contains(imx, imy)) {
-                handleEntryClick(re, imx, click.button()); return true; }
+                handleEntryClick(re, imx, click.button(), doubled);
+                return true;
+            }
         }
         return super.mouseClicked(click, doubled);
     }
 
-    private void handleEntryClick(RenderedEntry re, int mx, int button) {
+    private void handleEntryClick(RenderedEntry re, int mx, int button, boolean doubled) {
         ConfigEntryModel entry = re.entry();
         int re2 = re.x() + re.w() - PADDING;
         switch (entry.getType()) {
@@ -1299,18 +1335,31 @@ public class IQConfigScreen extends Screen {
             }
             case INT_SLIDER, FLOAT_SLIDER, DOUBLE_SLIDER -> {
                 if (button == 0) {
-                    int sx = re2 - SLIDER_W;
-                    if (mx >= sx && mx <= re2) {
-                        draggingSlider = entry;
-                        sliderTrackX = sx; sliderTrackW = SLIDER_W;
-                        updateSlider(entry, mx);
+                    try {
+                        int sx = re2 - SLIDER_W;
+                        int valueX = sx - minecraft.font.width(formatSlider(entry, getDouble(entry.getField()))) - 10;
+                        int valueY = re.y() + (re.h() - minecraft.font.lineHeight) / 2 - 2;
+                        int valueW = minecraft.font.width(formatSlider(entry, getDouble(entry.getField()))) + 10;
+
+                        if (doubled && mx >= valueX && mx <= valueX + valueW) {
+                            editingSlider = entry;
+                            sliderEditBuffer.setLength(0);
+                            sliderEditBuffer.append(formatSlider(entry, getDouble(entry.getField())));
+                        } else if (!doubled && mx >= sx && mx <= re2) {
+                            draggingSlider = entry;
+                            sliderTrackX = sx;
+                            sliderTrackW = SLIDER_W;
+                            updateSlider(entry, mx);
+                        }
+                    } catch (Exception e) {
+                        log.warn("Slider: {}", entry.getLabel(), e);
                     }
                 }
             }
         }
     }
 
-   private void handleColorEditorClick(int mx, int my) {
+    private void handleColorEditorClick(int mx, int my) {
         if (editingColor == null) return;
         ColorEditorLayout layout = getColorEditorLayout();
         int px = layout.x();
@@ -1343,9 +1392,17 @@ public class IQConfigScreen extends Screen {
             log.warn("Color click", e); }
     }
 
+    private void handleSliderEditorClick(int mx, int my) {
+        if (editingSlider == null) return;
+        editingSlider = null;
+    }
+
     @Override
     public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (closingScreen) return true;
+        if (editingSlider != null) {
+            return true;
+        }
         if (editingColor != null) {
             draggingScrollbar = false;
             handleColorEditorClick((int) click.x(), (int) click.y());
@@ -1396,6 +1453,11 @@ public class IQConfigScreen extends Screen {
     public boolean keyPressed(KeyEvent input) {
         if (closingScreen) return true;
         if (input.key() == 256) {
+            if (editingSlider != null) {
+                editingSlider = null;
+                sliderEditBuffer.setLength(0);
+                return true;
+            }
             if (editingColor != null) {
                 editingColor = null;
                 return true;
@@ -1408,6 +1470,16 @@ public class IQConfigScreen extends Screen {
             onClose();
             return true;
         }
+        if (editingSlider != null && input.key() == 257) {
+            confirmSliderEdit();
+            return true;
+        }
+        if (editingSlider != null && input.key() == 259) {
+            if (sliderEditBuffer.length() > 0) {
+                sliderEditBuffer.deleteCharAt(sliderEditBuffer.length() - 1);
+            }
+            return true;
+        }
         if (searchFocused && input.key() == 259 && !searchQuery.isEmpty()) {
             searchQuery.deleteCharAt(searchQuery.length() - 1);
             scrollOffset = 0; return true;
@@ -1418,6 +1490,13 @@ public class IQConfigScreen extends Screen {
     @Override
     public boolean charTyped(CharacterEvent input) {
         if (closingScreen) return true;
+        if (editingSlider != null) {
+            char c = input.codepointAsString().charAt(0);
+            if ((c >= '0' && c <= '9') || c == '.' || c == '-') {
+                sliderEditBuffer.append(c);
+            }
+            return true;
+        }
         if (searchFocused) {
             searchQuery.append(input.codepointAsString());
             scrollOffset = 0;
@@ -1447,6 +1526,34 @@ public class IQConfigScreen extends Screen {
             selectSlideDirs.put(key, -direction);
         } catch (Exception ex) {
             log.warn("Cycle: {}", e.getLabel(), ex); }
+    }
+
+    private void confirmSliderEdit() {
+        if (editingSlider == null) return;
+        try {
+            String input = sliderEditBuffer.toString().trim();
+            if (input.isEmpty()) {
+                editingSlider = null;
+                sliderEditBuffer.setLength(0);
+                return;
+            }
+            double val = Double.parseDouble(input);
+            double min = editingSlider.getRangeMin();
+            double max = editingSlider.getRangeMax();
+            val = clamp(val, min, max);
+
+            switch (editingSlider.getType()) {
+                case INT_SLIDER -> editingSlider.getField().set(null, (int) Math.round(val));
+                case FLOAT_SLIDER -> editingSlider.getField().set(null, (float) val);
+                case DOUBLE_SLIDER -> editingSlider.getField().set(null, val);
+            }
+        } catch (NumberFormatException e) {
+            log.warn("Invalid slider value: {}", sliderEditBuffer);
+        } catch (Exception e) {
+            log.warn("Slider edit: {}", editingSlider.getLabel(), e);
+        }
+        editingSlider = null;
+        sliderEditBuffer.setLength(0);
     }
 
     private void updateSlider(ConfigEntryModel e, int mx) {
@@ -1910,7 +2017,6 @@ public class IQConfigScreen extends Screen {
         return switch (categoryId) {
             case "Configuration" -> 0;
             case "KuudraGeneralConfig", "PhaseOneConfig", "PhaseTwoConfig", "PhaseThreeConfig", "PhaseFourConfig" -> 1;
-            case "SupporterCategory", "SupporterHelperCategory" -> 2;
             default -> 3;
         };
     }
@@ -1923,8 +2029,6 @@ public class IQConfigScreen extends Screen {
             case "PhaseTwoConfig" -> 30;
             case "PhaseThreeConfig" -> 40;
             case "PhaseFourConfig" -> 50;
-            case "SupporterCategory" -> 60;
-            case "SupporterHelperCategory" -> 70;
             default -> 999;
         };
     }

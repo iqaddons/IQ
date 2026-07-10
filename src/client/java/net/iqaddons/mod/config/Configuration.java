@@ -171,14 +171,14 @@ public class Configuration {
             id = "arrowTracker",
             translation = "Arrow Tracker"
     )
-    @Comment("Track your arrow type and quantity on the HUD")
+    @Comment("Track your arrow type and quantity on the HUD.")
     public static boolean arrowTracker = true;
 
     @ConfigEntry(
             id = "arrowTrackerNotifications",
             translation = "Arrow Running Out Notifications"
     )
-    @Comment("Show notifications when you're running out of or out of arrows")
+    @Comment("Show notifications when you're running out of or out of arrows.")
     public static boolean arrowTrackerNotifications = true;
 
     @ConfigEntry(
@@ -186,8 +186,10 @@ public class Configuration {
             translation = "Arrow Tracker Visibility"
     )
     @ConfigOption.Select
-    @Comment("Always: Shows the last tracked arrow data always.\n" +
-            "Shooting: Only appears when you are holding a bow.")
+    @Comment("""
+            Choose when the Arrow Tracker widget should be visible.
+            Always: Widget shows the last tracked arrow data at all times.
+            Only Shooting: Widget only appears when you're holding a bow.""")
     public static ArrowTrackerVisibility arrowTrackerVisibility = ArrowTrackerVisibility.ALWAYS;
 
     public enum ArrowTrackerVisibility {

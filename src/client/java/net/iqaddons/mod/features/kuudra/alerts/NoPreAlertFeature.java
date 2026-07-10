@@ -128,10 +128,21 @@ public class NoPreAlertFeature extends KuudraFeature {
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.isBlank()) return;
+
+        // Parse immediately on chat thread to avoid desync
+        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+        if (parsed != null) {
+            updateMissingPre(parsed.missingPreValue(), parsed.canonicalPileName());
+        }
+
+        // Queue other checks to main thread
         mc.execute(() -> handleChatMessage(message));
     }
 
     private void handleChatMessage(@NotNull String message) {
+        if (message.isBlank()) return;
+
         if (message.contains(ELLE_HEAD_OVER_MESSAGE)) {
             detectPreSpotFromPlayerPosition();
             return;
@@ -141,18 +152,8 @@ public class NoPreAlertFeature extends KuudraFeature {
             if (kuudraState.phase() == KuudraPhase.SUPPLIES) {
                 queueSupplyCheck("Elle's 'Not again!' message", true);
             }
-
             return;
         }
-
-        if (!message.startsWith("Party >")) return;
-
-        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
-        if (parsed == null) {
-            return;
-        }
-
-        updateMissingPre(parsed.missingPreValue(), parsed.canonicalPileName());
     }
 
     private void resetForSuppliesPhase() {
@@ -263,7 +264,7 @@ public class NoPreAlertFeature extends KuudraFeature {
 
             supplyState.setMissingPre(preSpot.getMissingPreValue());
             MessageUtil.PARTY.sendMessage("No " + preSpot.getDisplayName() + "!");
-            
+
             log.debug("No pre supply detected for {}, announced to party", preSpot.getDisplayName());
         }
 
@@ -298,7 +299,7 @@ public class NoPreAlertFeature extends KuudraFeature {
 
         preSpotDetectionAnnounced = true;
         MessageUtil.sendFormattedMessage("&fPre Spot detected: &e" + preSpot.getDisplayName() + "&f!");
-        
+
         log.debug("Announced detected pre spot {} from {}", preSpot.getDisplayName(), source);
     }
 

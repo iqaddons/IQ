@@ -8,8 +8,8 @@ import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityGlowUtil;
 import net.iqaddons.mod.utils.render.RenderColor;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.AbstractClientPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -87,6 +87,8 @@ public class TeamHighlightFeature extends KuudraFeature {
             if (!currentTeammates.contains(playerId)) {
                 EntityGlowUtil.removeGlowing(playerId, PRIORITY_TEAM_HIGHLIGHT);
                 toRemove.add(playerId);
+            } else if (!EntityGlowUtil.isGlowing(playerId)) {
+                EntityGlowUtil.setGlowing(playerId, teamColor, PRIORITY_TEAM_HIGHLIGHT);
             }
         }
         highlightedPlayers.removeAll(toRemove);

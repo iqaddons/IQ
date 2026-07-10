@@ -71,6 +71,15 @@ public class CratePriorityFeature extends KuudraFeature {
 
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
+        if (message.isBlank()) return;
+
+        // Parse immediately on chat thread to avoid desync
+        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
+        if (parsed != null) {
+            pendingMissingPre = parsed.missingPreValue();
+        }
+
+        // Queue other checks to main thread
         mc.execute(() -> handleChatMessage(message));
     }
 
@@ -83,15 +92,9 @@ public class CratePriorityFeature extends KuudraFeature {
             return;
         }
 
-        if (!message.startsWith("Party >")) return;
-
-        NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
-        if (parsed == null) {
-            return;
+        if (pendingMissingPre > 0) {
+            tryDispatchPriority("party no-pre");
         }
-
-        pendingMissingPre = parsed.missingPreValue();
-        tryDispatchPriority("party no-pre");
     }
 
     private void onTick(@NotNull ClientTickEvent event) {

@@ -7,6 +7,7 @@ import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.model.profit.chest.data.ChestData;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
+import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.data.DataKey;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +16,8 @@ import java.nio.file.Files;
 @Slf4j
 public final class KuudraProfitTrackerManager {
 
-    private static final long SESSION_TIMEOUT_MILLIS = 30L * 60L * 1000L;
+    private static final long SESSION_TIMEOUT_MILLIS = 21L * 60L * 1000L;
+    private static final long SESSION_WARNING_INTERVAL_MILLIS = 5L * 60L * 1000L;
 
     private static final DataKey<PersistentKuudraProfit> PROFIT_KEY = DataKey.of("kuudraProfit", PersistentKuudraProfit.class);
     private static final KuudraProfitTrackerManager INSTANCE = new KuudraProfitTrackerManager();
@@ -26,6 +28,7 @@ public final class KuudraProfitTrackerManager {
     private volatile ProfitData session = new ProfitData();
     private volatile ProfitScope currentScope = ProfitScope.SESSION;
     private volatile long lastKuudraActivityAt = 0L;
+    private volatile long lastSessionWarningAt = 0L;
 
     private KuudraProfitTrackerManager() {
         PersistentKuudraProfit persisted = store.getOrDefault(PROFIT_KEY, new PersistentKuudraProfit());
@@ -55,6 +58,7 @@ public final class KuudraProfitTrackerManager {
         updateRun(lifetime, safeRunMillis, failed);
         updateRun(session, safeRunMillis, failed);
         lastKuudraActivityAt = System.currentTimeMillis();
+        lastSessionWarningAt = 0L;
 
         save();
     }
@@ -65,6 +69,7 @@ public final class KuudraProfitTrackerManager {
         updateChest(lifetime, chest);
         updateChest(session, chest);
         lastKuudraActivityAt = System.currentTimeMillis();
+        lastSessionWarningAt = 0L;
         save();
     }
 
@@ -74,12 +79,14 @@ public final class KuudraProfitTrackerManager {
         updateReroll(lifetime, shard, rerollCost);
         updateReroll(session, shard, rerollCost);
         lastKuudraActivityAt = System.currentTimeMillis();
+        lastSessionWarningAt = 0L;
         save();
     }
 
     public synchronized void resetSession() {
         session = new ProfitData();
         lastKuudraActivityAt = 0L;
+        lastSessionWarningAt = 0L;
         save();
     }
 
@@ -92,6 +99,7 @@ public final class KuudraProfitTrackerManager {
         lifetime = new ProfitData();
         session = new ProfitData();
         lastKuudraActivityAt = 0L;
+        lastSessionWarningAt = 0L;
         save();
     }
 
@@ -108,10 +116,29 @@ public final class KuudraProfitTrackerManager {
     }
 
     public synchronized void expireSessionIfNeeded() {
-        if (isSessionExpired()) {
+        if (lastKuudraActivityAt <= 0L) {
+            return;
+        }
+
+        long timeSinceActivityMs = System.currentTimeMillis() - lastKuudraActivityAt;
+
+        if (timeSinceActivityMs > SESSION_TIMEOUT_MILLIS) {
             session = new ProfitData();
             lastKuudraActivityAt = 0L;
+            lastSessionWarningAt = 0L;
             save();
+            MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fSession data has been reset after 20 minutes of inactivity.");
+            return;
+        }
+
+        if (currentScope == ProfitScope.SESSION && timeSinceActivityMs > SESSION_WARNING_INTERVAL_MILLIS) {
+            long timeSinceWarningMs = System.currentTimeMillis() - lastSessionWarningAt;
+            if (lastSessionWarningAt == 0L || timeSinceWarningMs >= SESSION_WARNING_INTERVAL_MILLIS) {
+                lastSessionWarningAt = System.currentTimeMillis();
+                long minutesSinceActivity = timeSinceActivityMs / (60 * 1000);
+                long minutesUntilReset = (SESSION_TIMEOUT_MILLIS - timeSinceActivityMs) / (60 * 1000);
+                MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fNo runs in " + minutesSinceActivity + " minutes. Session resets in " + minutesUntilReset + "minutes.");
+            }
         }
     }
 

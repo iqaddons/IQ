@@ -229,7 +229,7 @@ public class CratePriorityWidget extends HudWidget {
         }
 
         if (isMouseOver(mouseX, mouseY)) {
-            context.fill(x, y, x + width, y + height, new Color(0, 0, 0, 100).getRGB());
+            context.fill(x, y, x + width, y + height, new Color(0, 0, 0, 125).getRGB());
         }
     }
 

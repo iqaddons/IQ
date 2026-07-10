@@ -15,12 +15,12 @@ public enum HudAnchor {
     BOTTOM_CENTER(0.5f, 1.0f),
     BOTTOM_RIGHT(1.0f, 1.0f);
 
-    private final float xFactor;
-    private final float yFactor;
-
     // Offsets are stored against a reference GUI size and scaled at runtime.
     public static final float REFERENCE_WIDTH = 960.0f;
     public static final float REFERENCE_HEIGHT = 540.0f;
+
+    private final float xFactor;
+    private final float yFactor;
 
     HudAnchor(float xFactor, float yFactor) {
         this.xFactor = xFactor;
@@ -29,42 +29,48 @@ public enum HudAnchor {
 
     public float calculateX(int screenWidth, int elementWidth, float offsetX) {
         float anchorX = screenWidth * xFactor;
+        float scaledOffsetX = offsetX * (screenWidth / REFERENCE_WIDTH);
 
         return switch (this) {
-            case TOP_RIGHT, CENTER_RIGHT, BOTTOM_RIGHT -> anchorX - elementWidth + offsetX;
-            case TOP_CENTER, CENTER, BOTTOM_CENTER -> anchorX - (elementWidth / 2.0f) + offsetX;
-            default -> anchorX + offsetX;
+            case TOP_RIGHT, CENTER_RIGHT, BOTTOM_RIGHT -> anchorX - elementWidth + scaledOffsetX;
+            case TOP_CENTER, CENTER, BOTTOM_CENTER -> anchorX - (elementWidth / 2.0f) + scaledOffsetX;
+            default -> anchorX + scaledOffsetX;
         };
     }
 
     public float calculateY(int screenHeight, int elementHeight, float offsetY) {
         float anchorY = screenHeight * yFactor;
+        float scaledOffsetY = offsetY * (screenHeight / REFERENCE_HEIGHT);
 
         return switch (this) {
-            case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> anchorY - elementHeight + offsetY;
-            case CENTER_LEFT, CENTER, CENTER_RIGHT -> anchorY - (elementHeight / 2.0f) + offsetY;
-            default -> anchorY + offsetY;
+            case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> anchorY - elementHeight + scaledOffsetY;
+            case CENTER_LEFT, CENTER, CENTER_RIGHT -> anchorY - (elementHeight / 2.0f) + scaledOffsetY;
+            default -> anchorY + scaledOffsetY;
         };
     }
 
     public float toOffsetX(float absoluteX, int screenWidth, int elementWidth) {
         float anchorX = screenWidth * xFactor;
 
-        return switch (this) {
+        float rawOffsetX = switch (this) {
             case TOP_RIGHT, CENTER_RIGHT, BOTTOM_RIGHT -> absoluteX - anchorX + elementWidth;
             case TOP_CENTER, CENTER, BOTTOM_CENTER -> absoluteX - anchorX + (elementWidth / 2.0f);
             default -> absoluteX - anchorX;
         };
+
+        return rawOffsetX / (screenWidth / REFERENCE_WIDTH);
     }
 
     public float toOffsetY(float absoluteY, int screenHeight, int elementHeight) {
         float anchorY = screenHeight * yFactor;
 
-        return switch (this) {
+        float rawOffsetY = switch (this) {
             case BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT -> absoluteY - anchorY + elementHeight;
             case CENTER_LEFT, CENTER, CENTER_RIGHT -> absoluteY - anchorY + (elementHeight / 2.0f);
             default -> absoluteY - anchorY;
         };
+
+        return rawOffsetY / (screenHeight / REFERENCE_HEIGHT);
     }
 
     public static float scaleDeltaX(float screenDeltaX, int screenWidth) {

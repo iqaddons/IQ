@@ -124,13 +124,18 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         dimensionsDirty = true;
     }
 
+    /**
+     * Public wrapper to force dimension recalculation.
+     */
+    public void refreshDimensions() {
+        markDimensionsDirty();
+    }
+
     private void recalculateDimensions() {
         Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        // Snapshot the list to avoid ConcurrentModificationException if lines are
-        // added/removed while recalculating dimensions (e.g. from event handlers)
-        List<HudLine> renderLines = new ArrayList<>(getCurrentRenderableLines());
+        List<HudLine> renderLines = getCurrentRenderableLines();
 
         int maxWidth = 0;
         int currentLineWidth = 0;
@@ -324,16 +329,14 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             context.fill(
                     (int) scaledX, (int) scaledY,
                     (int) scaledX + totalWidth, (int) scaledY + totalHeight,
-                    new Color(0, 0, 0, 100).getRGB()
+                    new Color(0, 0, 0, 125).getRGB()
             );
         }
 
         renderBeforeLines(context, scaledX, scaledY, totalWidth, totalHeight, textRenderer);
 
-        // Iterate over a snapshot to avoid ConcurrentModificationException if
-        // render-time callbacks mutate the underlying list (add/remove lines).
-        List<HudLine> renderSnapshot = new ArrayList<>(renderLines);
-        for (HudLine line : renderSnapshot) {
+        List<HudLine> linesToRender = new ArrayList<>(renderLines);
+        for (HudLine line : linesToRender) {
             if (!line.shouldRender()) continue;
             line.updateHoverState(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale);
             line.render(context, (int) currentX, (int) currentY, textRenderer);
@@ -348,7 +351,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
         context.pose().popMatrix();
 
-        for (HudLine line : new ArrayList<>(renderLines)) {
+        for (HudLine line : linesToRender) {
             if (!line.shouldRender()) continue;
             line.renderHover(context, textRenderer);
         }
@@ -371,7 +374,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         context.fill(
                 (int) scaledX - 2, (int) scaledY - 2,
                 (int) scaledX + width + 2, (int) scaledY + height + 2,
-                new Color(0, 0, 0, 150).getRGB()
+                new Color(0, 0, 0, 190).getRGB()
         );
 
         context.text(
@@ -442,8 +445,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float currentX = scaledX + getLineStartX(textRenderer);
         float currentY = scaledY;
 
-        List<HudLine> clickSnapshot = new ArrayList<>(getRenderableLines());
-        for (HudLine line : clickSnapshot) {
+        for (HudLine line : getRenderableLines()) {
             if (!line.shouldRender()) continue;
             if (line.handleClick(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale)) {
                 return true;
@@ -475,4 +477,5 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
     public void onConfigChanged() {
         HudManager.get().saveConfig();
     }
+
 }
