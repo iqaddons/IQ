@@ -107,7 +107,10 @@ public class IQConfigScreen extends Screen {
     private static final int TOGGLE_GLOW_ALPHA = 0x34;
     private static final int SLIDER_W = 100;
     private static final int CONTROL_H = 15;
-    private static final int CONTROL_RADIUS = 0;
+    private static final int CONTROL_RADIUS = 4;
+    private static final float CONTROL_GLOW = 2.5f;
+    private static final int CONTROL_GLOW_ALPHA = 0x28;
+    private static final int CONTROL_GLOW_ALPHA_HOV = 0x44;
     private static final int CONTROL_TEXT_PAD_X = 6;
     private static final int CONTROL_TEXT_GAP = 3;
     private static final int CONTROL_MIN_W = 34;
@@ -1286,16 +1289,14 @@ public class IQConfigScreen extends Screen {
     }
 
     private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {
-        int top = hov ? themeControlTopHover() : themeControlTop();
-        int bottom = hov ? themeControlBottomHover() : themeControlBottom();
-        int border = hov ? themedBorderHighlight() : themedBorderMid();
-
-        drawRoundedRect(ctx, x, y, w, CONTROL_H, top, CONTROL_RADIUS);
-        ctx.fill(x, y + CONTROL_H / 2, x + w, y + CONTROL_H, bottom);
-        drawRoundedHollowRect(ctx, x, y, w, CONTROL_H, border, CONTROL_RADIUS);
-
-        ctx.fill(x + 1, y + 1, x + w - 1, y + 2, 0x2AFFFFFF);
-        ctx.fill(x + 1, y + CONTROL_H - 2, x + w - 1, y + CONTROL_H - 1, 0x22000000);
+        int bg = hov ? themeControlTopHover() : themeControlTop();
+        if (sharedOutlineShadow) {
+            int glowA = hov ? CONTROL_GLOW_ALPHA_HOV : CONTROL_GLOW_ALPHA;
+            drawRoundedGlow(ctx, x, y, w, CONTROL_H, bg,
+                    withAlpha(themeAccentColor(), glowA), CONTROL_RADIUS, CONTROL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, CONTROL_H, bg, CONTROL_RADIUS);
+        }
     }
 
     private void renderScrollbar(GuiGraphicsExtractor ctx, int sx, int top, int ch) {

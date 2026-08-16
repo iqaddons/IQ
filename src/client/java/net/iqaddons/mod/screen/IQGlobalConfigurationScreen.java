@@ -73,8 +73,17 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int SIDEBAR_PILL_RADIUS = 5;
     private static final float SIDEBAR_PILL_GLOW = 4f;
     private static final int ROW_H = 22;
+    private static final int ROW_GAP = 6;
+    private static final int CARD_RADIUS = 6;
+    private static final float CARD_GLOW = 6f;
+    private static final int CARD_GLOW_ALPHA = 0x3A;
+    private static final int CARD_GLOW_ALPHA_HOV = 0x55;
     private static final int PAD = 10;
     private static final int CONTROL_H = 15;
+    private static final int CONTROL_RADIUS = 4;
+    private static final float CONTROL_GLOW = 2.5f;
+    private static final int CONTROL_GLOW_ALPHA = 0x28;
+    private static final int CONTROL_GLOW_ALPHA_HOV = 0x44;
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
@@ -375,12 +384,9 @@ public class IQGlobalConfigurationScreen extends Screen {
         contentFadeAnim += (1f - contentFadeAnim) * animRate(0.20f);
         if (contentFadeAnim > 0.997f) contentFadeAnim = 1f;
 
-        int clipX1 = x + PAD;
-        int clipY1 = y + PAD;
-        int clipX2 = x + w - PAD;
-        int clipY2 = y + h;
-
-        ctx.enableScissor(clipX1, clipY1, clipX2, clipY2);
+        // Scissor the full content panel so card glow isn't clipped on the sides/top.
+        // Cards themselves stay inset by PAD (larger than CARD_GLOW).
+        ctx.enableScissor(x, y, x + w, y + h);
 
         int contentW = w - PAD * 2;
         int cursorY = y + PAD - (int) contentScroll;
@@ -497,6 +503,17 @@ public class IQGlobalConfigurationScreen extends Screen {
         return y;
     }
 
+    private void drawRowShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, float hover) {
+        int fill = lerpArgb(themeRowColor(), themeRowHoverColor(), hover);
+        if (outlineShadow) {
+            int glowA = Math.round(CARD_GLOW_ALPHA + (CARD_GLOW_ALPHA_HOV - CARD_GLOW_ALPHA) * hover);
+            drawRoundedGlow(ctx, x, y, w, h, fill,
+                    withAlpha(themeAccentColor(), glowA), CARD_RADIUS, CARD_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, CARD_RADIUS);
+        }
+    }
+
     private int renderToggleRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
                                 boolean value, Runnable action) {
         boolean hover = isIn(frameMouseX, frameMouseY, x, y, w, ROW_H);
@@ -505,10 +522,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
         IqFonts.draw(ctx, label, x + 8,
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
@@ -541,7 +555,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, action, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderCycleRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
@@ -552,10 +566,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
         IqFonts.draw(ctx, label, x + 8,
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tFeatureTitle());
@@ -583,7 +594,7 @@ public class IQGlobalConfigurationScreen extends Screen {
             selectSlideDirs.put(sKey, -1);
         }, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderSliderRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
@@ -596,10 +607,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         hoverAnims.put(hKey, hAnim);
 
         int accent = currentAccentColor();
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
         IqFonts.draw(ctx, label, x + 8,
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
@@ -622,7 +630,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
         sliderHits.add(new SliderHit(sx, sy - 5, sw, 16, min, max, getter, setter, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderActionRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip, Runnable action) {
@@ -632,10 +640,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
         int bx = x + w - 76;
         int by = y + 4;
@@ -648,7 +653,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, action, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private String actionButtonText(String label) {
@@ -1460,15 +1465,14 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {
-        int top = themeButtonTop(hov);
-        int bottom = themeButtonBottom(hov);
-        int border = hov ? themeOutlineHighlight() : themeBorderMid();
-
-        drawRoundedRect(ctx, x, y, w, CONTROL_H, top, 0);
-        ctx.fill(x, y + CONTROL_H / 2, x + w, y + CONTROL_H, bottom);
-        drawRoundedHollowRect(ctx, x, y, w, CONTROL_H, border, 0);
-        ctx.fill(x + 1, y + 1, x + w - 1, y + 2, 0x2AFFFFFF);
-        ctx.fill(x + 1, y + CONTROL_H - 2, x + w - 1, y + CONTROL_H - 1, 0x22000000);
+        int bg = themeButtonTop(hov);
+        if (outlineShadow) {
+            int glowA = hov ? CONTROL_GLOW_ALPHA_HOV : CONTROL_GLOW_ALPHA;
+            drawRoundedGlow(ctx, x, y, w, CONTROL_H, bg,
+                    withAlpha(themeAccentColor(), glowA), CONTROL_RADIUS, CONTROL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, CONTROL_H, bg, CONTROL_RADIUS);
+        }
     }
 
     private int lerpArgb(int c0, int c1, float t) {
