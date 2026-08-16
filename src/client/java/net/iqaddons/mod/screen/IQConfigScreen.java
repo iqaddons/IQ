@@ -145,6 +145,9 @@ public class IQConfigScreen extends Screen {
     private static final int CARD_BODY_PAD_BOT = 6;
     private static final int SECTION_UNFURL_OFFSET = 12;
     private static final int SECTION_CHEVRON_SIZE = 12;
+    private static final float SECTION_EXPAND_SPEED = 14.0f;
+    private static final float SECTION_ANIM_MIN_STEPS = 0.06f;
+    private static final float SECTION_ANIM_MAX_STEPS = 3.0f;
 
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
@@ -212,6 +215,8 @@ public class IQConfigScreen extends Screen {
 
     private final Map<String, Float> toggleAnims  = new HashMap<>();
     private final Map<String, Float> sectionAnims = new HashMap<>();
+    private long sectionAnimLastNanos = 0L;
+    private float sectionAnimFrameSteps = 1f;
     private final Map<String, Float> hoverAnims   = new HashMap<>();
     private final Map<String, Float> selectSlideAnims = new HashMap<>();
     private final Map<String, Integer> selectSlideDirs = new HashMap<>();
@@ -621,6 +626,8 @@ public class IQConfigScreen extends Screen {
 
         renderedEntries.clear();
         List<ConfigEntryModel> entries = getDisplayEntries();
+        beginSectionAnimFrame();
+        tickSectionAnims(entries);
         int y = cy + 10 - (int) scrollOffset;
         int totalH = renderEntries(ctx, entries, cx, y, cw, ch, cy, 0);
 
@@ -749,8 +756,8 @@ public class IQConfigScreen extends Screen {
             int clipTop,
             int ch
     ) {
-        float sAnim = tickSectionAnim(sectionKey(entry), entry.isExpanded());
-        float reveal = easeOutCubic(sAnim);
+        float sAnim = sectionAnim(sectionKey(entry), entry.isExpanded());
+        float reveal = sAnim;
 
         int bodyContentH = 0;
         if (entry.getChildren() != null && !entry.getChildren().isEmpty()) {
@@ -836,13 +843,43 @@ public class IQConfigScreen extends Screen {
         }
     }
 
+    private void beginSectionAnimFrame() {
+        long now = System.nanoTime();
+        if (sectionAnimLastNanos == 0L) {
+            sectionAnimFrameSteps = 1f;
+        } else {
+            float steps = (now - sectionAnimLastNanos) / 1_000_000_000f * 60f;
+            sectionAnimFrameSteps = Math.max(SECTION_ANIM_MIN_STEPS, Math.min(SECTION_ANIM_MAX_STEPS, steps));
+        }
+        sectionAnimLastNanos = now;
+    }
+
+    private void tickSectionAnims(List<ConfigEntryModel> entries) {
+        for (ConfigEntryModel entry : entries) {
+            if (entry.getType() != EntryType.SECTION_HEADER) continue;
+            tickSectionAnim(sectionKey(entry), entry.isExpanded());
+            if (entry.getChildren() != null && !entry.getChildren().isEmpty()) {
+                tickSectionAnims(entry.getChildren());
+            }
+        }
+    }
+
+    private float sectionAnim(String key, boolean expanded) {
+        return sectionAnims.getOrDefault(key, expanded ? 1f : 0f);
+    }
+
     private float tickSectionAnim(String key, boolean expanded) {
         float target = expanded ? 1f : 0f;
         float anim = sectionAnims.getOrDefault(key, target);
-        anim += (target - anim) * 0.14f;
-        if (Math.abs(anim - target) < 0.003f) anim = target;
+        anim = approachAnim(anim, target, SECTION_EXPAND_SPEED, sectionAnimFrameSteps);
         sectionAnims.put(key, anim);
         return anim;
+    }
+
+    private float approachAnim(float current, float target, float speed, float frameSteps) {
+        float amount = Math.max(0f, Math.min(1f, speed / 60f * frameSteps));
+        float next = current + (target - current) * amount;
+        return Math.abs(target - next) < 0.001f ? target : next;
     }
 
     private int measureNestedRows(List<ConfigEntryModel> entries) {
@@ -854,8 +891,7 @@ public class IQConfigScreen extends Screen {
                 used += SEP_TOP_GAP;
             }
             if (entry.getType() == EntryType.SECTION_HEADER) {
-                float sAnim = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
-                float reveal = easeOutCubic(sAnim);
+                float reveal = sectionAnim(sectionKey(entry), entry.isExpanded());
                 int bodyContentH = entry.getChildren() == null || entry.getChildren().isEmpty()
                         ? 0 : measureNestedRows(entry.getChildren());
                 int fullBodyH = bodyContentH > 0 ? CARD_BODY_PAD_TOP + bodyContentH + CARD_BODY_PAD_BOT : 0;
@@ -973,7 +1009,7 @@ public class IQConfigScreen extends Screen {
                     x + 10, y + (h - IqFonts.lineHeight()) / 2, themeTextMain());
         }
 
-        float reveal = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
+        float reveal = sectionAnim(sectionKey(entry), entry.isExpanded());
         int chevronY = y + Math.round((h - SECTION_CHEVRON_SIZE) * 0.5f);
         int chevronColor = hov ? 0xFFFFFFFF : 0xFFC9B4D5;
         drawSectionChevron(ctx, chevronX, chevronY, reveal, chevronColor);
@@ -987,7 +1023,7 @@ public class IQConfigScreen extends Screen {
         float half = size * 0.5f;
         float cx = x + half;
         float cy = y + half;
-        float t = easeOutCubic(expandAnim);
+        float t = Math.max(0f, Math.min(1f, expandAnim));
         int draw = Math.max(1, Math.round(size));
 
         ctx.pose().pushMatrix();
@@ -2345,8 +2381,7 @@ public class IQConfigScreen extends Screen {
                 used += SEP_TOP_GAP;
             }
             if (entry.getType() == EntryType.SECTION_HEADER) {
-                float sAnim = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
-                float reveal = easeOutCubic(sAnim);
+                float reveal = sectionAnim(sectionKey(entry), entry.isExpanded());
                 int bodyContentH = entry.getChildren() == null || entry.getChildren().isEmpty()
                         ? 0 : measureNestedRows(entry.getChildren());
                 int fullBodyH = bodyContentH > 0 ? CARD_BODY_PAD_TOP + bodyContentH + CARD_BODY_PAD_BOT : 0;
