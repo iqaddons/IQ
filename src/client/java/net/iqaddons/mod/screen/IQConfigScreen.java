@@ -134,6 +134,9 @@ public class IQConfigScreen extends Screen {
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
     private static final int HEADER_ACTION_BTN_RADIUS = 5;
     private static final float HEADER_ACTION_BTN_GLOW = 2.75f;
+    private static final int TOOLTIP_RADIUS = 6;
+    private static final float TOOLTIP_GLOW = 3.5f;
+    private static final int TOOLTIP_GLOW_ALPHA = 0x3A;
 
     private static final int CORNER_R_SMALL = 0;
     private static final int CORNER_R_MED = 0;
@@ -1423,9 +1426,13 @@ public class IQConfigScreen extends Screen {
         int tx = frameMouseX + 12, ty = frameMouseY + 12;
         if (tx + bw > width - 4) tx = frameMouseX - bw - 8;
         if (ty + bh > height - 4) ty = frameMouseY - bh - 8;
-        drawRoundedRect(ctx, tx, ty, bw, bh, themeTooltipBgColor(), CORNER_R_SMALL);
-        drawRoundedHollowRect(ctx, tx, ty, bw, bh, themeTooltipBorderColor(), CORNER_R_SMALL);
-        ctx.fill(tx + 1, ty + 1, tx + 3, ty + bh - 1, withAlpha(themeAccentColor(), 0x8A));
+        int bg = themeTooltipBgColor();
+        if (sharedOutlineShadow) {
+            drawRoundedGlow(ctx, tx, ty, bw, bh, bg,
+                    withAlpha(themeAccentColor(), TOOLTIP_GLOW_ALPHA), TOOLTIP_RADIUS, TOOLTIP_GLOW);
+        } else {
+            drawRoundedRect(ctx, tx, ty, bw, bh, bg, TOOLTIP_RADIUS);
+        }
         for (int i = 0; i < lines.size(); i++)
             IqFonts.draw(ctx, lines.get(i),
                     tx + 7, ty + 5 + i * lh, themeTooltipTextColor());
