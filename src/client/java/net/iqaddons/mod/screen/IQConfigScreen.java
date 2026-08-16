@@ -89,7 +89,6 @@ public class IQConfigScreen extends Screen {
     private static final int HEADER_H = 42;
     private static final int LOGO_ZONE_H = 42;
     private static final int PADDING = 10;
-    private static final int CHILD_INDENT = 9;
     private static final int SCROLL_W = 3;
 
     private static final int ROW_H_SLIM = 26;
@@ -130,6 +129,17 @@ public class IQConfigScreen extends Screen {
     private static final int CORNER_R_LARGE = 10;
     private static final float PANEL_GLOW = 16f;
     private static final int PANEL_GLOW_ALPHA = 0x52;
+    private static final int CARD_RADIUS = 6;
+    private static final float CARD_GLOW = 6f;
+    private static final int CARD_GLOW_ALPHA = 0x3A;
+    private static final int CARD_GLOW_ALPHA_HOV = 0x55;
+    private static final int CARD_GLOW_ALPHA_ENABLED = 0x88;
+    private static final int CARD_GLOW_ALPHA_ENABLED_HOV = 0xA0;
+    private static final int CARD_GAP = 6;
+    private static final int NESTED_ROW_GAP = 2;
+    private static final int CARD_BODY_PAD_TOP = 4;
+    private static final int CARD_BODY_PAD_BOT = 6;
+    private static final int SECTION_UNFURL_OFFSET = 12;
 
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
@@ -358,6 +368,28 @@ public class IQConfigScreen extends Screen {
             drawRoundedGlow(ctx, x, y, w, h, fill, glow, r, PANEL_GLOW);
         } else {
             drawRoundedRect(ctx, x, y, w, h, fill, r);
+        }
+    }
+
+    private void drawCardShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int fill, float hover, boolean enabled) {
+        int r = CARD_RADIUS;
+        if (sharedOutlineShadow) {
+            int baseA = enabled ? CARD_GLOW_ALPHA_ENABLED : CARD_GLOW_ALPHA;
+            int hovA = enabled ? CARD_GLOW_ALPHA_ENABLED_HOV : CARD_GLOW_ALPHA_HOV;
+            int glowA = Math.round(baseA + (hovA - baseA) * hover);
+            int glow = withAlpha(themeAccentColor(), glowA);
+            drawRoundedGlow(ctx, x, y, w, h, fill, glow, r, CARD_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, r);
+        }
+    }
+
+    private boolean isModuleEnabled(ConfigEntryModel entry) {
+        if (entry.getType() != EntryType.BOOLEAN || entry.getField() == null) return false;
+        try {
+            return (boolean) entry.getField().get(null);
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -676,59 +708,169 @@ public class IQConfigScreen extends Screen {
                 used += SEP_TOP_GAP;
             }
 
-            boolean visible = y + rh > clipTop && y < clipTop + ch;
             int ex = cx + 7 + indent;
+
+            if (entry.getType() == EntryType.SECTION_HEADER) {
+                int blockH = renderExpandableModule(ctx, entry, ex, y, ew, rh, clipTop, ch);
+                y += blockH + CARD_GAP;
+                used += blockH + CARD_GAP;
+                continue;
+            }
+
+            boolean visible = y + rh > clipTop && y < clipTop + ch;
             boolean hovered = editingColor == null
                     && entry.getType() != EntryType.SEPARATOR
                     && isIn(frameMouseX, frameMouseY, ex, Math.max(y, clipTop), ew, rh);
 
-            if (visible) renderRow(ctx, entry, ex, y, ew, rh, hovered, indent > 0);
+            if (visible) renderRow(ctx, entry, ex, y, ew, rh, hovered, indent > 0, false);
 
             if (entry.getType() != EntryType.SEPARATOR)
                 renderedEntries.add(new RenderedEntry(entry, ex, y, ew, rh));
 
-            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : 4;
+            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : CARD_GAP;
             y += rh + gap;
             used += rh + gap;
+        }
+        return used;
+    }
 
-            if (entry.getType() == EntryType.SECTION_HEADER
-                    && entry.getChildren() != null && !entry.getChildren().isEmpty()) {
+    private int renderExpandableModule(
+            GuiGraphicsExtractor ctx,
+            ConfigEntryModel entry,
+            int x,
+            int y,
+            int w,
+            int headerH,
+            int clipTop,
+            int ch
+    ) {
+        float sAnim = tickSectionAnim(sectionKey(entry), entry.isExpanded());
+        float reveal = easeOutCubic(sAnim);
 
-                String sKey = sectionKey(entry);
-                float sTarget = entry.isExpanded() ? 1f : 0f;
-                float sAnim   = sectionAnims.getOrDefault(sKey, sTarget);
-                sAnim += (sTarget - sAnim) * 0.18f;
-                if (Math.abs(sAnim - sTarget) < 0.004f) sAnim = sTarget;
-                sectionAnims.put(sKey, sAnim);
+        int bodyContentH = 0;
+        if (entry.getChildren() != null && !entry.getChildren().isEmpty()) {
+            bodyContentH = measureNestedRows(entry.getChildren());
+        }
+        int fullBodyH = bodyContentH > 0 ? CARD_BODY_PAD_TOP + bodyContentH + CARD_BODY_PAD_BOT : 0;
+        int animBodyH = Math.round(fullBodyH * reveal);
+        int totalH = headerH + animBodyH;
 
-                if (sAnim > 0.003f) {
-                    int fullChildH  = measureEntries(entry.getChildren());
-                    int animChildH  = Math.max(1, (int) (sAnim * fullChildH));
+        boolean headerHov = editingColor == null
+                && isIn(frameMouseX, frameMouseY, x, Math.max(y, clipTop), w, headerH);
+        String hKey = "secHov#" + sectionKey(entry);
+        float hAnim = hoverAnims.getOrDefault(hKey, 0f);
+        hAnim += ((headerHov ? 1f : 0f) - hAnim) * 0.28f;
+        hoverAnims.put(hKey, hAnim);
 
-                    int clipY1 = y;
-                    int clipY2 = Math.min(y + animChildH, clipTop + ch);
+        boolean visible = y + totalH > clipTop && y < clipTop + ch;
+        if (visible) {
+            int fill = lerpArgb(themeSectionColor(), themeEntryHoverColor(), hAnim);
+            drawCardShell(ctx, x, y, w, totalH, fill, hAnim, false);
+            renderSectionHeaderContent(ctx, entry, x, y, w, headerH, headerHov);
 
-                    if (clipY2 > clipY1) {
-                        ctx.enableScissor(cx, clipY1, cx + cw, clipY2);
-                        renderEntries(ctx, entry.getChildren(), cx, y, cw, animChildH, y, indent + CHILD_INDENT);
-                        ctx.disableScissor();
-                    }
-                    y    += animChildH;
-                    used += animChildH;
+            if (animBodyH > 1 && entry.getChildren() != null) {
+                int divA = Math.round(0x2A * reveal);
+                if (divA > 0) {
+                    ctx.fill(x + 8, y + headerH, x + w - 8, y + headerH + 1,
+                            withAlpha(themeAccentColor(), divA));
+                }
+
+                int bodyTop = y + headerH;
+                int clipY1 = Math.max(bodyTop, clipTop);
+                int clipY2 = Math.min(bodyTop + animBodyH, clipTop + ch);
+                if (clipY2 > clipY1) {
+                    int peel = Math.round((1f - reveal) * SECTION_UNFURL_OFFSET);
+                    int childY = bodyTop + CARD_BODY_PAD_TOP - peel;
+                    ctx.enableScissor(x, clipY1, x + w, clipY2);
+                    renderNestedRows(ctx, entry.getChildren(), x, childY, w, clipY1, clipY2 - clipY1);
+                    ctx.disableScissor();
                 }
             }
+        }
+
+        renderedEntries.add(new RenderedEntry(entry, x, y, w, headerH));
+        return totalH;
+    }
+
+    private void renderNestedRows(
+            GuiGraphicsExtractor ctx,
+            List<ConfigEntryModel> entries,
+            int x,
+            int startY,
+            int w,
+            int clipTop,
+            int clipH
+    ) {
+        int y = startY;
+        for (ConfigEntryModel entry : entries) {
+            int rh = rowHeight(entry);
+            if (rh == 0) continue;
+
+            if (entry.getType() == EntryType.SEPARATOR && y > startY) {
+                y += SEP_TOP_GAP;
+            }
+
+            if (entry.getType() == EntryType.SECTION_HEADER) {
+                int blockH = renderExpandableModule(ctx, entry, x, y, w, rh, clipTop, clipH);
+                y += blockH + NESTED_ROW_GAP;
+                continue;
+            }
+
+            boolean visible = y + rh > clipTop && y < clipTop + clipH;
+            boolean hovered = editingColor == null
+                    && entry.getType() != EntryType.SEPARATOR
+                    && isIn(frameMouseX, frameMouseY, x, Math.max(y, clipTop), w, rh);
+
+            if (visible) renderRow(ctx, entry, x, y, w, rh, hovered, true, true);
+
+            if (entry.getType() != EntryType.SEPARATOR)
+                renderedEntries.add(new RenderedEntry(entry, x, y, w, rh));
+
+            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : NESTED_ROW_GAP;
+            y += rh + gap;
+        }
+    }
+
+    private float tickSectionAnim(String key, boolean expanded) {
+        float target = expanded ? 1f : 0f;
+        float anim = sectionAnims.getOrDefault(key, target);
+        anim += (target - anim) * 0.14f;
+        if (Math.abs(anim - target) < 0.003f) anim = target;
+        sectionAnims.put(key, anim);
+        return anim;
+    }
+
+    private int measureNestedRows(List<ConfigEntryModel> entries) {
+        int used = 0;
+        for (ConfigEntryModel entry : entries) {
+            int rh = rowHeight(entry);
+            if (rh == 0) continue;
+            if (entry.getType() == EntryType.SEPARATOR && used > 0) {
+                used += SEP_TOP_GAP;
+            }
+            if (entry.getType() == EntryType.SECTION_HEADER) {
+                float sAnim = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
+                float reveal = easeOutCubic(sAnim);
+                int bodyContentH = entry.getChildren() == null || entry.getChildren().isEmpty()
+                        ? 0 : measureNestedRows(entry.getChildren());
+                int fullBodyH = bodyContentH > 0 ? CARD_BODY_PAD_TOP + bodyContentH + CARD_BODY_PAD_BOT : 0;
+                used += rh + Math.round(fullBodyH * reveal) + NESTED_ROW_GAP;
+                continue;
+            }
+            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : NESTED_ROW_GAP;
+            used += rh + gap;
         }
         return used;
     }
 
     private void renderRow(GuiGraphicsExtractor ctx, ConfigEntryModel e,
-                           int x, int y, int w, int h, boolean hov, boolean isChild) {
+                           int x, int y, int w, int h, boolean hov, boolean isChild, boolean nested) {
         switch (e.getType()) {
             case SEPARATOR -> renderSeparator(ctx, x, y, w, h, e.getSeparatorLabel());
-            case SECTION_HEADER -> renderSectionHeader(ctx, e, x, y, w, h, hov);
+            case SECTION_HEADER -> renderSectionHeaderContent(ctx, e, x, y, w, h, hov);
             case UNSUPPORTED -> {
             }
-            default -> renderEntry(ctx, e, x, y, w, h, hov, isChild);
+            default -> renderEntry(ctx, e, x, y, w, h, hov, isChild, nested);
         }
     }
 
@@ -799,19 +941,9 @@ public class IQConfigScreen extends Screen {
         ctx.pose().popMatrix();
     }
 
-    private void renderSectionHeader(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
-                                     int x, int y, int w, int h, boolean hov) {
-        boolean exp = entry.isExpanded();
+    private void renderSectionHeaderContent(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
+                                            int x, int y, int w, int h, boolean hov) {
         boolean hasDesc = entry.getDescription() != null && !entry.getDescription().isBlank();
-
-        String hKey = "secHov#" + sectionKey(entry);
-        float hAnim = hoverAnims.getOrDefault(hKey, 0f);
-        hAnim += ((hov ? 1f : 0f) - hAnim) * 0.28f;
-        hoverAnims.put(hKey, hAnim);
-
-        drawRoundedRect(ctx, x, y, w, h, lerpArgb(themeSectionColor(), themeEntryHoverColor(), hAnim), CORNER_R_SMALL);
-        drawRoundedRect(ctx, x, y, 2, h, themeAccentColor(), CORNER_R_SMALL);
-        if (exp) drawRoundedRect(ctx, x, y, 2, 3, withAlpha(themeAccentColor(), 0xFF), CORNER_R_SMALL);
 
         String hint = sectionHint(entry);
         int hintW = IqFonts.widthPx(hint);
@@ -840,21 +972,25 @@ public class IQConfigScreen extends Screen {
             IqFonts.draw(ctx, hint,
                     hintX, y + (h - IqFonts.lineHeight()) / 2, themeTextMuted());
         }
-
-        drawRoundedHollowRect(ctx, x, y, w, h, lerpArgb(themedBorderDim(), themedBorderBright(), hAnim * (exp ? 1f : 0.4f)));
     }
 
     private void renderEntry(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
-                             int x, int y, int w, int h, boolean hov, boolean isChild) {
+                             int x, int y, int w, int h, boolean hov, boolean isChild, boolean nested) {
         String hKey = entryKey(entry);
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
         hAnim += ((hov ? 1f : 0f) - hAnim) * 0.28f;
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, h, isChild ? themeChildColor() : lerpArgb(themeEntryColor(), themeEntryHoverColor(), hAnim), CORNER_R_SMALL);
-        drawRoundedHollowRect(ctx, x, y, w, h, lerpArgb(themedBorderDim(), themedBorderHighlight(), hAnim));
-        int accentAlpha = (int) (0x38 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + h, withAlpha(themeAccentColor(), accentAlpha));
+        if (nested) {
+            if (hAnim > 0.01f) {
+                drawRoundedRect(ctx, x + 4, y + 1, w - 8, h - 2,
+                        withAlpha(themeAccentColor(), Math.round(0x1A * hAnim)), 4);
+            }
+        } else {
+            drawCardShell(ctx, x, y, w, h,
+                    isChild ? themeChildColor() : lerpArgb(themeEntryColor(), themeEntryHoverColor(), hAnim),
+                    hAnim, isModuleEnabled(entry));
+        }
 
         int ctrlW = controlWidth(entry);
         int descAvailW = w - PADDING - ctrlW - CONTROL_TEXT_GAP - PADDING;
@@ -2183,17 +2319,17 @@ public class IQConfigScreen extends Screen {
             if (entry.getType() == EntryType.SEPARATOR && used > 0) {
                 used += SEP_TOP_GAP;
             }
-            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : 4;
-            used += rh + gap;
-            if (entry.getType() == EntryType.SECTION_HEADER
-                    && entry.getChildren() != null && !entry.getChildren().isEmpty()) {
-                float sAnim = sectionAnims.getOrDefault(sectionKey(entry),
-                        entry.isExpanded() ? 1f : 0f);
-                if (sAnim > 0f) {
-                    int fullChildH = measureEntries(entry.getChildren());
-                    used += (int) (sAnim * fullChildH);
-                }
+            if (entry.getType() == EntryType.SECTION_HEADER) {
+                float sAnim = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
+                float reveal = easeOutCubic(sAnim);
+                int bodyContentH = entry.getChildren() == null || entry.getChildren().isEmpty()
+                        ? 0 : measureNestedRows(entry.getChildren());
+                int fullBodyH = bodyContentH > 0 ? CARD_BODY_PAD_TOP + bodyContentH + CARD_BODY_PAD_BOT : 0;
+                used += rh + Math.round(fullBodyH * reveal) + CARD_GAP;
+                continue;
             }
+            int gap = (entry.getType() == EntryType.SEPARATOR) ? 0 : CARD_GAP;
+            used += rh + gap;
         }
         return used;
     }
