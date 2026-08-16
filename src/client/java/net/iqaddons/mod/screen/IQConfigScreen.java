@@ -9,11 +9,14 @@ import net.iqaddons.mod.screen.model.ConfigEntryModel;
 import net.iqaddons.mod.screen.model.ConfigEntryModel.EntryType;
 import net.iqaddons.mod.utils.ConfigReflectionUtil;
 import net.iqaddons.mod.utils.data.DataKey;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
@@ -35,6 +38,7 @@ public class IQConfigScreen extends Screen {
     private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/settings.png");
     private static final Identifier CLOSE_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/close.png");
     private static final Identifier SEARCH_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/search.png");
+    private static final Identifier BACK_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/back.png");
     private static final int LOGO_SIZE = 24;
 
     private static final int BG_HEADER = 0xD50D0A16;
@@ -140,6 +144,7 @@ public class IQConfigScreen extends Screen {
     private static final int CARD_BODY_PAD_TOP = 4;
     private static final int CARD_BODY_PAD_BOT = 6;
     private static final int SECTION_UNFURL_OFFSET = 12;
+    private static final int SECTION_CHEVRON_SIZE = 12;
 
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
@@ -944,14 +949,12 @@ public class IQConfigScreen extends Screen {
     private void renderSectionHeaderContent(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
                                             int x, int y, int w, int h, boolean hov) {
         boolean hasDesc = entry.getDescription() != null && !entry.getDescription().isBlank();
-
-        String hint = sectionHint(entry);
-        int hintW = IqFonts.widthPx(hint);
-        int hintX = x + w - hintW - PADDING;
+        int chevronX = x + w - PADDING - SECTION_CHEVRON_SIZE;
+        int textRight = chevronX - 6;
 
         if (hasDesc) {
             int labelY = y + 7;
-            int descAvailW = Math.max(60, hintX - (x + 10) - 8);
+            int descAvailW = Math.max(60, textRight - (x + 10));
             IqFonts.draw(ctx, entry.getLabel(), x + 10, labelY, themeTextMain());
 
             List<String> lines = wrapText(entry.getDescription(), descAvailW);
@@ -965,13 +968,47 @@ public class IQConfigScreen extends Screen {
                         x + 10, descY + li * (IqFonts.lineHeight() + 1), themeFeatureDescriptionColor());
             }
             if (hov && lines.size() > 2) pendingTooltip = entry.getDescription();
-            IqFonts.draw(ctx, hint, hintX, labelY, themeTextMuted());
         } else {
             IqFonts.draw(ctx, entry.getLabel(),
                     x + 10, y + (h - IqFonts.lineHeight()) / 2, themeTextMain());
-            IqFonts.draw(ctx, hint,
-                    hintX, y + (h - IqFonts.lineHeight()) / 2, themeTextMuted());
         }
+
+        float reveal = sectionAnims.getOrDefault(sectionKey(entry), entry.isExpanded() ? 1f : 0f);
+        int chevronY = y + Math.round((h - SECTION_CHEVRON_SIZE) * 0.5f);
+        int chevronColor = hov ? 0xFFFFFFFF : 0xFFC9B4D5;
+        drawSectionChevron(ctx, chevronX, chevronY, reveal, chevronColor);
+    }
+
+    private void drawSectionChevron(GuiGraphicsExtractor ctx, int x, int y, float expandAnim, int color) {
+        AbstractTexture texture = Minecraft.getInstance().getTextureManager().getTexture(BACK_ICON_TEXTURE);
+        int texW = Math.max(1, texture.getTexture().getWidth(0));
+        int texH = Math.max(1, texture.getTexture().getHeight(0));
+        float size = SECTION_CHEVRON_SIZE;
+        float half = size * 0.5f;
+        float cx = x + half;
+        float cy = y + half;
+        float t = easeOutCubic(expandAnim);
+        int draw = Math.max(1, Math.round(size));
+
+        ctx.pose().pushMatrix();
+        ctx.pose().translate(cx, cy);
+        ctx.pose().rotate((float) (Math.PI * 0.5) * t);
+        ctx.blit(
+                RenderPipelines.GUI_TEXTURED,
+                BACK_ICON_TEXTURE,
+                Math.round(-half),
+                Math.round(-half),
+                (float) texW,
+                0.0f,
+                draw,
+                draw,
+                -texW,
+                texH,
+                texW,
+                texH,
+                color
+        );
+        ctx.pose().popMatrix();
     }
 
     private void renderEntry(GuiGraphicsExtractor ctx, ConfigEntryModel entry,
@@ -1733,8 +1770,7 @@ public class IQConfigScreen extends Screen {
             case SEPARATOR      -> SEP_H;
             case SECTION_HEADER -> {
                 if (e.getDescription() == null || e.getDescription().isBlank()) yield SEC_H;
-                int hintW = minecraft != null ? IqFonts.widthPx(sectionHint(e)) : 30;
-                int descW = cachedGw - cachedSidebarW - 14 - PADDING - hintW - 10 - PADDING;
+                int descW = cachedGw - cachedSidebarW - 14 - PADDING - SECTION_CHEVRON_SIZE - 6 - PADDING;
                 List<String> lines = wrapText(e.getDescription(), Math.max(60, descW));
                 yield lines.size() > 1 ? ROW_H_FULL_2 : ROW_H_FULL_1;
             }
@@ -2121,17 +2157,6 @@ public class IQConfigScreen extends Screen {
 
     private int clampControlWidth(int width) {
         return Math.max(CONTROL_MIN_W, Math.min(CONTROL_MAX_W, width));
-    }
-
-    private int countControls(List<ConfigEntryModel> list) {
-        return (int) list.stream()
-                .filter(e -> e.getType() != EntryType.SEPARATOR && e.getType() != EntryType.UNSUPPORTED)
-                .count();
-    }
-
-    private String sectionHint(ConfigEntryModel entry) {
-        int count = entry.getChildren() != null ? countControls(entry.getChildren()) : 0;
-        return count + (entry.isExpanded() ? " v" : " >");
     }
 
     private boolean isBuildOverlayStyleEntry(ConfigEntryModel e) {
