@@ -80,6 +80,9 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
+    private static final int CORNER_R_LARGE = 10;
+    private static final float PANEL_GLOW = 16f;
+    private static final int PANEL_GLOW_ALPHA = 0x52;
 
     private static final String[] THEMES = {"Default (IQ)", "Dark", "Light", "Ocean (Blue)", "Crimson (Red)", "Emerald (Green)"};
     private static final boolean HIDE_LIGHT_THEME = true;
@@ -229,10 +232,8 @@ public class IQGlobalConfigurationScreen extends Screen {
         overlayAlpha = (int) (overlayAlpha * renderTransition);
         ctx.fill(0, 0, width, height, (overlayAlpha << 24) | (BG_OUTER & 0x00FFFFFF));
 
-        int radius = 0;
         int accent = currentAccentColor();
-        drawGlowBorder(ctx, panelX, panelY, panelW, panelH, radius, accent);
-        drawRoundedRect(ctx, panelX, panelY, panelW, panelH, themePanelColor(), radius);
+        drawPanelShell(ctx, panelX, panelY, panelW, panelH, themePanelColor());
         int splitX = panelX + sidebarW;
         ctx.fill(splitX - 1, panelY, splitX, panelY + panelH, 0x22FFFFFF);
 
@@ -244,7 +245,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderHeader(GuiGraphicsExtractor ctx, int x, int y, int w) {
-        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0);
+        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0, CORNER_R_LARGE, 0, 0);
         ctx.fill(x, y + HEADER_H - 1, x + w, y + HEADER_H, 0x22FFFFFF);
 
         ConfigSection section = selectedSection;
@@ -292,9 +293,9 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderSidebar(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
-        drawRoundedRect(ctx, x, y, w, h, themeSidebarColor(), 0);
+        drawRoundedRect(ctx, x, y, w, h, themeSidebarColor(), CORNER_R_LARGE, 0, 0, CORNER_R_LARGE);
 
-        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0);
+        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), CORNER_R_LARGE, 0, 0, 0);
         ctx.fill(x, y + HEADER_H - 1, x + w, y + HEADER_H, 0x22FFFFFF);
         IqFonts.draw(ctx, themeHubTitle(), x + 10, y + 7, tHubTitle());
         IqFonts.draw(ctx, themeHubSubtitle(), x + 10,
@@ -358,7 +359,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderSections(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int accent) {
-        ctx.fill(x, y, x + w, y + h, themePanelColor());
+        drawRoundedRect(ctx, x, y, w, h, themePanelColor(), 0, 0, CORNER_R_LARGE, 0);
         if (lastRenderedSection != selectedSection) {
             contentFadeAnim = 0f;
             lastRenderedSection = selectedSection;
@@ -405,7 +406,9 @@ public class IQGlobalConfigurationScreen extends Screen {
         if (contentFadeAnim < 1f) {
             int overlayAlpha = (int) ((1f - contentFadeAnim) * 0xCC);
             if (overlayAlpha > 0) {
-                ctx.fill(x, y, x + w, y + h, (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF));
+                drawRoundedRect(ctx, x, y, w, h,
+                        (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF),
+                        0, 0, CORNER_R_LARGE, 0);
             }
         }
     }
@@ -1391,18 +1394,14 @@ public class IQGlobalConfigurationScreen extends Screen {
         return themePalette(t).toggleOff();
     }
 
-    private void drawGlowBorder(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int radius, int accent) {
-        if (!outlineShadow) {
-            drawRoundedHollowRect(ctx, x, y, w, h, themeBorderBright(), radius);
-            return;
+    private void drawPanelShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int fill) {
+        int r = CORNER_R_LARGE;
+        if (outlineShadow) {
+            int glow = withAlpha(themeAccentColor(), PANEL_GLOW_ALPHA);
+            drawRoundedGlow(ctx, x, y, w, h, fill, glow, r, PANEL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, r);
         }
-        int accRgb = themeAccentColor() & 0x00FFFFFF;
-        int[] alphas = {0x05, 0x10, 0x1E, 0x30};
-        for (int i = 0; i < alphas.length; i++) {
-            int d = alphas.length - i;
-            drawRoundedHollowRect(ctx, x - d, y - d, w + d * 2, h + d * 2, (alphas[i] << 24) | accRgb, radius + d);
-        }
-        drawRoundedHollowRect(ctx, x, y, w, h, themeBorderBright(), radius);
     }
 
     private int getHeaderActionButtonsStartX(int headerX, int headerW) {
@@ -1451,8 +1450,37 @@ public class IQGlobalConfigurationScreen extends Screen {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
     }
 
+    private void drawRoundedRect(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int color,
+            int topLeftRadius,
+            int topRightRadius,
+            int bottomRightRadius,
+            int bottomLeftRadius
+    ) {
+        ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius);
+    }
+
     private void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
         ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, color, radius, glowWidth);
+    }
+
+    private void drawRoundedGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            int radius,
+            float glowWidth
+    ) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, fillColor, glowColor, radius, glowWidth);
     }
 
     private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {

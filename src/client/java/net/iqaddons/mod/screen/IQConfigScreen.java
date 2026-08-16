@@ -127,7 +127,9 @@ public class IQConfigScreen extends Screen {
 
     private static final int CORNER_R_SMALL = 0;
     private static final int CORNER_R_MED = 0;
-    private static final int CORNER_R_LARGE = 0;
+    private static final int CORNER_R_LARGE = 10;
+    private static final float PANEL_GLOW = 16f;
+    private static final int PANEL_GLOW_ALPHA = 0x52;
 
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
@@ -335,8 +337,7 @@ public class IQConfigScreen extends Screen {
         int bgAlpha = (int) (overlayBaseAlpha * renderTransition);
         int bgColor = (bgAlpha << 24) | (BG_OUTER & 0x00FFFFFF);
         ctx.fill(0, 0, width, height, bgColor);
-        drawGlowBorder(ctx, cachedGx, cachedGy, cachedGw, cachedGh);
-        drawRoundedRect(ctx, cachedGx, cachedGy, cachedGw, cachedGh, themePanelColor(), CORNER_R_LARGE);
+        drawPanelShell(ctx, cachedGx, cachedGy, cachedGw, cachedGh, themePanelColor());
 
         renderSidebar(ctx);
         renderHeader(ctx);
@@ -350,25 +351,20 @@ public class IQConfigScreen extends Screen {
 
     }
 
-    private void drawGlowBorder(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
-        if (!sharedOutlineShadow) {
-            drawRoundedHollowRect(ctx, x, y, w, h, themedBorderBright(), CORNER_R_LARGE);
-            return;
+    private void drawPanelShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int fill) {
+        int r = CORNER_R_LARGE;
+        if (sharedOutlineShadow) {
+            int glow = withAlpha(themeAccentColor(), PANEL_GLOW_ALPHA);
+            drawRoundedGlow(ctx, x, y, w, h, fill, glow, r, PANEL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, r);
         }
-        int accRgb = themeAccentColor() & 0x00FFFFFF;
-        int[] alphas = {0x05, 0x10, 0x1E, 0x30};
-        for (int i = 0; i < alphas.length; i++) {
-            int d = alphas.length - i;
-            drawRoundedHollowRect(ctx, x - d, y - d, w + d * 2, h + d * 2,
-                    (alphas[i] << 24) | accRgb, CORNER_R_LARGE);
-        }
-        drawRoundedHollowRect(ctx, x, y, w, h, themedBorderBright(), CORNER_R_LARGE);
     }
 
     private void renderHeader(GuiGraphicsExtractor ctx) {
         int x = cachedGx + cachedSidebarW, y = cachedGy, w = cachedGw - cachedSidebarW;
 
-        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), CORNER_R_MED);
+        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0, CORNER_R_LARGE, 0, 0);
 
         int acc0 = themeAccentColor();
         int r0 = (acc0 >> 16) & 0xFF, g0 = (acc0 >> 8) & 0xFF, b0 = acc0 & 0xFF;
@@ -475,10 +471,10 @@ public class IQConfigScreen extends Screen {
         int gx = cachedGx, gy = cachedGy, gh = cachedGh, sidebarW = cachedSidebarW;
         boolean searchActive = isSearchActive();
 
-        drawRoundedRect(ctx, gx, gy, sidebarW, gh, themeSidebarColor(), CORNER_R_MED);
+        drawRoundedRect(ctx, gx, gy, sidebarW, gh, themeSidebarColor(), CORNER_R_LARGE, 0, 0, CORNER_R_LARGE);
         ctx.fill(gx + sidebarW - 1, gy, gx + sidebarW, gy + gh, 0x22FFFFFF);
 
-        drawRoundedRect(ctx, gx, gy, sidebarW, LOGO_ZONE_H, themeHeaderColor(), CORNER_R_MED);
+        drawRoundedRect(ctx, gx, gy, sidebarW, LOGO_ZONE_H, themeHeaderColor(), CORNER_R_LARGE, 0, 0, 0);
         ctx.fill(gx, gy + LOGO_ZONE_H - 1, gx + sidebarW, gy + LOGO_ZONE_H, 0x22FFFFFF);
 
         int lx = gx + 10, ly = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2;
@@ -574,7 +570,7 @@ public class IQConfigScreen extends Screen {
 
     private void renderContent(GuiGraphicsExtractor ctx, int cx, int cy, int cw, int ch) {
         if (categories.isEmpty()) return;
-        ctx.fill(cx, cy, cx + cw, cy + ch, themePanelColor());
+        drawRoundedRect(ctx, cx, cy, cw, ch, themePanelColor(), 0, 0, CORNER_R_LARGE, 0);
 
         if (lastRenderedCategory != selectedCategory) {
             if (lastRenderedCategory != -1) contentFadeAnim = 0f;
@@ -604,7 +600,9 @@ public class IQConfigScreen extends Screen {
         if (contentFadeAnim < 1f) {
             int overlayAlpha = (int) ((1f - contentFadeAnim) * 0xCC);
             if (overlayAlpha > 0)
-                ctx.fill(cx, cy, cx + cw, cy + ch, (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF));
+                drawRoundedRect(ctx, cx, cy, cw, ch,
+                        (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF),
+                        0, 0, CORNER_R_LARGE, 0);
         }
 
         if (entries.isEmpty() && !searchQuery.isEmpty()) {
@@ -1099,8 +1097,7 @@ public class IQConfigScreen extends Screen {
 
         ctx.fill(cachedGx + cachedSidebarW, cachedGy + HEADER_H,
                 cachedGx + cachedGw, cachedGy + cachedGh, 0x88000000);
-        ctx.fill(px, py, px + ceW, py + ceH, BG_COLOR_ED);
-        drawGlowBorder(ctx, px, py, ceW, ceH);
+        drawPanelShell(ctx, px, py, ceW, ceH, BG_COLOR_ED);
 
         IqFonts.drawCentered(ctx, "Edit Color", px + ceW / 2, py + 9, 0, IqFonts.lineHeight(), themeHubAccentTextColor());
         IqFonts.draw(ctx, "×", layout.closeX(), py + 9, themeTextMuted());
@@ -2203,6 +2200,21 @@ public class IQConfigScreen extends Screen {
 
     private void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
+    }
+
+    private void drawRoundedRect(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int color,
+            int topLeftRadius,
+            int topRightRadius,
+            int bottomRightRadius,
+            int bottomLeftRadius
+    ) {
+        ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius);
     }
 
     private void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {

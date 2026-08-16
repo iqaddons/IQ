@@ -52,15 +52,34 @@ final class ScreenUiUtil {
     }
 
     static void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
+        drawRoundedRect(ctx, x, y, w, h, color, radius, radius, radius, radius);
+    }
+
+    static void drawRoundedRect(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int color,
+            int topLeftRadius,
+            int topRightRadius,
+            int bottomRightRadius,
+            int bottomLeftRadius
+    ) {
         if (w <= 0 || h <= 0) {
             return;
         }
-        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
-        if (r == 0) {
+        int maxR = Math.min(w, h) / 2;
+        int tl = Math.max(0, Math.min(topLeftRadius, maxR));
+        int tr = Math.max(0, Math.min(topRightRadius, maxR));
+        int br = Math.max(0, Math.min(bottomRightRadius, maxR));
+        int bl = Math.max(0, Math.min(bottomLeftRadius, maxR));
+        if (tl == 0 && tr == 0 && br == 0 && bl == 0) {
             ctx.fill(x, y, x + w, y + h, color);
             return;
         }
-        RoundedPaneRenderer.submit(ctx, x, y, w, h, color, r);
+        RoundedPaneRenderer.submit(ctx, x, y, w, h, color, tl, tr, br, bl, 0f, 0f, color);
     }
 
     static void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
@@ -78,15 +97,37 @@ final class ScreenUiUtil {
             int radius,
             float glowWidth
     ) {
+        drawRoundedGlow(ctx, x, y, w, h, fillColor, glowColor, radius, radius, radius, radius, glowWidth);
+    }
+
+    static void drawRoundedGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            int topLeftRadius,
+            int topRightRadius,
+            int bottomRightRadius,
+            int bottomLeftRadius,
+            float glowWidth
+    ) {
         if (w <= 0 || h <= 0) {
             return;
         }
-        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
-        if (r == 0) {
+        int maxR = Math.min(w, h) / 2;
+        int tl = Math.max(0, Math.min(topLeftRadius, maxR));
+        int tr = Math.max(0, Math.min(topRightRadius, maxR));
+        int br = Math.max(0, Math.min(bottomRightRadius, maxR));
+        int bl = Math.max(0, Math.min(bottomLeftRadius, maxR));
+        boolean hasGlow = glowWidth > 0f && ((glowColor >>> 24) & 0xFF) != 0;
+        if (!hasGlow && tl == 0 && tr == 0 && br == 0 && bl == 0) {
             ctx.fill(x, y, x + w, y + h, fillColor);
             return;
         }
-        RoundedPaneRenderer.submit(ctx, x, y, w, h, fillColor, r, glowWidth, 1.0f, glowColor);
+        RoundedPaneRenderer.submit(ctx, x, y, w, h, fillColor, tl, tr, br, bl, Math.max(0f, glowWidth), 1.0f, glowColor);
     }
 
     static void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
@@ -99,14 +140,18 @@ final class ScreenUiUtil {
         }
 
         int r = Math.min(radius, Math.min(w, h) / 2);
-        for (int i = 0; i < r; i++) {
-            int inset = cornerInset(i, r);
-            ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, color);
-            ctx.fill(x + inset, y + h - i - 1, x + w - inset, y + h - i, color);
-        }
-
+        ctx.fill(x + r, y, x + w - r, y + 1, color);
+        ctx.fill(x + r, y + h - 1, x + w - r, y + h, color);
         ctx.fill(x, y + r, x + 1, y + h - r, color);
         ctx.fill(x + w - 1, y + r, x + w, y + h - r, color);
+
+        for (int i = 0; i < r; i++) {
+            int inset = cornerInset(i, r);
+            ctx.fill(x + inset, y + i, x + inset + 1, y + i + 1, color);
+            ctx.fill(x + w - inset - 1, y + i, x + w - inset, y + i + 1, color);
+            ctx.fill(x + inset, y + h - i - 1, x + inset + 1, y + h - i, color);
+            ctx.fill(x + w - inset - 1, y + h - i - 1, x + w - inset, y + h - i, color);
+        }
     }
 
     static List<String> wrapTextSimple(java.util.function.ToIntFunction<String> widthOf, String text, int maxWidth) {

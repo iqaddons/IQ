@@ -40,7 +40,7 @@ public final class RoundedPaneRenderer {
     }
 
     public static void submit(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int color, float radius) {
-        submit(graphics, x, y, w, h, color, radius, 0f, 0f, color);
+        submit(graphics, x, y, w, h, color, radius, radius, radius, radius, 0f, 0f, color);
     }
 
     public static void submit(
@@ -54,7 +54,7 @@ public final class RoundedPaneRenderer {
             float glowWidth,
             float glowStrength
     ) {
-        submit(graphics, x, y, w, h, color, radius, glowWidth, glowStrength, color);
+        submit(graphics, x, y, w, h, color, radius, radius, radius, radius, glowWidth, glowStrength, color);
     }
 
     public static void submit(
@@ -69,11 +69,31 @@ public final class RoundedPaneRenderer {
             float glowStrength,
             int glowColor
     ) {
-        if (w <= 0 || h <= 0 || ((fillColor >>> 24) & 0xFF) == 0) {
+        submit(graphics, x, y, w, h, fillColor, radius, radius, radius, radius, glowWidth, glowStrength, glowColor);
+    }
+
+    public static void submit(
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            float topLeftRadius,
+            float topRightRadius,
+            float bottomRightRadius,
+            float bottomLeftRadius,
+            float glowWidth,
+            float glowStrength,
+            int glowColor
+    ) {
+        boolean hasFill = ((fillColor >>> 24) & 0xFF) != 0;
+        boolean hasGlow = glowWidth > 0f && glowStrength > 0f && ((glowColor >>> 24) & 0xFF) != 0;
+        if (w <= 0 || h <= 0 || (!hasFill && !hasGlow)) {
             return;
         }
 
-        int pad = Math.max(0, (int) Math.ceil(glowWidth));
+        int pad = hasGlow ? Math.max(0, (int) Math.ceil(glowWidth)) : 0;
         Matrix3x2f pose = new Matrix3x2f(graphics.pose());
         ScreenRectangle fillBounds = new ScreenRectangle(x, y, w, h).transformAxisAligned(pose);
         ScreenRectangle drawBounds = pad == 0
@@ -89,13 +109,17 @@ public final class RoundedPaneRenderer {
             return;
         }
 
-        float scaledRadius = Math.max(0f, radius) * scale;
+        float maxR = Math.min(w, h) * 0.5f;
+        float tl = Math.max(0f, Math.min(topLeftRadius, maxR)) * scale;
+        float tr = Math.max(0f, Math.min(topRightRadius, maxR)) * scale;
+        float br = Math.max(0f, Math.min(bottomRightRadius, maxR)) * scale;
+        float bl = Math.max(0f, Math.min(bottomLeftRadius, maxR)) * scale;
         float scaledGlowWidth = Math.max(0f, glowWidth) * scale;
         graphics.guiRenderState.addGuiElement(
-                scaledGlowWidth > 0f && glowStrength > 0f && ((glowColor >>> 24) & 0xFF) != 0
+                hasGlow
                         ? RoundedPaneRenderState.withGlow(
-                        drawBounds, fillBounds, clip, scaledRadius, fillColor, glowColor, scaledGlowWidth, glowStrength)
-                        : RoundedPaneRenderState.solid(fillBounds, clip, scaledRadius, fillColor)
+                        drawBounds, fillBounds, clip, tl, tr, br, bl, fillColor, glowColor, scaledGlowWidth, glowStrength)
+                        : RoundedPaneRenderState.solid(fillBounds, clip, tl, tr, br, bl, fillColor)
         );
     }
 

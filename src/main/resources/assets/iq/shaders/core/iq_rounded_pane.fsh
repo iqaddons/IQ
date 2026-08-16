@@ -35,7 +35,9 @@ void main() {
     float glowStrength = max(PaneOptions.w, 0.0);
     float glow = 0.0;
     if (glowWidth > 0.0 && glowStrength > 0.0) {
-        glow = (1.0 - smoothstep(0.0, glowWidth, max(d, 0.0))) * glowStrength;
+        float t = clamp(max(d, 0.0) / glowWidth, 0.0, 1.0);
+        float falloff = 1.0 - t;
+        glow = falloff * falloff * falloff * glowStrength;
     }
 
     float t = smoothstep(0.0, 1.0, clamp(local.x / max(1.0, size.x), 0.0, 1.0));

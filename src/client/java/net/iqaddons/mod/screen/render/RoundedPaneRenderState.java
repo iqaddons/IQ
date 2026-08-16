@@ -61,8 +61,22 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
             float radius,
             int color
     ) {
+        return solid(rectangle, clip, radius, radius, radius, radius, color);
+    }
+
+    public static RoundedPaneRenderState solid(
+            ScreenRectangle rectangle,
+            ScreenRectangle clip,
+            float topLeftRadius,
+            float topRightRadius,
+            float bottomRightRadius,
+            float bottomLeftRadius,
+            int color
+    ) {
         return new RoundedPaneRenderState(
-                rectangle, rectangle, clip, radius, radius, radius, radius, color, color, false, 0, 0f, 0f
+                rectangle, rectangle, clip,
+                topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius,
+                color, color, false, 0, 0f, 0f
         );
     }
 
@@ -76,8 +90,29 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
             float glowWidth,
             float glowStrength
     ) {
+        return withGlow(
+                drawBounds, fillBounds, clip,
+                radius, radius, radius, radius,
+                fillColor, glowColor, glowWidth, glowStrength
+        );
+    }
+
+    public static RoundedPaneRenderState withGlow(
+            ScreenRectangle drawBounds,
+            ScreenRectangle fillBounds,
+            ScreenRectangle clip,
+            float topLeftRadius,
+            float topRightRadius,
+            float bottomRightRadius,
+            float bottomLeftRadius,
+            int fillColor,
+            int glowColor,
+            float glowWidth,
+            float glowStrength
+    ) {
         return new RoundedPaneRenderState(
-                drawBounds, fillBounds, clip, radius, radius, radius, radius,
+                drawBounds, fillBounds, clip,
+                topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius,
                 fillColor, glowColor, false, 0, glowWidth, glowStrength
         );
     }
