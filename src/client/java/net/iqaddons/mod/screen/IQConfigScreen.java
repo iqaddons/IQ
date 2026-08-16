@@ -34,7 +34,7 @@ public class IQConfigScreen extends Screen {
     private static final Identifier PATREON_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/patreon.png");
     private static final Identifier SETTINGS_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/settings.png");
     private static final Identifier CLOSE_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/close.png");
-    private static final int LOGO_TEX_SIZE = 160;
+    private static final Identifier SEARCH_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/search.png");
     private static final int LOGO_SIZE = 24;
 
     private static final int BG_HEADER = 0xD50D0A16;
@@ -118,11 +118,8 @@ public class IQConfigScreen extends Screen {
     private static final int LINK_BTN_SIZE = 14;
     private static final int LINK_BTN_GAP = 4;
     private static final int LINK_ICON_SIZE = 10;
-    private static final int SOCIAL_ICON_TEX_SIZE = 64;
-    private static final int SETTINGS_ICON_TEX_W = 24;
-    private static final int SETTINGS_ICON_TEX_H = 24;
-    private static final int CLOSE_ICON_TEX_SIZE = 24;
     private static final int HEADER_ACTION_BTN_SIZE = 19;
+    private static final int HEADER_ACTION_ICON_SIZE = 12;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
 
@@ -389,9 +386,11 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, sbX, sbY, sbW, SEARCH_H,
                 searchFocused ? BORDER_BRIGHT : (sbHov ? BORDER_MID : BORDER_DIM));
 
-        int iconY = sbY + (SEARCH_H - IqFonts.lineHeight()) / 2;
-        IqFonts.draw(ctx, "⌕", sbX + 5, iconY, 0xA0E64BA8);
-        IqFonts.draw(ctx, "⌕", sbX + 4, iconY, 0xE8FFFFFF);
+        int searchIconSize = 10;
+        int searchIconX = sbX + 4;
+        int searchIconY = sbY + (SEARCH_H - searchIconSize) / 2;
+        IqIcons.draw(ctx, SEARCH_ICON_TEXTURE, searchIconX, searchIconY, searchIconSize, 0xA0E64BA8);
+        IqIcons.draw(ctx, SEARCH_ICON_TEXTURE, searchIconX - 1, searchIconY, searchIconSize, 0xE8FFFFFF);
 
         String q = searchQuery.toString();
         boolean blink = searchFocused && (cursorTick / 10) % 2 == 0;
@@ -403,18 +402,17 @@ public class IQConfigScreen extends Screen {
             display = "§f" + trimmed + (blink ? "§7|" : "");
         }
         IqFonts.draw(ctx, display,
-                sbX + 15, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MAIN);
+                sbX + 16, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MAIN);
 
         if (!q.isEmpty()) {
             boolean clrHov = isIn(frameMouseX, frameMouseY, sbX + sbW - 15, sbY, 12, SEARCH_H);
-            IqFonts.draw(ctx, clrHov ? "§c✕" : "§8✕",
+            IqFonts.draw(ctx, clrHov ? "§c×" : "§8×",
                     sbX + sbW - 14, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MUTED);
         }
 
         int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
         int settingsBtnX = getHeaderActionButtonsStartX(x, w);
         int closeBtnX = settingsBtnX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
-        int iconSize = 12;
 
         boolean settingsHov = editingColor == null
                 && isIn(frameMouseX, frameMouseY, settingsBtnX, headerBtnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
@@ -432,12 +430,12 @@ public class IQConfigScreen extends Screen {
         drawHeaderActionButton(ctx, settingsBtnX, headerBtnY, settingsAnim);
         drawHeaderActionButton(ctx, closeBtnX, headerBtnY, closeAnim);
 
-        int settingsIconX = settingsBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
-        int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
-        int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
+        int settingsIconX = settingsBtnX + (HEADER_ACTION_BTN_SIZE - HEADER_ACTION_ICON_SIZE) / 2;
+        int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - HEADER_ACTION_ICON_SIZE) / 2;
+        int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - HEADER_ACTION_ICON_SIZE) / 2;
 
-        IqIcons.draw(ctx, SETTINGS_ICON_TEXTURE, settingsIconX, iconY2, iconSize, SETTINGS_ICON_TEX_W, 0xFFFFFFFF);
-        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeIconX, iconY2, iconSize, CLOSE_ICON_TEX_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, SETTINGS_ICON_TEXTURE, settingsIconX, iconY2, HEADER_ACTION_ICON_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeIconX, iconY2, HEADER_ACTION_ICON_SIZE, 0xFFFFFFFF);
 
         if (settingsHov) pendingTooltip = "Open Configuration Hub";
         if (closeHov) pendingTooltip = "Close config";
@@ -455,7 +453,7 @@ public class IQConfigScreen extends Screen {
 
         int lx = gx + 10, ly = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2;
 
-        IqIcons.draw(ctx, LOGO_TEXTURE, lx, ly, LOGO_SIZE, LOGO_TEX_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, LOGO_TEXTURE, lx, ly, LOGO_SIZE, 0xFFFFFFFF);
 
         IqFonts.draw(ctx, "§d§lIQ",
                 lx + LOGO_SIZE + 8, ly + 4, T_ACCENT);
@@ -528,7 +526,7 @@ public class IQConfigScreen extends Screen {
 
             int ix = bx + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
             int iy = by + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
-            IqIcons.draw(ctx, link.iconTexture(), ix, iy, LINK_ICON_SIZE, SOCIAL_ICON_TEX_SIZE, 0xFFFFFFFF);
+            IqIcons.draw(ctx, link.iconTexture(), ix, iy, LINK_ICON_SIZE, 0xFFFFFFFF);
             if (hov) pendingTooltip = link.tooltip();
             bx += LINK_BTN_SIZE + LINK_BTN_GAP;
         }
@@ -540,8 +538,7 @@ public class IQConfigScreen extends Screen {
     }
 
     private int getExternalLinksY(int gy) {
-        int iqLabelY = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2 + 4;
-        return iqLabelY + 1;
+        return gy + (LOGO_ZONE_H - LINK_BTN_SIZE) / 2;
     }
 
     private void renderContent(GuiGraphicsExtractor ctx, int cx, int cy, int cw, int ch) {
@@ -1012,7 +1009,7 @@ public class IQConfigScreen extends Screen {
             renderCheckerboard(ctx, sx, sy, SWATCH_W, SWATCH_H);
             ctx.fill(sx, sy, sx + SWATCH_W, sy + SWATCH_H, argb);
             drawHollowRect(ctx, sx - 1, sy - 1, SWATCH_W + 2, SWATCH_H + 2, hov ? themeAccentColor() : BORDER_MID);
-            if (hov) IqFonts.drawCentered(ctx, "§f✎", sx + SWATCH_W / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), 0xFFFFFFFF);
+            if (hov) IqFonts.drawCentered(ctx, "§f*", sx + SWATCH_W / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), 0xFFFFFFFF);
         } catch (Exception ex) {
             log.warn("Swatch: {}", e.getLabel(), ex);
         }
@@ -1075,7 +1072,7 @@ public class IQConfigScreen extends Screen {
         drawGlowBorder(ctx, px, py, ceW, ceH);
 
         IqFonts.drawCentered(ctx, "Edit Color", px + ceW / 2, py + 9, 0, IqFonts.lineHeight(), themeHubAccentTextColor());
-        IqFonts.draw(ctx, "✕", layout.closeX(), py + 9, themeTextMuted());
+        IqFonts.draw(ctx, "×", layout.closeX(), py + 9, themeTextMuted());
 
         try {
             int argb = (int) editingColor.getField().get(null);
@@ -1573,12 +1570,14 @@ public class IQConfigScreen extends Screen {
         int logoSubtitleW = IqFonts.widthPx("Config");
         int footerW = IqFonts.widthPx("Modrinth Version v1.0.3");
 
+        int linksW = EXTERNAL_LINKS.length * LINK_BTN_SIZE + (EXTERNAL_LINKS.length - 1) * LINK_BTN_GAP;
+        int logoRowW = 10 + LOGO_SIZE + 8 + Math.max(logoTitleW, logoSubtitleW) + 8 + linksW + 6;
+
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
                 Math.max(
                         16 + categoryTextW + 16,
-                        Math.max(10 + LOGO_SIZE + 8 + Math.max(logoTitleW, logoSubtitleW) + 12,
-                                10 + footerW + 12)
+                        Math.max(logoRowW, 10 + footerW + 12)
                 )
         );
 
@@ -1939,7 +1938,7 @@ public class IQConfigScreen extends Screen {
 
     private String sectionHint(ConfigEntryModel entry) {
         int count = entry.getChildren() != null ? countControls(entry.getChildren()) : 0;
-        return count + (entry.isExpanded() ? " ▾" : " ▸");
+        return count + (entry.isExpanded() ? " v" : " >");
     }
 
     private boolean isBuildOverlayStyleEntry(ConfigEntryModel e) {

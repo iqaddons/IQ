@@ -34,7 +34,6 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private static final Identifier BACK_ICON_TEXTURE  = Identifier.fromNamespaceAndPath("iq", "textures/social/back.png");
     private static final Identifier CLOSE_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/close.png");
-    private static final int ICON_TEX_SIZE = 24;
     private static final int ICON_RENDER_SIZE = 12;
 
     private static final int BG_OUTER = 0x7A000000;
@@ -277,8 +276,8 @@ public class IQGlobalConfigurationScreen extends Screen {
         int iconOffX = (HEADER_ACTION_BTN_SIZE - ICON_RENDER_SIZE) / 2;
         int iconOffY = (HEADER_ACTION_BTN_SIZE - ICON_RENDER_SIZE) / 2;
 
-        IqIcons.draw(ctx, BACK_ICON_TEXTURE, backX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, ICON_TEX_SIZE, 0xFFFFFFFF);
-        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, ICON_TEX_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, BACK_ICON_TEXTURE, backX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, 0xFFFFFFFF);
 
         if (backHover)  pendingTooltip = "Back to main configuration";
         if (closeHover) pendingTooltip = "Close config";
@@ -554,7 +553,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         int xOff = (int) (prog * slideDir * (bw * 0.55f));
 
         ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-        IqFonts.drawCentered(ctx, value + " ▸", bx + bw / 2 - xOff, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
+        IqFonts.drawCentered(ctx, value + " >", bx + bw / 2 - xOff, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
         ctx.disableScissor();
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, () -> {
