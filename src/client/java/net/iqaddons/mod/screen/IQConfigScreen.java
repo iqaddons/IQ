@@ -76,8 +76,6 @@ public class IQConfigScreen extends Screen {
     private static final int SEP_TEXT = 0xFF9C8CAE;
     private static final float SEP_TEXT_SCALE = 0.70f;
     private static final int TOGGLE_HANDLE = 0xFFFAF1FB;
-    private static final int TOGGLE_OUTLINE_IDLE = 0x664C335A;
-    private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
     private static final int GROUP_SEP_LINE = 0x26FFFFFF;
 
     private static final float GUI_W_RATIO = 0.49f;
@@ -102,8 +100,11 @@ public class IQConfigScreen extends Screen {
     private static final int SEP_TOP_GAP = 5;
     private static final int SEC_H = 32;
 
-    private static final int TOGGLE_W = 32;
-    private static final int TOGGLE_H = 16;
+    private static final int TOGGLE_W = 26;
+    private static final int TOGGLE_H = 13;
+    private static final float TOGGLE_SPEED = 14.0f;
+    private static final float TOGGLE_GLOW = 2.75f;
+    private static final int TOGGLE_GLOW_ALPHA = 0x34;
     private static final int SLIDER_W = 100;
     private static final int CONTROL_H = 15;
     private static final int CONTROL_RADIUS = 0;
@@ -526,7 +527,7 @@ public class IQConfigScreen extends Screen {
         IqFonts.draw(ctx, "§d§lIQ",
                 lx + LOGO_SIZE + 8, ly + 4, T_ACCENT);
         IqFonts.draw(ctx, "§8Config",
-                lx + LOGO_SIZE + 8, ly + 4 + IqFonts.lineHeight() + 3, 0x44FFFFFF);
+                lx + LOGO_SIZE + 8, ly + 4 + IqFonts.lineHeight() - 1, 0x44FFFFFF);
 
         renderExternalLinkButtons(ctx, gx, gy, sidebarW);
 
@@ -882,6 +883,11 @@ public class IQConfigScreen extends Screen {
         return Math.abs(target - next) < 0.001f ? target : next;
     }
 
+    private float smoothstep01(float t) {
+        float x = Math.max(0f, Math.min(1f, t));
+        return x * x * (3f - 2f * x);
+    }
+
     private int measureNestedRows(List<ConfigEntryModel> entries) {
         int used = 0;
         for (ConfigEntryModel entry : entries) {
@@ -1140,25 +1146,30 @@ public class IQConfigScreen extends Screen {
         try {
             boolean val = (boolean) e.getField().get(null);
             float tTarget = val ? 1f : 0f;
-            String tKey   = entryKey(e);
-            float tAnim   = toggleAnims.getOrDefault(tKey, tTarget);
-            tAnim += (tTarget - tAnim) * 0.22f;
-            if (Math.abs(tAnim - tTarget) < 0.004f) tAnim = tTarget;
+            String tKey = entryKey(e);
+            float tAnim = toggleAnims.getOrDefault(tKey, tTarget);
+            tAnim = approachAnim(tAnim, tTarget, TOGGLE_SPEED, sectionAnimFrameSteps);
             toggleAnims.put(tKey, tAnim);
 
-            int x  = rx - TOGGLE_W, y = cy - TOGGLE_H / 2;
-            int bg = lerpArgb(themeToggleOffColor(), themeToggleOnColor(), tAnim);
+            float visual = smoothstep01(tAnim);
+            int x = rx - TOGGLE_W;
+            int y = cy - TOGGLE_H / 2;
+            int bg = lerpArgb(themeToggleOffColor(), themeToggleOnColor(), visual);
 
-            drawRoundedRect(ctx, x, y, TOGGLE_W, TOGGLE_H, bg, TOGGLE_H / 2);
+            int glowA = Math.round(TOGGLE_GLOW_ALPHA * visual);
+            if (glowA > 0) {
+                ScreenUiUtil.drawPillGlow(ctx, x, y, TOGGLE_W, TOGGLE_H, bg,
+                        withAlpha(themeAccentColor(), glowA), TOGGLE_GLOW);
+            } else {
+                ScreenUiUtil.drawPill(ctx, x, y, TOGGLE_W, TOGGLE_H, bg);
+            }
 
-            int handleSize = TOGGLE_H - 4;
-            int hxOff = x + 2;
-            int hxOn  = x + TOGGLE_W - handleSize - 2;
-            int hx    = hxOff + (int) (tAnim * (hxOn - hxOff));
-            drawRoundedRect(ctx, hx, y + 2, handleSize, handleSize, themeToggleHandle(tAnim), handleSize / 2);
-
-            int outline = hov ? TOGGLE_OUTLINE_HOV : TOGGLE_OUTLINE_IDLE;
-            drawRoundedHollowRect(ctx, x, y, TOGGLE_W, TOGGLE_H, outline, TOGGLE_H / 2);
+            int handleSize = Math.max(1, TOGGLE_H - 4);
+            int inset = Math.max(1, (TOGGLE_H - handleSize) / 2);
+            float hxOff = x + inset;
+            float hxOn = x + TOGGLE_W - handleSize - inset;
+            int hx = Math.round(hxOff + visual * (hxOn - hxOff));
+            ScreenUiUtil.drawPill(ctx, hx, y + inset, handleSize, handleSize, themeToggleHandle(visual));
         } catch (Exception ex) {
             log.warn("Toggle: {}", e.getLabel(), ex);
         }

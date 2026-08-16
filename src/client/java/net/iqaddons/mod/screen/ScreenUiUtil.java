@@ -51,6 +51,38 @@ final class ScreenUiUtil {
         ctx.fill(x + w - 1, y, x + w, y + h, color);
     }
 
+    static void drawPill(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
+        if (h <= 0 || w <= 0) {
+            return;
+        }
+        float radius = Math.min(w, h) * 0.5f;
+        RoundedPaneRenderer.submit(ctx, x, y, w, h, color, radius, radius, radius, radius, 0f, 0f, color);
+    }
+
+    static void drawPillGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            float glowWidth
+    ) {
+        if (h <= 0 || w <= 0) {
+            return;
+        }
+        float radius = Math.min(w, h) * 0.5f;
+        boolean hasGlow = glowWidth > 0f && ((glowColor >>> 24) & 0xFF) != 0;
+        RoundedPaneRenderer.submit(
+                ctx, x, y, w, h, fillColor,
+                radius, radius, radius, radius,
+                hasGlow ? Math.max(0f, glowWidth) : 0f,
+                hasGlow ? 1.0f : 0f,
+                glowColor
+        );
+    }
+
     static void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         drawRoundedRect(ctx, x, y, w, h, color, radius, radius, radius, radius);
     }

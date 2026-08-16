@@ -56,8 +56,6 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int ACCENT = 0xFFD650AB;
     private static final int TOGGLE_ON = 0xFFEC4BAF;
     private static final int TOGGLE_OFF = 0xC2261B2D;
-    private static final int TOGGLE_OUTLINE_IDLE = 0x664C335A;
-    private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
 
     private static final float GUI_W_RATIO = 0.49f;
     private static final float GUI_H_RATIO = 0.47f;
@@ -116,6 +114,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     private boolean closeHandled = false;
     private @Nullable Screen closeTarget;
     private long lastTransitionTimeMs = -1L;
+    private long animLastNanos = 0L;
+    private float animFrameSteps = 1f;
 
     private int frameMouseX = 0;
     private int frameMouseY = 0;
@@ -205,6 +205,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     @Override
     public void extractRenderState(@NotNull GuiGraphicsExtractor ctx, int mouseX, int mouseY, float a) {
         updateScreenTransition();
+        beginAnimFrame();
         frameMouseX = mouseX;
         frameMouseY = mouseY;
         pendingTooltip = null;
@@ -505,25 +506,31 @@ public class IQGlobalConfigurationScreen extends Screen {
         IqFonts.draw(ctx, label, x + 8,
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
 
-        int tx = x + w - 38;
-        int ty = y + (ROW_H - 14) / 2;
-        int tw = 28;
-        int th = 14;
+        int tx = x + w - 32;
+        int ty = y + (ROW_H - 11) / 2;
+        int tw = 22;
+        int th = 11;
 
         String tKey = "tog#" + selectedSection.name() + "#" + label;
         float tTarget = value ? 1f : 0f;
         float tAnim = toggleAnims.getOrDefault(tKey, tTarget);
-        tAnim += (tTarget - tAnim) * animRate(0.22f);
-        if (Math.abs(tAnim - tTarget) < 0.004f) tAnim = tTarget;
+        tAnim = approachAnim(tAnim, tTarget, 14.0f);
         toggleAnims.put(tKey, tAnim);
 
-        drawRoundedRect(ctx, tx, ty, tw, th, lerpArgb(themeToggleOff(), themeToggleOn(), tAnim), th / 2);
-        int outline = hover ? TOGGLE_OUTLINE_HOV : TOGGLE_OUTLINE_IDLE;
-        drawRoundedHollowRect(ctx, tx, ty, tw, th, outline, th / 2);
-        int knobOffX = tx + 1;
-        int knobOnX = tx + tw - th + 1;
-        int knobX = knobOffX + (int) ((knobOnX - knobOffX) * tAnim);
-        drawRoundedRect(ctx, knobX, ty + 1, th - 2, th - 2, themeToggleHandle(tAnim), (th - 2) / 2);
+        float visual = smoothstep01(tAnim);
+        int bg = lerpArgb(themeToggleOff(), themeToggleOn(), visual);
+        int glowA = Math.round(0x34 * visual);
+        if (glowA > 0) {
+            ScreenUiUtil.drawPillGlow(ctx, tx, ty, tw, th, bg, withAlpha(themeAccentColor(), glowA), 2.75f);
+        } else {
+            ScreenUiUtil.drawPill(ctx, tx, ty, tw, th, bg);
+        }
+        int knobSize = Math.max(1, th - 4);
+        int inset = Math.max(1, (th - knobSize) / 2);
+        float knobOffX = tx + inset;
+        float knobOnX = tx + tw - knobSize - inset;
+        int knobX = Math.round(knobOffX + (knobOnX - knobOffX) * visual);
+        ScreenUiUtil.drawPill(ctx, knobX, ty + inset, knobSize, knobSize, themeToggleHandle(visual));
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, action, tooltip));
         if (hover) pendingTooltip = tooltip;
@@ -1243,6 +1250,29 @@ public class IQGlobalConfigurationScreen extends Screen {
     private float animRate(float base) {
         if (!animationsEnabled) return 1f;
         return base * (0.55f + (float) animationSpeed * 1.35f);
+    }
+
+    private void beginAnimFrame() {
+        long now = System.nanoTime();
+        if (animLastNanos == 0L) {
+            animFrameSteps = 1f;
+        } else {
+            float steps = (now - animLastNanos) / 1_000_000_000f * 60f;
+            animFrameSteps = Math.max(0.06f, Math.min(3f, steps));
+        }
+        animLastNanos = now;
+    }
+
+    private float approachAnim(float current, float target, float speed) {
+        if (!animationsEnabled) return target;
+        float amount = Math.max(0f, Math.min(1f, speed / 60f * animFrameSteps));
+        float next = current + (target - current) * amount;
+        return Math.abs(target - next) < 0.001f ? target : next;
+    }
+
+    private float smoothstep01(float t) {
+        float x = Math.max(0f, Math.min(1f, t));
+        return x * x * (3f - 2f * x);
     }
 
     private int themeToggleOn() {
