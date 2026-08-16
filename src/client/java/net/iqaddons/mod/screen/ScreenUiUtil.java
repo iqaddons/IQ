@@ -1,5 +1,6 @@
 package net.iqaddons.mod.screen;
 
+import net.iqaddons.mod.screen.render.RoundedPaneRenderState;
 import net.iqaddons.mod.screen.render.RoundedPaneRenderer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
@@ -51,12 +52,46 @@ final class ScreenUiUtil {
         ctx.fill(x + w - 1, y, x + w, y + h, color);
     }
 
+    static final int SLIDER_TRACK_H = 6;
+    static final int SLIDER_KNOB = 10;
+
     static void drawPill(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
         if (h <= 0 || w <= 0) {
             return;
         }
         float radius = Math.min(w, h) * 0.5f;
         RoundedPaneRenderer.submit(ctx, x, y, w, h, color, radius, radius, radius, radius, 0f, 0f, color);
+    }
+
+    /** Rounded track + circular knob. {@code t} is 0..1. Track top-left is {@code (x, y)}. */
+    static void drawSlider(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            float t,
+            int trackColor,
+            int fillColor,
+            int knobColor
+    ) {
+        if (w <= 0) {
+            return;
+        }
+        float clamped = (float) clamp01(t);
+        int trackH = SLIDER_TRACK_H;
+        int knob = SLIDER_KNOB;
+        int radius = trackH / 2;
+
+        drawRoundedRect(ctx, x, y, w, trackH, trackColor, radius);
+        int fillW = Math.round(w * clamped);
+        if (fillW > 0) {
+            int fillRadius = Math.min(radius, Math.max(1, fillW / 2));
+            drawRoundedRect(ctx, x, y, fillW, trackH, fillColor, fillRadius);
+        }
+
+        int kx = Math.round(x + clamped * w - knob * 0.5f);
+        int ky = y + trackH / 2 - knob / 2;
+        drawPill(ctx, kx, ky, knob, knob, knobColor);
     }
 
     static void drawPillGlow(
@@ -162,6 +197,41 @@ final class ScreenUiUtil {
         RoundedPaneRenderer.submit(ctx, x, y, w, h, fillColor, tl, tr, br, bl, Math.max(0f, glowWidth), 1.0f, glowColor);
     }
 
+    static void drawRoundedFillMode(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int colorA,
+            int colorB,
+            int radius,
+            int fillMode
+    ) {
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        float r = Math.max(0, radius);
+        RoundedPaneRenderer.submitFillMode(ctx, x, y, w, h, colorA, colorB, r, r, r, r, fillMode);
+    }
+
+    static void drawRoundedSv(GuiGraphicsExtractor ctx, int x, int y, int size, float hue, int radius) {
+        int huePacked = (Math.round((float) clamp01(hue) * 255f) << 16) | 0xFF000000;
+        drawRoundedFillMode(ctx, x, y, size, size, 0xFFFFFFFF, huePacked, radius, RoundedPaneRenderState.FILL_SV);
+    }
+
+    static void drawRoundedHueTrack(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int radius) {
+        drawRoundedFillMode(ctx, x, y, w, h, 0xFFFFFFFF, 0xFFFFFFFF, radius, RoundedPaneRenderState.FILL_HUE);
+    }
+
+    static void drawRoundedAlphaTrack(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int opaqueColor, int radius) {
+        drawRoundedFillMode(ctx, x, y, w, h, opaqueColor | 0xFF000000, 0, radius, RoundedPaneRenderState.FILL_ALPHA);
+    }
+
+    static void drawRoundedCheckerColor(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int argb, int radius) {
+        drawRoundedFillMode(ctx, x, y, w, h, argb, 0, radius, RoundedPaneRenderState.FILL_CHECKER_COLOR);
+    }
+
     static void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         if (w <= 1 || h <= 1) {
             return;
@@ -183,6 +253,27 @@ final class ScreenUiUtil {
             ctx.fill(x + w - inset - 1, y + i, x + w - inset, y + i + 1, color);
             ctx.fill(x + inset, y + h - i - 1, x + inset + 1, y + h - i, color);
             ctx.fill(x + w - inset - 1, y + h - i - 1, x + w - inset, y + h - i, color);
+        }
+    }
+
+    /** Covers pixels outside a rounded rect so gradient/checker fills appear rounded. */
+    static void maskOutsideRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int radius, int color) {
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        int r = Math.min(Math.max(0, radius), Math.min(w, h) / 2);
+        if (r <= 0) {
+            return;
+        }
+        for (int i = 0; i < r; i++) {
+            int inset = cornerInset(i, r);
+            if (inset <= 0) {
+                continue;
+            }
+            ctx.fill(x, y + i, x + inset, y + i + 1, color);
+            ctx.fill(x + w - inset, y + i, x + w, y + i + 1, color);
+            ctx.fill(x, y + h - i - 1, x + inset, y + h - i, color);
+            ctx.fill(x + w - inset, y + h - i - 1, x + w, y + h - i, color);
         }
     }
 

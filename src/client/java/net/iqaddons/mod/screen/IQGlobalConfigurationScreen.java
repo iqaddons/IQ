@@ -84,6 +84,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final float CONTROL_GLOW = 2.5f;
     private static final int CONTROL_GLOW_ALPHA = 0x28;
     private static final int CONTROL_GLOW_ALPHA_HOV = 0x44;
+    private static final float SLIDER_SPEED = 9.0f;
+    private static final float SLIDER_SPEED_DRAG = 13.0f;
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
@@ -115,6 +117,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     private final Map<String, Float> toggleAnims = new java.util.HashMap<>();
     private final Map<String, Float> selectSlideAnims = new java.util.HashMap<>();
     private final Map<String, Integer> selectSlideDirs = new java.util.HashMap<>();
+    private final Map<String, Float> sliderAnims = new java.util.HashMap<>();
+    private final Map<String, Float> sliderTargets = new java.util.HashMap<>();
 
     private @Nullable SliderHit draggingSlider;
     private double contentScroll = 0;
@@ -407,14 +411,18 @@ public class IQGlobalConfigurationScreen extends Screen {
         contentScroll = clamp(contentScroll, 0, maxScroll);
 
         if (maxScroll > 0) {
-            int trackX = x + w - 6;
+            int trackW = 4;
+            int trackX = x + w - trackW - 4;
             int trackTop = y + 10;
-            int trackH = h - 14;
+            int trackH = Math.max(1, h - 20);
             double ratio = (double) trackH / (trackH + maxScroll);
             int thumbH = Math.max(26, (int) (trackH * ratio));
+            thumbH = Math.min(thumbH, trackH);
             int thumbY = trackTop + (int) ((contentScroll / maxScroll) * (trackH - thumbH));
-            ctx.fill(trackX, trackTop, trackX + 2, trackTop + trackH, 0x24FFFFFF);
-            ctx.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, accent);
+            ctx.enableScissor(trackX - 1, trackTop - 1, trackX + trackW + 1, trackTop + trackH + 1);
+            ScreenUiUtil.drawPill(ctx, trackX, trackTop, trackW, trackH, 0x28FFFFFF);
+            ScreenUiUtil.drawPill(ctx, trackX, thumbY, trackW, thumbH, accent);
+            ctx.disableScissor();
         }
 
         if (contentFadeAnim < 1f) {
@@ -431,13 +439,13 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderCycleRow(ctx, x, y, w, "GUI Theme", "Theme profile for this interface.", visibleThemeLabel(),
                 this::cycleThemeForward);
         y = renderSliderRow(ctx, x, y, w, "GUI Opacity", "Overall transparency of the panel.", 0.35, 1.0,
-                () -> guiOpacity, v -> guiOpacity = v, valuePercent(guiOpacity));
+                () -> guiOpacity, v -> guiOpacity = v, this::valuePercent);
         y = renderSliderRow(ctx, x, y, w, "UI Scale", "Scale multiplier for this panel.", 0.75, 1.35,
-                () -> uiScale, v -> uiScale = v, String.format(Locale.ROOT, "%.2fx", uiScale));
+                () -> uiScale, v -> uiScale = v, v -> String.format(Locale.ROOT, "%.2fx", v));
         y = renderToggleRow(ctx, x, y, w, "GUI Animations", "Enable transitions and micro-interactions.",
                 animationsEnabled, () -> animationsEnabled = !animationsEnabled);
         y = renderSliderRow(ctx, x, y, w, "Animation Speed", "Speed for hover/fade transitions.", 0.2, 1.0,
-                () -> animationSpeed, v -> animationSpeed = v, valuePercent(animationSpeed));
+                () -> animationSpeed, v -> animationSpeed = v, this::valuePercent);
         y = renderToggleRow(ctx, x, y, w, "Outline / Shadow", "Adds subtle border and depth around controls.",
                 outlineShadow, () -> outlineShadow = !outlineShadow);
         y = renderToggleRow(ctx, x, y, w, "Persist UI Session", "Remember category, scroll and search when reopening config.",
@@ -469,7 +477,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderToggleRow(ctx, x, y, w, "Global HUD Toggle", "Master on/off for all HUD overlays.",
                 globalHudToggle, () -> globalHudToggle = !globalHudToggle);
         y = renderSliderRow(ctx, x, y, w, "Overlay Opacity", "Opacity applied to in-world overlays.", 0.2, 1.0,
-                () -> overlayOpacity, v -> overlayOpacity = v, valuePercent(overlayOpacity));
+                () -> overlayOpacity, v -> overlayOpacity = v, this::valuePercent);
         y = renderToggleRow(ctx, x, y, w, "Snap to Grid", "Align HUD elements to a placement grid.",
                 snapToGrid, () -> snapToGrid = !snapToGrid);
         y = renderToggleRow(ctx, x, y, w, "Show Bounding Boxes", "Displays HUD element bounds while editing.",
@@ -483,7 +491,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderCycleRow(ctx, x, y, w, "GUI Font", "Selects a GUI font preset.", FONTS[fontIndex],
                 () -> fontIndex = (fontIndex + 1) % FONTS.length);
         y = renderSliderRow(ctx, x, y, w, "Element Spacing", "Global padding/margin density.", 0.0, 1.0,
-                () -> layoutSpacing, v -> layoutSpacing = v, valuePercent(layoutSpacing));
+                () -> layoutSpacing, v -> layoutSpacing = v, this::valuePercent);
         y = renderCycleRow(ctx, x, y, w, "Layout Density", "Compactness of rows and controls.", DENSITY[densityIndex],
                 () -> densityIndex = (densityIndex + 1) % DENSITY.length);
         y = renderCycleRow(ctx, x, y, w, "Toggle Style", "Visual style for switches and checkers.", TOGGLE_STYLES[toggleStyleIndex],
@@ -585,7 +593,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         int xOff = (int) (prog * slideDir * (bw * 0.55f));
 
         ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-        IqFonts.drawCentered(ctx, value + " >", bx + bw / 2 - xOff, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
+        IqFonts.drawCentered(ctx, value, bx + bw / 2 - xOff, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
         ctx.disableScissor();
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, () -> {
@@ -599,7 +607,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private int renderSliderRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
                                 double min, double max, DoubleSupplier getter, DoubleConsumer setter,
-                                String valueText) {
+                                java.util.function.DoubleFunction<String> valueFormat) {
         boolean hover = isIn(frameMouseX, frameMouseY, x, y, w, ROW_H);
         String hKey = "row#sld#" + selectedSection.name() + "#" + label;
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
@@ -613,22 +621,32 @@ public class IQGlobalConfigurationScreen extends Screen {
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
 
         int sx = x + w - 148;
-        int sy = y + ROW_H / 2 - 3;
+        int sy = y + ROW_H / 2 - ScreenUiUtil.SLIDER_TRACK_H / 2;
         int sw = 96;
 
+        String sKey = "sld#" + selectedSection.name() + "#" + label;
         double value = clamp(getter.getAsDouble(), min, max);
-        double t = (value - min) / (max - min);
+        float actualT = (float) ((value - min) / (max - min));
+        boolean drag = draggingSlider != null && sKey.equals(draggingSlider.key());
+        float target = drag
+                ? sliderTargets.getOrDefault(sKey, actualT)
+                : actualT;
+        if (!drag) sliderTargets.put(sKey, target);
+        float anim = sliderAnims.getOrDefault(sKey, target);
+        anim = approachAnim(anim, target, drag ? SLIDER_SPEED_DRAG : SLIDER_SPEED);
+        sliderAnims.put(sKey, anim);
+        if (drag) {
+            setter.accept(min + clamp(anim, 0.0, 1.0) * (max - min));
+        }
 
-        drawRoundedRect(ctx, sx, sy, sw, 6, 0xA0352749, 3);
-        drawRoundedRect(ctx, sx, sy, (int) (sw * t), 6, accent, 3);
-        int hx = sx + (int) (sw * t) - 3;
-        drawRoundedRect(ctx, hx, sy - 3, 6, 12, 0xFFFFFFFF, 3);
+        double displayV = min + anim * (max - min);
+        ScreenUiUtil.drawSlider(ctx, sx, sy, sw, anim,
+                withAlpha(accent, 0x48), accent, 0xFFFBE9F6);
 
-        String vt = "§8" + valueText;
-        IqFonts.draw(ctx, vt, sx + sw + 8,
+        IqFonts.draw(ctx, "§8" + valueFormat.apply(displayV), sx + sw + 8,
                 y + (ROW_H - IqFonts.lineHeight()) / 2, tMuted());
 
-        sliderHits.add(new SliderHit(sx, sy - 5, sw, 16, min, max, getter, setter, tooltip));
+        sliderHits.add(new SliderHit(sKey, sx, sy - 5, sw, 16, min, max, getter, setter, tooltip));
         if (hover) pendingTooltip = tooltip;
         return y + ROW_H + ROW_GAP;
     }
@@ -680,7 +698,8 @@ public class IQGlobalConfigurationScreen extends Screen {
             for (SliderHit sliderHit : sliderHits) {
                 if (sliderHit.contains(mx, my)) {
                     draggingSlider = sliderHit;
-                    sliderHit.update(mx);
+                    float t = (float) clamp((mx - sliderHit.x()) / (double) sliderHit.w(), 0.0, 1.0);
+                    sliderTargets.put(sliderHit.key(), t);
                     return true;
                 }
             }
@@ -705,8 +724,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (closingScreen) return true;
         if (draggingSlider != null) {
-            draggingSlider.update((int) click.x());
-            saveState();
+            float t = (float) clamp((click.x() - draggingSlider.x()) / (double) draggingSlider.w(), 0.0, 1.0);
+            sliderTargets.put(draggingSlider.key(), t);
             return true;
         }
         return super.mouseDragged(click, offsetX, offsetY);
@@ -715,6 +734,15 @@ public class IQGlobalConfigurationScreen extends Screen {
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
         if (closingScreen) return true;
+        if (draggingSlider != null) {
+            Float t = sliderTargets.get(draggingSlider.key());
+            if (t != null) {
+                double val = draggingSlider.min() + clamp(t, 0f, 1f) * (draggingSlider.max() - draggingSlider.min());
+                draggingSlider.setter().accept(val);
+                sliderAnims.put(draggingSlider.key(), t);
+                saveState();
+            }
+        }
         draggingSlider = null;
         return super.mouseReleased(click);
     }
@@ -1639,15 +1667,10 @@ public class IQGlobalConfigurationScreen extends Screen {
         }
     }
 
-    private record SliderHit(int x, int y, int w, int h, double min, double max,
+    private record SliderHit(String key, int x, int y, int w, int h, double min, double max,
                              DoubleSupplier getter, DoubleConsumer setter, String tooltip) {
         boolean contains(int mx, int my) {
             return mx >= x && mx < x + w && my >= y && my < y + h;
-        }
-
-        void update(int mx) {
-            double t = clamp((mx - x) / (double) w, 0.0, 1.0);
-            setter.accept(min + t * (max - min));
         }
     }
 

@@ -11,6 +11,13 @@ import org.jetbrains.annotations.Nullable;
 
 public final class RoundedPaneRenderState implements GuiElementRenderState {
 
+    public static final int FILL_SOLID = 0;
+    public static final int FILL_HGRADIENT = 1;
+    public static final int FILL_SV = 2;
+    public static final int FILL_HUE = 3;
+    public static final int FILL_ALPHA = 4;
+    public static final int FILL_CHECKER_COLOR = 5;
+
     private final ScreenRectangle drawBounds;
     private final ScreenRectangle fillBounds;
     private final ScreenRectangle clip;
@@ -20,7 +27,7 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
     private final float bottomLeftRadius;
     private final int colorA;
     private final int colorB;
-    private final boolean gradient;
+    private final int fillMode;
     private final int softFadeShape;
     private final float glowWidth;
     private final float glowStrength;
@@ -35,7 +42,7 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
             float bottomLeftRadius,
             int colorA,
             int colorB,
-            boolean gradient,
+            int fillMode,
             int softFadeShape,
             float glowWidth,
             float glowStrength
@@ -49,7 +56,7 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
         this.bottomLeftRadius = bottomLeftRadius;
         this.colorA = colorA;
         this.colorB = colorB;
-        this.gradient = gradient;
+        this.fillMode = fillMode;
         this.softFadeShape = softFadeShape;
         this.glowWidth = glowWidth;
         this.glowStrength = glowStrength;
@@ -76,7 +83,25 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
         return new RoundedPaneRenderState(
                 rectangle, rectangle, clip,
                 topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius,
-                color, color, false, 0, 0f, 0f
+                color, color, FILL_SOLID, 0, 0f, 0f
+        );
+    }
+
+    public static RoundedPaneRenderState styled(
+            ScreenRectangle rectangle,
+            ScreenRectangle clip,
+            float topLeftRadius,
+            float topRightRadius,
+            float bottomRightRadius,
+            float bottomLeftRadius,
+            int colorA,
+            int colorB,
+            int fillMode
+    ) {
+        return new RoundedPaneRenderState(
+                rectangle, rectangle, clip,
+                topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius,
+                colorA, colorB, fillMode, 0, 0f, 0f
         );
     }
 
@@ -113,7 +138,7 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
         return new RoundedPaneRenderState(
                 drawBounds, fillBounds, clip,
                 topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius,
-                fillColor, glowColor, false, 0, glowWidth, glowStrength
+                fillColor, glowColor, FILL_SOLID, 0, glowWidth, glowStrength
         );
     }
 
@@ -174,7 +199,11 @@ public final class RoundedPaneRenderState implements GuiElementRenderState {
     }
 
     public boolean gradient() {
-        return gradient;
+        return fillMode == FILL_HGRADIENT;
+    }
+
+    public int fillMode() {
+        return fillMode;
     }
 
     public int softFadeShape() {

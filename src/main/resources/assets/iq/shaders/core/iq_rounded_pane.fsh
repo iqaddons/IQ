@@ -23,6 +23,18 @@ float roundedRectSdfPerCorner(vec2 local, vec2 size, vec4 radii) {
     return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
 }
 
+vec3 hsv2rgb(vec3 c) {
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+vec3 checkerColor(vec2 local) {
+    float cell = 4.0;
+    float parity = mod(floor(local.x / cell) + floor(local.y / cell), 2.0);
+    return mix(vec3(0.725, 0.690, 0.776), vec3(0.965, 0.941, 0.980), parity);
+}
+
 void main() {
     vec2 origin = PaneBounds.xy;
     vec2 size = PaneBounds.zw;
@@ -35,13 +47,40 @@ void main() {
     float glowStrength = max(PaneOptions.w, 0.0);
     float glow = 0.0;
     if (glowWidth > 0.0 && glowStrength > 0.0) {
-        float t = clamp(max(d, 0.0) / glowWidth, 0.0, 1.0);
-        float falloff = 1.0 - t;
+        float gt = clamp(max(d, 0.0) / glowWidth, 0.0, 1.0);
+        float falloff = 1.0 - gt;
         glow = falloff * falloff * falloff * glowStrength;
     }
 
-    float t = smoothstep(0.0, 1.0, clamp(local.x / max(1.0, size.x), 0.0, 1.0));
-    vec4 fillColor = PaneOptions.x > 0.5 ? mix(PaneColorB, PaneColorA, t) : PaneColorA;
+    float mode = PaneOptions.x;
+    vec2 uv = local / max(size, vec2(1.0));
+    uv = clamp(uv, 0.0, 1.0);
+
+    vec4 fillColor = PaneColorA;
+    if (mode > 0.5 && mode < 1.5) {
+        // Horizontal gradient
+        fillColor = mix(PaneColorB, PaneColorA, smoothstep(0.0, 1.0, uv.x));
+    } else if (mode > 1.5 && mode < 2.5) {
+        // SV square (hue in PaneColorB.r)
+        float hue = clamp(PaneColorB.r, 0.0, 1.0);
+        float sat = uv.x;
+        float val = uv.y;
+        fillColor = vec4(hsv2rgb(vec3(hue, sat, val)), 1.0);
+    } else if (mode > 2.5 && mode < 3.5) {
+        // Hue spectrum
+        fillColor = vec4(hsv2rgb(vec3(uv.x, 1.0, 1.0)), 1.0);
+    } else if (mode > 3.5 && mode < 4.5) {
+        // Alpha bar over checker
+        vec3 checker = checkerColor(local);
+        vec3 rgb = mix(checker, PaneColorA.rgb, uv.x);
+        fillColor = vec4(rgb, 1.0);
+    } else if (mode > 4.5) {
+        // Solid color composited over checker using alpha
+        vec3 checker = checkerColor(local);
+        vec3 rgb = mix(checker, PaneColorA.rgb, PaneColorA.a);
+        fillColor = vec4(rgb, 1.0);
+    }
+
     vec4 glowColor = PaneColorB;
 
     float fillA = fillColor.a * fill;

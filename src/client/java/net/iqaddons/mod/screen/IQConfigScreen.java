@@ -91,7 +91,8 @@ public class IQConfigScreen extends Screen {
     private static final int HEADER_H = 42;
     private static final int LOGO_ZONE_H = 42;
     private static final int PADDING = 10;
-    private static final int SCROLL_W = 3;
+    private static final int SCROLL_W = 4;
+    private static final int SCROLL_EDGE_INSET = 8;
 
     private static final int ROW_H_SLIM = 26;
     private static final int ROW_H_FULL_1 = 38;
@@ -105,6 +106,17 @@ public class IQConfigScreen extends Screen {
     private static final float TOGGLE_SPEED = 14.0f;
     private static final float TOGGLE_GLOW = 2.75f;
     private static final int TOGGLE_GLOW_ALPHA = 0x34;
+    private static final float SLIDER_SPEED = 9.0f;
+    private static final float SLIDER_SPEED_DRAG = 13.0f;
+    private static final int SLIDER_TRACK_ALPHA = 0x48;
+    private static final float COLOR_EDITOR_SPEED = 16.0f;
+    private static final float COLOR_PICK_SPEED = 11.0f;
+    private static final float COLOR_PICK_SPEED_DRAG = 16.0f;
+    private static final int COLOR_PREVIEW_RADIUS = 5;
+    private static final int COLOR_SV_RADIUS = 10;
+    private static final int COLOR_TRACK_H = 8;
+    private static final int COLOR_TRACK_RADIUS = 4;
+    private static final int SWATCH_RADIUS = 4;
     private static final int SLIDER_W = 100;
     private static final int CONTROL_H = 15;
     private static final int CONTROL_RADIUS = 4;
@@ -219,6 +231,11 @@ public class IQConfigScreen extends Screen {
     private int sliderEditValueX, sliderEditValueY, sliderEditValueW;
 
     private @Nullable ConfigEntryModel editingColor;
+    private float colorEditorAnim = 0f;
+    private boolean colorEditorClosing = false;
+    private float colorAnimH, colorAnimS, colorAnimV, colorAnimA;
+    private float colorTargetH, colorTargetS, colorTargetV, colorTargetA;
+    private boolean colorPickerDragging = false;
     private double uiScale = 1.0;
 
     private final List<RenderedEntry> renderedEntries = new ArrayList<>();
@@ -233,6 +250,8 @@ public class IQConfigScreen extends Screen {
     private final Map<String, Float> hoverAnims   = new HashMap<>();
     private final Map<String, Float> selectSlideAnims = new HashMap<>();
     private final Map<String, Integer> selectSlideDirs = new HashMap<>();
+    private final Map<String, Float> sliderAnims = new HashMap<>();
+    private final Map<String, Float> sliderTargets = new HashMap<>();
     private double scrollVelocity = 0;
     private float contentFadeAnim = 1f;
     private int lastRenderedCategory = -1;
@@ -328,6 +347,8 @@ public class IQConfigScreen extends Screen {
         hoverAnims.clear();
         selectSlideAnims.clear();
         selectSlideDirs.clear();
+        sliderAnims.clear();
+        sliderTargets.clear();
         for (ConfigCategory cat : categories) {
             preseedSectionAnims(cat.entries());
         }
@@ -656,7 +677,7 @@ public class IQConfigScreen extends Screen {
             scrollOffset = clamp(scrollOffset, 0, maxScroll);
         }
         ctx.disableScissor();
-        if (maxScroll > 0) renderScrollbar(ctx, cx + cw - SCROLL_W - 2, cy, ch);
+        if (maxScroll > 0) renderScrollbar(ctx);
 
         if (contentFadeAnim < 1f) {
             int overlayAlpha = (int) ((1f - contentFadeAnim) * 0xCC);
@@ -1122,7 +1143,7 @@ public class IQConfigScreen extends Screen {
             }
             case INT_SLIDER, FLOAT_SLIDER, DOUBLE_SLIDER -> renderSlider(ctx, entry, re, cy);
             case SELECT -> renderSelect(ctx, entry, re, cy, hov);
-            case COLOR -> renderColorSwatch(ctx, entry, re, cy, hov);
+            case COLOR -> renderColorSwatch(ctx, entry, re, cy);
             case BUTTON -> renderButton(ctx, entry, re, cy, hov);
         }
     }
@@ -1135,27 +1156,25 @@ public class IQConfigScreen extends Screen {
 
         renderActionControl(ctx, x, y, w, hov);
 
-        int innerX = x + 1;
-        int innerY = y + 1;
-        int innerW = w - 2;
-        int innerH = h - 2;
-        int segW = innerW / 2;
-        int splitX = innerX + segW;
-
         boolean simple = PhaseTwoConfig.simpleBuildProgressOverlay;
-        boolean normal = !simple;
+        int segW = w / 2;
+        int pad = 2;
+        int pillH = h - pad * 2;
+        int pillR = Math.max(2, pillH / 2);
+        int activeFill = withAlpha(themeAccentColor(), hov ? 0x66 : 0x4E);
 
-        int activeBg = hov ? 0xB41A344B : 0xA1162C40;
-        int idleBg = hov ? 0x5A121A25 : 0x4A0E141D;
+        if (simple) {
+            drawRoundedRect(ctx, x + pad, y + pad, segW - pad - 1, pillH, activeFill, pillR);
+        } else {
+            drawRoundedRect(ctx, x + segW + 1, y + pad, segW - pad - 1, pillH, activeFill, pillR);
+        }
+
         int activeText = hov ? themeActionTextHoverColor() : themeActionTextColor();
         int idleText = themeTextMuted();
-
-        ctx.fill(innerX, innerY, innerX + segW - 1, innerY + innerH, simple ? activeBg : idleBg);
-        ctx.fill(splitX + 1, innerY, innerX + innerW, innerY + innerH, normal ? activeBg : idleBg);
-        ctx.fill(splitX, innerY + 2, splitX + 1, innerY + innerH - 2, 0x2E8EA3BF);
-
-        IqFonts.drawCentered(ctx, "Simple", innerX + (segW / 2), cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), simple ? activeText : idleText);
-        IqFonts.drawCentered(ctx, "Normal", splitX + ((innerW - segW) / 2), cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), normal ? activeText : idleText);
+        IqFonts.drawCentered(ctx, "Simple", x + segW / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(),
+                simple ? activeText : idleText);
+        IqFonts.drawCentered(ctx, "Normal", x + segW + segW / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(),
+                simple ? idleText : activeText);
     }
 
     private void renderToggle(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
@@ -1213,25 +1232,33 @@ public class IQConfigScreen extends Screen {
                     ctx.fill(cursorX, valueY, cursorX + 1, valueY + IqFonts.lineHeight(), T_MAIN);
                 }
             } else {
-                double t = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
+                String key = entryKey(e);
+                double actualT = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
                 boolean drag = draggingSlider == e;
-                int sx = rx - SLIDER_W, ty = cy - 3;
-                ctx.fill(sx, ty, sx + SLIDER_W, ty + 6, BG_SLIDER_TRK);
-                int fw = (int) (t * SLIDER_W);
-                int accentCol = themeAccentColor();
-                if (fw > 0) {
-                    ctx.fill(sx, ty, sx + fw, ty + 6, accentCol);
-                    if (fw > 2) ctx.fill(sx + fw - 2, ty, sx + fw, ty + 6, withAlpha(accentCol, 0xFF));
-                }
-                int hx = sx + fw - 4, hh = drag ? 14 : 10;
-                ctx.fill(hx, cy - hh / 2, hx + 8, cy + hh / 2, SLIDER_HANDLE);
+                float target = drag
+                        ? sliderTargets.getOrDefault(key, (float) actualT)
+                        : (float) actualT;
+                if (!drag) sliderTargets.put(key, target);
+                float anim = sliderAnims.getOrDefault(key, target);
+                anim = approachAnim(anim, target, drag ? SLIDER_SPEED_DRAG : SLIDER_SPEED, sectionAnimFrameSteps);
+                sliderAnims.put(key, anim);
+                if (drag) applySliderT(e, anim);
 
-                int valueTextW = IqFonts.widthPx(vs);
+                double displayV = e.getRangeMin() + anim * (e.getRangeMax() - e.getRangeMin());
+                String displayVs = formatSlider(e, displayV);
+
+                int sx = rx - SLIDER_W;
+                int ty = cy - ScreenUiUtil.SLIDER_TRACK_H / 2;
+                int accent = themeAccentColor();
+                ScreenUiUtil.drawSlider(ctx, sx, ty, SLIDER_W, anim,
+                        withAlpha(accent, SLIDER_TRACK_ALPHA), accent, SLIDER_HANDLE);
+
+                int valueTextW = IqFonts.widthPx(displayVs);
                 sliderEditValueX = sx - valueTextW - 5;
                 sliderEditValueY = cy - IqFonts.lineHeight() / 2;
                 sliderEditValueW = valueTextW + 10;
 
-                IqFonts.draw(ctx, vs,
+                IqFonts.draw(ctx, displayVs,
                         sliderEditValueX, sliderEditValueY, themeTextMuted());
             }
         } catch (Exception ex) {
@@ -1255,26 +1282,19 @@ public class IQConfigScreen extends Screen {
             int slideDir = selectSlideDirs.getOrDefault(sKey, 1);
             int xOff = (int) (prog * slideDir * (bw * 0.55f));
 
-            String label = hov
-                    ? ("< " + vs + " >")
-                    : (vs + " >");
-
             ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-            IqFonts.drawCentered(ctx, label, bx + bw / 2 - xOff, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), hov ? themeActionTextHoverColor() : themeActionTextColor());
+            IqFonts.drawCentered(ctx, vs, bx + bw / 2 - xOff, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), hov ? themeActionTextHoverColor() : themeActionTextColor());
             ctx.disableScissor();
         } catch (Exception ex) {
             log.warn("Select: {}", e.getLabel(), ex);
         }
     }
 
-    private void renderColorSwatch(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
+    private void renderColorSwatch(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy) {
         try {
             int argb = (int) e.getField().get(null);
             int sx = rx - SWATCH_W, sy = cy - SWATCH_H / 2;
-            renderCheckerboard(ctx, sx, sy, SWATCH_W, SWATCH_H);
-            ctx.fill(sx, sy, sx + SWATCH_W, sy + SWATCH_H, argb);
-            drawHollowRect(ctx, sx - 1, sy - 1, SWATCH_W + 2, SWATCH_H + 2, hov ? themeAccentColor() : BORDER_MID);
-            if (hov) IqFonts.drawCentered(ctx, "§f*", sx + SWATCH_W / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), 0xFFFFFFFF);
+            ScreenUiUtil.drawRoundedCheckerColor(ctx, sx, sy, SWATCH_W, SWATCH_H, argb, SWATCH_RADIUS);
         } catch (Exception ex) {
             log.warn("Swatch: {}", e.getLabel(), ex);
         }
@@ -1299,11 +1319,16 @@ public class IQConfigScreen extends Screen {
         }
     }
 
-    private void renderScrollbar(GuiGraphicsExtractor ctx, int sx, int top, int ch) {
+    private void renderScrollbar(GuiGraphicsExtractor ctx) {
         ScrollbarMetrics metrics = getScrollbarMetrics();
         if (metrics == null) return;
-        ctx.fill(sx, top, sx + SCROLL_W, top + ch, 0x14FFFFFF);
-        ctx.fill(sx, metrics.thumbY(), sx + SCROLL_W, metrics.thumbY() + metrics.thumbH(), themeAccentColor());
+
+        // Keep the bar inside the content panel, then pill-clip so capsule ends stay clean.
+        ctx.enableScissor(metrics.x() - 1, metrics.top() - 1,
+                metrics.x() + SCROLL_W + 1, metrics.top() + metrics.height() + 1);
+        ScreenUiUtil.drawPill(ctx, metrics.x(), metrics.top(), SCROLL_W, metrics.height(), 0x28FFFFFF);
+        ScreenUiUtil.drawPill(ctx, metrics.x(), metrics.thumbY(), SCROLL_W, metrics.thumbH(), themeAccentColor());
+        ctx.disableScissor();
     }
 
     private @Nullable ScrollbarMetrics getScrollbarMetrics() {
@@ -1313,100 +1338,131 @@ public class IQConfigScreen extends Screen {
         int cy = cachedGy + HEADER_H;
         int cw = cachedGw - cachedSidebarW;
         int ch = cachedGh - HEADER_H;
-        int sx = cx + cw - SCROLL_W - 2;
+        int sx = cx + cw - SCROLL_W - 4;
+        int trackTop = cy + SCROLL_EDGE_INSET;
+        int trackH = Math.max(1, ch - SCROLL_EDGE_INSET * 2);
 
-        double ratio = (double) ch / (maxScroll + ch);
-        int thumbH = Math.max(20, (int) (ratio * ch));
-        int thumbY = cy + (int) ((scrollOffset / maxScroll) * (ch - thumbH));
-        return new ScrollbarMetrics(sx, cy, ch, thumbY, thumbH);
+        double ratio = (double) trackH / (maxScroll + trackH);
+        int thumbH = Math.max(24, (int) (ratio * trackH));
+        thumbH = Math.min(thumbH, trackH);
+        int thumbY = trackTop + (int) ((scrollOffset / maxScroll) * (trackH - thumbH));
+        return new ScrollbarMetrics(sx, trackTop, trackH, thumbY, thumbH);
     }
 
     private void renderColorEditor(GuiGraphicsExtractor ctx) {
         if (editingColor == null) return;
+
+        float target = colorEditorClosing ? 0f : 1f;
+        colorEditorAnim = approachAnim(colorEditorAnim, target, COLOR_EDITOR_SPEED, sectionAnimFrameSteps);
+        if (colorEditorClosing && colorEditorAnim <= 0.01f) {
+            editingColor = null;
+            colorEditorClosing = false;
+            colorEditorAnim = 0f;
+            colorPickerDragging = false;
+            return;
+        }
+
+        float t = smoothstep01(colorEditorAnim);
+        if (t <= 0.001f) return;
+
         ColorEditorLayout layout = getColorEditorLayout();
         int ceH = layout.h();
         int ceW = layout.w();
         int px = layout.x();
         int py = layout.y();
+        float cx = px + ceW * 0.5f;
+        float cy = py + ceH * 0.5f;
+        float scale = Math.max(0.02f, t);
 
-        ctx.fill(cachedGx + cachedSidebarW, cachedGy + HEADER_H,
-                cachedGx + cachedGw, cachedGy + cachedGh, 0x88000000);
-        drawPanelShell(ctx, px, py, ceW, ceH, BG_COLOR_ED);
+        int overlayA = Math.round(0x88 * t);
+        if (overlayA > 0) {
+            ctx.fill(cachedGx + cachedSidebarW, cachedGy + HEADER_H,
+                    cachedGx + cachedGw, cachedGy + cachedGh, overlayA << 24);
+        }
+
+        ctx.pose().pushMatrix();
+        ctx.pose().translate(cx, cy);
+        ctx.pose().scale(scale, scale);
+        ctx.pose().translate(-cx, -cy);
+
+        // Panel only — no outer glow on picker chrome
+        drawRoundedRect(ctx, px, py, ceW, ceH, BG_COLOR_ED, CORNER_R_LARGE);
 
         IqFonts.drawCentered(ctx, "Edit Color", px + ceW / 2, py + 9, 0, IqFonts.lineHeight(), themeHubAccentTextColor());
         IqFonts.draw(ctx, "×", layout.closeX(), py + 9, themeTextMuted());
 
         try {
-            int argb = (int) editingColor.getField().get(null);
-            int a = (argb >> 24) & 0xFF;
-            int r = (argb >> 16) & 0xFF;
-            int g = (argb >> 8) & 0xFF;
-            int b = argb & 0xFF;
-            float[] hsv = rgbToHsv(r, g, b);
-            float h = hsv[0], s = hsv[1], v = hsv[2];
+            tickColorPickerAnim();
+            float h = colorAnimH, s = colorAnimS, v = colorAnimV, a01 = colorAnimA;
+            int argb = hsvToArgb(h, s, v, a01);
 
             int prevX = layout.previewX(), prevY = layout.previewY();
-            renderCheckerboard(ctx, prevX, prevY, layout.previewW(), 18);
-            ctx.fill(prevX, prevY, prevX + layout.previewW(), prevY + 18, argb);
-            drawHollowRect(ctx, prevX - 1, prevY - 1, layout.previewW() + 2, 20, BORDER_BRIGHT);
-            IqFonts.drawCentered(ctx, String.format("#%08X", argb), px + ceW / 2, prevY + 22, 0, IqFonts.lineHeight(), themeTextMuted());
+            int prevW = layout.previewW();
+            int prevH = 18;
+            ScreenUiUtil.drawRoundedCheckerColor(ctx, prevX, prevY, prevW, prevH, argb, COLOR_PREVIEW_RADIUS);
+            IqFonts.drawCentered(ctx, String.format("#%08X", argb),
+                    px + ceW / 2, layout.hexY(), 0, IqFonts.lineHeight(), themeTextMuted());
 
             int svX = layout.svX(), svY = layout.svY(), svSize = layout.svSize();
-            drawSvSquare(ctx, svX, svY, svSize, h);
-            int cx = svX + (int) (s * (svSize - 1));
-            int cy = svY + (int) ((1f - v) * (svSize - 1));
-            drawHollowRect(ctx, cx - 2, cy - 2, 5, 5, 0xFFFFFFFF);
+            ScreenUiUtil.drawRoundedSv(ctx, svX, svY, svSize, h, COLOR_SV_RADIUS);
+            int cursorX = Math.round(svX + s * (svSize - 1));
+            int cursorY = Math.round(svY + (1f - v) * (svSize - 1));
+            ScreenUiUtil.drawPill(ctx, cursorX - 3, cursorY - 3, 6, 6, 0xFFFFFFFF);
+            ScreenUiUtil.drawPill(ctx, cursorX - 2, cursorY - 2, 4, 4, argb | 0xFF000000);
 
             int tx = layout.trackX(), tw = layout.trackW();
-            drawHueTrack(ctx, tx, layout.hueY(), tw);
-            int hx = tx + (int) (h * tw);
-            drawHollowRect(ctx, hx - 2, layout.hueY() - 2, 5, 12, 0xFFFFFFFF);
+            ScreenUiUtil.drawRoundedHueTrack(ctx, tx, layout.hueY(), tw, COLOR_TRACK_H, COLOR_TRACK_RADIUS);
+            int hueKnob = ScreenUiUtil.SLIDER_KNOB;
+            int hx = Math.round(tx + h * tw - hueKnob * 0.5f);
+            int hy = layout.hueY() + COLOR_TRACK_H / 2 - hueKnob / 2;
+            ScreenUiUtil.drawPill(ctx, hx, hy, hueKnob, hueKnob, SLIDER_HANDLE);
             IqFonts.draw(ctx, "H", tx - 10, layout.hueY() - 1, themeTextMuted());
 
             if (editingColor.isHasAlpha()) {
-                renderCheckerboard(ctx, tx, layout.alphaY(), tw, 8);
-                drawAlphaTrack(ctx, tx, layout.alphaY(), tw, h, s, v);
-                int ax = tx + (int) ((a / 255f) * tw);
-                drawHollowRect(ctx, ax - 2, layout.alphaY() - 2, 5, 12, 0xFFFFFFFF);
+                int opaque = hsvToArgb(h, s, v, 1f);
+                ScreenUiUtil.drawRoundedAlphaTrack(ctx, tx, layout.alphaY(), tw, COLOR_TRACK_H, opaque, COLOR_TRACK_RADIUS);
+                int ax = Math.round(tx + a01 * tw - hueKnob * 0.5f);
+                int ay = layout.alphaY() + COLOR_TRACK_H / 2 - hueKnob / 2;
+                ScreenUiUtil.drawPill(ctx, ax, ay, hueKnob, hueKnob, SLIDER_HANDLE);
                 IqFonts.draw(ctx, "A", tx - 10, layout.alphaY() - 1, themeTextMuted());
             }
         } catch (Exception e) {
-            log.warn("Color editor render", e); }
+            log.warn("Color editor render", e);
+        }
+
+        ctx.pose().popMatrix();
     }
 
-    private void drawSvSquare(GuiGraphicsExtractor ctx, int x, int y, int size, float hue) {
-        int step = 2;
-        for (int yy = 0; yy < size; yy += step) {
-            float v = 1f - (yy / (float) Math.max(1, size - 1));
-            for (int xx = 0; xx < size; xx += step) {
-                float s = xx / (float) Math.max(1, size - 1);
-                int c = hsvToArgb(hue, s, v, 1f);
-                ctx.fill(x + xx, y + yy, Math.min(x + xx + step, x + size), Math.min(y + yy + step, y + size), c);
+    private void tickColorPickerAnim() {
+        float speed = colorPickerDragging ? COLOR_PICK_SPEED_DRAG : COLOR_PICK_SPEED;
+        colorAnimH = approachAnim(colorAnimH, colorTargetH, speed, sectionAnimFrameSteps);
+        colorAnimS = approachAnim(colorAnimS, colorTargetS, speed, sectionAnimFrameSteps);
+        colorAnimV = approachAnim(colorAnimV, colorTargetV, speed, sectionAnimFrameSteps);
+        colorAnimA = approachAnim(colorAnimA, colorTargetA, speed, sectionAnimFrameSteps);
+        if (colorPickerDragging && editingColor != null) {
+            try {
+                editingColor.getField().set(null, hsvToArgb(colorAnimH, colorAnimS, colorAnimV, colorAnimA));
+            } catch (Exception ignored) {
             }
         }
-        drawHollowRect(ctx, x - 1, y - 1, size + 2, size + 2, themedBorderMid());
     }
 
-    private void drawHueTrack(GuiGraphicsExtractor ctx, int x, int y, int w) {
-        final int trackH = 8;
-        int step = 2;
-        for (int xx = 0; xx < w; xx += step) {
-            float hue = xx / (float) Math.max(1, w - 1);
-            int c = hsvToArgb(hue, 1f, 1f, 1f);
-            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + trackH, c);
+    private void syncColorPickerFromField() {
+        if (editingColor == null) return;
+        try {
+            int argb = (int) editingColor.getField().get(null);
+            int a = (argb >>> 24) & 0xFF;
+            int r = (argb >>> 16) & 0xFF;
+            int g = (argb >>> 8) & 0xFF;
+            int b = argb & 0xFF;
+            float[] hsv = rgbToHsv(r, g, b);
+            colorTargetH = colorAnimH = hsv[0];
+            colorTargetS = colorAnimS = hsv[1];
+            colorTargetV = colorAnimV = hsv[2];
+            colorTargetA = colorAnimA = a / 255f;
+        } catch (Exception e) {
+            log.warn("Color sync", e);
         }
-        drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
-    }
-
-    private void drawAlphaTrack(GuiGraphicsExtractor ctx, int x, int y, int w, float hue, float sat, float val) {
-        final int trackH = 8;
-        int step = 2;
-        for (int xx = 0; xx < w; xx += step) {
-            float a = xx / (float) Math.max(1, w - 1);
-            int c = hsvToArgb(hue, sat, val, a);
-            ctx.fill(x + xx, y, Math.min(x + xx + step, x + w), y + trackH, c);
-        }
-        drawHollowRect(ctx, x - 1, y - 1, w + 2, trackH + 2, themedBorderMid());
     }
 
     private void renderCheckerboard(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
@@ -1562,7 +1618,7 @@ public class IQConfigScreen extends Screen {
                 if (button == 0) cycleSelect(entry, +1);
                 else if (button == 1) cycleSelect(entry, -1);
             }
-            case COLOR   -> { if (button == 0) editingColor = entry; }
+            case COLOR   -> { if (button == 0) openColorEditor(entry); }
             case SECTION_HEADER -> { if (button == 0) entry.toggleExpanded(); }
             case BUTTON  -> {
                 if (button == 0 && entry.getButtonAction() != null) {
@@ -1598,37 +1654,52 @@ public class IQConfigScreen extends Screen {
         }
     }
 
+    private void openColorEditor(ConfigEntryModel entry) {
+        editingColor = entry;
+        colorEditorClosing = false;
+        colorEditorAnim = 0f;
+        colorPickerDragging = false;
+        syncColorPickerFromField();
+    }
+
+    private void requestCloseColorEditor() {
+        if (editingColor == null || colorEditorClosing) return;
+        colorEditorClosing = true;
+        colorPickerDragging = false;
+        try {
+            editingColor.getField().set(null, hsvToArgb(colorTargetH, colorTargetS, colorTargetV, colorTargetA));
+        } catch (Exception ignored) {
+        }
+    }
+
     private void handleColorEditorClick(int mx, int my) {
-        if (editingColor == null) return;
+        if (editingColor == null || colorEditorClosing || colorEditorAnim < 0.85f) return;
         ColorEditorLayout layout = getColorEditorLayout();
         int px = layout.x();
         int py = layout.y();
         if (mx < px || mx > px + layout.w() || my < py || my > py + layout.h()
                 || (mx >= layout.closeX() - 2 && my <= py + 22)) {
-            editingColor = null; return; }
-        try {
-            int argb = (int) editingColor.getField().get(null);
-            int a = (argb >> 24) & 0xFF;
-            int r = (argb >> 16) & 0xFF;
-            int g = (argb >> 8) & 0xFF;
-            int b = argb & 0xFF;
-            float[] hsv = rgbToHsv(r, g, b);
-            float h = hsv[0], s = hsv[1], v = hsv[2];
+            requestCloseColorEditor();
+            return;
+        }
 
-            if (isIn(mx, my, layout.svX(), layout.svY(), layout.svSize(), layout.svSize())) {
-                s = (float) clamp01((mx - layout.svX()) / (double) Math.max(1, layout.svSize() - 1));
-                v = (float) (1.0 - clamp01((my - layout.svY()) / (double) Math.max(1, layout.svSize() - 1)));
-            }
-            if (isIn(mx, my, layout.trackX(), layout.hueY() - 2, layout.trackW(), 12)) {
-                h = (float) clamp01((mx - layout.trackX()) / (double) Math.max(1, layout.trackW() - 1));
-            }
-            if (editingColor.isHasAlpha() && isIn(mx, my, layout.trackX(), layout.alphaY() - 2, layout.trackW(), 12)) {
-                a = (int) Math.round(clamp01((mx - layout.trackX()) / (double) Math.max(1, layout.trackW() - 1)) * 255.0);
-            }
-
-            editingColor.getField().set(null, hsvToArgb(h, s, v, a / 255f));
-        } catch (Exception e) {
-            log.warn("Color click", e); }
+        boolean hit = false;
+        if (isIn(mx, my, layout.svX(), layout.svY(), layout.svSize(), layout.svSize())) {
+            colorTargetS = (float) clamp01((mx - layout.svX()) / (double) Math.max(1, layout.svSize() - 1));
+            colorTargetV = (float) (1.0 - clamp01((my - layout.svY()) / (double) Math.max(1, layout.svSize() - 1)));
+            hit = true;
+        }
+        if (isIn(mx, my, layout.trackX(), layout.hueY() - 2, layout.trackW(), COLOR_TRACK_H + 4)) {
+            colorTargetH = (float) clamp01((mx - layout.trackX()) / (double) Math.max(1, layout.trackW() - 1));
+            hit = true;
+        }
+        if (editingColor.isHasAlpha() && isIn(mx, my, layout.trackX(), layout.alphaY() - 2, layout.trackW(), COLOR_TRACK_H + 4)) {
+            colorTargetA = (float) clamp01((mx - layout.trackX()) / (double) Math.max(1, layout.trackW() - 1));
+            hit = true;
+        }
+        if (hit) {
+            colorPickerDragging = true;
+        }
     }
 
     private void handleSliderEditorClick(int mx, int my) {
@@ -1676,6 +1747,25 @@ public class IQConfigScreen extends Screen {
     public boolean mouseReleased(MouseButtonEvent click) {
         if (closingScreen) return true;
         draggingScrollbar = false;
+        if (colorPickerDragging && editingColor != null) {
+            try {
+                editingColor.getField().set(null, hsvToArgb(colorTargetH, colorTargetS, colorTargetV, colorTargetA));
+                colorAnimH = colorTargetH;
+                colorAnimS = colorTargetS;
+                colorAnimV = colorTargetV;
+                colorAnimA = colorTargetA;
+            } catch (Exception ignored) {
+            }
+        }
+        colorPickerDragging = false;
+        if (draggingSlider != null) {
+            String key = entryKey(draggingSlider);
+            Float t = sliderTargets.get(key);
+            if (t != null) {
+                applySliderT(draggingSlider, t);
+                sliderAnims.put(key, t);
+            }
+        }
         draggingSlider = null;
         return super.mouseReleased(click);
     }
@@ -1698,7 +1788,7 @@ public class IQConfigScreen extends Screen {
                 return true;
             }
             if (editingColor != null) {
-                editingColor = null;
+                requestCloseColorEditor();
                 return true;
             }
             if (searchFocused && !searchQuery.isEmpty()) {
@@ -1818,16 +1908,23 @@ public class IQConfigScreen extends Screen {
     }
 
     private void updateSlider(ConfigEntryModel e, int mx) {
-        double t = clamp01((double) (mx - sliderTrackX) / sliderTrackW);
-        double val = e.getRangeMin() + t * (e.getRangeMax() - e.getRangeMin());
+        float t = (float) clamp01((double) (mx - sliderTrackX) / sliderTrackW);
+        sliderTargets.put(entryKey(e), t);
+    }
+
+    private void applySliderT(ConfigEntryModel e, float t) {
+        double val = e.getRangeMin() + clamp01(t) * (e.getRangeMax() - e.getRangeMin());
         try {
             switch (e.getType()) {
                 case INT_SLIDER -> e.getField().set(null, (int) Math.round(val));
                 case FLOAT_SLIDER -> e.getField().set(null, (float) val);
                 case DOUBLE_SLIDER -> e.getField().set(null, val);
+                default -> {
+                }
             }
         } catch (Exception ex) {
-            log.warn("Slider: {}", e.getLabel(), ex); }
+            log.warn("Slider: {}", e.getLabel(), ex);
+        }
     }
 
     private int rowHeight(ConfigEntryModel e) {
@@ -2206,7 +2303,7 @@ public class IQConfigScreen extends Screen {
         try {
             Object val = e.getField().get(null);
             String vs = toTitleCase(val != null ? val.toString() : "?");
-            int textW = IqFonts.widthPx(vs + " >");
+            int textW = IqFonts.widthPx(vs);
             return clampControlWidth(textW + (CONTROL_TEXT_PAD_X * 2));
         } catch (Exception ignored) {
             return SELECT_W;
@@ -2485,7 +2582,8 @@ public class IQConfigScreen extends Screen {
     }
 
     private ColorEditorLayout getColorEditorLayout() {
-        int modalH = editingColor != null && editingColor.isHasAlpha() ? 228 : 192;
+        boolean hasAlpha = editingColor != null && editingColor.isHasAlpha();
+        int modalH = hasAlpha ? 248 : 212;
         int modalW = Math.min(248, cachedGw - 18);
         modalW = Math.max(188, modalW);
         int modalX = cachedGx + (cachedGw - modalW) / 2;
@@ -2493,16 +2591,17 @@ public class IQConfigScreen extends Screen {
         int previewW = Math.max(60, Math.min(80, modalW - 128));
         int previewX = modalX + (modalW - previewW) / 2;
         int previewY = modalY + 26;
+        int hexY = previewY + 18 + 5;
         int svSize = 118;
         int svX = modalX + (modalW - svSize) / 2;
-        int svY = previewY + 30;
+        int svY = hexY + IqFonts.lineHeight() + 12;
         int trackX = modalX + 18;
         int trackW = Math.max(140, modalW - 36);
         int hueY = svY + svSize + 10;
         int alphaY = hueY + 20;
         int closeX = modalX + modalW - 16;
         return new ColorEditorLayout(modalX, modalY, modalW, modalH,
-                previewX, previewY, previewW,
+                previewX, previewY, previewW, hexY,
                 svX, svY, svSize,
                 trackX, trackW, hueY, alphaY,
                 closeX);
@@ -2681,7 +2780,7 @@ public class IQConfigScreen extends Screen {
     }
 
     private record ColorEditorLayout(int x, int y, int w, int h,
-                                     int previewX, int previewY, int previewW,
+                                     int previewX, int previewY, int previewW, int hexY,
                                      int svX, int svY, int svSize,
                                      int trackX, int trackW, int hueY, int alphaY,
                                      int closeX) {

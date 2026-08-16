@@ -123,6 +123,46 @@ public final class RoundedPaneRenderer {
         );
     }
 
+    public static void submitFillMode(
+            GuiGraphicsExtractor graphics,
+            int x,
+            int y,
+            int w,
+            int h,
+            int colorA,
+            int colorB,
+            float topLeftRadius,
+            float topRightRadius,
+            float bottomRightRadius,
+            float bottomLeftRadius,
+            int fillMode
+    ) {
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+
+        Matrix3x2f pose = new Matrix3x2f(graphics.pose());
+        ScreenRectangle fillBounds = new ScreenRectangle(x, y, w, h).transformAxisAligned(pose);
+        float scale = transformedScale(w, h, fillBounds);
+
+        ScreenRectangle activeScissor = graphics.scissorStack.peek();
+        ScreenRectangle clip = activeScissor == null
+                ? fillBounds
+                : fillBounds.intersection(activeScissor);
+        if (clip == null || clip.width() <= 0 || clip.height() <= 0) {
+            return;
+        }
+
+        float maxR = Math.min(w, h) * 0.5f;
+        float tl = Math.max(0f, Math.min(topLeftRadius, maxR)) * scale;
+        float tr = Math.max(0f, Math.min(topRightRadius, maxR)) * scale;
+        float br = Math.max(0f, Math.min(bottomRightRadius, maxR)) * scale;
+        float bl = Math.max(0f, Math.min(bottomLeftRadius, maxR)) * scale;
+        graphics.guiRenderState.addGuiElement(
+                RoundedPaneRenderState.styled(fillBounds, clip, tl, tr, br, bl, colorA, colorB, fillMode)
+        );
+    }
+
     public static void render(RoundedPaneRenderState state) {
         GpuTextureView target = Minecraft.getInstance().getMainRenderTarget().getColorTextureView();
         if (target == null) {
@@ -148,7 +188,7 @@ public final class RoundedPaneRenderer {
                 state.bottomLeftRadius(),
                 state.colorA(),
                 state.colorB(),
-                state.gradient(),
+                state.fillMode(),
                 state.softFadeShape(),
                 state.glowWidth(),
                 state.glowStrength()
@@ -175,7 +215,7 @@ public final class RoundedPaneRenderer {
             float bottomLeftRadiusGui,
             int colorA,
             int colorB,
-            boolean gradient,
+            int fillMode,
             int softFadeShape,
             float glowWidth,
             float glowStrength
@@ -223,7 +263,7 @@ public final class RoundedPaneRenderer {
                 bottomLeftRadiusGui * scale,
                 colorA,
                 colorB,
-                gradient,
+                fillMode,
                 softFadeShape,
                 glowWidth * scale,
                 glowStrength
@@ -267,7 +307,7 @@ public final class RoundedPaneRenderer {
             float bottomLeftRadius,
             int colorA,
             int colorB,
-            boolean gradient,
+            int fillMode,
             int softFadeShape,
             float glowWidth,
             float glowStrength
@@ -289,7 +329,7 @@ public final class RoundedPaneRenderer {
                             (colorB & 0xFF) / 255.0f,
                             ((colorB >>> 24) & 0xFF) / 255.0f
                     )
-                    .putVec4(gradient ? 1.0f : 0.0f, (float) softFadeShape, glowWidth, glowStrength);
+                    .putVec4((float) fillMode, (float) softFadeShape, glowWidth, glowStrength);
         }
     }
 }
