@@ -173,6 +173,7 @@ public class IQConfigScreen extends Screen {
     private @Nullable List<ConfigEntryModel> cachedDisplayEntries;
     private final Map<String, List<String>> wrapTextCache = new HashMap<>();
     private boolean searchFocused = false;
+    private boolean searchSelectAll = false;
     private float searchFocusAnim = 0f;
     private float searchCursorX = -1f;
     private int cursorTick = 0;
@@ -410,14 +411,25 @@ public class IQConfigScreen extends Screen {
             IqFonts.draw(ctx, "§8Search…", textX, textY, T_MAIN);
         } else {
             String trimmed = IqFonts.trim(q, sbW - 32);
+            int textW = IqFonts.widthPx(trimmed);
+            int textH = IqFonts.lineHeight();
+            if (searchFocused && searchSelectAll && textW > 0) {
+                ctx.fill(
+                        Math.round(textX) - 1,
+                        Math.round(textY) - 1,
+                        Math.round(textX) + textW + 1,
+                        Math.round(textY) + textH + 1,
+                        withAlpha(themeAccentColor(), 0x66)
+                );
+            }
             IqFonts.draw(ctx, "§f" + trimmed, textX, textY, T_MAIN);
-            cursorTargetX = textX + IqFonts.widthPx(trimmed);
+            cursorTargetX = textX + textW;
         }
 
         if (searchCursorX < 0f) searchCursorX = cursorTargetX;
         searchCursorX += (cursorTargetX - searchCursorX) * 0.35f;
 
-        boolean blink = searchFocused && (cursorTick / 60) % 2 == 0;
+        boolean blink = searchFocused && !searchSelectAll && (cursorTick / 60) % 2 == 0;
         if (searchFocused && blink) {
             IqFonts.draw(ctx, "§7|", searchCursorX, textY, T_MAIN);
         }
@@ -1228,15 +1240,20 @@ public class IQConfigScreen extends Screen {
         int sbY = searchBox.y();
         if (isIn(imx, imy, sbX, sbY, sbW, SEARCH_H)) {
             searchFocused = true;
+            searchSelectAll = false;
             cursorTick = 0;
             searchCursorX = -1f;
             if (!searchQuery.isEmpty() && isIn(imx, imy, sbX + sbW - 15, sbY, 12, SEARCH_H)) {
                 searchQuery.setLength(0);
+                searchSelectAll = false;
                 scrollOffset = 0;
             }
             return true;
         }
-        if (searchFocused) searchFocused = false;
+        if (searchFocused) {
+            searchFocused = false;
+            searchSelectAll = false;
+        }
 
         if (click.button() == 0 && editingColor == null && editingSlider == null) {
             int bx = getExternalLinksStartX(cachedGx, cachedSidebarW);
@@ -1450,7 +1467,12 @@ public class IQConfigScreen extends Screen {
                 return true;
             }
             if (searchFocused && !searchQuery.isEmpty()) {
+                if (searchSelectAll) {
+                    searchSelectAll = false;
+                    return true;
+                }
                 searchQuery.setLength(0);
+                searchSelectAll = false;
                 scrollOffset = 0;
                 return true;
             }
@@ -1467,9 +1489,22 @@ public class IQConfigScreen extends Screen {
             }
             return true;
         }
+        if (searchFocused && input.isSelectAll()) {
+            if (!searchQuery.isEmpty()) {
+                searchSelectAll = true;
+                cursorTick = 0;
+            }
+            return true;
+        }
         if (searchFocused && input.key() == 259 && !searchQuery.isEmpty()) {
-            searchQuery.deleteCharAt(searchQuery.length() - 1);
-            scrollOffset = 0; return true;
+            if (searchSelectAll) {
+                searchQuery.setLength(0);
+                searchSelectAll = false;
+            } else {
+                searchQuery.deleteCharAt(searchQuery.length() - 1);
+            }
+            scrollOffset = 0;
+            return true;
         }
         return super.keyPressed(input);
     }
@@ -1485,6 +1520,10 @@ public class IQConfigScreen extends Screen {
             return true;
         }
         if (searchFocused) {
+            if (searchSelectAll) {
+                searchQuery.setLength(0);
+                searchSelectAll = false;
+            }
             searchQuery.append(input.codepointAsString());
             scrollOffset = 0;
             return true;
@@ -2335,6 +2374,7 @@ public class IQConfigScreen extends Screen {
         closeTarget = target;
         editingColor = null;
         searchFocused = false;
+        searchSelectAll = false;
         draggingScrollbar = false;
         draggingSlider = null;
         scrollVelocity = 0;
