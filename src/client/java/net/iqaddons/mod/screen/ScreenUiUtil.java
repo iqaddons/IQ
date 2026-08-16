@@ -1,5 +1,6 @@
 package net.iqaddons.mod.screen;
 
+import net.iqaddons.mod.screen.render.RoundedPaneRenderer;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
@@ -59,14 +60,33 @@ final class ScreenUiUtil {
             ctx.fill(x, y, x + w, y + h, color);
             return;
         }
+        RoundedPaneRenderer.submit(ctx, x, y, w, h, color, r);
+    }
 
-        ctx.fill(x + r, y, x + w - r, y + h, color);
-        ctx.fill(x, y + r, x + w, y + h - r, color);
-        for (int i = 0; i < r; i++) {
-            int inset = cornerInset(i, r);
-            ctx.fill(x + inset, y + i, x + w - inset, y + i + 1, color);
-            ctx.fill(x + inset, y + h - i - 1, x + w - inset, y + h - i, color);
+    static void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
+        drawRoundedGlow(ctx, x, y, w, h, color, color, radius, glowWidth);
+    }
+
+    static void drawRoundedGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            int radius,
+            float glowWidth
+    ) {
+        if (w <= 0 || h <= 0) {
+            return;
         }
+        int r = Math.max(0, Math.min(radius, Math.min(w, h) / 2));
+        if (r == 0) {
+            ctx.fill(x, y, x + w, y + h, fillColor);
+            return;
+        }
+        RoundedPaneRenderer.submit(ctx, x, y, w, h, fillColor, r, glowWidth, 1.0f, glowColor);
     }
 
     static void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {

@@ -12,6 +12,7 @@
     "FontManagerAccessor",
     "HudClickMixin",
     "GuiMixin",
+    "GuiRendererMixin",
     "ItemUseMixin",
     "LevelRendererMixin",
     "MinecraftAccessor",

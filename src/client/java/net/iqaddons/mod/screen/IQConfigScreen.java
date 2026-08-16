@@ -113,6 +113,8 @@ public class IQConfigScreen extends Screen {
     private static final int SWATCH_W = 36;
     private static final int SWATCH_H = 16;
     private static final int SEARCH_H      = 18;
+    private static final int SEARCH_RADIUS = 4;
+    private static final float SEARCH_GLOW = 3.5f;
     private static final int MODE_PICKER_W = 94;
 
     private static final int LINK_BTN_SIZE = 14;
@@ -130,6 +132,9 @@ public class IQConfigScreen extends Screen {
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
     private static final int SIDEBAR_GROUP_GAP = 7;
+    private static final int SIDEBAR_PILL_H = 16;
+    private static final int SIDEBAR_PILL_RADIUS = 5;
+    private static final float SIDEBAR_PILL_GLOW = 4f;
 
     private static final ExternalLinkButton[] EXTERNAL_LINKS = new ExternalLinkButton[] {
             new ExternalLinkButton(DISCORD_ICON_TEXTURE, "Discord", "https://discord.com/invite/25aaMJMGMc",
@@ -168,6 +173,8 @@ public class IQConfigScreen extends Screen {
     private @Nullable List<ConfigEntryModel> cachedDisplayEntries;
     private final Map<String, List<String>> wrapTextCache = new HashMap<>();
     private boolean searchFocused = false;
+    private float searchFocusAnim = 0f;
+    private float searchCursorX = -1f;
     private int cursorTick = 0;
 
     private @Nullable ConfigEntryModel draggingSlider;
@@ -381,10 +388,13 @@ public class IQConfigScreen extends Screen {
         int sbY = searchBox.y();
 
         boolean sbHov = isIn(frameMouseX, frameMouseY, sbX, sbY, sbW, SEARCH_H);
-        drawRoundedRect(ctx, sbX, sbY, sbW, SEARCH_H,
-                searchFocused ? themeSearchActiveColor() : themeSearchColor(), CORNER_R_SMALL);
-        drawRoundedHollowRect(ctx, sbX, sbY, sbW, SEARCH_H,
-                searchFocused ? BORDER_BRIGHT : (sbHov ? BORDER_MID : BORDER_DIM));
+        float focusTarget = searchFocused ? 1f : 0f;
+        searchFocusAnim += (focusTarget - searchFocusAnim) * 0.28f;
+        int searchBg = lerpArgb(themeSearchColor(), themeSearchActiveColor(), searchFocusAnim);
+        int idleGlowA = sbHov ? 0x3A : 0x2E;
+        int glowA = Math.round(idleGlowA + (0x55 - idleGlowA) * searchFocusAnim);
+        int glow = withAlpha(themeAccentColor(), glowA);
+        drawRoundedGlow(ctx, sbX, sbY, sbW, SEARCH_H, searchBg, glow, SEARCH_RADIUS, SEARCH_GLOW);
 
         int searchIconSize = 10;
         int searchIconX = sbX + 4;
@@ -393,16 +403,24 @@ public class IQConfigScreen extends Screen {
         IqIcons.draw(ctx, SEARCH_ICON_TEXTURE, searchIconX - 1, searchIconY, searchIconSize, 0xE8FFFFFF);
 
         String q = searchQuery.toString();
-        boolean blink = searchFocused && (cursorTick / 10) % 2 == 0;
-        String display;
+        float textX = sbX + 16;
+        float textY = sbY + (SEARCH_H - IqFonts.lineHeight()) * 0.5f;
+        float cursorTargetX = textX;
         if (q.isEmpty() && !searchFocused) {
-            display = "§8Search…";
+            IqFonts.draw(ctx, "§8Search…", textX, textY, T_MAIN);
         } else {
             String trimmed = IqFonts.trim(q, sbW - 32);
-            display = "§f" + trimmed + (blink ? "§7|" : "");
+            IqFonts.draw(ctx, "§f" + trimmed, textX, textY, T_MAIN);
+            cursorTargetX = textX + IqFonts.widthPx(trimmed);
         }
-        IqFonts.draw(ctx, display,
-                sbX + 16, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MAIN);
+
+        if (searchCursorX < 0f) searchCursorX = cursorTargetX;
+        searchCursorX += (cursorTargetX - searchCursorX) * 0.35f;
+
+        boolean blink = searchFocused && (cursorTick / 60) % 2 == 0;
+        if (searchFocused && blink) {
+            IqFonts.draw(ctx, "§7|", searchCursorX, textY, T_MAIN);
+        }
 
         if (!q.isEmpty()) {
             boolean clrHov = isIn(frameMouseX, frameMouseY, sbX + sbW - 15, sbY, 12, SEARCH_H);
@@ -468,16 +486,16 @@ public class IQConfigScreen extends Screen {
         if (!searchActive) {
             for (SidebarCategorySlot slot : sidebarSlots) {
                 if (slot.categoryIndex() != selectedCategory) continue;
-                float catPillTarget = slot.y() + 2f;
+                float catPillTarget = slot.y() + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) * 0.5f;
                 if (catPillY < 0) catPillY = catPillTarget;
                 catPillY += (catPillTarget - catPillY) * 0.18f;
 
-                int pillY = (int) catPillY;
-                int pillH = SIDEBAR_ROW_H - 4;
+                int pillY = Math.round(catPillY);
+                int pillX = gx + 8;
+                int pillW = sidebarW - 16;
                 int acc = themeAccentColor();
-                drawRoundedRect(ctx, gx + 7, pillY - 1, sidebarW - 14, pillH + 2, withAlpha(acc, 0x1E), CORNER_R_MED);
-                drawRoundedRect(ctx, gx + 8, pillY, sidebarW - 16, pillH, withAlpha(acc, 0x4A), CORNER_R_SMALL);
-                drawRoundedRect(ctx, gx + 8, pillY, 3, pillH, acc, CORNER_R_SMALL);
+                drawRoundedGlow(ctx, pillX, pillY, pillW, SIDEBAR_PILL_H,
+                        withAlpha(acc, 0x4A), SIDEBAR_PILL_RADIUS, SIDEBAR_PILL_GLOW);
                 break;
             }
         }
@@ -493,10 +511,11 @@ public class IQConfigScreen extends Screen {
 
             boolean active = !searchActive && slot.categoryIndex() == selectedCategory;
             boolean hovered = !active && editingColor == null
-                    && isIn(frameMouseX, frameMouseY, gx + 8, slot.y() + 2, sidebarW - 16, SIDEBAR_ROW_H - 4);
+                    && isIn(frameMouseX, frameMouseY, gx + 8, slot.y(), sidebarW - 16, SIDEBAR_ROW_H);
 
             if (hovered) {
-                drawRoundedRect(ctx, gx + 8, slot.y() + 2, sidebarW - 16, SIDEBAR_ROW_H - 4, 0x149A6BB8, CORNER_R_SMALL);
+                int hoverY = slot.y() + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) / 2;
+                drawRoundedRect(ctx, gx + 8, hoverY, sidebarW - 16, SIDEBAR_PILL_H, 0x149A6BB8, SIDEBAR_PILL_RADIUS);
             }
 
             String name = getSidebarDisplayName(category);
@@ -504,8 +523,8 @@ public class IQConfigScreen extends Screen {
                 name = IqFonts.trim(name, sidebarW - 36) + "…";
 
             int col = active ? themeSidebarTextActive() : (hovered ? themeSidebarTextHover() : themeSidebarTextMuted());
-            IqFonts.draw(ctx, name,
-                    gx + 16, slot.y() + (SIDEBAR_ROW_H - IqFonts.lineHeight()) / 2, col);
+            float textY = slot.y() + (SIDEBAR_ROW_H - IqFonts.lineHeight()) * 0.5f;
+            IqFonts.draw(ctx, name, gx + 16, textY, col);
             lastGroup = group;
         }
 
@@ -1209,6 +1228,8 @@ public class IQConfigScreen extends Screen {
         int sbY = searchBox.y();
         if (isIn(imx, imy, sbX, sbY, sbW, SEARCH_H)) {
             searchFocused = true;
+            cursorTick = 0;
+            searchCursorX = -1f;
             if (!searchQuery.isEmpty() && isIn(imx, imy, sbX + sbW - 15, sbY, 12, SEARCH_H)) {
                 searchQuery.setLength(0);
                 scrollOffset = 0;
@@ -1248,7 +1269,7 @@ public class IQConfigScreen extends Screen {
 
         if (imx >= cachedGx && imx < cachedGx + cachedSidebarW && imy > cachedGy + LOGO_ZONE_H) {
             for (SidebarCategorySlot slot : sidebarSlots) {
-                if (isIn(imx, imy, cachedGx + 8, slot.y() + 2, cachedSidebarW - 16, SIDEBAR_ROW_H - 4)) {
+                if (isIn(imx, imy, cachedGx + 8, slot.y(), cachedSidebarW - 16, SIDEBAR_ROW_H)) {
                     if (slot.categoryIndex() != selectedCategory) {
                         selectedCategory = slot.categoryIndex();
                         scrollOffset = 0;
@@ -2143,6 +2164,24 @@ public class IQConfigScreen extends Screen {
 
     private void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
+    }
+
+    private void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, color, radius, glowWidth);
+    }
+
+    private void drawRoundedGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            int radius,
+            float glowWidth
+    ) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, fillColor, glowColor, radius, glowWidth);
     }
 
     private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {

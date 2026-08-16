@@ -71,6 +71,9 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int HEADER_H = 42;
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
+    private static final int SIDEBAR_PILL_H = 16;
+    private static final int SIDEBAR_PILL_RADIUS = 5;
+    private static final float SIDEBAR_PILL_GLOW = 4f;
     private static final int ROW_H = 22;
     private static final int PAD = 10;
     private static final int CONTROL_H = 15;
@@ -302,7 +305,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         for (ConfigSection section : ConfigSection.values()) {
             sidebarSlots.add(new SidebarSlot(section, rowY));
             if (section == selectedSection) {
-                float target = rowY + 2f;
+                float target = rowY + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) * 0.5f;
                 if (catPillY < 0f) catPillY = target;
                 catPillY += (target - catPillY) * animRate(0.18f);
             }
@@ -310,27 +313,28 @@ public class IQGlobalConfigurationScreen extends Screen {
         }
 
         if (catPillY >= 0f) {
-            int pillY = (int) catPillY;
-            int pillH = SIDEBAR_ROW_H - 4;
+            int pillY = Math.round(catPillY);
             int accent = themeAccentColor();
-            drawRoundedRect(ctx, x + 7, pillY - 1, w - 14, pillH + 2, withAlpha(accent, 0x1E), 0);
-            drawRoundedRect(ctx, x + 8, pillY, w - 16, pillH, withAlpha(accent, 0x4A), 0);
-            drawRoundedRect(ctx, x + 8, pillY, 3, pillH, accent, 0);
+            int pillX = x + 8;
+            int pillW = w - 16;
+            drawRoundedGlow(ctx, pillX, pillY, pillW, SIDEBAR_PILL_H,
+                    withAlpha(accent, 0x4A), SIDEBAR_PILL_RADIUS, SIDEBAR_PILL_GLOW);
         }
 
         for (SidebarSlot slot : sidebarSlots) {
             ConfigSection section = slot.section();
             int sy = slot.y();
             boolean active = section == selectedSection;
-            boolean hovered = isIn(frameMouseX, frameMouseY, x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4);
+            boolean hovered = isIn(frameMouseX, frameMouseY, x + 8, sy, w - 16, SIDEBAR_ROW_H);
             String hKey = "side#" + section.name();
             float hAnim = hoverAnims.getOrDefault(hKey, 0f);
             hAnim += ((hovered ? 1f : 0f) - hAnim) * animRate(0.28f);
             hoverAnims.put(hKey, hAnim);
 
             if (!active && hAnim > 0.01f) {
-                drawRoundedRect(ctx, x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4,
-                        lerpArgb(0x00000000, 0x149A6BB8, hAnim), 0);
+                int hoverY = sy + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) / 2;
+                drawRoundedRect(ctx, x + 8, hoverY, w - 16, SIDEBAR_PILL_H,
+                        lerpArgb(0x00000000, 0x149A6BB8, hAnim), SIDEBAR_PILL_RADIUS);
             }
 
             String label = section.title;
@@ -338,12 +342,12 @@ public class IQGlobalConfigurationScreen extends Screen {
                 label = IqFonts.trim(label, w - 34) + "…";
             }
             IqFonts.draw(ctx, label, x + 16,
-                    sy + (SIDEBAR_ROW_H - IqFonts.lineHeight()) / 2,
+                    sy + (SIDEBAR_ROW_H - IqFonts.lineHeight()) * 0.5f,
                     active ? tMain() : (hovered ? tActionTextHov() : tMuted()));
 
             if (hovered) pendingTooltip = section.tooltip;
 
-            actionHits.add(new ActionHit(x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4,
+            actionHits.add(new ActionHit(x + 8, sy, w - 16, SIDEBAR_ROW_H,
                     () -> {
                         if (selectedSection != section) {
                             selectedSection = section;
@@ -1445,6 +1449,10 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private void drawRoundedRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
+    }
+
+    private void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, color, radius, glowWidth);
     }
 
     private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
