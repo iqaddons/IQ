@@ -78,6 +78,10 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
+    private static final int HEADER_ACTION_BTN_RADIUS = 5;
+    private static final float HEADER_ACTION_BTN_GLOW = 2.75f;
+    private static final int HEADER_ACTION_GLOW_ALPHA = 0x2A;
+    private static final int HEADER_ACTION_GLOW_ALPHA_HOV = 0x48;
     private static final int CORNER_R_LARGE = 10;
     private static final float PANEL_GLOW = 16f;
     private static final int PANEL_GLOW_ALPHA = 0x52;
@@ -1441,19 +1445,15 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private void drawHeaderActionButton(GuiGraphicsExtractor ctx, int x, int y, float hover) {
         int size = HEADER_ACTION_BTN_SIZE;
-        int glow = lerpArgb(0x10000000, withAlpha(themeAccentColor(), 0x34), hover);
-        int top = lerpArgb(themeButtonTop(false), themeButtonTop(true), hover);
-        int bottom = lerpArgb(themeButtonBottom(false), themeButtonBottom(true), hover);
-        int body = lerpArgb(themeButtonBody(false), themeButtonBody(true), hover);
-        int border = lerpArgb(withAlpha(themeBorderMid(), 0x88), withAlpha(themeAccentColor(), 0xAA), hover);
-
-        ctx.fill(x - 1, y - 1, x + size + 1, y + size + 1, glow);
-        ctx.fill(x, y, x + size, y + size / 2, top);
-        ctx.fill(x, y + size / 2, x + size, y + size, bottom);
-        ctx.fill(x + 1, y + 1, x + size - 1, y + size - 1, body);
-        ctx.fill(x + 1, y + 1, x + size - 1, y + 2, 0x42FFFFFF);
-        ctx.fill(x + 1, y + size - 2, x + size - 1, y + size - 1, 0x3A000000);
-        drawHollowRect(ctx, x, y, size, size, border);
+        int bg = lerpArgb(themeButtonTop(false), themeButtonTop(true), hover);
+        if (outlineShadow) {
+            int glowA = Math.round(HEADER_ACTION_GLOW_ALPHA
+                    + (HEADER_ACTION_GLOW_ALPHA_HOV - HEADER_ACTION_GLOW_ALPHA) * hover);
+            drawRoundedGlow(ctx, x, y, size, size, bg,
+                    withAlpha(themeAccentColor(), glowA), HEADER_ACTION_BTN_RADIUS, HEADER_ACTION_BTN_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, size, size, bg, HEADER_ACTION_BTN_RADIUS);
+        }
     }
 
     private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {

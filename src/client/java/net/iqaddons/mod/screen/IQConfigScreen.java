@@ -124,10 +124,16 @@ public class IQConfigScreen extends Screen {
     private static final int LINK_BTN_SIZE = 14;
     private static final int LINK_BTN_GAP = 4;
     private static final int LINK_ICON_SIZE = 10;
+    private static final int LINK_BTN_RADIUS = 4;
+    private static final float LINK_BTN_GLOW = 2.5f;
+    private static final int LINK_BTN_GLOW_ALPHA = 0x2A;
+    private static final int LINK_BTN_GLOW_ALPHA_HOV = 0x48;
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_ICON_SIZE = 12;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
+    private static final int HEADER_ACTION_BTN_RADIUS = 5;
+    private static final float HEADER_ACTION_BTN_GLOW = 2.75f;
 
     private static final int CORNER_R_SMALL = 0;
     private static final int CORNER_R_MED = 0;
@@ -590,9 +596,13 @@ public class IQConfigScreen extends Screen {
         for (ExternalLinkButton link : EXTERNAL_LINKS) {
             boolean hov = editingColor == null && isIn(frameMouseX, frameMouseY, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE);
             int btnBg = hov ? themeControlTopHover() : themeControlTop();
-            int btnBorder = hov ? withAlpha(themeAccentColor(), 0x88) : themedBorderDim();
-            drawRoundedRect(ctx, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE, btnBg, CORNER_R_SMALL);
-            drawRoundedHollowRect(ctx, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE, btnBorder);
+            if (sharedOutlineShadow) {
+                int glowA = hov ? LINK_BTN_GLOW_ALPHA_HOV : LINK_BTN_GLOW_ALPHA;
+                drawRoundedGlow(ctx, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE, btnBg,
+                        withAlpha(themeAccentColor(), glowA), LINK_BTN_RADIUS, LINK_BTN_GLOW);
+            } else {
+                drawRoundedRect(ctx, bx, by, LINK_BTN_SIZE, LINK_BTN_SIZE, btnBg, LINK_BTN_RADIUS);
+            }
 
             int ix = bx + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
             int iy = by + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
@@ -1017,7 +1027,7 @@ public class IQConfigScreen extends Screen {
 
         float reveal = sectionAnim(sectionKey(entry), entry.isExpanded());
         int chevronY = y + Math.round((h - SECTION_CHEVRON_SIZE) * 0.5f);
-        int chevronColor = hov ? 0xFFFFFFFF : 0xFFC9B4D5;
+        int chevronColor = hov ? themeTextMain() : themeTextMuted();
         drawSectionChevron(ctx, chevronX, chevronY, reveal, chevronColor);
     }
 
@@ -2541,24 +2551,14 @@ public class IQConfigScreen extends Screen {
 
     private void drawHeaderActionButton(GuiGraphicsExtractor ctx, int x, int y, float hover) {
         int size = HEADER_ACTION_BTN_SIZE;
-        int accRgb = themeAccentColor() & 0x00FFFFFF;
-        int glow = lerpArgb(0x10000000, (0x34 << 24) | accRgb, hover);
-        int top = lerpArgb(themeControlTop(), themeControlTopHover(), hover);
-        int bottom = lerpArgb(themeControlBottom(), themeControlBottomHover(), hover);
-        int body = lerpArgb(
-                lerpArgb(themeControlTop(), themeControlBottom(), 0.5f),
-                lerpArgb(themeControlTopHover(), themeControlBottomHover(), 0.5f),
-                hover);
-        int border = lerpArgb(withAlpha(themedBorderMid(), 0x88), (0xAA << 24) | accRgb, hover);
-
-        ctx.fill(x - 1, y - 1, x + size + 1, y + size + 1, glow);
-        ctx.fill(x, y, x + size, y + size / 2, top);
-        ctx.fill(x, y + size / 2, x + size, y + size, bottom);
-        ctx.fill(x + 1, y + 1, x + size - 1, y + size - 1, body);
-
-        ctx.fill(x + 1, y + 1, x + size - 1, y + 2, 0x42FFFFFF);
-        ctx.fill(x + 1, y + size - 2, x + size - 1, y + size - 1, 0x3A000000);
-        drawHollowRect(ctx, x, y, size, size, border);
+        int bg = lerpArgb(themeControlTop(), themeControlTopHover(), hover);
+        if (sharedOutlineShadow) {
+            int glowA = Math.round(LINK_BTN_GLOW_ALPHA + (LINK_BTN_GLOW_ALPHA_HOV - LINK_BTN_GLOW_ALPHA) * hover);
+            drawRoundedGlow(ctx, x, y, size, size, bg,
+                    withAlpha(themeAccentColor(), glowA), HEADER_ACTION_BTN_RADIUS, HEADER_ACTION_BTN_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, size, size, bg, HEADER_ACTION_BTN_RADIUS);
+        }
     }
 
     private void drawHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color) {
