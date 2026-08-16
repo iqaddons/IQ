@@ -1,6 +1,5 @@
 package net.iqaddons.mod.screen;
 
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ final class ScreenUiUtil {
         ctx.fill(x + w - 1, y + r, x + w, y + h - r, color);
     }
 
-    static List<String> wrapTextSimple(Font textRenderer, String text, int maxWidth) {
+    static List<String> wrapTextSimple(java.util.function.ToIntFunction<String> widthOf, String text, int maxWidth) {
         if (maxWidth <= 0) {
             return List.of(text);
         }
@@ -99,7 +98,7 @@ final class ScreenUiUtil {
         StringBuilder line = new StringBuilder();
         for (String word : words) {
             String candidate = line.isEmpty() ? word : line + " " + word;
-            if (textRenderer.width(candidate) <= maxWidth) {
+            if (widthOf.applyAsInt(candidate) <= maxWidth) {
                 line = new StringBuilder(candidate);
             } else {
                 if (!line.isEmpty()) {
@@ -114,7 +113,7 @@ final class ScreenUiUtil {
         return lines;
     }
 
-    static List<String> wrapTextParagraphs(Font textRenderer, String text, int maxWidth) {
+    static List<String> wrapTextParagraphs(java.util.function.ToIntFunction<String> widthOf, String text, int maxWidth) {
         if (maxWidth <= 0) {
             return List.of(text);
         }
@@ -131,15 +130,19 @@ final class ScreenUiUtil {
             StringBuilder line = new StringBuilder();
             for (String word : paragraph.split(" ")) {
                 String candidate = line.isEmpty() ? word : line + " " + word;
-                if (textRenderer.width(candidate) <= maxWidth) {
+                if (widthOf.applyAsInt(candidate) <= maxWidth) {
                     line = new StringBuilder(candidate);
                 } else {
                     if (!line.isEmpty()) {
                         lines.add(line.toString());
                         line = new StringBuilder();
                     }
-                    if (textRenderer.width(word) > maxWidth) {
-                        lines.add(textRenderer.plainSubstrByWidth(word, Math.max(0, maxWidth - 6)) + "\u2026");
+                    if (widthOf.applyAsInt(word) > maxWidth) {
+                        String trimmed = word;
+                        while (!trimmed.isEmpty() && widthOf.applyAsInt(trimmed + "\u2026") > maxWidth) {
+                            trimmed = trimmed.substring(0, trimmed.length() - 1);
+                        }
+                        lines.add(trimmed + "\u2026");
                     } else {
                         line = new StringBuilder(word);
                     }

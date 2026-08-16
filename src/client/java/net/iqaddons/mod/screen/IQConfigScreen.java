@@ -14,7 +14,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
@@ -390,9 +389,9 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, sbX, sbY, sbW, SEARCH_H,
                 searchFocused ? BORDER_BRIGHT : (sbHov ? BORDER_MID : BORDER_DIM));
 
-        int iconY = sbY + (SEARCH_H - minecraft.font.lineHeight) / 2;
-        ctx.text(minecraft.font, Component.literal("⌕"), sbX + 5, iconY, 0xA0E64BA8);
-        ctx.text(minecraft.font, Component.literal("⌕"), sbX + 4, iconY, 0xE8FFFFFF);
+        int iconY = sbY + (SEARCH_H - IqFonts.lineHeight()) / 2;
+        IqFonts.draw(ctx, "⌕", sbX + 5, iconY, 0xA0E64BA8);
+        IqFonts.draw(ctx, "⌕", sbX + 4, iconY, 0xE8FFFFFF);
 
         String q = searchQuery.toString();
         boolean blink = searchFocused && (cursorTick / 10) % 2 == 0;
@@ -400,17 +399,16 @@ public class IQConfigScreen extends Screen {
         if (q.isEmpty() && !searchFocused) {
             display = "§8Search…";
         } else {
-            String trimmed = minecraft.font.plainSubstrByWidth(q, sbW - 32);
+            String trimmed = IqFonts.trim(q, sbW - 32);
             display = "§f" + trimmed + (blink ? "§7|" : "");
         }
-        ctx.text(minecraft.font, Component.literal(display),
-                sbX + 15, sbY + (SEARCH_H - minecraft.font.lineHeight) / 2, T_MAIN);
+        IqFonts.draw(ctx, display,
+                sbX + 15, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MAIN);
 
         if (!q.isEmpty()) {
             boolean clrHov = isIn(frameMouseX, frameMouseY, sbX + sbW - 15, sbY, 12, SEARCH_H);
-            ctx.text(minecraft.font,
-                    Component.literal(clrHov ? "§c✕" : "§8✕"),
-                    sbX + sbW - 14, sbY + (SEARCH_H - minecraft.font.lineHeight) / 2, T_MUTED);
+            IqFonts.draw(ctx, clrHov ? "§c✕" : "§8✕",
+                    sbX + sbW - 14, sbY + (SEARCH_H - IqFonts.lineHeight()) / 2, T_MUTED);
         }
 
         int headerBtnY = y + (HEADER_H - HEADER_ACTION_BTN_SIZE) / 2;
@@ -438,16 +436,8 @@ public class IQConfigScreen extends Screen {
         int closeIconX = closeBtnX + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
         int iconY2 = headerBtnY + (HEADER_ACTION_BTN_SIZE - iconSize) / 2;
 
-        ctx.blit(RenderPipelines.GUI_TEXTURED, SETTINGS_ICON_TEXTURE,
-                settingsIconX, iconY2, 0f, 0f,
-                iconSize, iconSize,
-                SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H,
-                SETTINGS_ICON_TEX_W, SETTINGS_ICON_TEX_H);
-        ctx.blit(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
-                closeIconX, iconY2, 0f, 0f,
-                iconSize, iconSize,
-                CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE,
-                CLOSE_ICON_TEX_SIZE, CLOSE_ICON_TEX_SIZE);
+        IqIcons.draw(ctx, SETTINGS_ICON_TEXTURE, settingsIconX, iconY2, iconSize, SETTINGS_ICON_TEX_W, 0xFFFFFFFF);
+        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeIconX, iconY2, iconSize, CLOSE_ICON_TEX_SIZE, 0xFFFFFFFF);
 
         if (settingsHov) pendingTooltip = "Open Configuration Hub";
         if (closeHov) pendingTooltip = "Close config";
@@ -465,16 +455,12 @@ public class IQConfigScreen extends Screen {
 
         int lx = gx + 10, ly = gy + (LOGO_ZONE_H - LOGO_SIZE) / 2;
 
-        ctx.blit(RenderPipelines.GUI_TEXTURED, LOGO_TEXTURE,
-                lx, ly, 0f, 0f,
-                LOGO_SIZE, LOGO_SIZE,
-                LOGO_TEX_SIZE, LOGO_TEX_SIZE,
-                LOGO_TEX_SIZE, LOGO_TEX_SIZE);
+        IqIcons.draw(ctx, LOGO_TEXTURE, lx, ly, LOGO_SIZE, LOGO_TEX_SIZE, 0xFFFFFFFF);
 
-        ctx.text(minecraft.font, Component.literal("§d§lIQ"),
+        IqFonts.draw(ctx, "§d§lIQ",
                 lx + LOGO_SIZE + 8, ly + 4, T_ACCENT);
-        ctx.text(minecraft.font, Component.literal("§8Config"),
-                lx + LOGO_SIZE + 8, ly + 4 + minecraft.font.lineHeight + 3, 0x44FFFFFF);
+        IqFonts.draw(ctx, "§8Config",
+                lx + LOGO_SIZE + 8, ly + 4 + IqFonts.lineHeight() + 3, 0x44FFFFFF);
 
         renderExternalLinkButtons(ctx, gx, gy, sidebarW);
 
@@ -516,17 +502,17 @@ public class IQConfigScreen extends Screen {
             }
 
             String name = getSidebarDisplayName(category);
-            if (minecraft.font.width(name) > sidebarW - 28)
-                name = minecraft.font.plainSubstrByWidth(name, sidebarW - 36) + "…";
+            if (IqFonts.widthPx(name) > sidebarW - 28)
+                name = IqFonts.trim(name, sidebarW - 36) + "…";
 
             int col = active ? themeSidebarTextActive() : (hovered ? themeSidebarTextHover() : themeSidebarTextMuted());
-            ctx.text(minecraft.font, Component.literal(name),
-                    gx + 16, slot.y() + (SIDEBAR_ROW_H - minecraft.font.lineHeight) / 2, col);
+            IqFonts.draw(ctx, name,
+                    gx + 16, slot.y() + (SIDEBAR_ROW_H - IqFonts.lineHeight()) / 2, col);
             lastGroup = group;
         }
 
-        ctx.text(minecraft.font, Component.literal("§8MODRINTH VERSION v1.0.3"),
-                gx + 10, gy + gh - minecraft.font.lineHeight - 8, 0x22FFFFFF);
+        IqFonts.draw(ctx, "§8MODRINTH VERSION v1.0.3",
+                gx + 10, gy + gh - IqFonts.lineHeight() - 8, 0x22FFFFFF);
     }
 
     private void renderExternalLinkButtons(GuiGraphicsExtractor ctx, int gx, int gy, int sidebarW) {
@@ -542,11 +528,7 @@ public class IQConfigScreen extends Screen {
 
             int ix = bx + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
             int iy = by + (LINK_BTN_SIZE - LINK_ICON_SIZE) / 2;
-            ctx.blit(RenderPipelines.GUI_TEXTURED, link.iconTexture(),
-                    ix, iy, 0f, 0f,
-                    LINK_ICON_SIZE, LINK_ICON_SIZE,
-                    SOCIAL_ICON_TEX_SIZE, SOCIAL_ICON_TEX_SIZE,
-                    SOCIAL_ICON_TEX_SIZE, SOCIAL_ICON_TEX_SIZE);
+            IqIcons.draw(ctx, link.iconTexture(), ix, iy, LINK_ICON_SIZE, SOCIAL_ICON_TEX_SIZE, 0xFFFFFFFF);
             if (hov) pendingTooltip = link.tooltip();
             bx += LINK_BTN_SIZE + LINK_BTN_GAP;
         }
@@ -598,9 +580,7 @@ public class IQConfigScreen extends Screen {
         }
 
         if (entries.isEmpty() && !searchQuery.isEmpty()) {
-            ctx.centeredText(minecraft.font,
-                    Component.literal("§8No results for §7\"" + searchQuery + "\""),
-                    cx + cw / 2, cy + ch / 2, T_MUTED);
+            IqFonts.drawCentered(ctx, "§8No results for §7\"" + searchQuery + "\"", cx + cw / 2, cy + ch / 2, 0, IqFonts.lineHeight(), T_MUTED);
         }
     }
 
@@ -751,19 +731,19 @@ public class IQConfigScreen extends Screen {
         int minPillW = 24;
         int maxPillW = Math.max(minPillW, w - 28);
 
-        int textWRaw = minecraft.font.width(separatorText);
+        int textWRaw = IqFonts.widthPx(separatorText);
         int textW = Math.max(1, (int) Math.ceil(textWRaw * SEP_TEXT_SCALE));
         int pillW = Math.min(maxPillW, Math.max(minPillW, textW + (textPaddingX * 2)));
         if (textW + (textPaddingX * 2) > maxPillW) {
             int maxTextW = Math.max(10, (int) Math.floor((maxPillW - (textPaddingX * 2)) / SEP_TEXT_SCALE));
-            String trimmed = minecraft.font.plainSubstrByWidth(up, maxTextW);
+            String trimmed = IqFonts.trim(up, maxTextW);
             separatorText = Component.literal(trimmed).copy().withStyle(style -> style.withBold(true));
-            textWRaw = minecraft.font.width(separatorText);
+            textWRaw = IqFonts.widthPx(separatorText);
             textW = Math.max(1, (int) Math.ceil(textWRaw * SEP_TEXT_SCALE));
             pillW = Math.min(maxPillW, Math.max(minPillW, textW + (textPaddingX * 2)));
         }
 
-        int scaledFontH = Math.max(1, (int) Math.ceil(minecraft.font.lineHeight * SEP_TEXT_SCALE));
+        int scaledFontH = Math.max(1, (int) Math.ceil(IqFonts.lineHeight() * SEP_TEXT_SCALE));
         int pillH = Math.max(10, scaledFontH + (textPaddingY * 2));
         int pillX = x + (w - pillW) / 2;
         int pillY = centerY - (pillH / 2);
@@ -789,7 +769,7 @@ public class IQConfigScreen extends Screen {
         ctx.pose().pushMatrix();
         ctx.pose().translate(tx, ty);
         ctx.pose().scale(SEP_TEXT_SCALE, SEP_TEXT_SCALE);
-        ctx.text(minecraft.font, separatorText, 0, 0, themeSepText());
+        IqFonts.draw(ctx, separatorText, 0, 0, themeSepText());
         ctx.pose().popMatrix();
     }
 
@@ -808,31 +788,31 @@ public class IQConfigScreen extends Screen {
         if (exp) drawRoundedRect(ctx, x, y, 2, 3, withAlpha(themeAccentColor(), 0xFF), CORNER_R_SMALL);
 
         String hint = sectionHint(entry);
-        int hintW = minecraft.font.width(hint);
+        int hintW = IqFonts.widthPx(hint);
         int hintX = x + w - hintW - PADDING;
 
         if (hasDesc) {
             int labelY = y + 7;
             int descAvailW = Math.max(60, hintX - (x + 10) - 8);
-            ctx.text(minecraft.font, Component.literal(entry.getLabel()), x + 10, labelY, themeTextMain());
+            IqFonts.draw(ctx, entry.getLabel(), x + 10, labelY, themeTextMain());
 
             List<String> lines = wrapText(entry.getDescription(), descAvailW);
-            int descY = labelY + minecraft.font.lineHeight + 3;
+            int descY = labelY + IqFonts.lineHeight() + 3;
             for (int li = 0; li < Math.min(2, lines.size()); li++) {
                 String ln = lines.get(li);
                 if (li == 1 && lines.size() > 2) {
-                    ln = minecraft.font.plainSubstrByWidth(ln, descAvailW - 10) + "…";
+                    ln = IqFonts.trim(ln, descAvailW - 10) + "…";
                 }
-                ctx.text(minecraft.font, Component.literal(ln),
-                        x + 10, descY + li * (minecraft.font.lineHeight + 1), themeFeatureDescriptionColor());
+                IqFonts.draw(ctx, ln,
+                        x + 10, descY + li * (IqFonts.lineHeight() + 1), themeFeatureDescriptionColor());
             }
             if (hov && lines.size() > 2) pendingTooltip = entry.getDescription();
-            ctx.text(minecraft.font, Component.literal(hint), hintX, labelY, themeTextMuted());
+            IqFonts.draw(ctx, hint, hintX, labelY, themeTextMuted());
         } else {
-            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
-                    x + 10, y + (h - minecraft.font.lineHeight) / 2, themeTextMain());
-            ctx.text(minecraft.font, Component.literal(hint),
-                    hintX, y + (h - minecraft.font.lineHeight) / 2, themeTextMuted());
+            IqFonts.draw(ctx, entry.getLabel(),
+                    x + 10, y + (h - IqFonts.lineHeight()) / 2, themeTextMain());
+            IqFonts.draw(ctx, hint,
+                    hintX, y + (h - IqFonts.lineHeight()) / 2, themeTextMuted());
         }
 
         drawRoundedHollowRect(ctx, x, y, w, h, lerpArgb(themedBorderDim(), themedBorderBright(), hAnim * (exp ? 1f : 0.4f)));
@@ -856,22 +836,22 @@ public class IQConfigScreen extends Screen {
 
         if (hasDesc) {
             int labelY = y + 7;
-            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
+            IqFonts.draw(ctx, entry.getLabel(),
                     x + PADDING, labelY, themeFeatureTitleColor());
 
             List<String> lines = wrapText(entry.getDescription(), Math.max(60, descAvailW));
-            int descY = labelY + minecraft.font.lineHeight + 3;
+            int descY = labelY + IqFonts.lineHeight() + 3;
             for (int li = 0; li < Math.min(2, lines.size()); li++) {
                 String ln = lines.get(li);
                 if (li == 1 && lines.size() > 2)
-                    ln = minecraft.font.plainSubstrByWidth(ln, descAvailW - 10) + "…";
-                ctx.text(minecraft.font, Component.literal(ln),
-                        x + PADDING, descY + li * (minecraft.font.lineHeight + 1), themeFeatureDescriptionColor());
+                    ln = IqFonts.trim(ln, descAvailW - 10) + "…";
+                IqFonts.draw(ctx, ln,
+                        x + PADDING, descY + li * (IqFonts.lineHeight() + 1), themeFeatureDescriptionColor());
             }
             if (hov && lines.size() > 2) pendingTooltip = entry.getDescription();
         } else {
-            ctx.text(minecraft.font, Component.literal(entry.getLabel()),
-                    x + PADDING, y + (h - minecraft.font.lineHeight) / 2, themeFeatureTitleColor());
+            IqFonts.draw(ctx, entry.getLabel(),
+                    x + PADDING, y + (h - IqFonts.lineHeight()) / 2, themeFeatureTitleColor());
         }
 
         int re = x + w - PADDING, cy = y + h / 2;
@@ -917,10 +897,8 @@ public class IQConfigScreen extends Screen {
         ctx.fill(splitX + 1, innerY, innerX + innerW, innerY + innerH, normal ? activeBg : idleBg);
         ctx.fill(splitX, innerY + 2, splitX + 1, innerY + innerH - 2, 0x2E8EA3BF);
 
-        ctx.centeredText(minecraft.font, Component.literal("Simple"),
-                innerX + (segW / 2), cy - minecraft.font.lineHeight / 2, simple ? activeText : idleText);
-        ctx.centeredText(minecraft.font, Component.literal("Normal"),
-                splitX + ((innerW - segW) / 2), cy - minecraft.font.lineHeight / 2, normal ? activeText : idleText);
+        IqFonts.drawCentered(ctx, "Simple", innerX + (segW / 2), cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), simple ? activeText : idleText);
+        IqFonts.drawCentered(ctx, "Normal", splitX + ((innerW - segW) / 2), cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), normal ? activeText : idleText);
     }
 
     private void renderToggle(GuiGraphicsExtractor ctx, ConfigEntryModel e, int rx, int cy, boolean hov) {
@@ -957,20 +935,20 @@ public class IQConfigScreen extends Screen {
             String vs = formatSlider(e, v);
 
             if (editingSlider == e) {
-                int valueTextW = minecraft.font.width(vs) + 8;
+                int valueTextW = IqFonts.widthPx(vs) + 8;
                 int valueX = rx - SLIDER_W - 5 - valueTextW;
-                int valueY = cy - minecraft.font.lineHeight / 2 - 2;
-                int valueH = minecraft.font.lineHeight + 4;
+                int valueY = cy - IqFonts.lineHeight() / 2 - 2;
+                int valueH = IqFonts.lineHeight() + 4;
 
                 ctx.fill(valueX - 2, valueY - 2, valueX + valueTextW + 2, valueY + valueH + 2, BG_ENTRY);
                 drawHollowRect(ctx, valueX - 2, valueY - 2, valueTextW + 4, valueH + 4, themeAccentColor());
 
-                ctx.text(minecraft.font, Component.literal(sliderEditBuffer.toString()),
+                IqFonts.draw(ctx, sliderEditBuffer.toString(),
                         valueX, valueY, T_MAIN);
 
                 if ((System.currentTimeMillis() / 500) % 2 == 0) {
-                    int cursorX = valueX + minecraft.font.width(sliderEditBuffer.toString());
-                    ctx.fill(cursorX, valueY, cursorX + 1, valueY + minecraft.font.lineHeight, T_MAIN);
+                    int cursorX = valueX + IqFonts.widthPx(sliderEditBuffer.toString());
+                    ctx.fill(cursorX, valueY, cursorX + 1, valueY + IqFonts.lineHeight(), T_MAIN);
                 }
             } else {
                 double t = clamp01((v - e.getRangeMin()) / (e.getRangeMax() - e.getRangeMin()));
@@ -986,12 +964,12 @@ public class IQConfigScreen extends Screen {
                 int hx = sx + fw - 4, hh = drag ? 14 : 10;
                 ctx.fill(hx, cy - hh / 2, hx + 8, cy + hh / 2, SLIDER_HANDLE);
 
-                int valueTextW = minecraft.font.width(vs);
+                int valueTextW = IqFonts.widthPx(vs);
                 sliderEditValueX = sx - valueTextW - 5;
-                sliderEditValueY = cy - minecraft.font.lineHeight / 2;
+                sliderEditValueY = cy - IqFonts.lineHeight() / 2;
                 sliderEditValueW = valueTextW + 10;
 
-                ctx.text(minecraft.font, Component.literal(vs),
+                IqFonts.draw(ctx, vs,
                         sliderEditValueX, sliderEditValueY, themeTextMuted());
             }
         } catch (Exception ex) {
@@ -1020,10 +998,7 @@ public class IQConfigScreen extends Screen {
                     : (vs + " >");
 
             ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-            ctx.centeredText(minecraft.font,
-                    Component.literal(label),
-                    bx + bw / 2 - xOff, cy - minecraft.font.lineHeight / 2,
-                    hov ? themeActionTextHoverColor() : themeActionTextColor());
+            IqFonts.drawCentered(ctx, label, bx + bw / 2 - xOff, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), hov ? themeActionTextHoverColor() : themeActionTextColor());
             ctx.disableScissor();
         } catch (Exception ex) {
             log.warn("Select: {}", e.getLabel(), ex);
@@ -1037,8 +1012,7 @@ public class IQConfigScreen extends Screen {
             renderCheckerboard(ctx, sx, sy, SWATCH_W, SWATCH_H);
             ctx.fill(sx, sy, sx + SWATCH_W, sy + SWATCH_H, argb);
             drawHollowRect(ctx, sx - 1, sy - 1, SWATCH_W + 2, SWATCH_H + 2, hov ? themeAccentColor() : BORDER_MID);
-            if (hov) ctx.centeredText(minecraft.font, Component.literal("§f✎"),
-                    sx + SWATCH_W / 2, cy - minecraft.font.lineHeight / 2, 0xFFFFFFFF);
+            if (hov) IqFonts.drawCentered(ctx, "§f✎", sx + SWATCH_W / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), 0xFFFFFFFF);
         } catch (Exception ex) {
             log.warn("Swatch: {}", e.getLabel(), ex);
         }
@@ -1049,9 +1023,7 @@ public class IQConfigScreen extends Screen {
         int bw = buttonControlWidth(e);
         int bx = rx - bw, by = cy - CONTROL_H / 2;
         renderActionControl(ctx, bx, by, bw, hov);
-        ctx.centeredText(minecraft.font, Component.literal(text),
-                bx + bw / 2, cy - minecraft.font.lineHeight / 2,
-                hov ? themeActionTextHoverColor() : themeActionTextColor());
+        IqFonts.drawCentered(ctx, text, bx + bw / 2, cy - IqFonts.lineHeight() / 2, 0, IqFonts.lineHeight(), hov ? themeActionTextHoverColor() : themeActionTextColor());
     }
 
     private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {
@@ -1102,9 +1074,8 @@ public class IQConfigScreen extends Screen {
         ctx.fill(px, py, px + ceW, py + ceH, BG_COLOR_ED);
         drawGlowBorder(ctx, px, py, ceW, ceH);
 
-        ctx.centeredText(minecraft.font, Component.literal("Edit Color"),
-                px + ceW / 2, py + 9, themeHubAccentTextColor());
-        ctx.text(minecraft.font, Component.literal("✕"), layout.closeX(), py + 9, themeTextMuted());
+        IqFonts.drawCentered(ctx, "Edit Color", px + ceW / 2, py + 9, 0, IqFonts.lineHeight(), themeHubAccentTextColor());
+        IqFonts.draw(ctx, "✕", layout.closeX(), py + 9, themeTextMuted());
 
         try {
             int argb = (int) editingColor.getField().get(null);
@@ -1119,9 +1090,7 @@ public class IQConfigScreen extends Screen {
             renderCheckerboard(ctx, prevX, prevY, layout.previewW(), 18);
             ctx.fill(prevX, prevY, prevX + layout.previewW(), prevY + 18, argb);
             drawHollowRect(ctx, prevX - 1, prevY - 1, layout.previewW() + 2, 20, BORDER_BRIGHT);
-            ctx.centeredText(minecraft.font,
-                    Component.literal(String.format("#%08X", argb)),
-                    px + ceW / 2, prevY + 22, themeTextMuted());
+            IqFonts.drawCentered(ctx, String.format("#%08X", argb), px + ceW / 2, prevY + 22, 0, IqFonts.lineHeight(), themeTextMuted());
 
             int svX = layout.svX(), svY = layout.svY(), svSize = layout.svSize();
             drawSvSquare(ctx, svX, svY, svSize, h);
@@ -1133,14 +1102,14 @@ public class IQConfigScreen extends Screen {
             drawHueTrack(ctx, tx, layout.hueY(), tw);
             int hx = tx + (int) (h * tw);
             drawHollowRect(ctx, hx - 2, layout.hueY() - 2, 5, 12, 0xFFFFFFFF);
-            ctx.text(minecraft.font, Component.literal("H"), tx - 10, layout.hueY() - 1, themeTextMuted());
+            IqFonts.draw(ctx, "H", tx - 10, layout.hueY() - 1, themeTextMuted());
 
             if (editingColor.isHasAlpha()) {
                 renderCheckerboard(ctx, tx, layout.alphaY(), tw, 8);
                 drawAlphaTrack(ctx, tx, layout.alphaY(), tw, h, s, v);
                 int ax = tx + (int) ((a / 255f) * tw);
                 drawHollowRect(ctx, ax - 2, layout.alphaY() - 2, 5, 12, 0xFFFFFFFF);
-                ctx.text(minecraft.font, Component.literal("A"), tx - 10, layout.alphaY() - 1, themeTextMuted());
+                IqFonts.draw(ctx, "A", tx - 10, layout.alphaY() - 1, themeTextMuted());
             }
         } catch (Exception e) {
             log.warn("Color editor render", e); }
@@ -1193,8 +1162,8 @@ public class IQConfigScreen extends Screen {
 
     private void renderTooltip(GuiGraphicsExtractor ctx, String text) {
         List<String> lines = wrapText(text, 240);
-        int fh = minecraft.font.lineHeight, lh = fh + 2;
-        int tw = lines.stream().mapToInt(l -> minecraft.font.width(l)).max().orElse(60);
+        int fh = IqFonts.lineHeight(), lh = fh + 2;
+        int tw = lines.stream().mapToInt(l -> IqFonts.widthPx(l)).max().orElse(60);
         int bw = tw + 14, bh = lines.size() * lh + 10;
         int tx = frameMouseX + 12, ty = frameMouseY + 12;
         if (tx + bw > width - 4) tx = frameMouseX - bw - 8;
@@ -1203,7 +1172,7 @@ public class IQConfigScreen extends Screen {
         drawRoundedHollowRect(ctx, tx, ty, bw, bh, themeTooltipBorderColor(), CORNER_R_SMALL);
         ctx.fill(tx + 1, ty + 1, tx + 3, ty + bh - 1, withAlpha(themeAccentColor(), 0x8A));
         for (int i = 0; i < lines.size(); i++)
-            ctx.text(minecraft.font, Component.literal(lines.get(i)),
+            IqFonts.draw(ctx, lines.get(i),
                     tx + 7, ty + 5 + i * lh, themeTooltipTextColor());
     }
 
@@ -1337,9 +1306,9 @@ public class IQConfigScreen extends Screen {
                 if (button == 0) {
                     try {
                         int sx = re2 - SLIDER_W;
-                        int valueX = sx - minecraft.font.width(formatSlider(entry, getDouble(entry.getField()))) - 10;
-                        int valueY = re.y() + (re.h() - minecraft.font.lineHeight) / 2 - 2;
-                        int valueW = minecraft.font.width(formatSlider(entry, getDouble(entry.getField()))) + 10;
+                        int valueX = sx - IqFonts.widthPx(formatSlider(entry, getDouble(entry.getField()))) - 10;
+                        int valueY = re.y() + (re.h() - IqFonts.lineHeight()) / 2 - 2;
+                        int valueW = IqFonts.widthPx(formatSlider(entry, getDouble(entry.getField()))) + 10;
 
                         if (doubled && mx >= valueX && mx <= valueX + valueW) {
                             editingSlider = entry;
@@ -1574,7 +1543,7 @@ public class IQConfigScreen extends Screen {
             case SEPARATOR      -> SEP_H;
             case SECTION_HEADER -> {
                 if (e.getDescription() == null || e.getDescription().isBlank()) yield SEC_H;
-                int hintW = minecraft != null ? minecraft.font.width(sectionHint(e)) : 30;
+                int hintW = minecraft != null ? IqFonts.widthPx(sectionHint(e)) : 30;
                 int descW = cachedGw - cachedSidebarW - 14 - PADDING - hintW - 10 - PADDING;
                 List<String> lines = wrapText(e.getDescription(), Math.max(60, descW));
                 yield lines.size() > 1 ? ROW_H_FULL_2 : ROW_H_FULL_1;
@@ -1596,13 +1565,13 @@ public class IQConfigScreen extends Screen {
 
         int categoryTextW = categories.stream()
                 .map(ConfigCategory::name)
-                .mapToInt(minecraft.font::width)
+                .mapToInt(s -> Math.round(IqFonts.width(s)))
                 .max()
                 .orElse(0);
 
-        int logoTitleW = minecraft.font.width("IQ");
-        int logoSubtitleW = minecraft.font.width("Config");
-        int footerW = minecraft.font.width("Modrinth Version v1.0.3");
+        int logoTitleW = IqFonts.widthPx("IQ");
+        int logoSubtitleW = IqFonts.widthPx("Config");
+        int footerW = IqFonts.widthPx("Modrinth Version v1.0.3");
 
         int desiredW = Math.max(
                 SIDEBAR_BASE_W,
@@ -1944,7 +1913,7 @@ public class IQConfigScreen extends Screen {
         try {
             Object val = e.getField().get(null);
             String vs = toTitleCase(val != null ? val.toString() : "?");
-            int textW = minecraft.font.width(vs + " >");
+            int textW = IqFonts.widthPx(vs + " >");
             return clampControlWidth(textW + (CONTROL_TEXT_PAD_X * 2));
         } catch (Exception ignored) {
             return SELECT_W;
@@ -1954,7 +1923,7 @@ public class IQConfigScreen extends Screen {
     private int buttonControlWidth(ConfigEntryModel e) {
         if (minecraft == null) return BUTTON_W;
         String text = e.getButtonText() != null ? e.getButtonText() : "RUN";
-        int textW = minecraft.font.width(text);
+        int textW = IqFonts.widthPx(text);
         return clampControlWidth(textW + (CONTROL_TEXT_PAD_X * 2));
     }
 
@@ -2044,7 +2013,7 @@ public class IQConfigScreen extends Screen {
         List<String> cached = wrapTextCache.get(cacheKey);
         if (cached != null) return cached;
 
-        List<String> wrapped = ScreenUiUtil.wrapTextParagraphs(minecraft.font, text, maxWidth);
+        List<String> wrapped = ScreenUiUtil.wrapTextParagraphs(s -> Math.round(IqFonts.width(s)), text, maxWidth);
         List<String> snapshot = List.copyOf(wrapped);
         if (wrapTextCache.size() >= 512) wrapTextCache.clear();
         wrapTextCache.put(cacheKey, snapshot);
