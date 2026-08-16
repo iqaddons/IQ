@@ -138,7 +138,7 @@ public class Configuration {
             translation = "Loadouts Keybinds"
     )
     @Comment("Enable loadouts slot selection using keybinds.\n" +
-            "Configure slot keybinds in Options → Controls → Keybinds")
+            "Configure slot keybinds in Options > Controls > Keybinds")
     public static boolean loadoutsKeybinds = true;
 
     @ConfigEntry(
@@ -155,7 +155,7 @@ public class Configuration {
             translation = "Wardrobe Keybinds"
     )
     @Comment("Enable wardrobe slot selection using keybinds.\n" +
-            "Configure slot keybinds in Options → Controls → Keybinds.")
+            "Configure slot keybinds in Options > Controls > Keybinds.")
     public static boolean wardrobeKeybinds = true;
 
     @ConfigEntry(

@@ -9,7 +9,6 @@ import net.iqaddons.mod.screen.model.ConfigEntryModel.EntryType;
 import net.iqaddons.mod.utils.ConfigReflectionUtil;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -35,7 +34,6 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private static final Identifier BACK_ICON_TEXTURE  = Identifier.fromNamespaceAndPath("iq", "textures/social/back.png");
     private static final Identifier CLOSE_ICON_TEXTURE = Identifier.fromNamespaceAndPath("iq", "textures/social/close.png");
-    private static final int ICON_TEX_SIZE = 24;
     private static final int ICON_RENDER_SIZE = 12;
 
     private static final int BG_OUTER = 0x7A000000;
@@ -58,8 +56,6 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int ACCENT = 0xFFD650AB;
     private static final int TOGGLE_ON = 0xFFEC4BAF;
     private static final int TOGGLE_OFF = 0xC2261B2D;
-    private static final int TOGGLE_OUTLINE_IDLE = 0x664C335A;
-    private static final int TOGGLE_OUTLINE_HOV = 0x8A7A4B90;
 
     private static final float GUI_W_RATIO = 0.49f;
     private static final float GUI_H_RATIO = 0.47f;
@@ -73,12 +69,36 @@ public class IQGlobalConfigurationScreen extends Screen {
     private static final int HEADER_H = 42;
     private static final int SIDEBAR_ROW_H = 24;
     private static final int SIDEBAR_ROW_GAP = 2;
+    private static final int SIDEBAR_PILL_H = 16;
+    private static final int SIDEBAR_PILL_RADIUS = 5;
+    private static final float SIDEBAR_PILL_GLOW = 4f;
     private static final int ROW_H = 22;
+    private static final int ROW_GAP = 6;
+    private static final int CARD_RADIUS = 6;
+    private static final float CARD_GLOW = 6f;
+    private static final int CARD_GLOW_ALPHA = 0x3A;
+    private static final int CARD_GLOW_ALPHA_HOV = 0x55;
     private static final int PAD = 10;
     private static final int CONTROL_H = 15;
+    private static final int CONTROL_RADIUS = 4;
+    private static final float CONTROL_GLOW = 2.5f;
+    private static final int CONTROL_GLOW_ALPHA = 0x28;
+    private static final int CONTROL_GLOW_ALPHA_HOV = 0x44;
+    private static final float SLIDER_SPEED = 9.0f;
+    private static final float SLIDER_SPEED_DRAG = 13.0f;
     private static final int HEADER_ACTION_BTN_SIZE = 19;
     private static final int HEADER_ACTION_BTN_GAP = 6;
     private static final int HEADER_ACTION_BTN_RIGHT_PAD = 8;
+    private static final int HEADER_ACTION_BTN_RADIUS = 5;
+    private static final float HEADER_ACTION_BTN_GLOW = 2.75f;
+    private static final int HEADER_ACTION_GLOW_ALPHA = 0x2A;
+    private static final int HEADER_ACTION_GLOW_ALPHA_HOV = 0x48;
+    private static final int TOOLTIP_RADIUS = 6;
+    private static final float TOOLTIP_GLOW = 3.5f;
+    private static final int TOOLTIP_GLOW_ALPHA = 0x3A;
+    private static final int CORNER_R_LARGE = 10;
+    private static final float PANEL_GLOW = 16f;
+    private static final int PANEL_GLOW_ALPHA = 0x52;
 
     private static final String[] THEMES = {"Default (IQ)", "Dark", "Light", "Ocean (Blue)", "Crimson (Red)", "Emerald (Green)"};
     private static final boolean HIDE_LIGHT_THEME = true;
@@ -97,6 +117,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     private final Map<String, Float> toggleAnims = new java.util.HashMap<>();
     private final Map<String, Float> selectSlideAnims = new java.util.HashMap<>();
     private final Map<String, Integer> selectSlideDirs = new java.util.HashMap<>();
+    private final Map<String, Float> sliderAnims = new java.util.HashMap<>();
+    private final Map<String, Float> sliderTargets = new java.util.HashMap<>();
 
     private @Nullable SliderHit draggingSlider;
     private double contentScroll = 0;
@@ -112,6 +134,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     private boolean closeHandled = false;
     private @Nullable Screen closeTarget;
     private long lastTransitionTimeMs = -1L;
+    private long animLastNanos = 0L;
+    private float animFrameSteps = 1f;
 
     private int frameMouseX = 0;
     private int frameMouseY = 0;
@@ -201,6 +225,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     @Override
     public void extractRenderState(@NotNull GuiGraphicsExtractor ctx, int mouseX, int mouseY, float a) {
         updateScreenTransition();
+        beginAnimFrame();
         frameMouseX = mouseX;
         frameMouseY = mouseY;
         pendingTooltip = null;
@@ -228,10 +253,8 @@ public class IQGlobalConfigurationScreen extends Screen {
         overlayAlpha = (int) (overlayAlpha * renderTransition);
         ctx.fill(0, 0, width, height, (overlayAlpha << 24) | (BG_OUTER & 0x00FFFFFF));
 
-        int radius = 0;
         int accent = currentAccentColor();
-        drawGlowBorder(ctx, panelX, panelY, panelW, panelH, radius, accent);
-        drawRoundedRect(ctx, panelX, panelY, panelW, panelH, themePanelColor(), radius);
+        drawPanelShell(ctx, panelX, panelY, panelW, panelH, themePanelColor());
         int splitX = panelX + sidebarW;
         ctx.fill(splitX - 1, panelY, splitX, panelY + panelH, 0x22FFFFFF);
 
@@ -243,7 +266,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderHeader(GuiGraphicsExtractor ctx, int x, int y, int w) {
-        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0);
+        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0, CORNER_R_LARGE, 0, 0);
         ctx.fill(x, y + HEADER_H - 1, x + w, y + HEADER_H, 0x22FFFFFF);
 
         ConfigSection section = selectedSection;
@@ -255,12 +278,12 @@ public class IQGlobalConfigurationScreen extends Screen {
         int backX = getHeaderActionButtonsStartX(x, w);
         int closeX = backX + HEADER_ACTION_BTN_SIZE + HEADER_ACTION_BTN_GAP;
         int textMaxW = Math.max(40, (backX - 8) - (x + 10));
-        if (minecraft.font.width(title) > textMaxW) title = minecraft.font.plainSubstrByWidth(title, textMaxW - 6) + "...";
-        if (minecraft.font.width(subtitle) > textMaxW) subtitle = minecraft.font.plainSubstrByWidth(subtitle, textMaxW - 6) + "...";
+        if (IqFonts.widthPx(title) > textMaxW) title = IqFonts.trim(title, textMaxW - 6) + "...";
+        if (IqFonts.widthPx(subtitle) > textMaxW) subtitle = IqFonts.trim(subtitle, textMaxW - 6) + "...";
 
-        ctx.text(minecraft.font, Component.literal(title), x + 10, titleY, tMain());
-        ctx.text(minecraft.font, Component.literal(subtitle),
-                x + 10, titleY + minecraft.font.lineHeight + 2, tMuted());
+        IqFonts.draw(ctx, title, x + 10, titleY, tMain());
+        IqFonts.draw(ctx, subtitle,
+                x + 10, titleY + IqFonts.lineHeight() + 2, tMuted());
 
         boolean backHover  = isIn(frameMouseX, frameMouseY, backX,  btnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
         boolean closeHover = isIn(frameMouseX, frameMouseY, closeX, btnY, HEADER_ACTION_BTN_SIZE, HEADER_ACTION_BTN_SIZE);
@@ -278,17 +301,8 @@ public class IQGlobalConfigurationScreen extends Screen {
         int iconOffX = (HEADER_ACTION_BTN_SIZE - ICON_RENDER_SIZE) / 2;
         int iconOffY = (HEADER_ACTION_BTN_SIZE - ICON_RENDER_SIZE) / 2;
 
-        ctx.blit(RenderPipelines.GUI_TEXTURED, BACK_ICON_TEXTURE,
-                backX + iconOffX, btnY + iconOffY, 0f, 0f,
-                ICON_RENDER_SIZE, ICON_RENDER_SIZE,
-                ICON_TEX_SIZE, ICON_TEX_SIZE,
-                ICON_TEX_SIZE, ICON_TEX_SIZE);
-
-        ctx.blit(RenderPipelines.GUI_TEXTURED, CLOSE_ICON_TEXTURE,
-                closeX + iconOffX, btnY + iconOffY, 0f, 0f,
-                ICON_RENDER_SIZE, ICON_RENDER_SIZE,
-                ICON_TEX_SIZE, ICON_TEX_SIZE,
-                ICON_TEX_SIZE, ICON_TEX_SIZE);
+        IqIcons.draw(ctx, BACK_ICON_TEXTURE, backX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, 0xFFFFFFFF);
+        IqIcons.draw(ctx, CLOSE_ICON_TEXTURE, closeX + iconOffX, btnY + iconOffY, ICON_RENDER_SIZE, 0xFFFFFFFF);
 
         if (backHover)  pendingTooltip = "Back to main configuration";
         if (closeHover) pendingTooltip = "Close config";
@@ -300,20 +314,20 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderSidebar(GuiGraphicsExtractor ctx, int x, int y, int w, int h) {
-        drawRoundedRect(ctx, x, y, w, h, themeSidebarColor(), 0);
+        drawRoundedRect(ctx, x, y, w, h, themeSidebarColor(), CORNER_R_LARGE, 0, 0, CORNER_R_LARGE);
 
-        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), 0);
+        drawRoundedRect(ctx, x, y, w, HEADER_H, themeHeaderColor(), CORNER_R_LARGE, 0, 0, 0);
         ctx.fill(x, y + HEADER_H - 1, x + w, y + HEADER_H, 0x22FFFFFF);
-        ctx.text(minecraft.font, Component.literal(themeHubTitle()), x + 10, y + 7, tHubTitle());
-        ctx.text(minecraft.font, Component.literal(themeHubSubtitle()), x + 10,
-                y + 7 + minecraft.font.lineHeight + 2, tHubSubtitle());
+        IqFonts.draw(ctx, themeHubTitle(), x + 10, y + 7, tHubTitle());
+        IqFonts.draw(ctx, themeHubSubtitle(), x + 10,
+                y + 7 + IqFonts.lineHeight() + 2, tHubSubtitle());
 
         sidebarSlots.clear();
         int rowY = y + HEADER_H + 8;
         for (ConfigSection section : ConfigSection.values()) {
             sidebarSlots.add(new SidebarSlot(section, rowY));
             if (section == selectedSection) {
-                float target = rowY + 2f;
+                float target = rowY + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) * 0.5f;
                 if (catPillY < 0f) catPillY = target;
                 catPillY += (target - catPillY) * animRate(0.18f);
             }
@@ -321,40 +335,41 @@ public class IQGlobalConfigurationScreen extends Screen {
         }
 
         if (catPillY >= 0f) {
-            int pillY = (int) catPillY;
-            int pillH = SIDEBAR_ROW_H - 4;
+            int pillY = Math.round(catPillY);
             int accent = themeAccentColor();
-            drawRoundedRect(ctx, x + 7, pillY - 1, w - 14, pillH + 2, withAlpha(accent, 0x1E), 0);
-            drawRoundedRect(ctx, x + 8, pillY, w - 16, pillH, withAlpha(accent, 0x4A), 0);
-            drawRoundedRect(ctx, x + 8, pillY, 3, pillH, accent, 0);
+            int pillX = x + 8;
+            int pillW = w - 16;
+            drawRoundedGlow(ctx, pillX, pillY, pillW, SIDEBAR_PILL_H,
+                    withAlpha(accent, 0x4A), SIDEBAR_PILL_RADIUS, SIDEBAR_PILL_GLOW);
         }
 
         for (SidebarSlot slot : sidebarSlots) {
             ConfigSection section = slot.section();
             int sy = slot.y();
             boolean active = section == selectedSection;
-            boolean hovered = isIn(frameMouseX, frameMouseY, x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4);
+            boolean hovered = isIn(frameMouseX, frameMouseY, x + 8, sy, w - 16, SIDEBAR_ROW_H);
             String hKey = "side#" + section.name();
             float hAnim = hoverAnims.getOrDefault(hKey, 0f);
             hAnim += ((hovered ? 1f : 0f) - hAnim) * animRate(0.28f);
             hoverAnims.put(hKey, hAnim);
 
             if (!active && hAnim > 0.01f) {
-                drawRoundedRect(ctx, x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4,
-                        lerpArgb(0x00000000, 0x149A6BB8, hAnim), 0);
+                int hoverY = sy + (SIDEBAR_ROW_H - SIDEBAR_PILL_H) / 2;
+                drawRoundedRect(ctx, x + 8, hoverY, w - 16, SIDEBAR_PILL_H,
+                        lerpArgb(0x00000000, 0x149A6BB8, hAnim), SIDEBAR_PILL_RADIUS);
             }
 
             String label = section.title;
-            if (minecraft.font.width(label) > w - 28) {
-                label = minecraft.font.plainSubstrByWidth(label, w - 34) + "…";
+            if (IqFonts.widthPx(label) > w - 28) {
+                label = IqFonts.trim(label, w - 34) + "…";
             }
-            ctx.text(minecraft.font, Component.literal(label), x + 16,
-                    sy + (SIDEBAR_ROW_H - minecraft.font.lineHeight) / 2,
+            IqFonts.draw(ctx, label, x + 16,
+                    sy + (SIDEBAR_ROW_H - IqFonts.lineHeight()) * 0.5f,
                     active ? tMain() : (hovered ? tActionTextHov() : tMuted()));
 
             if (hovered) pendingTooltip = section.tooltip;
 
-            actionHits.add(new ActionHit(x + 8, sy + 2, w - 16, SIDEBAR_ROW_H - 4,
+            actionHits.add(new ActionHit(x + 8, sy, w - 16, SIDEBAR_ROW_H,
                     () -> {
                         if (selectedSection != section) {
                             selectedSection = section;
@@ -365,7 +380,7 @@ public class IQGlobalConfigurationScreen extends Screen {
     }
 
     private void renderSections(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int accent) {
-        ctx.fill(x, y, x + w, y + h, themePanelColor());
+        drawRoundedRect(ctx, x, y, w, h, themePanelColor(), 0, 0, CORNER_R_LARGE, 0);
         if (lastRenderedSection != selectedSection) {
             contentFadeAnim = 0f;
             lastRenderedSection = selectedSection;
@@ -373,12 +388,9 @@ public class IQGlobalConfigurationScreen extends Screen {
         contentFadeAnim += (1f - contentFadeAnim) * animRate(0.20f);
         if (contentFadeAnim > 0.997f) contentFadeAnim = 1f;
 
-        int clipX1 = x + PAD;
-        int clipY1 = y + PAD;
-        int clipX2 = x + w - PAD;
-        int clipY2 = y + h;
-
-        ctx.enableScissor(clipX1, clipY1, clipX2, clipY2);
+        // Scissor the full content panel so card glow isn't clipped on the sides/top.
+        // Cards themselves stay inset by PAD (larger than CARD_GLOW).
+        ctx.enableScissor(x, y, x + w, y + h);
 
         int contentW = w - PAD * 2;
         int cursorY = y + PAD - (int) contentScroll;
@@ -399,20 +411,26 @@ public class IQGlobalConfigurationScreen extends Screen {
         contentScroll = clamp(contentScroll, 0, maxScroll);
 
         if (maxScroll > 0) {
-            int trackX = x + w - 6;
+            int trackW = 4;
+            int trackX = x + w - trackW - 4;
             int trackTop = y + 10;
-            int trackH = h - 14;
+            int trackH = Math.max(1, h - 20);
             double ratio = (double) trackH / (trackH + maxScroll);
             int thumbH = Math.max(26, (int) (trackH * ratio));
+            thumbH = Math.min(thumbH, trackH);
             int thumbY = trackTop + (int) ((contentScroll / maxScroll) * (trackH - thumbH));
-            ctx.fill(trackX, trackTop, trackX + 2, trackTop + trackH, 0x24FFFFFF);
-            ctx.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, accent);
+            ctx.enableScissor(trackX - 1, trackTop - 1, trackX + trackW + 1, trackTop + trackH + 1);
+            ScreenUiUtil.drawPill(ctx, trackX, trackTop, trackW, trackH, 0x28FFFFFF);
+            ScreenUiUtil.drawPill(ctx, trackX, thumbY, trackW, thumbH, accent);
+            ctx.disableScissor();
         }
 
         if (contentFadeAnim < 1f) {
             int overlayAlpha = (int) ((1f - contentFadeAnim) * 0xCC);
             if (overlayAlpha > 0) {
-                ctx.fill(x, y, x + w, y + h, (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF));
+                drawRoundedRect(ctx, x, y, w, h,
+                        (overlayAlpha << 24) | (themePanelColor() & 0x00FFFFFF),
+                        0, 0, CORNER_R_LARGE, 0);
             }
         }
     }
@@ -421,13 +439,13 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderCycleRow(ctx, x, y, w, "GUI Theme", "Theme profile for this interface.", visibleThemeLabel(),
                 this::cycleThemeForward);
         y = renderSliderRow(ctx, x, y, w, "GUI Opacity", "Overall transparency of the panel.", 0.35, 1.0,
-                () -> guiOpacity, v -> guiOpacity = v, valuePercent(guiOpacity));
+                () -> guiOpacity, v -> guiOpacity = v, this::valuePercent);
         y = renderSliderRow(ctx, x, y, w, "UI Scale", "Scale multiplier for this panel.", 0.75, 1.35,
-                () -> uiScale, v -> uiScale = v, String.format(Locale.ROOT, "%.2fx", uiScale));
+                () -> uiScale, v -> uiScale = v, v -> String.format(Locale.ROOT, "%.2fx", v));
         y = renderToggleRow(ctx, x, y, w, "GUI Animations", "Enable transitions and micro-interactions.",
                 animationsEnabled, () -> animationsEnabled = !animationsEnabled);
         y = renderSliderRow(ctx, x, y, w, "Animation Speed", "Speed for hover/fade transitions.", 0.2, 1.0,
-                () -> animationSpeed, v -> animationSpeed = v, valuePercent(animationSpeed));
+                () -> animationSpeed, v -> animationSpeed = v, this::valuePercent);
         y = renderToggleRow(ctx, x, y, w, "Outline / Shadow", "Adds subtle border and depth around controls.",
                 outlineShadow, () -> outlineShadow = !outlineShadow);
         y = renderToggleRow(ctx, x, y, w, "Persist UI Session", "Remember category, scroll and search when reopening config.",
@@ -459,7 +477,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderToggleRow(ctx, x, y, w, "Global HUD Toggle", "Master on/off for all HUD overlays.",
                 globalHudToggle, () -> globalHudToggle = !globalHudToggle);
         y = renderSliderRow(ctx, x, y, w, "Overlay Opacity", "Opacity applied to in-world overlays.", 0.2, 1.0,
-                () -> overlayOpacity, v -> overlayOpacity = v, valuePercent(overlayOpacity));
+                () -> overlayOpacity, v -> overlayOpacity = v, this::valuePercent);
         y = renderToggleRow(ctx, x, y, w, "Snap to Grid", "Align HUD elements to a placement grid.",
                 snapToGrid, () -> snapToGrid = !snapToGrid);
         y = renderToggleRow(ctx, x, y, w, "Show Bounding Boxes", "Displays HUD element bounds while editing.",
@@ -473,7 +491,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         y = renderCycleRow(ctx, x, y, w, "GUI Font", "Selects a GUI font preset.", FONTS[fontIndex],
                 () -> fontIndex = (fontIndex + 1) % FONTS.length);
         y = renderSliderRow(ctx, x, y, w, "Element Spacing", "Global padding/margin density.", 0.0, 1.0,
-                () -> layoutSpacing, v -> layoutSpacing = v, valuePercent(layoutSpacing));
+                () -> layoutSpacing, v -> layoutSpacing = v, this::valuePercent);
         y = renderCycleRow(ctx, x, y, w, "Layout Density", "Compactness of rows and controls.", DENSITY[densityIndex],
                 () -> densityIndex = (densityIndex + 1) % DENSITY.length);
         y = renderCycleRow(ctx, x, y, w, "Toggle Style", "Visual style for switches and checkers.", TOGGLE_STYLES[toggleStyleIndex],
@@ -493,6 +511,17 @@ public class IQGlobalConfigurationScreen extends Screen {
         return y;
     }
 
+    private void drawRowShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, float hover) {
+        int fill = lerpArgb(themeRowColor(), themeRowHoverColor(), hover);
+        if (outlineShadow) {
+            int glowA = Math.round(CARD_GLOW_ALPHA + (CARD_GLOW_ALPHA_HOV - CARD_GLOW_ALPHA) * hover);
+            drawRoundedGlow(ctx, x, y, w, h, fill,
+                    withAlpha(themeAccentColor(), glowA), CARD_RADIUS, CARD_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, CARD_RADIUS);
+        }
+    }
+
     private int renderToggleRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
                                 boolean value, Runnable action) {
         boolean hover = isIn(frameMouseX, frameMouseY, x, y, w, ROW_H);
@@ -501,37 +530,40 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
-        ctx.text(minecraft.font, Component.literal(label), x + 8,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, tMain());
+        IqFonts.draw(ctx, label, x + 8,
+                y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
 
-        int tx = x + w - 38;
-        int ty = y + (ROW_H - 14) / 2;
-        int tw = 28;
-        int th = 14;
+        int tx = x + w - 32;
+        int ty = y + (ROW_H - 11) / 2;
+        int tw = 22;
+        int th = 11;
 
         String tKey = "tog#" + selectedSection.name() + "#" + label;
         float tTarget = value ? 1f : 0f;
         float tAnim = toggleAnims.getOrDefault(tKey, tTarget);
-        tAnim += (tTarget - tAnim) * animRate(0.22f);
-        if (Math.abs(tAnim - tTarget) < 0.004f) tAnim = tTarget;
+        tAnim = approachAnim(tAnim, tTarget, 14.0f);
         toggleAnims.put(tKey, tAnim);
 
-        drawRoundedRect(ctx, tx, ty, tw, th, lerpArgb(themeToggleOff(), themeToggleOn(), tAnim), th / 2);
-        int outline = hover ? TOGGLE_OUTLINE_HOV : TOGGLE_OUTLINE_IDLE;
-        drawRoundedHollowRect(ctx, tx, ty, tw, th, outline, th / 2);
-        int knobOffX = tx + 1;
-        int knobOnX = tx + tw - th + 1;
-        int knobX = knobOffX + (int) ((knobOnX - knobOffX) * tAnim);
-        drawRoundedRect(ctx, knobX, ty + 1, th - 2, th - 2, themeToggleHandle(tAnim), (th - 2) / 2);
+        float visual = smoothstep01(tAnim);
+        int bg = lerpArgb(themeToggleOff(), themeToggleOn(), visual);
+        int glowA = Math.round(0x34 * visual);
+        if (glowA > 0) {
+            ScreenUiUtil.drawPillGlow(ctx, tx, ty, tw, th, bg, withAlpha(themeAccentColor(), glowA), 2.75f);
+        } else {
+            ScreenUiUtil.drawPill(ctx, tx, ty, tw, th, bg);
+        }
+        int knobSize = Math.max(1, th - 4);
+        int inset = Math.max(1, (th - knobSize) / 2);
+        float knobOffX = tx + inset;
+        float knobOnX = tx + tw - knobSize - inset;
+        int knobX = Math.round(knobOffX + (knobOnX - knobOffX) * visual);
+        ScreenUiUtil.drawPill(ctx, knobX, ty + inset, knobSize, knobSize, themeToggleHandle(visual));
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, action, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderCycleRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
@@ -542,15 +574,12 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
-        ctx.text(minecraft.font, Component.literal(label), x + 8,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, tFeatureTitle());
+        IqFonts.draw(ctx, label, x + 8,
+                y + (ROW_H - IqFonts.lineHeight()) / 2, tFeatureTitle());
 
-        int bw = Math.min(170, minecraft.font.width(value) + 24);
+        int bw = Math.min(170, IqFonts.widthPx(value) + 24);
         int bx = x + w - bw - 8;
         int by = y + 4;
         renderActionControl(ctx, bx, by, bw, hover);
@@ -564,9 +593,7 @@ public class IQGlobalConfigurationScreen extends Screen {
         int xOff = (int) (prog * slideDir * (bw * 0.55f));
 
         ctx.enableScissor(bx + 2, by, bx + bw - 2, by + CONTROL_H);
-        ctx.centeredText(minecraft.font, Component.literal(value + " ▸"),
-                bx + bw / 2 - xOff, y + (ROW_H - minecraft.font.lineHeight) / 2,
-                hover ? tActionTextHov() : tActionText());
+        IqFonts.drawCentered(ctx, value, bx + bw / 2 - xOff, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
         ctx.disableScissor();
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, () -> {
@@ -575,12 +602,12 @@ public class IQGlobalConfigurationScreen extends Screen {
             selectSlideDirs.put(sKey, -1);
         }, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderSliderRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip,
                                 double min, double max, DoubleSupplier getter, DoubleConsumer setter,
-                                String valueText) {
+                                java.util.function.DoubleFunction<String> valueFormat) {
         boolean hover = isIn(frameMouseX, frameMouseY, x, y, w, ROW_H);
         String hKey = "row#sld#" + selectedSection.name() + "#" + label;
         float hAnim = hoverAnims.getOrDefault(hKey, 0f);
@@ -588,33 +615,40 @@ public class IQGlobalConfigurationScreen extends Screen {
         hoverAnims.put(hKey, hAnim);
 
         int accent = currentAccentColor();
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
-        ctx.text(minecraft.font, Component.literal(label), x + 8,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, tMain());
+        IqFonts.draw(ctx, label, x + 8,
+                y + (ROW_H - IqFonts.lineHeight()) / 2, tMain());
 
         int sx = x + w - 148;
-        int sy = y + ROW_H / 2 - 3;
+        int sy = y + ROW_H / 2 - ScreenUiUtil.SLIDER_TRACK_H / 2;
         int sw = 96;
 
+        String sKey = "sld#" + selectedSection.name() + "#" + label;
         double value = clamp(getter.getAsDouble(), min, max);
-        double t = (value - min) / (max - min);
+        float actualT = (float) ((value - min) / (max - min));
+        boolean drag = draggingSlider != null && sKey.equals(draggingSlider.key());
+        float target = drag
+                ? sliderTargets.getOrDefault(sKey, actualT)
+                : actualT;
+        if (!drag) sliderTargets.put(sKey, target);
+        float anim = sliderAnims.getOrDefault(sKey, target);
+        anim = approachAnim(anim, target, drag ? SLIDER_SPEED_DRAG : SLIDER_SPEED);
+        sliderAnims.put(sKey, anim);
+        if (drag) {
+            setter.accept(min + clamp(anim, 0.0, 1.0) * (max - min));
+        }
 
-        drawRoundedRect(ctx, sx, sy, sw, 6, 0xA0352749, 3);
-        drawRoundedRect(ctx, sx, sy, (int) (sw * t), 6, accent, 3);
-        int hx = sx + (int) (sw * t) - 3;
-        drawRoundedRect(ctx, hx, sy - 3, 6, 12, 0xFFFFFFFF, 3);
+        double displayV = min + anim * (max - min);
+        ScreenUiUtil.drawSlider(ctx, sx, sy, sw, anim,
+                withAlpha(accent, 0x48), accent, 0xFFFBE9F6);
 
-        String vt = "§8" + valueText;
-        ctx.text(minecraft.font, Component.literal(vt), sx + sw + 8,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, tMuted());
+        IqFonts.draw(ctx, "§8" + valueFormat.apply(displayV), sx + sw + 8,
+                y + (ROW_H - IqFonts.lineHeight()) / 2, tMuted());
 
-        sliderHits.add(new SliderHit(sx, sy - 5, sw, 16, min, max, getter, setter, tooltip));
+        sliderHits.add(new SliderHit(sKey, sx, sy - 5, sw, 16, min, max, getter, setter, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private int renderActionRow(GuiGraphicsExtractor ctx, int x, int y, int w, String label, String tooltip, Runnable action) {
@@ -624,24 +658,20 @@ public class IQGlobalConfigurationScreen extends Screen {
         hAnim += ((hover ? 1f : 0f) - hAnim) * animRate(0.28f);
         hoverAnims.put(hKey, hAnim);
 
-        drawRoundedRect(ctx, x, y, w, ROW_H, lerpArgb(themeRowColor(), themeRowHoverColor(), hAnim), 0);
-        drawRoundedHollowRect(ctx, x, y, w, ROW_H, lerpArgb(themeBorderDim(), themeOutlineHighlight(), hAnim), 0);
-        int accentAlpha = (int) (0x30 * hAnim);
-        if (accentAlpha > 0) ctx.fill(x, y, x + 2, y + ROW_H, withAlpha(themeAccentColor(), accentAlpha));
+        drawRowShell(ctx, x, y, w, ROW_H, hAnim);
 
         int bx = x + w - 76;
         int by = y + 4;
         renderActionControl(ctx, bx, by, 68, hover);
         String buttonText = actionButtonText(label);
 
-        ctx.text(minecraft.font, Component.literal(label), x + 8,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, tFeatureTitle());
-        ctx.centeredText(minecraft.font, Component.literal(buttonText), bx + 34,
-                y + (ROW_H - minecraft.font.lineHeight) / 2, hover ? tActionTextHov() : tActionText());
+        IqFonts.draw(ctx, label, x + 8,
+                y + (ROW_H - IqFonts.lineHeight()) / 2, tFeatureTitle());
+        IqFonts.drawCentered(ctx, buttonText, bx + 34, y + (ROW_H - IqFonts.lineHeight()) / 2, 0, IqFonts.lineHeight(), hover ? tActionTextHov() : tActionText());
 
         actionHits.add(new ActionHit(x, y, w, ROW_H, action, tooltip));
         if (hover) pendingTooltip = tooltip;
-        return y + ROW_H + 4;
+        return y + ROW_H + ROW_GAP;
     }
 
     private String actionButtonText(String label) {
@@ -668,7 +698,8 @@ public class IQGlobalConfigurationScreen extends Screen {
             for (SliderHit sliderHit : sliderHits) {
                 if (sliderHit.contains(mx, my)) {
                     draggingSlider = sliderHit;
-                    sliderHit.update(mx);
+                    float t = (float) clamp((mx - sliderHit.x()) / (double) sliderHit.w(), 0.0, 1.0);
+                    sliderTargets.put(sliderHit.key(), t);
                     return true;
                 }
             }
@@ -693,8 +724,8 @@ public class IQGlobalConfigurationScreen extends Screen {
     public boolean mouseDragged(MouseButtonEvent click, double offsetX, double offsetY) {
         if (closingScreen) return true;
         if (draggingSlider != null) {
-            draggingSlider.update((int) click.x());
-            saveState();
+            float t = (float) clamp((click.x() - draggingSlider.x()) / (double) draggingSlider.w(), 0.0, 1.0);
+            sliderTargets.put(draggingSlider.key(), t);
             return true;
         }
         return super.mouseDragged(click, offsetX, offsetY);
@@ -703,6 +734,15 @@ public class IQGlobalConfigurationScreen extends Screen {
     @Override
     public boolean mouseReleased(MouseButtonEvent click) {
         if (closingScreen) return true;
+        if (draggingSlider != null) {
+            Float t = sliderTargets.get(draggingSlider.key());
+            if (t != null) {
+                double val = draggingSlider.min() + clamp(t, 0f, 1f) * (draggingSlider.max() - draggingSlider.min());
+                draggingSlider.setter().accept(val);
+                sliderAnims.put(draggingSlider.key(), t);
+                saveState();
+            }
+        }
         draggingSlider = null;
         return super.mouseReleased(click);
     }
@@ -1252,6 +1292,29 @@ public class IQGlobalConfigurationScreen extends Screen {
         return base * (0.55f + (float) animationSpeed * 1.35f);
     }
 
+    private void beginAnimFrame() {
+        long now = System.nanoTime();
+        if (animLastNanos == 0L) {
+            animFrameSteps = 1f;
+        } else {
+            float steps = (now - animLastNanos) / 1_000_000_000f * 60f;
+            animFrameSteps = Math.max(0.06f, Math.min(3f, steps));
+        }
+        animLastNanos = now;
+    }
+
+    private float approachAnim(float current, float target, float speed) {
+        if (!animationsEnabled) return target;
+        float amount = Math.max(0f, Math.min(1f, speed / 60f * animFrameSteps));
+        float next = current + (target - current) * amount;
+        return Math.abs(target - next) < 0.001f ? target : next;
+    }
+
+    private float smoothstep01(float t) {
+        float x = Math.max(0f, Math.min(1f, t));
+        return x * x * (3f - 2f * x);
+    }
+
     private int themeToggleOn() {
         return palette().toggleOn();
     }
@@ -1401,18 +1464,14 @@ public class IQGlobalConfigurationScreen extends Screen {
         return themePalette(t).toggleOff();
     }
 
-    private void drawGlowBorder(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int radius, int accent) {
-        if (!outlineShadow) {
-            drawRoundedHollowRect(ctx, x, y, w, h, themeBorderBright(), radius);
-            return;
+    private void drawPanelShell(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int fill) {
+        int r = CORNER_R_LARGE;
+        if (outlineShadow) {
+            int glow = withAlpha(themeAccentColor(), PANEL_GLOW_ALPHA);
+            drawRoundedGlow(ctx, x, y, w, h, fill, glow, r, PANEL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, h, fill, r);
         }
-        int accRgb = themeAccentColor() & 0x00FFFFFF;
-        int[] alphas = {0x05, 0x10, 0x1E, 0x30};
-        for (int i = 0; i < alphas.length; i++) {
-            int d = alphas.length - i;
-            drawRoundedHollowRect(ctx, x - d, y - d, w + d * 2, h + d * 2, (alphas[i] << 24) | accRgb, radius + d);
-        }
-        drawRoundedHollowRect(ctx, x, y, w, h, themeBorderBright(), radius);
     }
 
     private int getHeaderActionButtonsStartX(int headerX, int headerW) {
@@ -1422,31 +1481,26 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private void drawHeaderActionButton(GuiGraphicsExtractor ctx, int x, int y, float hover) {
         int size = HEADER_ACTION_BTN_SIZE;
-        int glow = lerpArgb(0x10000000, withAlpha(themeAccentColor(), 0x34), hover);
-        int top = lerpArgb(themeButtonTop(false), themeButtonTop(true), hover);
-        int bottom = lerpArgb(themeButtonBottom(false), themeButtonBottom(true), hover);
-        int body = lerpArgb(themeButtonBody(false), themeButtonBody(true), hover);
-        int border = lerpArgb(withAlpha(themeBorderMid(), 0x88), withAlpha(themeAccentColor(), 0xAA), hover);
-
-        ctx.fill(x - 1, y - 1, x + size + 1, y + size + 1, glow);
-        ctx.fill(x, y, x + size, y + size / 2, top);
-        ctx.fill(x, y + size / 2, x + size, y + size, bottom);
-        ctx.fill(x + 1, y + 1, x + size - 1, y + size - 1, body);
-        ctx.fill(x + 1, y + 1, x + size - 1, y + 2, 0x42FFFFFF);
-        ctx.fill(x + 1, y + size - 2, x + size - 1, y + size - 1, 0x3A000000);
-        drawHollowRect(ctx, x, y, size, size, border);
+        int bg = lerpArgb(themeButtonTop(false), themeButtonTop(true), hover);
+        if (outlineShadow) {
+            int glowA = Math.round(HEADER_ACTION_GLOW_ALPHA
+                    + (HEADER_ACTION_GLOW_ALPHA_HOV - HEADER_ACTION_GLOW_ALPHA) * hover);
+            drawRoundedGlow(ctx, x, y, size, size, bg,
+                    withAlpha(themeAccentColor(), glowA), HEADER_ACTION_BTN_RADIUS, HEADER_ACTION_BTN_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, size, size, bg, HEADER_ACTION_BTN_RADIUS);
+        }
     }
 
     private void renderActionControl(GuiGraphicsExtractor ctx, int x, int y, int w, boolean hov) {
-        int top = themeButtonTop(hov);
-        int bottom = themeButtonBottom(hov);
-        int border = hov ? themeOutlineHighlight() : themeBorderMid();
-
-        drawRoundedRect(ctx, x, y, w, CONTROL_H, top, 0);
-        ctx.fill(x, y + CONTROL_H / 2, x + w, y + CONTROL_H, bottom);
-        drawRoundedHollowRect(ctx, x, y, w, CONTROL_H, border, 0);
-        ctx.fill(x + 1, y + 1, x + w - 1, y + 2, 0x2AFFFFFF);
-        ctx.fill(x + 1, y + CONTROL_H - 2, x + w - 1, y + CONTROL_H - 1, 0x22000000);
+        int bg = themeButtonTop(hov);
+        if (outlineShadow) {
+            int glowA = hov ? CONTROL_GLOW_ALPHA_HOV : CONTROL_GLOW_ALPHA;
+            drawRoundedGlow(ctx, x, y, w, CONTROL_H, bg,
+                    withAlpha(themeAccentColor(), glowA), CONTROL_RADIUS, CONTROL_GLOW);
+        } else {
+            drawRoundedRect(ctx, x, y, w, CONTROL_H, bg, CONTROL_RADIUS);
+        }
     }
 
     private int lerpArgb(int c0, int c1, float t) {
@@ -1461,6 +1515,39 @@ public class IQGlobalConfigurationScreen extends Screen {
         ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, radius);
     }
 
+    private void drawRoundedRect(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int color,
+            int topLeftRadius,
+            int topRightRadius,
+            int bottomRightRadius,
+            int bottomLeftRadius
+    ) {
+        ScreenUiUtil.drawRoundedRect(ctx, x, y, w, h, color, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius);
+    }
+
+    private void drawRoundedGlow(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius, float glowWidth) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, color, radius, glowWidth);
+    }
+
+    private void drawRoundedGlow(
+            GuiGraphicsExtractor ctx,
+            int x,
+            int y,
+            int w,
+            int h,
+            int fillColor,
+            int glowColor,
+            int radius,
+            float glowWidth
+    ) {
+        ScreenUiUtil.drawRoundedGlow(ctx, x, y, w, h, fillColor, glowColor, radius, glowWidth);
+    }
+
     private void drawRoundedHollowRect(GuiGraphicsExtractor ctx, int x, int y, int w, int h, int color, int radius) {
         ScreenUiUtil.drawRoundedHollowRect(ctx, x, y, w, h, color, radius);
     }
@@ -1471,7 +1558,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
         int sectionTextW = 0;
         for (ConfigSection section : ConfigSection.values()) {
-            sectionTextW = Math.max(sectionTextW, minecraft.font.width(section.title));
+            sectionTextW = Math.max(sectionTextW, IqFonts.widthPx(section.title));
         }
 
         int desiredW = Math.max(SIDEBAR_W, 16 + sectionTextW + 16);
@@ -1480,9 +1567,9 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private void renderTooltip(GuiGraphicsExtractor ctx, String text) {
         List<String> lines = wrapText(text, 260);
-        int fh = minecraft.font.lineHeight;
+        int fh = IqFonts.lineHeight();
         int lh = fh + 2;
-        int tw = lines.stream().mapToInt(s -> minecraft.font.width(s)).max().orElse(80);
+        int tw = lines.stream().mapToInt(s -> IqFonts.widthPx(s)).max().orElse(80);
         int bw = tw + 14;
         int bh = lines.size() * lh + 8;
         int tx = frameMouseX + 12;
@@ -1491,12 +1578,15 @@ public class IQGlobalConfigurationScreen extends Screen {
         if (tx + bw > width - 4) tx = frameMouseX - bw - 8;
         if (ty + bh > height - 4) ty = frameMouseY - bh - 8;
 
-        int radius = 2;
-        drawRoundedRect(ctx, tx, ty, bw, bh, themeTooltipBgColor(), radius);
-        drawRoundedHollowRect(ctx, tx, ty, bw, bh, themeTooltipBorderColor(), radius);
-        ctx.fill(tx + 1, ty + 1, tx + 3, ty + bh - 1, withAlpha(themeAccentColor(), 0x8A));
+        int bg = themeTooltipBgColor();
+        if (outlineShadow) {
+            drawRoundedGlow(ctx, tx, ty, bw, bh, bg,
+                    withAlpha(themeAccentColor(), TOOLTIP_GLOW_ALPHA), TOOLTIP_RADIUS, TOOLTIP_GLOW);
+        } else {
+            drawRoundedRect(ctx, tx, ty, bw, bh, bg, TOOLTIP_RADIUS);
+        }
         for (int i = 0; i < lines.size(); i++) {
-            ctx.text(minecraft.font, Component.literal(lines.get(i)),
+            IqFonts.draw(ctx, lines.get(i),
                     tx + 7, ty + 4 + i * lh, themeTooltipTextColor());
         }
     }
@@ -1542,7 +1632,7 @@ public class IQGlobalConfigurationScreen extends Screen {
 
     private List<String> wrapText(String text, int maxWidth) {
         if (minecraft == null) return List.of(text);
-        return ScreenUiUtil.wrapTextSimple(minecraft.font, text, maxWidth);
+        return ScreenUiUtil.wrapTextSimple(s -> Math.round(IqFonts.width(s)), text, maxWidth);
     }
 
     private boolean isIn(int mx, int my, int x, int y, int w, int h) {
@@ -1577,15 +1667,10 @@ public class IQGlobalConfigurationScreen extends Screen {
         }
     }
 
-    private record SliderHit(int x, int y, int w, int h, double min, double max,
+    private record SliderHit(String key, int x, int y, int w, int h, double min, double max,
                              DoubleSupplier getter, DoubleConsumer setter, String tooltip) {
         boolean contains(int mx, int my) {
             return mx >= x && mx < x + w && my >= y && my < y + h;
-        }
-
-        void update(int mx) {
-            double t = clamp((mx - x) / (double) w, 0.0, 1.0);
-            setter.accept(min + t * (max - min));
         }
     }
 

@@ -9,10 +9,13 @@
     "EntityGlowMixin",
     "EntityMixin",
     "AbstractContainerScreenMixin",
+    "FontManagerAccessor",
     "HudClickMixin",
     "GuiMixin",
+    "GuiRendererMixin",
     "ItemUseMixin",
     "LevelRendererMixin",
+    "MinecraftAccessor",
     "feature.BallistaBuildSoundMixin",
     "feature.FishingCastSoundMixin",
     "feature.MuteTerminatorCooldownSoundMixin"
