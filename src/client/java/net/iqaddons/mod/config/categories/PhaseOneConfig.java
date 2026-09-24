@@ -433,14 +433,14 @@ public class PhaseOneConfig {
         @ConfigEntry(id = "normalPileColor", translation = "Normal Pile Color")
         @ConfigOption.Color(alpha = true)
         @Comment("Change the color of standard supply pile waypoints")
-        public static int normalPileColor = new Color(255, 255, 255, 52).getRGB();
+        public static int normalPileColor = new Color(255, 255, 255, 0).getRGB();
 
         @ConfigEntry(id = "noPrePileColor", translation = "No Pre Pile Color")
         @ConfigOption.Color(alpha = true)
         @Comment("Change the color of no-pre supply pile waypoints")
         public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
 
-        @ConfigEntry(id = "placeAreaHitbox", translation = "Place Area Hitbox (Experimental)")
+        @ConfigEntry(id = "placeAreaHitbox", translation = "Place Area Hitbox")
         @Comment("Render the server supply placement area on the floor around each pile")
         public static boolean placeAreaHitbox = true;
 
