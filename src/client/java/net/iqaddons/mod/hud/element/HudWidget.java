@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.SubscriptionOwner;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.component.HudLine;
+import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +23,12 @@ import java.util.function.BooleanSupplier;
 public abstract class HudWidget extends SubscriptionOwner implements HudElement {
 
     protected static final Minecraft mc = Minecraft.getInstance();
+    private static final int HOVER_BACKGROUND_COLOR = 0x7D000000;
+    private static final int PLACEHOLDER_BACKGROUND_COLOR = 0xBE000000;
+    private static final int PLACEHOLDER_TEXT_COLOR = 0xFF808080;
+    private static final int SELECTION_BORDER_COLOR = 0xAAFF0000;
+    private static final int SELECTION_NAME_COLOR = 0xDCFFFFFF;
+    private static final int SELECTION_LOCATION_COLOR = 0xC8FFFFFF;
 
     private final String id;
     private final String displayName;
@@ -49,6 +55,8 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     private int cachedWidth = 0;
     private int cachedHeight = 0;
+    private int nanoWidth = -1;
+    private int nanoHeight = -1;
     private boolean dimensionsDirty = true;
 
     protected HudWidget(
@@ -106,6 +114,9 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     @Override
     public int getWidth() {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle() && nanoWidth > 0) {
+            return nanoWidth;
+        }
         if (dimensionsDirty) {
             recalculateDimensions();
         }
@@ -114,6 +125,9 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     @Override
     public int getHeight() {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle() && nanoHeight > 0) {
+            return nanoHeight;
+        }
         if (dimensionsDirty) {
             recalculateDimensions();
         }
@@ -135,7 +149,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         Font textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        List<HudLine> renderLines = getCurrentRenderableLines();
+        List<HudLine> renderLines = getRenderableLines();
 
         int maxWidth = 0;
         int currentLineWidth = 0;
@@ -161,48 +175,48 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         dimensionsDirty = false;
     }
 
-    protected void addLine(@NotNull HudLine line) {
+    protected synchronized void addLine(@NotNull HudLine line) {
         lines.add(line);
         markDimensionsDirty();
     }
 
-    protected void addLines(HudLine @NotNull ... lines) {
+    protected synchronized void addLines(HudLine @NotNull ... lines) {
         for (HudLine line : lines) {
             addLine(line);
         }
     }
 
-    protected void addLineAt(int index, @NotNull HudLine line) {
+    protected synchronized void addLineAt(int index, @NotNull HudLine line) {
         lines.add(index, line);
         markDimensionsDirty();
     }
 
-    protected void setLines(@NotNull List<HudLine> newLines) {
+    protected synchronized void setLines(@NotNull List<HudLine> newLines) {
         lines.clear();
         lines.addAll(newLines);
         markDimensionsDirty();
     }
 
-    protected void removeLine(@NotNull HudLine line) {
+    protected synchronized void removeLine(@NotNull HudLine line) {
         lines.remove(line);
         markDimensionsDirty();
     }
 
-    protected void clearLines() {
+    protected synchronized void clearLines() {
         lines.clear();
         markDimensionsDirty();
     }
 
-    public @NotNull List<HudLine> getLines() {
-        return Collections.unmodifiableList(lines);
+    public synchronized @NotNull List<HudLine> getLines() {
+        return Collections.unmodifiableList(new ArrayList<>(lines));
     }
 
-    protected void setExampleLines(HudLine @NotNull ... examples) {
+    protected synchronized void setExampleLines(HudLine @NotNull ... examples) {
         exampleLines.clear();
         Collections.addAll(exampleLines, examples);
     }
 
-    protected void setExampleLines(@NotNull List<HudLine> examples) {
+    protected synchronized void setExampleLines(@NotNull List<HudLine> examples) {
         exampleLines.clear();
         exampleLines.addAll(examples);
     }
@@ -219,8 +233,33 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         return lines;
     }
 
-    protected @NotNull List<HudLine> getRenderableLines() {
-        return getCurrentRenderableLines();
+    protected synchronized @NotNull List<HudLine> getRenderableLines() {
+        return new ArrayList<>(getCurrentRenderableLines());
+    }
+
+    public synchronized @NotNull List<HudLine> getNanoRenderableLines() {
+        return Collections.unmodifiableList(new ArrayList<>(getCurrentRenderableLines()));
+    }
+
+    public float getNanoLineStartX(@NotNull Font textRenderer, @NotNull HudLine line) {
+        return getLineStartX(textRenderer, line);
+    }
+
+    public boolean isNanoLineCentered(@NotNull Font textRenderer, @NotNull HudLine line) {
+        return false;
+    }
+
+    public void setNanoDimensions(int width, int height) {
+        this.nanoWidth = Math.max(width, 1);
+        this.nanoHeight = Math.max(height, 1);
+    }
+
+    public boolean isNanoActive() {
+        return active;
+    }
+
+    public boolean isNanoEnabled() {
+        return enabledSupplier.getAsBoolean();
     }
 
     @Override
@@ -269,6 +308,10 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         return 0.0f;
     }
 
+    protected float getLineStartX(@NotNull Font textRenderer, @NotNull HudLine line) {
+        return getLineStartX(textRenderer);
+    }
+
     protected void renderBeforeLines(
             @NotNull GuiGraphicsExtractor context,
             float x,
@@ -294,7 +337,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         var textRenderer = mc.font;
         if (textRenderer == null) return;
 
-        List<HudLine> renderLines = getCurrentRenderableLines();
+        List<HudLine> renderLines = getRenderableLines();
         if (renderLines.isEmpty()) {
             renderEmptyPlaceholder(context, textRenderer);
             return;
@@ -315,43 +358,49 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
 
-        float currentX = scaledX + getLineStartX(textRenderer);
+        float currentX = scaledX;
         float currentY = scaledY;
+        boolean atLineStart = true;
 
         int totalWidth = getWidth();
         int totalHeight = getHeight();
 
-        if (selected) {
+        boolean modernHud = IqNanoGlobalConfigScreen.isSharedModernHudStyle();
+        if (selected && !modernHud) {
             renderSelectionBorder(context, (int) scaledX, (int) scaledY, totalWidth, totalHeight, textRenderer);
         }
 
-        if (isMouseOver(mouseX, mouseY) && HudManager.get().isEditorOpen()) {
+        if (!modernHud && isMouseOver(mouseX, mouseY) && HudManager.get().isEditorOpen()) {
             context.fill(
                     (int) scaledX, (int) scaledY,
                     (int) scaledX + totalWidth, (int) scaledY + totalHeight,
-                    new Color(0, 0, 0, 125).getRGB()
+                    HOVER_BACKGROUND_COLOR
             );
         }
 
         renderBeforeLines(context, scaledX, scaledY, totalWidth, totalHeight, textRenderer);
 
-        List<HudLine> linesToRender = new ArrayList<>(renderLines);
-        for (HudLine line : linesToRender) {
+        for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
+            if (atLineStart) {
+                currentX = scaledX + getLineStartX(textRenderer, line);
+            }
+
             line.updateHoverState(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale);
             line.render(context, (int) currentX, (int) currentY, textRenderer);
 
             if (line.hasLineBreak()) {
                 currentY += textRenderer.lineHeight + 1;
-                currentX = scaledX + getLineStartX(textRenderer);
+                atLineStart = true;
             } else {
                 currentX += line.getWidth(textRenderer);
+                atLineStart = false;
             }
         }
 
         context.pose().popMatrix();
 
-        for (HudLine line : linesToRender) {
+        for (HudLine line : renderLines) {
             if (!line.shouldRender()) continue;
             line.renderHover(context, textRenderer);
         }
@@ -374,7 +423,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         context.fill(
                 (int) scaledX - 2, (int) scaledY - 2,
                 (int) scaledX + width + 2, (int) scaledY + height + 2,
-                new Color(0, 0, 0, 190).getRGB()
+                PLACEHOLDER_BACKGROUND_COLOR
         );
 
         context.text(
@@ -382,7 +431,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 placeholder,
                 (int) scaledX,
                 (int) scaledY,
-                new Color(128, 128, 128).getRGB()
+                PLACEHOLDER_TEXT_COLOR
         );
 
         if (selected) {
@@ -398,15 +447,13 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
             int width, int height,
             @NotNull Font textRenderer
     ) {
-        int borderColor = new Color(255, 0, 0, 170).getRGB();
-
-        context.fill(x, y, x + width, y + 1, borderColor);
-        context.fill(x, y + height - 1, x + width, y + height, borderColor);
-        context.fill(x, y, x + 1, y + height, borderColor);
-        context.fill(x + width - 1, y, x + width, y + height, borderColor);
+        context.fill(x, y, x + width, y + 1, SELECTION_BORDER_COLOR);
+        context.fill(x, y + height - 1, x + width, y + height, SELECTION_BORDER_COLOR);
+        context.fill(x, y, x + 1, y + height, SELECTION_BORDER_COLOR);
+        context.fill(x + width - 1, y, x + width, y + height, SELECTION_BORDER_COLOR);
 
         String widgetName = displayName;
-        String widgetLocation = String.format("X: %.0f Y: %.0f", this.x, this.y);
+        String widgetLocation = "X: " + Math.round(this.x) + " Y: " + Math.round(this.y);
 
         int nameWidth = textRenderer.width(widgetName);
         int locationWidth = textRenderer.width(widgetLocation);
@@ -419,7 +466,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 widgetName,
                 nameX,
                 y - textRenderer.lineHeight - 2,
-                new Color(255, 255, 255, 220).getRGB()
+                SELECTION_NAME_COLOR
         );
 
         context.text(
@@ -427,7 +474,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
                 widgetLocation,
                 locationX,
                 y + height + 2,
-                new Color(255, 255, 255, 200).getRGB()
+                SELECTION_LOCATION_COLOR
         );
     }
 
@@ -442,20 +489,26 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
         float scaledX = getAbsoluteX() / scale;
         float scaledY = getAbsoluteY() / scale;
 
-        float currentX = scaledX + getLineStartX(textRenderer);
+        float currentX = scaledX;
         float currentY = scaledY;
+        boolean atLineStart = true;
 
         for (HudLine line : getRenderableLines()) {
             if (!line.shouldRender()) continue;
+            if (atLineStart) {
+                currentX = scaledX + getLineStartX(textRenderer, line);
+            }
+
             if (line.handleClick(mouseX, mouseY, currentX * scale, currentY * scale, textRenderer, scale)) {
                 return true;
             }
 
             if (line.hasLineBreak()) {
                 currentY += textRenderer.lineHeight + 1;
-                currentX = scaledX + getLineStartX(textRenderer);
+                atLineStart = true;
             } else {
                 currentX += line.getWidth(textRenderer);
+                atLineStart = false;
             }
         }
 

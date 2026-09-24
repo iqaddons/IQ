@@ -23,10 +23,10 @@ public class KuudraDirectionWidget extends HudWidget {
     public KuudraDirectionWidget() {
         super("kuudra_direction",
                 "Kuudra Direction",
-                -4f,
-                -60f,
+                432.5f,
+                166.4418f,
                 3.0f,
-                HudAnchor.CENTER
+                HudAnchor.TOP_LEFT
         );
 
         setEnabledSupplier(() -> PhaseFourConfig.kuudraDirectionAlert);

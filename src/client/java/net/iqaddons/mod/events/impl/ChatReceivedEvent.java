@@ -22,10 +22,10 @@ public class ChatReceivedEvent implements Event, Cancellable {
 
     public ChatReceivedEvent(@NotNull Component text) {
         this.text = text;
-        this.message = text.getString();
-        this.strippedMessage = this.message.isBlank()
-                ? ""
-                : StringUtils.stripFormatting(this.message);
+        // Extract and normalize message immediately to avoid race conditions on Netty thread
+        String rawMessage = text.getString();
+        this.message = rawMessage != null ? rawMessage : "";
+        this.strippedMessage = this.message.isBlank() ? "" : StringUtils.stripFormatting(this.message);
     }
 
     public boolean contains(@NotNull String str) {

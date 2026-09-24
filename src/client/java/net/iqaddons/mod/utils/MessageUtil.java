@@ -70,9 +70,9 @@ public enum MessageUtil {
         mc.execute(() -> {
             if (mc.gui == null) return;
 
-            mc.gui.setTitle(title);
-            mc.gui.setSubtitle(subtitle);
-            mc.gui.setTimes(fadeIn, stay, fadeOut);
+            mc.gui.hud.setTitle(title);
+            mc.gui.hud.setSubtitle(subtitle);
+            mc.gui.hud.setTimes(fadeIn, stay, fadeOut);
         });
     }
 

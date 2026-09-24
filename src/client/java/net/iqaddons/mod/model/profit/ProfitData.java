@@ -13,6 +13,7 @@ public final class ProfitData {
     public long runs;
     public long failedRuns;
     public long totalRunMillis;
+    public long bestRunMillis;
 
     public long chestsOpened;
     public long paidChests;
@@ -52,7 +53,7 @@ public final class ProfitData {
     @NotNull
     public ProfitData copy() {
         return new ProfitData(
-                runs, failedRuns, totalRunMillis, chestsOpened, paidChests, freeChests,
+                runs, failedRuns, totalRunMillis, bestRunMillis, chestsOpened, paidChests, freeChests,
                 rerolls, shardRerolls, grossCoins, profit, keyCostCoins,
                 rerollCostCoins, pricedItems, essence
         );

@@ -1,15 +1,14 @@
 package net.iqaddons.mod.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
-import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.manager.calculator.ChestProfitCalculator;
+import net.iqaddons.mod.manager.calculator.ItemValueCalculator;
 import net.iqaddons.mod.manager.calculator.impl.EnchantedBookValueCalculator;
 import net.iqaddons.mod.manager.calculator.impl.EssenceValueCalculator;
-import net.iqaddons.mod.manager.calculator.ItemValueCalculator;
 import net.iqaddons.mod.manager.calculator.impl.GenericValueCalculator;
 import net.iqaddons.mod.manager.calculator.impl.SalvageValueCalculator;
+import net.iqaddons.mod.manager.pricing.ItemPriceManager;
 import net.iqaddons.mod.model.profit.chest.ChestItemValue;
 import net.iqaddons.mod.model.profit.chest.ChestValueBreakdown;
 import net.iqaddons.mod.model.profit.chest.data.ChestContents;
@@ -84,7 +83,9 @@ public final class ChestProfitUtil {
             double itemValue = CHEST_PROFIT_CALCULATOR.calculateItemValue(stack);
 
             if (CRIMSON_ESSENCE_ID.equals(itemId)) {
-                int bonusQuantity = (int) Math.round(quantity * (KuudraGeneralConfig.ProfitTrackerConfig.kuudraPetBonus / 100.0));
+                double totalBonus = (KuudraGeneralConfig.ProfitTrackerConfig.kuudraPetBonus
+                        + KuudraGeneralConfig.ProfitTrackerConfig.attributeBonus) / 100.0;
+                int bonusQuantity = (int) Math.round(quantity * totalBonus);
                 if (bonusQuantity > 0) {
                     double unitPrice = ItemPriceManager.get().getItemPrice(CRIMSON_ESSENCE_ID);
                     double bonusValue = unitPrice * bonusQuantity;

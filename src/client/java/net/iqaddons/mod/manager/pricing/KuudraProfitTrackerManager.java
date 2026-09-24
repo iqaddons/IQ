@@ -2,13 +2,14 @@ package net.iqaddons.mod.manager.pricing;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.manager.IQPersistentDataStore;
-import net.iqaddons.mod.model.profit.ProfitData;
-import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.model.profit.chest.data.ChestData;
 import net.iqaddons.mod.model.profit.chest.type.ChestType;
-import net.iqaddons.mod.utils.MessageUtil;
+import net.iqaddons.mod.model.profit.ProfitData;
+import net.iqaddons.mod.model.profit.ProfitScope;
 import net.iqaddons.mod.utils.data.DataKey;
+import net.iqaddons.mod.utils.MessageUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Files;
@@ -16,7 +17,6 @@ import java.nio.file.Files;
 @Slf4j
 public final class KuudraProfitTrackerManager {
 
-    private static final long SESSION_TIMEOUT_MILLIS = 21L * 60L * 1000L;
     private static final long SESSION_WARNING_INTERVAL_MILLIS = 5L * 60L * 1000L;
 
     private static final DataKey<PersistentKuudraProfit> PROFIT_KEY = DataKey.of("kuudraProfit", PersistentKuudraProfit.class);
@@ -122,12 +122,15 @@ public final class KuudraProfitTrackerManager {
 
         long timeSinceActivityMs = System.currentTimeMillis() - lastKuudraActivityAt;
 
-        if (timeSinceActivityMs > SESSION_TIMEOUT_MILLIS) {
+        long sessionTimeoutMillis = sessionTimeoutMillis();
+
+        if (timeSinceActivityMs > sessionTimeoutMillis) {
             session = new ProfitData();
             lastKuudraActivityAt = 0L;
             lastSessionWarningAt = 0L;
             save();
-            MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fSession data has been reset after 20 minutes of inactivity.");
+            MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fSession data has been reset after "
+                    + sessionResetMinutes() + " minutes of inactivity.");
             return;
         }
 
@@ -136,8 +139,8 @@ public final class KuudraProfitTrackerManager {
             if (lastSessionWarningAt == 0L || timeSinceWarningMs >= SESSION_WARNING_INTERVAL_MILLIS) {
                 lastSessionWarningAt = System.currentTimeMillis();
                 long minutesSinceActivity = timeSinceActivityMs / (60 * 1000);
-                long minutesUntilReset = (SESSION_TIMEOUT_MILLIS - timeSinceActivityMs) / (60 * 1000);
-                MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fNo runs in " + minutesSinceActivity + " minutes. Session resets in " + minutesUntilReset + "minutes.");
+                long minutesUntilReset = (sessionTimeoutMillis - timeSinceActivityMs + 60L * 1000L - 1L) / (60L * 1000L);
+                MessageUtil.sendFormattedMessage("§8[§ePROFIT TRACKER§8] §fNo runs in " + minutesSinceActivity + " minutes. Session resets in " + minutesUntilReset + " minutes.");
             }
         }
     }
@@ -160,7 +163,12 @@ public final class KuudraProfitTrackerManager {
     private void updateRun(@NotNull ProfitData data, long runMillis, boolean failed) {
         data.runs++;
         if (failed) data.failedRuns++;
-        if (runMillis > 0) data.totalRunMillis += runMillis;
+        if (runMillis > 0) {
+            data.totalRunMillis += runMillis;
+            if (!failed && (data.bestRunMillis <= 0 || runMillis < data.bestRunMillis)) {
+                data.bestRunMillis = runMillis;
+            }
+        }
     }
 
     private void updateChest(@NotNull ProfitData data, @NotNull ChestData record) {
@@ -195,7 +203,15 @@ public final class KuudraProfitTrackerManager {
     }
 
     private boolean isSessionExpired() {
-        return lastKuudraActivityAt > 0L && (System.currentTimeMillis() - lastKuudraActivityAt) > SESSION_TIMEOUT_MILLIS;
+        return lastKuudraActivityAt > 0L && (System.currentTimeMillis() - lastKuudraActivityAt) > sessionTimeoutMillis();
+    }
+
+    private long sessionTimeoutMillis() {
+        return sessionResetMinutes() * 60L * 1000L;
+    }
+
+    private int sessionResetMinutes() {
+        return Math.max(5, Math.min(120, KuudraGeneralConfig.ProfitTrackerConfig.sessionResetMinutes));
     }
 
     private synchronized void save() {

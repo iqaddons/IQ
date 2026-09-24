@@ -8,6 +8,11 @@ public record PearlWaypoint(
         @NotNull Vec3 target,
         @NotNull RenderColor color,
         Vec3 standBlock,
+        Vec3 aimTarget,
+        @NotNull PearlTrajectoryType trajectoryType,
+        double projectionDistance,
+        Integer landingTick,
+        double landingOffsetTicks,
         Integer preSupply,
         Integer hideForPre,
         float size,
@@ -31,5 +36,9 @@ public record PearlWaypoint(
 
     public boolean hasStandBlock() {
         return standBlock != null && !(standBlock.x == 0 && standBlock.y == 0 && standBlock.z == 0);
+    }
+
+    public boolean usesTrajectoryProjection() {
+        return aimTarget != null && !(aimTarget.x == 0 && aimTarget.y == 0 && aimTarget.z == 0);
     }
 }

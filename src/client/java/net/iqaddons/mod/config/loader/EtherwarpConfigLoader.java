@@ -9,6 +9,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.iqaddons.mod.model.etherwarp.EtherwarpCategory;
 import net.iqaddons.mod.model.etherwarp.EtherwarpWaypoint;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.model.pearl.WaypointArea;
+import net.iqaddons.mod.utils.BoundingBox2D;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -31,13 +33,30 @@ import java.util.Set;
 @Slf4j
 public class EtherwarpConfigLoader {
 
-    private static final EtherwarpConfigLoader INSTANCE = new EtherwarpConfigLoader();
-
     private static final Path CONFIG_DIR = FabricLoader.getInstance().getConfigDir().resolve("iq");
-    private static final Path CONFIG_FILE = CONFIG_DIR.resolve("etherwarp_config.json");
-    private static final String DEFAULT_RESOURCE = "/default-config/iq/etherwarp_config.json";
-
+    private static final Path LEGACY_CONFIG_FILE = CONFIG_DIR.resolve("etherwarp_config.json");
+    private static final Path CONFIG_FILE = CONFIG_DIR.resolve("custom_waypoints.json");
+    private static final String DEFAULT_RESOURCE = "/default-config/iq/custom_waypoints.json";
+    private static final EtherwarpConfigLoader INSTANCE = new EtherwarpConfigLoader();
+    private static final EtherwarpConfigLoader NEW_ETHERWARP_INSTANCE = new EtherwarpConfigLoader(
+            CONFIG_DIR.resolve("new_etherwarp_waypoints.json"),
+            "/default-config/iq/new_etherwarp_waypoints.json",
+            false
+    );
+    private final Path configFile;
+    private final String defaultResource;
+    private final boolean applyLegacyMigrations;
     private volatile List<EtherwarpCategory> cachedCategories = Collections.emptyList();
+
+    private EtherwarpConfigLoader() {
+        this(CONFIG_FILE, DEFAULT_RESOURCE, true);
+    }
+
+    private EtherwarpConfigLoader(@NotNull Path configFile, @NotNull String defaultResource, boolean applyLegacyMigrations) {
+        this.configFile = configFile;
+        this.defaultResource = defaultResource;
+        this.applyLegacyMigrations = applyLegacyMigrations;
+    }
 
     /**
      * Carrega a configuração de waypoints do Etherwarp.
@@ -47,6 +66,9 @@ public class EtherwarpConfigLoader {
         Path configPath = getConfigPath();
 
         try {
+            if (applyLegacyMigrations) {
+                migrateLegacyCustomConfig(configPath);
+            }
             if (Files.exists(configPath)) {
                 log.info("Loading Etherwarp config from: {}", configPath);
                 try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
@@ -56,9 +78,9 @@ public class EtherwarpConfigLoader {
             }
 
             log.info("Loading Etherwarp config from bundled resource");
-            try (InputStream is = getClass().getResourceAsStream(DEFAULT_RESOURCE)) {
+            try (InputStream is = getClass().getResourceAsStream(defaultResource)) {
                 if (is == null) {
-                    log.error("Default Etherwarp resource not found: {}", DEFAULT_RESOURCE);
+                    log.error("Default Etherwarp resource not found: {}", defaultResource);
                     cachedCategories = Collections.emptyList();
                     return cachedCategories;
                 }
@@ -91,9 +113,44 @@ public class EtherwarpConfigLoader {
         return cachedCategories;
     }
 
+    public @NotNull List<WaypointArea> loadAreas() {
+        try {
+            if (!Files.exists(configFile)) {
+                saveDefaultConfig(configFile);
+            }
+            try (Reader reader = Files.newBufferedReader(configFile, StandardCharsets.UTF_8)) {
+                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+                if (!bool(root, "enabled", true)) return List.of();
+                JsonArray areasArray = root.getAsJsonArray("areas");
+                if (areasArray == null) return List.of();
+
+                List<WaypointArea> areas = new ArrayList<>();
+                for (JsonElement element : areasArray) {
+                    if (!element.isJsonObject()) continue;
+                    JsonObject area = element.getAsJsonObject();
+                    if (!bool(area, "enabled", true)) continue;
+                    JsonArray bounds = area.getAsJsonArray("bounds");
+                    if (bounds == null || bounds.size() != 4) continue;
+                    areas.add(new WaypointArea(
+                            area.has("name") ? area.get("name").getAsString() : "area",
+                            new BoundingBox2D(bounds.get(0).getAsDouble(), bounds.get(1).getAsDouble(), bounds.get(2).getAsDouble(), bounds.get(3).getAsDouble()),
+                            List.of(),
+                            null,
+                            null
+                    ));
+                }
+                return List.copyOf(areas);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to load Etherwarp areas from {}", configFile, e);
+            return List.of();
+        }
+    }
+
     private @NotNull @UnmodifiableView List<EtherwarpCategory> parseJson(@NotNull Reader reader) {
         try {
             JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+            if (!bool(root, "enabled", true)) return Collections.emptyList();
             JsonArray categoriesArray = root.getAsJsonArray("categories");
             if (categoriesArray == null) {
                 log.warn("No 'categories' array found in Etherwarp config");
@@ -147,6 +204,7 @@ public class EtherwarpConfigLoader {
 
     private Optional<EtherwarpWaypoint> parseWaypoint(@NotNull JsonObject obj) {
         try {
+            if (!bool(obj, "enabled", true)) return Optional.empty();
             String name = obj.get("name").getAsString();
 
             List<Vec3> positions = parsePositions(obj);
@@ -176,6 +234,11 @@ public class EtherwarpConfigLoader {
 
             EtherwarpWaypoint.HighlightShape shape = parseShape(obj);
             EtherwarpWaypoint.BoxSpec boxSpec = parseBoxSpec(obj);
+            EtherwarpWaypoint.WaypointMarkerStyle markerStyle = parseMarkerStyle(obj);
+            String text = obj.has("text") ? obj.get("text").getAsString() : name;
+            float textScale = obj.has("textScale") ? obj.get("textScale").getAsFloat() : 0.05f;
+            textScale = Math.clamp(textScale, 0.02f, 0.16f);
+            EtherwarpWaypoint.TextPosition textPosition = parseTextPosition(obj);
 
             EtherwarpWaypoint waypoint = new EtherwarpWaypoint(
                     name,
@@ -189,7 +252,11 @@ public class EtherwarpConfigLoader {
                     hideInPhases,
                     maxRenderDistance,
                     shape,
-                    boxSpec
+                    boxSpec,
+                    markerStyle,
+                    text,
+                    textScale,
+                    textPosition
             );
 
             if (!waypoint.isValid()) {
@@ -292,6 +359,24 @@ public class EtherwarpConfigLoader {
         }
     }
 
+    private EtherwarpWaypoint.WaypointMarkerStyle parseMarkerStyle(@NotNull JsonObject obj) {
+        String raw = obj.has("markerStyle") ? obj.get("markerStyle").getAsString() : "SOLID";
+        try {
+            return EtherwarpWaypoint.WaypointMarkerStyle.valueOf(raw.trim().toUpperCase());
+        } catch (Exception e) {
+            return EtherwarpWaypoint.WaypointMarkerStyle.SOLID;
+        }
+    }
+
+    private EtherwarpWaypoint.TextPosition parseTextPosition(@NotNull JsonObject obj) {
+        String raw = obj.has("textPosition") ? obj.get("textPosition").getAsString() : "ABOVE";
+        try {
+            return EtherwarpWaypoint.TextPosition.valueOf(raw.trim().toUpperCase());
+        } catch (Exception e) {
+            return EtherwarpWaypoint.TextPosition.ABOVE;
+        }
+    }
+
     private int parseColor(JsonElement colorElement) {
         if (colorElement == null || colorElement.isJsonNull()) {
             return 0xFFFFFF;
@@ -359,15 +444,15 @@ public class EtherwarpConfigLoader {
         return phases;
     }
 
-    private Path getConfigPath() {
-        return CONFIG_FILE;
+    public Path getConfigPath() {
+        return configFile;
     }
 
     private void saveDefaultConfig(@NotNull Path configPath) {
         try {
             Files.createDirectories(CONFIG_DIR);
             if (!Files.exists(configPath)) {
-                try (InputStream is = getClass().getResourceAsStream(DEFAULT_RESOURCE)) {
+                try (InputStream is = getClass().getResourceAsStream(defaultResource)) {
                     if (is != null) {
                         Files.copy(is, configPath);
                         log.info("Copied default Etherwarp config to: {}", configPath);
@@ -379,8 +464,35 @@ public class EtherwarpConfigLoader {
         }
     }
 
+    private void migrateLegacyCustomConfig(@NotNull Path configPath) {
+        try {
+            if (Files.exists(configPath)) return;
+            Files.createDirectories(CONFIG_DIR);
+            if (Files.exists(LEGACY_CONFIG_FILE)) {
+                Files.copy(LEGACY_CONFIG_FILE, configPath);
+                log.info("Migrated legacy etherwarp_config.json to custom_waypoints.json");
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to migrate legacy custom waypoints config", e);
+        }
+    }
+
+    private boolean bool(JsonObject obj, String key, boolean fallback) {
+        if (obj == null || !obj.has(key)) return fallback;
+        try {
+            return obj.get(key).getAsBoolean();
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
     public static EtherwarpConfigLoader get() {
         return INSTANCE;
+    }
+
+    public static EtherwarpConfigLoader getNewEtherwarpWaypoints() {
+        return NEW_ETHERWARP_INSTANCE;
     }
 }
 

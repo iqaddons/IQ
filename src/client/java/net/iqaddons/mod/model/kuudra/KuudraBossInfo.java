@@ -1,7 +1,7 @@
 package net.iqaddons.mod.model.kuudra;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.MagmaCube;
+import net.minecraft.world.entity.monster.cubemob.MagmaCube;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 

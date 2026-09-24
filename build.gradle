@@ -1,6 +1,7 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
+    id 'net.fabricmc.fabric-loom' version '1.17.20'
     id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
 }
 
 version = "${project.mod_version}+mc${project.minecraft_version}"
@@ -19,6 +20,29 @@ loom {
             sourceSet sourceSets.client
         }
     }
+}
+
+// Register the Kotlin source directory for the client split-env sourceset.
+sourceSets {
+    client {
+        kotlin {
+            srcDir 'src/client/kotlin'
+        }
+    }
+}
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = 'iqaddons-test'
+        enableGameTests = false
+        enableClientGameTests = true
+    }
+}
+
+tasks.named('compileClientJava', JavaCompile).configure {
+    dependsOn tasks.named('compileClientKotlin')
+    classpath += files(layout.buildDirectory.dir('classes/kotlin/client'))
 }
 
 repositories {
@@ -41,14 +65,25 @@ dependencies {
 
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-26.1:${project.resourcefulconfig_version}")
+    implementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-26.2:${project.resourcefulconfig_version}")
     implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-    implementation 'net.hypixel:mod-api:1.0.1'
+    implementation include('net.hypixel:mod-api:1.0.1')
     implementation include("dev.firstdark.discordrpc:discord-rpc:${project.discord_rpc_version}")
 
     compileOnly "org.projectlombok:lombok:1.18.38"
     annotationProcessor "org.projectlombok:lombok:1.18.38"
+
+    // Fabric Language Kotlin supplies this at runtime; do not embed a duplicate 1.6 MB copy in IQ.
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
+
+    def lwjglVersion = "3.4.1"
+    implementation "org.lwjgl:lwjgl-nanovg:${lwjglVersion}"
+    include "org.lwjgl:lwjgl-nanovg:${lwjglVersion}"
+    ["natives-windows", "natives-linux", "natives-macos", "natives-macos-arm64"].each { classifier ->
+        runtimeOnly "org.lwjgl:lwjgl-nanovg:${lwjglVersion}:${classifier}"
+        include "org.lwjgl:lwjgl-nanovg:${lwjglVersion}:${classifier}"
+    }
 }
 
 processResources {
@@ -83,4 +118,42 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.name}" }
     }
+}
+
+tasks.register('gametestJar', Jar) {
+    archiveClassifier = 'gametest'
+    from sourceSets.gametest.output
+}
+
+tasks.register('testPearlFlatTrajectory', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.PearlFlatTrajectoryTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.register('testNanoVgDiagnosticMode', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.NanoVgDiagnosticModeTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.register('testPublicFeatureLogic', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.PublicFeatureLogicTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testNanoVgDiagnosticMode')
+    dependsOn tasks.named('testPublicFeatureLogic')
+}
+
+dependencies {
+    productionRuntimeMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    gametestRuntimeOnly "net.fabricmc:fabric-language-kotlin:${project.fabric_language_kotlin_version}"
+    productionRuntimeMods "com.terraformersmc:modmenu:${project.modmenu_version}"
+    productionRuntimeMods "net.fabricmc:fabric-language-kotlin:${project.fabric_language_kotlin_version}"
 }

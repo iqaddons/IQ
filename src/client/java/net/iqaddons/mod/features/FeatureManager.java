@@ -8,7 +8,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Slf4j
 @NoArgsConstructor
@@ -35,13 +38,7 @@ public final class FeatureManager {
     public void stop() {
         EventBus.unsubscribe(tickSubscription);
 
-        for (Feature feature : new ArrayList<>(features.values())) {
-            try {
-                feature.deactivate();
-            } catch (Exception e) {
-                log.warn("Failed to deactivate feature {}", feature.getName(), e);
-            }
-        }
+        features.values().forEach(Feature::deactivate);
     }
 
     public @Nullable Feature get(@NotNull String id) {
@@ -50,10 +47,12 @@ public final class FeatureManager {
 
     @SuppressWarnings("unchecked")
     public <T extends Feature> @Nullable T get(@NotNull Class<T> type) {
-        return (T) features.values().stream()
-                .filter(type::isInstance)
-                .findFirst()
-                .orElse(null);
+        for (Feature feature : features.values()) {
+            if (type.isInstance(feature)) {
+                return (T) feature;
+            }
+        }
+        return null;
     }
 
     public @NotNull @UnmodifiableView Collection<Feature> all() {
@@ -67,8 +66,7 @@ public final class FeatureManager {
     }
 
     private void syncAllFeatures() {
-
-        for (Feature feature : new java.util.ArrayList<>(features.values())) {
+        for (Feature feature : features.values()) {
             boolean shouldBeActive = feature.isEnabled();
 
             if (shouldBeActive && !feature.isActive()) {

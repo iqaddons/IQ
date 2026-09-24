@@ -14,8 +14,8 @@
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20Us-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/HdhXhCWcW9)
 [![GitHub Downloads](https://img.shields.io/github/downloads/pehenrii/IQ/total?style=for-the-badge&logo=github&label=Downloads&color=2ea043)](https://github.com/pehenrii/IQ/releases)
-[![Made with Java](https://img.shields.io/badge/Made%20With-Java%2021-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org)
-[![Fabric](https://img.shields.io/badge/Fabric-1.21.x-DBD0B4?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA)](https://fabricmc.net)
+[![Made with Java](https://img.shields.io/badge/Made%20With-Java%2025-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org)
+[![Fabric](https://img.shields.io/badge/Fabric-26.2-DBD0B4?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA)](https://fabricmc.net)
 [![License](https://img.shields.io/github/license/pehenrii/IQ?style=for-the-badge&color=blue)](https://github.com/pehenrii/IQ/blob/master/LICENSE)
 
 </div>
@@ -361,6 +361,21 @@ Additional clutter-reduction options for cleaner gameplay.
 </details>
 
 ---
+
+## Minecraft 26.2
+
+- Minecraft **26.2**, Java **25**, Fabric Loader **0.19.5+** and Fabric API **0.160.0+26.2**.
+- Use **OpenGL** for the NanoVG configuration screens and modern HUD. Vulkan is not supported by NanoVG; IQ displays an explanation when opening its configuration and uses the classic HUD as a fallback.
+- Resourceful Config 5.0.0, Kotlin and the Hypixel Mod API are bundled. Mod Menu 20.0.2 is optional.
+
+Build with `./gradlew build`. The distribution is `build/libs/iq-1.0.4+mc26.2.jar`.
+
+Validation:
+
+- `./gradlew runClientGameTest`: starts an isolated world, audits mixins, exercises overlay geometry and opens the configuration screen.
+- Test files and generated worlds stay under `build/run/`. Test classes are excluded from the distribution.
+
+A live Hypixel Kuudra run is still needed to check server-specific events.
 
 ## Pearl Waypoints Customization
 

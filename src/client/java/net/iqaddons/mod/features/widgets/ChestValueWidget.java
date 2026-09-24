@@ -26,7 +26,7 @@ public class ChestValueWidget extends HudWidget {
 
     public ChestValueWidget() {
         super("chestValueWidget", "Chest Value",
-                160.0f, 170.0f,
+                148.5f, 170.72353f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );
@@ -60,7 +60,7 @@ public class ChestValueWidget extends HudWidget {
             return;
         }
 
-        ContainerScreen screen = (ContainerScreen) mc.screen;
+        ContainerScreen screen = (ContainerScreen) mc.gui.screen();
         ChestValueBreakdown breakdown = ChestProfitUtil.analyzeChest(screen.getMenu().slots);
 
         lines.add(HudLine.of("§7Total Value: §6" + formatCoins(breakdown.totalValue())));
@@ -89,7 +89,7 @@ public class ChestValueWidget extends HudWidget {
     }
 
     private boolean isKuudraChestScreenOpen() {
-        if (!(mc.screen instanceof ContainerScreen screen)) {
+        if (!(mc.gui.screen() instanceof ContainerScreen screen)) {
             return false;
         }
 

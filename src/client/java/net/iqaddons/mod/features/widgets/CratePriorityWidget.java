@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.CratePriorityHudEvent;
 import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.iqaddons.mod.utils.HudRenderer;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TextColor;
@@ -31,10 +32,10 @@ public class CratePriorityWidget extends HudWidget {
         super(
                 "crate_priority",
                 "Crate Priority",
-                0f,
-                120f,
-                2.0f,
-                HudAnchor.CENTER
+                372.5f,
+                131.11957f,
+                3.0f,
+                HudAnchor.TOP_LEFT
         );
 
         setEnabledSupplier(() -> PhaseOneConfig.cratePriority);
@@ -91,6 +92,10 @@ public class CratePriorityWidget extends HudWidget {
     }
 
     private void renderWidget(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, boolean preview) {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) {
+            return;
+        }
+
         String renderText = getRenderText(preview);
         if (renderText.isEmpty()) {
             return;
@@ -127,8 +132,32 @@ public class CratePriorityWidget extends HudWidget {
         context.pose().popMatrix();
     }
 
+    public @NotNull String getNanoRenderText(boolean preview) {
+        return getRenderText(preview);
+    }
+
+    public @NotNull String getNanoMinReferenceText() {
+        return MIN_REFERENCE_TEXT;
+    }
+
+    public @NotNull TextColor getNanoTextColor() {
+        return PhaseOneConfig.CratePriorityConfig.cratePriorityColor;
+    }
+
+    public float getNanoAlpha(boolean preview) {
+        return preview ? 1.0f : getAlpha();
+    }
+
+    public float getNanoSlideOffset(boolean preview) {
+        return preview ? 0.0f : getSlideOffset();
+    }
+
     @Override
     public int getWidth() {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) {
+            return super.getWidth();
+        }
+
         var textRenderer = mc.font;
         if (textRenderer == null) {
             return 20;
@@ -141,6 +170,10 @@ public class CratePriorityWidget extends HudWidget {
 
     @Override
     public int getHeight() {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) {
+            return super.getHeight();
+        }
+
         var textRenderer = mc.font;
         if (textRenderer == null) {
             return 1;

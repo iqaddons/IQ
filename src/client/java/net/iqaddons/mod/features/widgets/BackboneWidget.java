@@ -16,9 +16,9 @@ public class BackboneWidget extends HudWidget {
         super(
                 "backbone_alert",
                 "Backbone Alert",
-                336.5f,
-                272.5f,
-                2.3f,
+                307.0f,
+                285.47922f,
+                3.0f,
                 HudAnchor.TOP_LEFT
         );
 

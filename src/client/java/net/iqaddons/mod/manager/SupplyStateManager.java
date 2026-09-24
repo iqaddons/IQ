@@ -13,10 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Getter
@@ -24,8 +23,8 @@ public final class SupplyStateManager {
 
     private static final SupplyStateManager INSTANCE = new SupplyStateManager();
 
-    private final List<SupplyPosition> activeSupplies = new CopyOnWriteArrayList<>();
-    private final List<PileLocation> remainingPiles = new CopyOnWriteArrayList<>();
+    private volatile List<SupplyPosition> activeSupplies = List.of();
+    private volatile List<PileLocation> remainingPiles = List.of();
 
     private volatile PreSpot detectedPreSpot = null;
     private volatile boolean preSpotLocked = false;
@@ -45,8 +44,7 @@ public final class SupplyStateManager {
     }
 
     public void updateSupplyPositions(@NotNull List<SupplyPosition> positions) {
-        activeSupplies.clear();
-        activeSupplies.addAll(positions);
+        activeSupplies = List.copyOf(positions);
     }
 
     public void markNoPreCheckCompleted() {
@@ -61,7 +59,7 @@ public final class SupplyStateManager {
 
     @Contract(pure = true)
     public @NotNull @UnmodifiableView List<SupplyPosition> getActiveSupplies() {
-        return Collections.unmodifiableList(activeSupplies);
+        return activeSupplies;
     }
 
     public boolean tryDetectPreSpot(@NotNull Vec3 playerPos) {
@@ -84,8 +82,12 @@ public final class SupplyStateManager {
         Vec3 preLoc = detectedPreSpot.getLocation();
         double radius = 18.0;
 
-        return activeSupplies.stream()
-                .anyMatch(supply -> supply.isNear(preLoc, radius));
+        for (SupplyPosition supply : activeSupplies) {
+            if (supply.isNear(preLoc, radius)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public @Nullable Boolean hasSecondarySupply() {
@@ -96,19 +98,27 @@ public final class SupplyStateManager {
         Vec3 secondaryLoc = detectedPreSpot.getSecondaryLocation();
         double radius = detectedPreSpot.getSecondaryCheckRadius();
 
-        return activeSupplies.stream()
-                .anyMatch(supply -> supply.isNear(secondaryLoc, radius));
+        for (SupplyPosition supply : activeSupplies) {
+            if (supply.isNear(secondaryLoc, radius)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public @Nullable SupplyPosition findSupplyNear(@NotNull Vec3 location, double radius) {
-        return activeSupplies.stream()
-                .filter(supply -> supply.isNear(location, radius))
-                .findFirst()
-                .orElse(null);
+        for (SupplyPosition supply : activeSupplies) {
+            if (supply.isNear(location, radius)) {
+                return supply;
+            }
+        }
+        return null;
     }
 
     public void markPileCompleted(@NotNull Vec3 armorStandPos) {
-        remainingPiles.removeIf(pile -> pile.isNearby(armorStandPos));
+        List<PileLocation> updatedPiles = new ArrayList<>(remainingPiles);
+        updatedPiles.removeIf(pile -> pile.isNearby(armorStandPos));
+        remainingPiles = List.copyOf(updatedPiles);
     }
 
     public void setMissingPre(int value) {
@@ -126,15 +136,23 @@ public final class SupplyStateManager {
     }
 
     public void reloadPileLocations(@NotNull List<PileLocation> updatedPiles) {
-        remainingPiles.clear();
-        remainingPiles.addAll(updatedPiles);
-        log.debug("Pile locations reloaded from config: {} piles", updatedPiles.size());
+        remainingPiles = List.copyOf(updatedPiles);
+        log.debug("Pile locations reloaded: {} piles", updatedPiles.size());
+    }
+
+    public void resetRemainingPiles() {
+        remainingPiles = List.copyOf(getDefaultPiles());
+        log.debug("Remaining pile locations reset");
+    }
+
+    public void clearRemainingPiles() {
+        remainingPiles = List.of();
+        log.debug("Remaining pile locations cleared");
     }
 
     public void reset() {
-        activeSupplies.clear();
-        remainingPiles.clear();
-        remainingPiles.addAll(getConfiguredPiles());
+        activeSupplies = List.of();
+        remainingPiles = List.copyOf(getDefaultPiles());
 
         detectedPreSpot = null;
         preSpotLocked = false;
@@ -180,9 +198,8 @@ public final class SupplyStateManager {
         return 6;
     }
 
-    private @NotNull List<PileLocation> getConfiguredPiles() {
-        List<PileLocation> cachedPiles = PileConfigLoader.get().getCached();
-        return cachedPiles.isEmpty() ? PileConfigLoader.get().load() : cachedPiles;
+    private @NotNull List<PileLocation> getDefaultPiles() {
+        return PileConfigLoader.get().load();
     }
 
     public static SupplyStateManager get() {

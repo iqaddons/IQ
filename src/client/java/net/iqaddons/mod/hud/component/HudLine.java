@@ -1,6 +1,7 @@
 package net.iqaddons.mod.hud.component;
 
 import lombok.Data;
+import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.FormattedCharSequence;
@@ -29,6 +30,7 @@ public class HudLine {
     private @Nullable Runnable mouseEnterAction;
     private @Nullable Runnable mouseLeaveAction;
     private @Nullable BiConsumer<GuiGraphicsExtractor, Font> hoverAction;
+    private @Nullable String tooltipText;
 
     private boolean hovered = false;
     private BooleanSupplier visibilityCondition = () -> true;
@@ -122,6 +124,11 @@ public class HudLine {
         return this;
     }
 
+    public @NotNull HudLine tooltip(@NotNull String text) {
+        this.tooltipText = text;
+        return this;
+    }
+
     public @NotNull HudLine showWhen(@NotNull BooleanSupplier condition) {
         this.visibilityCondition = condition;
         return this;
@@ -141,7 +148,7 @@ public class HudLine {
     }
 
     public boolean isInteractive() {
-        return clickAction != null || hoverAction != null
+        return clickAction != null || hoverAction != null || tooltipText != null
                 || mouseEnterAction != null || mouseLeaveAction != null;
     }
 
@@ -195,17 +202,66 @@ public class HudLine {
         return false;
     }
 
+    public boolean isNanoHovered() {
+        return hovered;
+    }
+
+    public void setNanoHovered(boolean hovered) {
+        this.hovered = hovered;
+    }
+
+    public boolean hasNanoClickAction() {
+        return clickAction != null;
+    }
+
+    public void runNanoClickAction() {
+        if (clickAction != null) {
+            clickAction.run();
+        }
+    }
+
+    public void runNanoMouseEnterAction() {
+        if (mouseEnterAction != null) {
+            mouseEnterAction.run();
+        }
+    }
+
+    public void runNanoMouseLeaveAction() {
+        if (mouseLeaveAction != null) {
+            mouseLeaveAction.run();
+        }
+    }
+
+    public @Nullable String getNanoTooltipText() {
+        return tooltipText;
+    }
+
     public void render(
             @NotNull GuiGraphicsExtractor context,
             int x, int y,
             @NotNull Font textRenderer
     ) {
         if (text.isEmpty()) return;
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) return;
 
         context.text(textRenderer, orderedText, x, y, -1, shadow);
     }
 
+    public @NotNull String getNanoText() {
+        return text == null ? "" : text;
+    }
+
+    public boolean hasNanoShadow() {
+        return shadow;
+    }
+
     public void renderHover(@NotNull GuiGraphicsExtractor context, @NotNull Font textRenderer) {
+        if (hovered && tooltipText != null) {
+            double[] mouse = net.iqaddons.mod.utils.HudRenderer.getScaledMousePosition();
+            net.iqaddons.mod.utils.HudRenderer.drawSimpleTooltip(context, tooltipText, mouse[0], mouse[1]);
+            return;
+        }
+
         if (hovered && hoverAction != null) {
             hoverAction.accept(context, textRenderer);
         }

@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Locale;
 
 import static net.iqaddons.mod.IQConstants.ELLE_HEAD_OVER_MESSAGE;
 
@@ -246,7 +247,7 @@ public class SecondSupplyAlertFeature extends KuudraFeature {
     }
 
     private @NotNull String formatAlert(@NotNull String name, @NotNull SupplyPosition supply) {
-        return String.format("%s x: %.2f, y: 75, z: %.2f",
+        return String.format(Locale.ROOT, "%s x: %.2f, y: 75, z: %.2f",
                 name,
                 supply.position().x,
                 supply.position().z

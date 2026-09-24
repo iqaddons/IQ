@@ -3,8 +3,10 @@ package net.iqaddons.mod.config;
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
 import net.iqaddons.mod.config.categories.*;
 import net.iqaddons.mod.hud.HudManager;
+import net.iqaddons.mod.screen.IQConfigScreen;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 @Config(
         value = "iqaddons",
@@ -34,7 +36,10 @@ public class Configuration {
     )
     @Comment("Open the HUD Editor to move and customize HUD elements")
     public static final Runnable hudEditor = () -> {
-        mc.execute(() -> HudManager.get().openEditor());
+        mc.execute(() -> {
+            Screen parent = mc.gui.screen() instanceof IQConfigScreen ? mc.gui.screen() : null;
+            HudManager.get().openEditor(parent);
+        });
     };
 
     @ConfigEntry(
@@ -64,9 +69,9 @@ public class Configuration {
 
     @ConfigEntry(
             id = "muteTerminatorCooldownSound",
-            translation = "Mute Terminator Cooldown Sound"
+            translation = "Mute Rend Terminator Cooldown"
     )
-    @Comment("Disable the annoying Terminator ability cooldown sound/chat message")
+    @Comment("Disable the annoying Rend Terminator cooldown sound/chat message")
     public static boolean muteTerminatorCooldownSound = true;
 
     @ConfigEntry(
@@ -129,6 +134,10 @@ public class Configuration {
         @ConfigEntry(id = "partyCommandProfit", translation = "!profit")
         @Comment("Reply with your current profit counter percent")
         public static boolean partyCommandProfit = true;
+
+        @ConfigEntry(id = "partyCommandPersonalBest", translation = "!pb")
+        @Comment("Reply with your best session and lifetime Kuudra times")
+        public static boolean partyCommandPersonalBest = true;
     }
 
     @ConfigOption.Separator("Loadouts")
@@ -140,6 +149,13 @@ public class Configuration {
     @Comment("Enable loadouts slot selection using keybinds.\n" +
             "Configure slot keybinds in Options → Controls → Keybinds")
     public static boolean loadoutsKeybinds = true;
+
+    @ConfigEntry(
+            id = "preventClosingLoadoutMenu",
+            translation = "Prevent Closing Loadout Menu"
+    )
+    @Comment("Block left and right clicks on the Close button in the Loadouts menu")
+    public static boolean preventClosingLoadoutMenu = true;
 
     @ConfigEntry(
             id = "loadoutsSound",
@@ -171,14 +187,14 @@ public class Configuration {
             id = "arrowTracker",
             translation = "Arrow Tracker"
     )
-    @Comment("Track your arrow type and quantity on the HUD.")
+    @Comment("Track your arrow type and quantity on the HUD")
     public static boolean arrowTracker = true;
 
     @ConfigEntry(
             id = "arrowTrackerNotifications",
             translation = "Arrow Running Out Notifications"
     )
-    @Comment("Show notifications when you're running out of or out of arrows.")
+    @Comment("Show notifications when you're running out of or out of arrows")
     public static boolean arrowTrackerNotifications = true;
 
     @ConfigEntry(
@@ -186,10 +202,8 @@ public class Configuration {
             translation = "Arrow Tracker Visibility"
     )
     @ConfigOption.Select
-    @Comment("""
-            Choose when the Arrow Tracker widget should be visible.
-            Always: Widget shows the last tracked arrow data at all times.
-            Only Shooting: Widget only appears when you're holding a bow.""")
+    @Comment("Always: Shows the last tracked arrow data always.\n" +
+            "Shooting: Only appears when you are holding a bow.")
     public static ArrowTrackerVisibility arrowTrackerVisibility = ArrowTrackerVisibility.ALWAYS;
 
     public enum ArrowTrackerVisibility {

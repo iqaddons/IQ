@@ -3,22 +3,28 @@ package net.iqaddons.mod.features.generic;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
+import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.ChestCounterManager;
+import net.iqaddons.mod.manager.PersonalBestManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.ServerUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class PartyCommandsFeature extends Feature {
 
+    private static final long PARTY_COMMAND_RESPONSE_DELAY_MILLIS = 500L;
+    private static final long PARTY_COMMAND_RESPONSE_INTERVAL_MILLIS = 500L;
     private static final Pattern PARTY_CHAT_PATTERN = Pattern.compile("^Party > (?:\\[[^]]+] )?([A-Za-z0-9_]+):\\s*(.+)$");
     private static final Map<Integer, String> KUUDRA_TIER_MAP = Map.of(
             1, "KUUDRA_NORMAL",
@@ -28,6 +34,9 @@ public class PartyCommandsFeature extends Feature {
             5, "KUUDRA_INFERNAL"
     );
 
+    private final Queue<ScheduledPartyMessage> partyCommandMessages = new ArrayDeque<>();
+    private long nextPartyCommandResponseAt = 0L;
+
     public PartyCommandsFeature() {
         super("partyCommands", "Party Commands", () -> Configuration.PartyCommands.enable);
     }
@@ -35,6 +44,7 @@ public class PartyCommandsFeature extends Feature {
     @Override
     protected void onActivate() {
         subscribe(ChatReceivedEvent.class, this::onChatReceived);
+        subscribe(ClientTickEvent.class, this::onClientTick);
     }
 
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
@@ -60,6 +70,7 @@ public class PartyCommandsFeature extends Feature {
             case "!chests" -> sendChestProgress();
             case "!runs" -> sendRuns(parts);
             case "!profit" -> sendProfit();
+            case "!pb" -> sendPersonalBest();
             default -> {}
         }
     }
@@ -95,14 +106,14 @@ public class PartyCommandsFeature extends Feature {
         if (!Configuration.PartyCommands.partyCommandPing || mc.player == null || mc.player.connection == null) return;
 
         var averagePing = ServerUtils.getAveragePing();
-        MessageUtil.PARTY.sendMessage(String.format("[IQ] %,dms", averagePing.toMillis()));
+        sendPartyCommandMessage(String.format("[IQ] %,dms", averagePing.toMillis()));
     }
 
     private void sendTps() {
         if (!Configuration.PartyCommands.partyCommandTps || mc.level == null) return;
 
         float tps = ServerUtils.getAverageTps();
-        MessageUtil.PARTY.sendMessage(String.format(Locale.ROOT, "[IQ] %.1f", tps));
+        sendPartyCommandMessage(String.format(Locale.ROOT, "[IQ] %.1f", tps));
     }
 
     private void sendChestProgress() {
@@ -110,7 +121,7 @@ public class PartyCommandsFeature extends Feature {
 
         int current = ChestCounterManager.get().getChests();
         int limit = ChestCounterManager.MAX_CHESTS;
-        MessageUtil.PARTY.sendMessage("[IQ] I am currently at " + current + "/" + limit + " of my chest limit.");
+        sendPartyCommandMessage("[IQ] I am currently at " + current + "/" + limit + " of my chest limit.");
     }
 
     private void sendRuns(@NotNull String @NotNull [] parts) {
@@ -122,7 +133,7 @@ public class PartyCommandsFeature extends Feature {
         }
 
         ProfitData data = KuudraProfitTrackerManager.get().session();
-        MessageUtil.PARTY.sendMessage(String.format(
+        sendPartyCommandMessage(String.format(
                 "[IQ] Runs: %d (F:%d) | Avg: %.2fs",
                 data.runs, data.failedRuns, data.averageRunMillis() / 1000.0
         ));
@@ -132,13 +143,58 @@ public class PartyCommandsFeature extends Feature {
         if (!Configuration.PartyCommands.partyCommandProfit) return;
 
         ProfitData data = KuudraProfitTrackerManager.get().current();
-        MessageUtil.PARTY.sendMessage(String.format(
+        sendPartyCommandMessage(String.format(
                 "[IQ] Profit: %s | Rate: %s/h | Runs: %d | Avg: %.2fs",
                 formatCoins(data.profit),
                 formatCoins(Math.max(0, data.hourlyRateCoins())),
                 data.runs,
                 data.averageRunMillis() / 1000.0
         ));
+    }
+
+    private void sendPersonalBest() {
+        if (!Configuration.PartyCommands.partyCommandPersonalBest) return;
+
+        KuudraProfitTrackerManager tracker = KuudraProfitTrackerManager.get();
+        PersonalBestManager personalBestManager = PersonalBestManager.get();
+
+        long sessionBestMillis = tracker.session().bestRunMillis;
+        long lifetimeBestMillis = personalBestManager.hasPersonalBest()
+                ? personalBestManager.getBestTimeMillis()
+                : tracker.lifetime().bestRunMillis;
+        String tier = personalBestManager.hasPersonalBest()
+                ? personalBestManager.getTier().getDisplayName()
+                : "Unknown";
+
+        sendPartyCommandMessage(String.format(
+                Locale.ROOT,
+                "[IQ] Best Personal Time (Tier %s): Session %s / Lifetime: %s",
+                tier,
+                formatRunTime(sessionBestMillis),
+                formatRunTime(lifetimeBestMillis)
+        ));
+    }
+
+    private void sendPartyCommandMessage(@NotNull String message) {
+        long now = System.currentTimeMillis();
+        long sendAt = Math.max(now + PARTY_COMMAND_RESPONSE_DELAY_MILLIS, nextPartyCommandResponseAt);
+        nextPartyCommandResponseAt = sendAt + PARTY_COMMAND_RESPONSE_INTERVAL_MILLIS;
+        partyCommandMessages.add(new ScheduledPartyMessage(message, sendAt));
+    }
+
+    private void onClientTick(@NotNull ClientTickEvent event) {
+        if (partyCommandMessages.isEmpty()) return;
+
+        ScheduledPartyMessage next = partyCommandMessages.peek();
+        if (next == null || System.currentTimeMillis() < next.sendAtMillis()) return;
+
+        partyCommandMessages.poll();
+        MessageUtil.PARTY.sendMessage(next.message());
+    }
+
+    private @NotNull String formatRunTime(long millis) {
+        if (millis <= 0L) return "N/A";
+        return String.format(Locale.ROOT, "%.2fs", millis / 1000.0);
     }
 
     private @NotNull String formatCoins(long coins) {
@@ -148,5 +204,8 @@ public class PartyCommandsFeature extends Feature {
         if (abs >= 1_000_000L) return String.format(Locale.ROOT, "%s%.2fm", prefix, abs / 1_000_000d);
         if (abs >= 1_000L) return String.format(Locale.ROOT, "%s%.1fk", prefix, abs / 1_000d);
         return prefix + abs;
+    }
+
+    private record ScheduledPartyMessage(@NotNull String message, long sendAtMillis) {
     }
 }

@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,8 @@ public class AbilityAnnounceFeature extends KuudraFeature {
             if (!rule.isEnabled()) continue;
 
             if (rule.pattern().matcher(message).matches()) {
-                MessageUtil.PARTY.sendMessage("[IQ] %s Casted at %s!".formatted(rule.spellName(), formatPlayerPosition()));
+                MessageUtil.PARTY.sendMessage("[IQ] %s Casted at %s%s!"
+                        .formatted(rule.spellName(), formatPlayerPosition(), formatBossPhaseTimeSuffix()));
                 return;
             }
         }
@@ -69,6 +71,13 @@ public class AbilityAnnounceFeature extends KuudraFeature {
 
         BlockPos pos = mc.player.blockPosition();
         return "%d, %d, %d".formatted(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    private @NotNull String formatBossPhaseTimeSuffix() {
+        if (!isInPhase(KuudraPhase.BOSS)) return "";
+
+        double bossPhaseSeconds = currentContext().phaseDuration().toMillis() / 1000.0;
+        return String.format(Locale.ROOT, " in %.2fs", bossPhaseSeconds);
     }
 
     private record AbilityAnnounceRule(

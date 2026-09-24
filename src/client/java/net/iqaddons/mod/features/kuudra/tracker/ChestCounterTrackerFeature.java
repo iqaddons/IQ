@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class ChestCounterTrackerFeature extends Feature {
 
-    private static final long OVERLAY_TIMEOUT_MS = 3 * 60 * 1000L;
+    private static final long OVERLAY_TIMEOUT_MS = 5 * 60 * 1000L;
     public static boolean overlayVisible;
 
     private final ChestCounterManager manager = ChestCounterManager.get();
@@ -80,7 +80,7 @@ public class ChestCounterTrackerFeature extends Feature {
 
         if (lastRunTimestamp > 0 && System.currentTimeMillis() - lastRunTimestamp >= OVERLAY_TIMEOUT_MS) {
             overlayVisible = false;
-            MessageUtil.sendFormattedMessage("§fNo runs completed in the last 3 minutes. Overlay hidden.");
+            MessageUtil.sendFormattedMessage("§8[§eChest Tracker§8] §fNo runs completed in the last 5 minutes. §8»§f Overlay hidden.");
         }
     }
 

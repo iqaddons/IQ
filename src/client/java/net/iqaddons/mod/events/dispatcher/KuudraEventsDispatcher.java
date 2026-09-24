@@ -8,6 +8,7 @@ import net.iqaddons.mod.events.dispatcher.detector.FreshDetector;
 import net.iqaddons.mod.events.dispatcher.detector.SupplyDetector;
 import net.iqaddons.mod.events.impl.ChatReceivedEvent;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.EntityTrackingUpdateEvent;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
@@ -42,6 +43,7 @@ public class KuudraEventsDispatcher extends EventDispatcher {
         kuudraStateManager = KuudraStateManager.get();
 
         subscribe(ClientTickEvent.class, this::onClientTick);
+        subscribe(EntityTrackingUpdateEvent.class, this::onEntityTrackingUpdate);
         subscribe(ChatReceivedEvent.class, this::onChat);
         subscribe(ScreenClickEvent.class, this::onScreenClick);
         subscribe(TitleReceivedEvent.class, this::onTitleReceived);
@@ -103,6 +105,10 @@ public class KuudraEventsDispatcher extends EventDispatcher {
                 log.info("Area: {} -> {}", previousArea, newArea);
             }
         }
+    }
+
+    private void onEntityTrackingUpdate(@NotNull EntityTrackingUpdateEvent event) {
+        directionDetector.detect(event, kuudraStateManager.context(), EventBus::post);
     }
 
     private void armPendingSkyBlockExit() {

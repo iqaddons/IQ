@@ -9,17 +9,17 @@ import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.manager.BackboneAlertManager;
 import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class BackboneAlertFeature extends Feature {
 
     private static final int BACKBONE_TICKS = 22;
-    private static final int BACKBONE_COOLDOWN_TICKS = 32;
     private static final int DEFAULT_BACKBONE_ADVANCE_TICKS = 2;
+    private static final int BACKBONE_COOLDOWN_TICKS = 32;
 
     private final BackboneAlertManager manager = BackboneAlertManager.get();
 
@@ -61,9 +61,7 @@ public class BackboneAlertFeature extends Feature {
 
         manager.setCooldownTicks(BACKBONE_COOLDOWN_TICKS);
         manager.setThrowOrigin(getPlayerEyePos(mc.player));
-        int advanceOffset = PhaseFourConfig.backboneAlertAdvanceTicks;
-        int configuredAdvanceTicks = DEFAULT_BACKBONE_ADVANCE_TICKS + advanceOffset;
-        manager.startBackboneTimer(Math.max(1, BACKBONE_TICKS - configuredAdvanceTicks));
+        manager.startBackboneTimer(Math.max(1, BACKBONE_TICKS - (DEFAULT_BACKBONE_ADVANCE_TICKS + PhaseFourConfig.backboneAlertAdvanceTicks)));
 
         postStateChange(false);
     }

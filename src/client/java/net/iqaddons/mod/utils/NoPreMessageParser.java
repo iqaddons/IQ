@@ -5,7 +5,12 @@ import net.iqaddons.mod.model.spot.PreSpot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,9 +18,10 @@ import java.util.regex.Pattern;
 public class NoPreMessageParser {
 
     // More robust alias matching to avoid rare misses caused by punctuation, formatting or unicode
+    private static final Pattern NON_ALIAS_CHAR_PATTERN = Pattern.compile("[^a-z0-9 ]");
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
     private static final Map<String, String> ALIASES = new HashMap<>();
     private static final List<AliasRule> ALIAS_RULES;
-
     static {
         ALIASES.put("triangle", "TRIANGLE");
         ALIASES.put("tri", "TRIANGLE");
@@ -53,11 +59,10 @@ public class NoPreMessageParser {
         if (message == null || message.isBlank()) return null;
 
         // normalize: remove any leftover formatting chars and non-alphanum (keep spaces)
-        String normalized = message.toLowerCase(Locale.ROOT)
-                .replaceAll("§.", "")
-                .replaceAll("[^a-z0-9 ]", " ")
-                .replaceAll("\\s+", " ")
-                .trim();
+        String normalized = WHITESPACE_PATTERN.matcher(
+                NON_ALIAS_CHAR_PATTERN.matcher(StringUtils.stripFormatting(message).toLowerCase(Locale.ROOT))
+                        .replaceAll(" ")
+        ).replaceAll(" ").trim();
 
         for (AliasRule rule : ALIAS_RULES) {
             // look for "no <alias>" or "missing <alias>"

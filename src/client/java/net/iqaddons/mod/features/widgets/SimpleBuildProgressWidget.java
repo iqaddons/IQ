@@ -1,11 +1,11 @@
 package net.iqaddons.mod.features.widgets;
 
-import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.config.categories.PhaseTwoConfig;
 import net.iqaddons.mod.manager.KuudraStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.BuildProgressOverlayUtil;
@@ -27,8 +27,8 @@ public class SimpleBuildProgressWidget extends HudWidget {
         super(
                 "simpleBuildProgress",
                 "Simple Build Progress",
-                200.0f, 100.0f,
-                1.2f,
+                427.0f, 332.88547f,
+                1.7000002f,
                 HudAnchor.TOP_LEFT
         );
 

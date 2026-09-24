@@ -68,11 +68,11 @@ public class DangerAlertFeature extends KuudraFeature {
         Block block = state.getBlock();
 
         return switch (block) {
-            case Block b when b == Blocks.GREEN_TERRACOTTA -> DangerLevel.GREEN;
-            case Block b when b == Blocks.LIME_TERRACOTTA -> DangerLevel.LIME;
-            case Block b when b == Blocks.YELLOW_TERRACOTTA -> DangerLevel.YELLOW;
-            case Block b when b == Blocks.ORANGE_TERRACOTTA -> DangerLevel.ORANGE;
-            case Block b when b == Blocks.RED_TERRACOTTA -> DangerLevel.RED;
+            case Block b when b == Blocks.DYED_TERRACOTTA.green() -> DangerLevel.GREEN;
+            case Block b when b == Blocks.DYED_TERRACOTTA.lime() -> DangerLevel.LIME;
+            case Block b when b == Blocks.DYED_TERRACOTTA.yellow() -> DangerLevel.YELLOW;
+            case Block b when b == Blocks.DYED_TERRACOTTA.orange() -> DangerLevel.ORANGE;
+            case Block b when b == Blocks.DYED_TERRACOTTA.red() -> DangerLevel.RED;
             default -> null;
         };
     }

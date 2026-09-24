@@ -25,11 +25,16 @@ public record EtherwarpWaypoint(
         @NotNull Set<KuudraPhase> hideInPhases,
         float maxRenderDistance,          // -1 = sem limite
         @NotNull HighlightShape shape,
-        @NotNull BoxSpec boxSpec
+        @NotNull BoxSpec boxSpec,
+        @NotNull WaypointMarkerStyle markerStyle,
+        @NotNull String text,
+        float textScale,
+        @NotNull TextPosition textPosition
 ) {
 
     public EtherwarpWaypoint {
         colorsRgb = colorsRgb == null ? List.of() : List.copyOf(colorsRgb);
+        text = text == null ? "" : text;
     }
 
     public int getColorForIndex(int index) {
@@ -69,6 +74,17 @@ public record EtherwarpWaypoint(
         EDGE_BOTTOM,
         PILLAR,
         CUSTOM
+    }
+
+    public enum WaypointMarkerStyle {
+        SOLID,
+        TARGET
+    }
+
+    public enum TextPosition {
+        ABOVE,
+        BELOW,
+        HIDDEN
     }
 
     public AABB getRenderBox(@NotNull Vec3 center) {

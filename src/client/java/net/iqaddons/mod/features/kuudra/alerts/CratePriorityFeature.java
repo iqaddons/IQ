@@ -34,8 +34,9 @@ public class CratePriorityFeature extends KuudraFeature {
 
     private final SupplyStateManager supplyState = SupplyStateManager.get();
     private final CratePriorityConfigLoader cratePriorityConfig = CratePriorityConfigLoader.get();
+    private static volatile @NotNull String currentDestination = "";
 
-    private int pendingMissingPre = 0;
+    private volatile int pendingMissingPre = 0;
     private @NotNull String lastDecisionKey = "";
 
     public CratePriorityFeature() {
@@ -72,13 +73,16 @@ public class CratePriorityFeature extends KuudraFeature {
     private void onChat(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
         if (message.isBlank()) return;
-
+        
         // Parse immediately on chat thread to avoid desync
         NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
         if (parsed != null) {
-            pendingMissingPre = parsed.missingPreValue();
+            int missingPre = parsed.missingPreValue();
+            pendingMissingPre = missingPre;
+            supplyState.setMissingPre(missingPre);
+            mc.execute(() -> handleNoPreCall(missingPre, parsed.canonicalPileName()));
         }
-
+        
         // Queue other checks to main thread
         mc.execute(() -> handleChatMessage(message));
     }
@@ -91,15 +95,31 @@ public class CratePriorityFeature extends KuudraFeature {
             tryDispatchPriority("elle chat");
             return;
         }
-
+        
         if (pendingMissingPre > 0) {
             tryDispatchPriority("party no-pre");
         }
     }
 
+    private void handleNoPreCall(int missingPre, @NotNull String pileName) {
+        if (currentPhase() != KuudraPhase.SUPPLIES) return;
+
+        pendingMissingPre = missingPre;
+        supplyState.setMissingPre(missingPre);
+        log.info("Crate Priority detected no-pre call: {} (value={})", pileName, missingPre);
+        tryDispatchPriority("captured party no-pre");
+    }
+
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame() || !event.isNthTick(SCAN_INTERVAL_TICKS)) return;
-        if (currentPhase() != KuudraPhase.SUPPLIES || pendingMissingPre <= 0) return;
+        if (currentPhase() != KuudraPhase.SUPPLIES) return;
+
+        int sharedMissingPre = supplyState.getMissingPre();
+        if (sharedMissingPre > 0 && pendingMissingPre != sharedMissingPre) {
+            pendingMissingPre = sharedMissingPre;
+        }
+
+        if (pendingMissingPre <= 0) return;
 
         tryDispatchPriority("tick retry");
     }
@@ -121,6 +141,7 @@ public class CratePriorityFeature extends KuudraFeature {
         }
 
         String decisionKey = currentPre.name() + ":" + pendingMissingPre + ":" + destination;
+        currentDestination = destination;
         if (decisionKey.equals(lastDecisionKey)) {
             return;
         }
@@ -191,6 +212,11 @@ public class CratePriorityFeature extends KuudraFeature {
     private void resetState() {
         pendingMissingPre = 0;
         lastDecisionKey = "";
+        currentDestination = "";
+    }
+
+    public static @NotNull String getCurrentDestination() {
+        return currentDestination;
     }
 }
 

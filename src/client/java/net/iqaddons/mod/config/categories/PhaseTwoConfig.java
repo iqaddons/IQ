@@ -50,6 +50,60 @@ public class PhaseTwoConfig {
     public static boolean buildStartCountdownOverlay = true;
 
     @ConfigEntry(
+            id = "fireVeilOverlay",
+            translation = "Fire Veil Overlay"
+    )
+    @Comment("Show Fire Veil Wand overlay and countdown")
+    public static boolean fireVeilOverlay = true;
+
+    @ConfigEntry(
+            id = "fireVeilOverlayConfig",
+            translation = "Fire Veil Overlay Config"
+    )
+    @Comment("Customize Fire Veil Wand render, countdown, and recast sound")
+    public static final FireVeilOverlayConfig fireVeilOverlayConfig = new FireVeilOverlayConfig();
+
+    @ConfigObject
+    public static class FireVeilOverlayConfig {
+        @ConfigEntry(
+                id = "render",
+                translation = "Render"
+        )
+        @ConfigOption.Select
+        @Comment("Choose how the Fire Veil Wand radius is rendered")
+        public static FireVeilOverlayRender render = FireVeilOverlayRender.CIRCLE;
+
+        @ConfigEntry(
+                id = "renderColor",
+                translation = "Render Color"
+        )
+        @ConfigOption.Color(alpha = true)
+        @Comment("Change the Fire Veil Overlay render color")
+        public static int renderColor = new Color(255, 170, 0, 200).getRGB();
+
+        @ConfigEntry(
+                id = "renderThroughWalls",
+                translation = "Render Through Walls"
+        )
+        @Comment("Render the Fire Veil Overlay through blocks, walls, and entities")
+        public static boolean renderThroughWalls = false;
+
+        @ConfigEntry(
+                id = "abilityCountdown",
+                translation = "Ability Countdown"
+        )
+        @Comment("Show a widget counting down until Fire Veil Wand can be recast")
+        public static boolean abilityCountdown = true;
+
+        @ConfigEntry(
+                id = "soundWhenRecast",
+                translation = "Sound When Recast"
+        )
+        @Comment("Play a loud pling when Fire Veil Wand is ready to recast")
+        public static boolean soundWhenRecast = true;
+    }
+
+    @ConfigEntry(
             id = "freshCountdown",
             translation = "Fresh Countdown"
     )
@@ -85,7 +139,7 @@ public class PhaseTwoConfig {
             id = "hideDefaultBuildPileTextConfig",
             translation = "Hide Default Build Pile Text Config"
     )
-    @Comment("Choose which pile text elements to hide.")
+    @Comment("Choose which pile text elements to hide")
     public static final HideDefaultBuildPileTextConfig hideDefaultBuildPileTextConfig = new HideDefaultBuildPileTextConfig();
 
     @ConfigOption.Separator("Build Highlights")
@@ -175,6 +229,12 @@ public class PhaseTwoConfig {
         @ConfigOption.Select
         @Comment("Change the style of the Elle highlight")
         public static WorldRenderUtils.RenderStyle elleHighlightStyle = WorldRenderUtils.RenderStyle.OUTLINE;
+    }
+
+    public enum FireVeilOverlayRender {
+        DEFAULT,
+        WALL,
+        CIRCLE,
     }
 
     @ConfigObject

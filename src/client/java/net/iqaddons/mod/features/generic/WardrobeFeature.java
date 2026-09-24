@@ -25,7 +25,6 @@ public class WardrobeFeature extends Feature {
 
     private static final String WARDROBE_TITLE = "Armor Sets";
     private static final int WARDROBE_SLOT_OFFSET = 36;
-
     public WardrobeFeature() {
         super(
                 "wardrobeKeybinds",
@@ -74,7 +73,7 @@ public class WardrobeFeature extends Feature {
     private void clickWardrobeSlot(int slotIndex) {
         LocalPlayer player = mc.player;
         if (player == null || mc.gameMode == null) return;
-        if (!(mc.screen instanceof AbstractContainerScreen<?> handledScreen)) return;
+        if (!(mc.gui.screen() instanceof AbstractContainerScreen<?> handledScreen)) return;
 
         AbstractContainerMenu handler = handledScreen.getMenu();
         if (slotIndex < 0 || slotIndex >= handler.slots.size()) return;
