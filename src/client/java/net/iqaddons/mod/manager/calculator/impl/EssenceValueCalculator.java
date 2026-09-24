@@ -9,7 +9,9 @@ public class EssenceValueCalculator implements ItemValueCalculator {
 
     @Override
     public double calculateValue(@NotNull ItemStack stack, String itemId, int quantity) {
-        int finalAmount = (int) Math.round(quantity * (1 + KuudraGeneralConfig.ProfitTrackerConfig.kuudraPetBonus / 100.0));
+        double totalBonus = (KuudraGeneralConfig.ProfitTrackerConfig.kuudraPetBonus
+                + KuudraGeneralConfig.ProfitTrackerConfig.attributeBonus) / 100.0;
+        int finalAmount = (int) Math.round(quantity * (1 + totalBonus));
         return manager.getItemPrice(itemId) * finalAmount;
     }
 }

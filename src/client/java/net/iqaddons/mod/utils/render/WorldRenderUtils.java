@@ -33,6 +33,7 @@ import org.joml.Vector3f;
 public class WorldRenderUtils {
 
     private static final Minecraft mc = Minecraft.getInstance();
+    private static final float DEFAULT_OUTLINE_LINE_WIDTH = 1.0f;
 
     public static void drawFilled(
             @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
@@ -57,6 +58,13 @@ public class WorldRenderUtils {
             @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
             @NotNull CameraRenderState camera, AABB box, boolean throughWalls, @NotNull RenderColor color
     ) {
+        drawOutline(matrices, consumer, camera, box, throughWalls, color, DEFAULT_OUTLINE_LINE_WIDTH);
+    }
+
+    public static void drawOutline(
+            @NotNull PoseStack matrices, MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera, AABB box, boolean throughWalls, @NotNull RenderColor color, float lineWidth
+    ) {
         matrices.pushPose();
         Vec3 camPos = camera.pos.reverse();
         matrices.translate(camPos.x, camPos.y, camPos.z);
@@ -67,7 +75,7 @@ public class WorldRenderUtils {
 
         drawBox(
                 matrices.last(), buffer, box,
-                color.argb, 1
+                color.argb, sanitizeLineWidth(lineWidth)
         );
         matrices.popPose();
     }
@@ -150,6 +158,334 @@ public class WorldRenderUtils {
         }
 
         matrices.popPose();
+    }
+
+    public static void drawThickCircleOutline(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float radius,
+            float thickness,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+        if (!Float.isFinite(radius) || !Float.isFinite(thickness) || radius <= 0.0f || thickness <= 0.0f) return;
+
+        float halfThickness = Math.min(thickness / 2.0f, radius);
+        float innerRadius = Math.max(0.0f, radius - halfThickness);
+        float outerRadius = radius + halfThickness;
+
+        matrices.pushPose();
+
+        Vec3 camPos = camera.pos;
+        matrices.translate(-camPos.x, -camPos.y, -camPos.z);
+
+        PoseStack.Pose entry = matrices.last();
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleFilledNoCull : Layers.CircleFilled
+        );
+
+        for (int i = 0; i < segments; i++) {
+            double angle1 = (Math.PI * 2.0) * i / segments;
+            double angle2 = (Math.PI * 2.0) * (i + 1) / segments;
+
+            float innerX1 = (float) (center.x + Math.cos(angle1) * innerRadius);
+            float innerZ1 = (float) (center.z + Math.sin(angle1) * innerRadius);
+            float outerX1 = (float) (center.x + Math.cos(angle1) * outerRadius);
+            float outerZ1 = (float) (center.z + Math.sin(angle1) * outerRadius);
+            float innerX2 = (float) (center.x + Math.cos(angle2) * innerRadius);
+            float innerZ2 = (float) (center.z + Math.sin(angle2) * innerRadius);
+            float outerX2 = (float) (center.x + Math.cos(angle2) * outerRadius);
+            float outerZ2 = (float) (center.z + Math.sin(angle2) * outerRadius);
+            float y = (float) center.y;
+
+            triangle(buffer, entry, innerX1, y, innerZ1, outerX1, y, outerZ1, outerX2, y, outerZ2, color);
+            triangle(buffer, entry, innerX1, y, innerZ1, outerX2, y, outerZ2, innerX2, y, innerZ2, color);
+            triangle(buffer, entry, outerX2, y, outerZ2, outerX1, y, outerZ1, innerX1, y, innerZ1, color);
+            triangle(buffer, entry, innerX2, y, innerZ2, outerX2, y, outerZ2, innerX1, y, innerZ1, color);
+        }
+
+        matrices.popPose();
+    }
+
+    public static void drawThickSquareOutline(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float size,
+            float thickness,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (!Float.isFinite(size) || !Float.isFinite(thickness) || size <= 0.0f || thickness <= 0.0f) return;
+
+        float halfSize = size / 2.0f;
+        float halfThickness = Math.min(thickness / 2.0f, halfSize);
+        double minX = center.x - halfSize;
+        double maxX = center.x + halfSize;
+        double minZ = center.z - halfSize;
+        double maxZ = center.z + halfSize;
+        double minY = center.y;
+        double maxY = center.y + Math.max(0.01f, thickness * 0.25f);
+
+        drawFilled(matrices, consumer, camera,
+                new AABB(minX, minY, minZ, maxX, maxY, minZ + halfThickness),
+                throughWalls, color);
+        drawFilled(matrices, consumer, camera,
+                new AABB(minX, minY, maxZ - halfThickness, maxX, maxY, maxZ),
+                throughWalls, color);
+        drawFilled(matrices, consumer, camera,
+                new AABB(minX, minY, minZ + halfThickness, minX + halfThickness, maxY, maxZ - halfThickness),
+                throughWalls, color);
+        drawFilled(matrices, consumer, camera,
+                new AABB(maxX - halfThickness, minY, minZ + halfThickness, maxX, maxY, maxZ - halfThickness),
+                throughWalls, color);
+    }
+
+    public static void drawCircleWall(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float radius,
+            float height,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+        if (!Float.isFinite(radius) || !Float.isFinite(height) || radius <= 0.0f || height <= 0.0f) return;
+
+        matrices.pushPose();
+
+        Vec3 camPos = camera.pos;
+        matrices.translate(-camPos.x, -camPos.y, -camPos.z);
+
+        PoseStack.Pose entry = matrices.last();
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.BoxFilledNoCull : Layers.BoxFilled
+        );
+
+        float minY = (float) center.y;
+        float maxY = minY + height;
+
+        for (int i = 0; i < segments; i++) {
+            double angle1 = (Math.PI * 2.0) * i / segments;
+            double angle2 = (Math.PI * 2.0) * (i + 1) / segments;
+
+            float x1 = (float) (center.x + Math.cos(angle1) * radius);
+            float z1 = (float) (center.z + Math.sin(angle1) * radius);
+            float x2 = (float) (center.x + Math.cos(angle2) * radius);
+            float z2 = (float) (center.z + Math.sin(angle2) * radius);
+
+            quad(buffer, entry,
+                    x1, minY, z1,
+                    x2, minY, z2,
+                    x2, maxY, z2,
+                    x1, maxY, z1,
+                    color.r, color.g, color.b, color.a);
+            quad(buffer, entry,
+                    x1, maxY, z1,
+                    x2, maxY, z2,
+                    x2, minY, z2,
+                    x1, minY, z1,
+                    color.r, color.g, color.b, color.a);
+        }
+
+        matrices.popPose();
+    }
+
+    public static void drawCircleWireframeWall(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float radius,
+            float height,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+        if (!Float.isFinite(radius) || !Float.isFinite(height) || radius <= 0.0f || height <= 0.0f) return;
+
+        drawCircleOutline(matrices, consumer, camera, center, radius, segments, throughWalls, color);
+        drawCircleOutline(matrices, consumer, camera, center.add(0.0, height * 0.5f, 0.0), radius, segments, throughWalls, color);
+        drawCircleOutline(matrices, consumer, camera, center.add(0.0, height, 0.0), radius, segments, throughWalls, color);
+
+        int verticalMarkers = Math.max(8, segments / 5);
+        double markerHalfWidth = 0.015;
+        for (int i = 0; i < verticalMarkers; i++) {
+            double angle = (Math.PI * 2.0) * i / verticalMarkers;
+            double x = center.x + Math.cos(angle) * radius;
+            double z = center.z + Math.sin(angle) * radius;
+            AABB marker = new AABB(
+                    x - markerHalfWidth,
+                    center.y,
+                    z - markerHalfWidth,
+                    x + markerHalfWidth,
+                    center.y + height,
+                    z + markerHalfWidth
+            );
+            drawOutline(matrices, consumer, camera, marker, throughWalls, color);
+        }
+    }
+
+    public static void drawBillboardSquareOutline(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float size,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        float half = size / 2.0f;
+
+        matrices.pushPose();
+        translateBillboard(matrices, camera, center);
+
+        PoseStack.Pose entry = matrices.last();
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleOutlineNoCull : Layers.CircleOutline
+        );
+
+        lineVertex(buffer, entry, -half, -half, color);
+        lineVertex(buffer, entry, half, -half, color);
+        lineVertex(buffer, entry, half, half, color);
+        lineVertex(buffer, entry, -half, half, color);
+        lineVertex(buffer, entry, -half, -half, color);
+
+        matrices.popPose();
+    }
+
+    public static void drawBillboardCircleOutline(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float radius,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+
+        matrices.pushPose();
+        translateBillboard(matrices, camera, center);
+
+        PoseStack.Pose entry = matrices.last();
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleOutlineNoCull : Layers.CircleOutline
+        );
+
+        for (int i = 0; i <= segments; i++) {
+            double angle = (Math.PI * 2.0) * i / segments;
+            lineVertex(
+                    buffer,
+                    entry,
+                    (float) (Math.cos(angle) * radius),
+                    (float) (Math.sin(angle) * radius),
+                    color
+            );
+        }
+
+        matrices.popPose();
+    }
+
+    public static void drawThickBillboardCircleOutline(
+            @NotNull PoseStack matrices,
+            MultiBufferSource.BufferSource consumer,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center,
+            float radius,
+            float thickness,
+            int segments,
+            boolean throughWalls,
+            @NotNull RenderColor color
+    ) {
+        if (segments < 3) segments = 3;
+        if (!Float.isFinite(radius) || !Float.isFinite(thickness) || radius <= 0.0f || thickness <= 0.0f) return;
+
+        float halfThickness = Math.min(thickness / 2.0f, radius);
+        float innerRadius = Math.max(0.0f, radius - halfThickness);
+        float outerRadius = radius + halfThickness;
+
+        matrices.pushPose();
+        translateBillboard(matrices, camera, center);
+
+        PoseStack.Pose entry = matrices.last();
+        VertexConsumer buffer = consumer.getBuffer(
+                throughWalls ? Layers.CircleFilledNoCull : Layers.CircleFilled
+        );
+
+        for (int i = 0; i < segments; i++) {
+            double angle1 = (Math.PI * 2.0) * i / segments;
+            double angle2 = (Math.PI * 2.0) * (i + 1) / segments;
+
+            float innerX1 = (float) (Math.cos(angle1) * innerRadius);
+            float innerY1 = (float) (Math.sin(angle1) * innerRadius);
+            float outerX1 = (float) (Math.cos(angle1) * outerRadius);
+            float outerY1 = (float) (Math.sin(angle1) * outerRadius);
+            float innerX2 = (float) (Math.cos(angle2) * innerRadius);
+            float innerY2 = (float) (Math.sin(angle2) * innerRadius);
+            float outerX2 = (float) (Math.cos(angle2) * outerRadius);
+            float outerY2 = (float) (Math.sin(angle2) * outerRadius);
+
+            triangle(buffer, entry, innerX1, innerY1, 0.0f, outerX1, outerY1, 0.0f, outerX2, outerY2, 0.0f, color);
+            triangle(buffer, entry, innerX1, innerY1, 0.0f, outerX2, outerY2, 0.0f, innerX2, innerY2, 0.0f, color);
+            triangle(buffer, entry, outerX2, outerY2, 0.0f, outerX1, outerY1, 0.0f, innerX1, innerY1, 0.0f, color);
+            triangle(buffer, entry, innerX2, innerY2, 0.0f, outerX2, outerY2, 0.0f, innerX1, innerY1, 0.0f, color);
+        }
+
+        matrices.popPose();
+    }
+
+    private static void translateBillboard(
+            @NotNull PoseStack matrices,
+            @NotNull CameraRenderState camera,
+            @NotNull Vec3 center
+    ) {
+        Vec3 camPos = camera.pos;
+        matrices.translate(
+                center.x - camPos.x,
+                center.y - camPos.y,
+                center.z - camPos.z
+        );
+        matrices.mulPose(camera.orientation);
+    }
+
+    private static void lineVertex(
+            @NotNull VertexConsumer buffer,
+            PoseStack.@NotNull Pose entry,
+            float x,
+            float y,
+            @NotNull RenderColor color
+    ) {
+        buffer.addVertex(entry, x, y, 0.0f).setColor(color.r, color.g, color.b, color.a);
+    }
+
+    private static void triangle(
+            @NotNull VertexConsumer buffer,
+            PoseStack.@NotNull Pose entry,
+            float x1,
+            float y1,
+            float z1,
+            float x2,
+            float y2,
+            float z2,
+            float x3,
+            float y3,
+            float z3,
+            @NotNull RenderColor color
+    ) {
+        buffer.addVertex(entry, x1, y1, z1).setColor(color.r, color.g, color.b, color.a);
+        buffer.addVertex(entry, x2, y2, z2).setColor(color.r, color.g, color.b, color.a);
+        buffer.addVertex(entry, x3, y3, z3).setColor(color.r, color.g, color.b, color.a);
     }
 
     public static void drawText(
@@ -292,6 +628,14 @@ public class WorldRenderUtils {
                 color,
                 lineWidth
         );
+    }
+
+    private static float sanitizeLineWidth(float lineWidth) {
+        if (!Float.isFinite(lineWidth)) {
+            return DEFAULT_OUTLINE_LINE_WIDTH;
+        }
+
+        return Math.clamp(lineWidth, 0.5f, 4.0f);
     }
 
     public static void drawFilledBox(

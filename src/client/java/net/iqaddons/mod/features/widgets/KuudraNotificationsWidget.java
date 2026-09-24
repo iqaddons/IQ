@@ -8,7 +8,9 @@ import net.iqaddons.mod.hud.HudManager;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +32,10 @@ public class KuudraNotificationsWidget extends HudWidget {
         super(
                 "kuudra_notifications",
                 "Kuudra Notifications",
-                0f,
-                80f,
-                1.0f,
-                HudAnchor.CENTER
+                0.0f,
+                96.86814f,
+                3.0f,
+                HudAnchor.TOP_CENTER
         );
 
         notificationLine = HudLine.of("§c§lLOADING NOTIFICATIONS..")
@@ -120,6 +122,10 @@ public class KuudraNotificationsWidget extends HudWidget {
 
     @Override
     public void render(@NotNull GuiGraphicsExtractor context, double mouseX, double mouseY, float a) {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) {
+            return;
+        }
+
         if (HudManager.get().isEditorOpen()) {
             super.render(context, mouseX, mouseY, a);
             return;
@@ -178,12 +184,34 @@ public class KuudraNotificationsWidget extends HudWidget {
     @Override
     public int getWidth() {
         int baseWidth = super.getWidth();
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) {
+            return Math.max(baseWidth, getNanoWidthHint());
+        }
+
         var textRenderer = mc.font;
         if (textRenderer == null) {
             return baseWidth;
         }
 
         return Math.max(baseWidth, textRenderer.width(MIN_REFERENCE_TEXT));
+    }
+
+    @Override
+    public boolean isNanoLineCentered(@NotNull Font textRenderer, @NotNull HudLine line) {
+        return true;
+    }
+
+    public @NotNull String getNanoMinReferenceText() {
+        return MIN_REFERENCE_TEXT;
+    }
+
+    private int getNanoWidthHint() {
+        var textRenderer = mc.font;
+        if (textRenderer == null) {
+            return 20;
+        }
+
+        return textRenderer.width(MIN_REFERENCE_TEXT);
     }
 
     private void resetNotification() {

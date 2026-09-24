@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Getter
 @Slf4j
@@ -31,7 +29,6 @@ public final class ItemPriceManager {
     });
 
     private final List<PriceProvider> providers;
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public ItemPriceManager() {
         HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build();
@@ -61,20 +58,14 @@ public final class ItemPriceManager {
     }
 
     private @NotNull Optional<Double> getPrice(String itemId) {
-        Lock readLock = lock.readLock();
-        readLock.lock();
-        try {
-            for (PriceProvider provider : providers) {
-                Optional<Double> price = provider.getPrice(itemId);
-                if (price.isPresent()) {
-                    return price;
-                }
+        for (PriceProvider provider : providers) {
+            Optional<Double> price = provider.getPrice(itemId);
+            if (price.isPresent()) {
+                return price;
             }
-
-            return Optional.empty();
-        } finally {
-            readLock.unlock();
         }
+
+        return Optional.empty();
     }
 
     public double calculateKeyPrice(ChestKeyType key) {
@@ -90,13 +81,7 @@ public final class ItemPriceManager {
     }
 
     private void updateAll() {
-        Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            providers.forEach(PriceProvider::update);
-        } finally {
-            writeLock.unlock();
-        }
+        providers.forEach(PriceProvider::update);
     }
 
     public static @NotNull ItemPriceManager get() {

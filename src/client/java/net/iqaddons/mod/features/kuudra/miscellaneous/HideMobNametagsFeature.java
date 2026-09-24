@@ -5,6 +5,7 @@ import net.iqaddons.mod.config.categories.KuudraGeneralConfig;
 import net.iqaddons.mod.events.impl.ArmorStandRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.StringUtils;
 
 @Slf4j
 public class HideMobNametagsFeature extends KuudraFeature {
@@ -31,8 +32,7 @@ public class HideMobNametagsFeature extends KuudraFeature {
             return;
         }
 
-        String name = state.nameTag.getString();
-        String stripped = name.replaceAll("§.", "");
+        String stripped = StringUtils.stripFormatting(state.nameTag.getString());
         if (stripped.contains("[Lv")) {
             event.setCancelled(true);
         }

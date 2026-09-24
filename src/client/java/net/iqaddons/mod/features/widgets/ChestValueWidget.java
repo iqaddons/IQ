@@ -26,7 +26,7 @@ public class ChestValueWidget extends HudWidget {
 
     public ChestValueWidget() {
         super("chestValueWidget", "Chest Value",
-                160.0f, 170.0f,
+                148.5f, 170.72353f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );

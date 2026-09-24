@@ -3,6 +3,7 @@ package net.iqaddons.mod.config.categories;
 import com.teamresourceful.resourcefulconfig.api.annotations.Category;
 import com.teamresourceful.resourcefulconfig.api.annotations.Comment;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigEntry;
+import com.teamresourceful.resourcefulconfig.api.annotations.ConfigObject;
 import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 
 @Category(
@@ -10,16 +11,14 @@ import com.teamresourceful.resourcefulconfig.api.annotations.ConfigOption;
 )
 public class PhaseFourConfig {
 
-    @ConfigOption.Separator("VISUALS")
-
-    @ConfigEntry(
-            id = "hideDamageTitle",
-            translation = "Hide Kuudra Damage Title"
-    )
-    @Comment("Hide Kuudra's default damage title (e.g. ☠ 240M/240M❤)")
-    public static boolean hideDamageTitle = true;
-
     @ConfigOption.Separator("Boss Alerts")
+    @ConfigEntry(
+            id = "rendDamageAlert",
+            translation = "Rend Damage"
+    )
+    @Comment("Show an alert when any teammate deals Rend damage")
+    public static boolean rendDamageAlert = true;
+
     @ConfigEntry(
             id = "kuudraDirectionAlert",
             translation = "Kuudra Direction Alert"
@@ -27,12 +26,13 @@ public class PhaseFourConfig {
     @Comment("Show an alert indicating which side Kuudra will spawn on")
     public static boolean kuudraDirectionAlert = true;
 
+
     @ConfigEntry(
-            id = "rendDamageAlert",
-            translation = "Rend Damage"
+            id = "iceSprayAlert",
+            translation = "Ice Spray Alert"
     )
-    @Comment("Show an alert when any teammate deals Rend damage")
-    public static boolean rendDamageAlert = true;
+    @Comment("Announce your Ice Spray usage time in party chat during the boss phase")
+    public static boolean iceSprayAlert = true;
 
     @ConfigEntry(
             id = "backboneAlert",
@@ -79,10 +79,48 @@ public class PhaseFourConfig {
     public static boolean kuudraDistanceDisplay = false;
 
     @ConfigEntry(
-            id = "kuudraDistanceThrowBoneTitle",
-            translation = "Kuudra Distance Throw Bone Alert (W.I.P)"
+            id = "kuudraDistanceConfig",
+            translation = "Kuudra Distance Config"
     )
-    @Comment("Show a small \"Throw Bone\" title when your Kuudra distance is in the green range (in development)")
-    public static boolean kuudraDistanceThrowBoneTitle = false;
+    @Comment("Configure the green distance range and Throw Bone alert")
+    public static final KuudraDistanceConfig kuudraDistanceConfig = new KuudraDistanceConfig();
+
+    @ConfigObject
+    public static class KuudraDistanceConfig {
+
+        @ConfigEntry(
+                id = "throwBoneAlert",
+                translation = "Throw Bone Alert"
+        )
+        @Comment("Show a small \"Throw Bone\" title when your Kuudra distance is in the green range")
+        public static boolean throwBoneAlert = true;
+
+        @ConfigEntry(
+                id = "greenMinDistance",
+                translation = "Green Min Distance"
+        )
+        @ConfigOption.Range(min = 0, max = 30)
+        @ConfigOption.Slider
+        @Comment("Minimum horizontal distance from Kuudra that counts as green")
+        public static double greenMinDistance = 12.0d;
+
+        @ConfigEntry(
+                id = "greenMaxDistance",
+                translation = "Green Max Distance"
+        )
+        @ConfigOption.Range(min = 0, max = 30)
+        @ConfigOption.Slider
+        @Comment("Maximum horizontal distance from Kuudra that counts as green")
+        public static double greenMaxDistance = 14.0d;
+    }
+
+    @ConfigOption.Separator("VISUALS")
+
+    @ConfigEntry(
+            id = "hideDamageTitle",
+            translation = "Hide Kuudra Damage Title"
+    )
+    @Comment("Hide Kuudra's default damage title (e.g. ☠ 240M/240M❤)")
+    public static boolean hideDamageTitle = true;
 
 }

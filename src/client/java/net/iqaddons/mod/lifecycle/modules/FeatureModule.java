@@ -22,22 +22,23 @@ public class FeatureModule implements LifecycleComponent {
         features = new FeatureManager();
         features.register(
                 new PartyJoinSoundFeature(), new WaypointFeature(), new LoadoutsFeature(), new WardrobeFeature(),
-                new PartyCommandsFeature(), new LimboAlertFeature(), new ArrowTrackerFeature()
+                new PreventClosingLoadoutMenuFeature(), new PartyCommandsFeature(), new LimboAlertFeature(), new ArrowTrackerFeature()
         );
 
         features.register(
-                new PearlWaypointFeature(), new SupplyWaypointsFeature(), new PileWaypointsFeature(),
-                new NoPreAlertFeature(), new CratePriorityFeature(), new SecondSupplyAlertFeature(), new CustomSupplyMessageFeature(),
+                new SupplyWaypointsFeature(), new PileWaypointsFeature(), new PearlWaypointFeature(),
+                new NoPreAlertFeature(), new CratePriorityFeature(), new SecondSupplyAlertFeature(), new SupplyPlacementEfficiencyFeature(), new CustomSupplyMessageFeature(),
                 new ElleHighlightFeature(), new FreshAlertFeature(), new KuudraHitboxFeature(),
-                new RendDamageAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
-                new ManaDrainAlertFeature(), new BlockUselessPerksFeature(), new HideMobNametagsFeature(),
+                new RendDamageAlertFeature(), new IceSprayAlertFeature(), new BuildWaypointsFeature(), new StunWaypointsFeature(),
+                new ManaDrainAlertFeature(), new BlockUselessPerksFeature(), new BlockPickobulusFeature(), new HideMobNametagsFeature(),
                 new TeamHighlightFeature(), new FreshHighlightFeature(), new KuudraPhaseAlertFeature(), new DangerAlertFeature(),
                 new KuudraHealthFeature(), new HideDamageTitleFeature(), new SupplyDroppedAlertFeature(),
                 new PersonalBestTrackerFeature(), new PhaseSplitsPBTrackerFeature(), new AutoRequeueFeature(), new ChestCounterTrackerFeature(),
                 new KuudraProfitTrackerFeature(), new CroesusHelperFeature(), new HideKuudraBossBarFeature(),
                 new KuudraNotificationsFeature(), new BackboneAlertFeature(), new SupplyGiantHitboxAlertFeature(),
                 new HideUselessArmorStandsFeature(), new AbilityAnnounceFeature(), new DiscordRPCFeature(),
-                new IchorPoolWaypointFeature(), new EtherwarpHelperFeature(), new KuudraDistanceFeature()
+                new IchorPoolWaypointFeature(), new EtherwarpWaypointsFeature(), new DpsWaypointFeature(), new SkipWaypointFeature(), new KuudraDistanceFeature(),
+                new FireVeilOverlayFeature()
         );
 
         features.start();

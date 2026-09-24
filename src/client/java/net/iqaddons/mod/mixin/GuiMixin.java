@@ -2,6 +2,7 @@ package net.iqaddons.mod.mixin;
 
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.EventBus;
+import net.iqaddons.mod.events.impl.ActionBarReceivedEvent;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.events.impl.TitleReceivedEvent;
 import net.minecraft.client.Minecraft;
@@ -40,6 +41,8 @@ public abstract class GuiMixin {
     private String iq$lastSubtitleMessage = "";
     @Unique
     private boolean iq$lastTitleCancelled;
+    @Unique
+    private String iq$lastOverlayMessage = "";
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void iq$onRenderHud(GuiGraphicsExtractor context, DeltaTracker tickCounter, CallbackInfo ci) {
@@ -54,6 +57,18 @@ public abstract class GuiMixin {
                 width,
                 height
         ));
+    }
+
+    @Inject(method = "setOverlayMessage", at = @At("HEAD"))
+    private void iq$onSetOverlayMessage(Component message, boolean tinted, CallbackInfo ci) {
+        if (message == null) return;
+
+        String currentOverlayMessage = message.getString();
+        if (currentOverlayMessage == null || currentOverlayMessage.isEmpty()) return;
+        if (currentOverlayMessage.equals(iq$lastOverlayMessage)) return;
+
+        iq$lastOverlayMessage = currentOverlayMessage;
+        EventBus.post(new ActionBarReceivedEvent(message));
     }
 
     @Inject(method = "extractTitle", at = @At("HEAD"), cancellable = true)

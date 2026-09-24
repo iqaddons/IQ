@@ -71,7 +71,7 @@ public class StringUtils {
 
     public @NotNull String formatPlayerNick(@NotNull String rawPlayerText) {
         String normalizedText = removeChatPrefix(rawPlayerText.trim());
-        String plainText = normalizedText.replaceAll("§.", "");
+        String plainText = stripFormatting(normalizedText);
 
         Matcher nameMatcher = MINECRAFT_NAME_PATTERN.matcher(plainText);
         if (!nameMatcher.find()) {
@@ -102,7 +102,24 @@ public class StringUtils {
     }
 
     private @NotNull String removeChatPrefix(@NotNull String rawPlayerText) {
-        String strippedPrefix = rawPlayerText.replaceFirst("(?i)^(§.)*party\\s*>\\s*", "");
+        String strippedPrefix = rawPlayerText;
+        int index = 0;
+        while (index + 1 < strippedPrefix.length() && strippedPrefix.charAt(index) == '§') {
+            index += 2;
+        }
+        if (strippedPrefix.regionMatches(true, index, "party", 0, 5)) {
+            int afterParty = index + 5;
+            while (afterParty < strippedPrefix.length() && Character.isWhitespace(strippedPrefix.charAt(afterParty))) {
+                afterParty++;
+            }
+            if (afterParty < strippedPrefix.length() && strippedPrefix.charAt(afterParty) == '>') {
+                afterParty++;
+                while (afterParty < strippedPrefix.length() && Character.isWhitespace(strippedPrefix.charAt(afterParty))) {
+                    afterParty++;
+                }
+                strippedPrefix = strippedPrefix.substring(afterParty);
+            }
+        }
         int separator = strippedPrefix.indexOf(':');
         return separator > 0 ? strippedPrefix.substring(0, separator).trim() : strippedPrefix;
     }
@@ -132,6 +149,42 @@ public class StringUtils {
     }
 
     public static @NotNull String stripFormatting(@NotNull String text) {
-        return text.replaceAll("§[0-9A-FK-ORa-fk-or]", "");
+        int colorCodeIndex = text.indexOf('§');
+        if (colorCodeIndex < 0 || colorCodeIndex + 1 >= text.length()) {
+            return text;
+        }
+
+        StringBuilder stripped = new StringBuilder(text.length());
+        stripped.append(text, 0, colorCodeIndex);
+        for (int index = colorCodeIndex; index < text.length(); index++) {
+            char current = text.charAt(index);
+            if (current == '§' && index + 1 < text.length() && isFormattingCode(text.charAt(index + 1))) {
+                index++;
+                continue;
+            }
+            stripped.append(current);
+        }
+        return stripped.toString();
+    }
+
+    public static @NotNull String digitsOnly(@NotNull String value) {
+        StringBuilder digits = new StringBuilder(value.length());
+        for (int index = 0; index < value.length(); index++) {
+            char current = value.charAt(index);
+            if (current >= '0' && current <= '9') {
+                digits.append(current);
+            }
+        }
+        return digits.toString();
+    }
+
+    private static boolean isFormattingCode(char code) {
+        return (code >= '0' && code <= '9')
+                || (code >= 'a' && code <= 'f')
+                || (code >= 'A' && code <= 'F')
+                || (code >= 'k' && code <= 'o')
+                || (code >= 'K' && code <= 'O')
+                || code == 'r'
+                || code == 'R';
     }
 }

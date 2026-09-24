@@ -42,7 +42,7 @@ public class SupplyTimerWidget extends HudWidget {
         super(
                 "supplyTimer",
                 "Supply Timer",
-                6.5f, 115.0f,
+                5.0f, 114.099754f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );
@@ -108,7 +108,7 @@ public class SupplyTimerWidget extends HudWidget {
         persistUntilInstanceChange = true;
         supplyState.startSuppliesPhase();
         resetLocalState();
-        if (PhaseOneConfig.supplyTimerCountdown) {
+        if (shouldRenderStaticCountdown()) {
             supplySpawnCountdownEndMillis = System.currentTimeMillis() + SUPPLY_SPAWN_COUNTDOWN_MS;
         }
     }
@@ -255,7 +255,7 @@ public class SupplyTimerWidget extends HudWidget {
 
         addLine(HudLine.of(String.format(
                 "%s§lSupply Times §8[%s%d§8/§a6§8]",
-                PhaseOneConfig.supplyTimesTitleColor.code(),
+                PhaseOneConfig.SupplyTimesConfig.titleColor.code(),
                 totalCollected >= 6 ? "§a" : "§e",
                 totalCollected
         )));
@@ -265,7 +265,9 @@ public class SupplyTimerWidget extends HudWidget {
                 long remainingMs = Math.max(0L, supplySpawnCountdownEndMillis - System.currentTimeMillis());
                 addLine(HudLine.of(String.format("§7Spawning in: %s%.2fs", getSupplySpawnCountdownColor(remainingMs), remainingMs / 1000.0)));
             } else {
-                addLine(HudLine.of("§7No placed supplies yet..."));
+                addLine(HudLine.of(PhaseOneConfig.SupplyTimesConfig.countdownWidget
+                        ? "§7No placed supplies yet..."
+                        : "§7No placed supplies yet..."));
             }
             markDimensionsDirty();
             return;
@@ -283,11 +285,11 @@ public class SupplyTimerWidget extends HudWidget {
     }
 
     private boolean hasActiveSupplySpawnCountdown() {
-        if (!PhaseOneConfig.supplyTimerCountdown) {
-            return false;
-        }
+        return shouldRenderStaticCountdown() && supplySpawnCountdownEndMillis > System.currentTimeMillis();
+    }
 
-        return supplySpawnCountdownEndMillis > System.currentTimeMillis();
+    private boolean shouldRenderStaticCountdown() {
+        return PhaseOneConfig.SupplyTimesConfig.countdown && !PhaseOneConfig.SupplyTimesConfig.countdownWidget;
     }
 
     private @NotNull String getSupplySpawnCountdownColor(long remainingMs) {

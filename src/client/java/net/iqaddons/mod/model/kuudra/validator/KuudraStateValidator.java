@@ -109,8 +109,8 @@ public final class KuudraStateValidator {
             return new ValidationResult.PlayerNotInWorld();
         }
 
-        boolean ignoreScoreboardPresenceChecks = context.phase() == KuudraPhase.DPS
-                || context.phase() == KuudraPhase.SKIP;
+        boolean ignoreScoreboardPresenceChecks = context.phase() == KuudraPhase.EATEN
+                || context.phase().isCombatPhase();
 
         if (!ignoreScoreboardPresenceChecks && !isOnSkyBlock()) {
             return new ValidationResult.NotOnSkyBlock();

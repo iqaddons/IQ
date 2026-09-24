@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.config.categories.*;
+import net.iqaddons.mod.features.generic.LoadoutsFeature;
 import net.iqaddons.mod.screen.IQConfigScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -28,18 +29,6 @@ public class IQKeyBindings {
 
     @Getter
     private static KeyMapping goBackCroesusPageKey;
-
-    @Getter
-    private static KeyMapping castIchorPoolKey;
-
-    @Getter
-    private static KeyMapping pearlAimAssistKey;
-
-    @Getter
-    private static KeyMapping toggleLeftClickKey;
-
-    @Getter
-    private static KeyMapping toggleRightClickKey;
 
     @Getter
     private static List<KeyMapping> wardrobeSlotKeys = List.of();
@@ -84,34 +73,6 @@ public class IQKeyBindings {
 
         openLoadoutsKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-loadouts",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                IQ_CATEGORY
-        ));
-
-        castIchorPoolKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.iq.cast-ichor-pool",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                IQ_CATEGORY
-        ));
-
-        pearlAimAssistKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.iq.pearl-aim-assist",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                IQ_CATEGORY
-        ));
-
-        toggleLeftClickKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.iq.toggle-left-click",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                IQ_CATEGORY
-        ));
-
-        toggleRightClickKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-                "key.iq.toggle-right-click",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
                 IQ_CATEGORY
@@ -171,10 +132,28 @@ public class IQKeyBindings {
 
             while (openLoadoutsKey.consumeClick()) {
                 if (client.player != null) {
+                    drainLoadoutsSlotClicks();
+                    LoadoutsFeature.markManualOpen();
                     client.player.connection.sendCommand("loadouts");
                 }
             }
+
+            if (client.screen == null && LoadoutsFeature.isAwaitingManualOpenSlot()) {
+                for (int slot = 0; slot < loadoutsSlotKeys.size(); slot++) {
+                    while (loadoutsSlotKeys.get(slot).consumeClick()) {
+                        LoadoutsFeature.queueLoadoutsSlot(slot + 1);
+                    }
+                }
+            }
         });
+    }
+
+    private static void drainLoadoutsSlotClicks() {
+        for (KeyMapping loadoutsSlotKey : loadoutsSlotKeys) {
+            while (loadoutsSlotKey.consumeClick()) {
+                // Drain stale slot clicks before opening Loadouts so queued input only uses fresh presses.
+            }
+        }
     }
 
     public static void openConfigScreen(@NotNull Minecraft client) {

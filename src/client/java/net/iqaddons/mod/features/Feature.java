@@ -32,7 +32,7 @@ public abstract class Feature extends SubscriptionOwner {
 
     public final boolean activate() {
         if (!active.compareAndSet(false, true)) {
-            log.warn("Feature {} already active", name);
+            log.info("Feature {} already active", name);
             return false;
         }
 
@@ -51,7 +51,7 @@ public abstract class Feature extends SubscriptionOwner {
 
     public final boolean deactivate() {
         if (!active.compareAndSet(true, false)) {
-            log.warn("Feature {} already inactive", name);
+            log.info("Feature {} already inactive", name);
             return false;
         }
 

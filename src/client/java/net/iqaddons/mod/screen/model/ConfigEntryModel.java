@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -38,6 +39,9 @@ public class ConfigEntryModel {
     @Builder.Default
     @Nullable
     private final Supplier<String> descriptionSupplier = null;
+    @Builder.Default
+    @Nullable
+    private final Supplier<Boolean> visibilitySupplier = null;
     @Nullable
     private final Field field;
 
@@ -64,6 +68,8 @@ public class ConfigEntryModel {
     // SELECT
     @Nullable
     private final Object[] enumValues;
+    @Nullable
+    private final Function<Object, String> enumDescriptionResolver;
 
     // SECTION_HEADER
     @Nullable
@@ -85,9 +91,17 @@ public class ConfigEntryModel {
     public static ConfigEntryModel sectionHeader(String label, @Nullable String description,
                                                  @Nullable Supplier<String> descriptionSupplier,
                                                  List<ConfigEntryModel> children) {
+        return sectionHeader(label, description, descriptionSupplier, null, children);
+    }
+
+    public static ConfigEntryModel sectionHeader(String label, @Nullable String description,
+                                                 @Nullable Supplier<String> descriptionSupplier,
+                                                 @Nullable Supplier<Boolean> visibilitySupplier,
+                                                 List<ConfigEntryModel> children) {
         return ConfigEntryModel.builder()
                 .type(EntryType.SECTION_HEADER).label(label).description(description)
                 .descriptionSupplier(descriptionSupplier)
+                .visibilitySupplier(visibilitySupplier)
                 .children(children).expanded(new AtomicBoolean(false)).build();
     }
 
@@ -108,6 +122,10 @@ public class ConfigEntryModel {
     public @Nullable String getDescription() {
         if (descriptionSupplier != null) return descriptionSupplier.get();
         return description;
+    }
+
+    public boolean isVisible() {
+        return visibilitySupplier == null || Boolean.TRUE.equals(visibilitySupplier.get());
     }
 
     public void toggleExpanded() {

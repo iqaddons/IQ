@@ -61,7 +61,7 @@ public class CustomSplitsWidget extends HudWidget {
         super(
                 "customSplits",
                 "Custom Splits",
-                6.5f, 6.5f,
+                5.0f, 4.851834f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );
@@ -287,14 +287,14 @@ public class CustomSplitsWidget extends HudWidget {
         double overall = calculateOverall();
         overallLine.text(String.format("%sOverall: %s%s",
                 KuudraGeneralConfig.SplitColorConfig.overall.code(),
-                getOverallColor(overall),
+                getOverallTimeColor(overall),
                 TimeUtils.formatTime(overall))
         );
 
         double pace = calculatePace();
         paceLine.text(String.format("%sPace: %s%s",
                 KuudraGeneralConfig.SplitColorConfig.pace.code(),
-                getOverallColor(pace),
+                getOverallTimeColor(pace),
                 TimeUtils.formatTime(pace))
         );
 
@@ -339,14 +339,14 @@ public class CustomSplitsWidget extends HudWidget {
         return pace;
     }
 
-    private @NotNull String getSplitColor(double time, @NotNull KuudraPhase phase) {
+    public static @NotNull String getSplitColor(double time, @NotNull KuudraPhase phase) {
         double[] thresholds = PHASE_THRESHOLDS.get(phase);
         if (thresholds == null) return "§f";
 
         return getSplitColor(time, thresholds);
     }
 
-    private @NotNull String getSplitColor(double time, double @NotNull [] thresholds) {
+    private static @NotNull String getSplitColor(double time, double @NotNull [] thresholds) {
         if (time <= 0) return "§f";
 
         if (time <= thresholds[0]) return TextColor.WHITE.code();
@@ -371,7 +371,7 @@ public class CustomSplitsWidget extends HudWidget {
         };
     }
 
-    private @NotNull String getOverallColor(double time) {
+    public static @NotNull String getOverallTimeColor(double time) {
         if (time <= 0) return "§f";
         if (time >= 52.5 && time <= 59.0) return "§9";
         if (time >= 50.0 && time <= 52.49) return "§5";

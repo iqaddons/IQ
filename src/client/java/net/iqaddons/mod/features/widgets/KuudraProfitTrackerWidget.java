@@ -7,10 +7,12 @@ import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
 import net.iqaddons.mod.manager.KuudraStateManager;
+import net.iqaddons.mod.manager.PersonalBestManager;
+import net.iqaddons.mod.manager.ProfitTrackerDisplayManager;
 import net.iqaddons.mod.manager.pricing.KuudraProfitTrackerManager;
 import net.iqaddons.mod.model.profit.ProfitData;
 import net.iqaddons.mod.model.profit.ProfitScope;
-import net.iqaddons.mod.utils.HudRenderer;
+import net.iqaddons.mod.model.profit.ProfitTrackerDisplayLine;
 import net.iqaddons.mod.utils.ScoreboardUtils;
 import net.iqaddons.mod.utils.TimeUtils;
 import net.minecraft.client.gui.screens.ChatScreen;
@@ -33,13 +35,16 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     );
 
     private final KuudraProfitTrackerManager tracker = KuudraProfitTrackerManager.get();
+    private final PersonalBestManager personalBestManager = PersonalBestManager.get();
+    private final ProfitTrackerDisplayManager displayManager = ProfitTrackerDisplayManager.get();
 
     private final HudLine title = HudLine.of("§b§lProfit Tracker");
     private final HudLine netProfit = HudLine.of("§fProfit: §a+0");
     private final HudLine runs = HudLine.of("§fRuns: §70 §8(§a0C§8/§c0F§8)");
-    private final HudLine chests = HudLine.of("§fChests: §f0 §8(§e0P§8/§a0F§8)");
+    private final HudLine chests = HudLine.of("§fChests: §70 §8(§e0P§8/§a0F§8)");
     private final HudLine rerolls = HudLine.of("§fRerolls: §b0/0 §8(§c-0§8)");
-    private final HudLine avg = HudLine.of("§fAvg Time: §b0.00s");
+    private final HudLine avg = HudLine.of("§fAvg Time: §70s");
+    private final HudLine bestTime = HudLine.of("§fBest Time: §70s");
     private final HudLine totalTime = HudLine.of("§fTime: §b0s");
     private final HudLine rate = HudLine.of("§fRate: §70/h");
 
@@ -86,60 +91,38 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         // [Session] button
         sessionOption
                 .onClick(() -> selectScope(ProfitScope.SESSION))
-                .onHover((context, textRenderer) -> {
-                    double[] mouse = HudRenderer.getScaledMousePosition();
-                    HudRenderer.drawSimpleTooltip(context,
-                            "Tracks stats for the current session.\nResets after 20 min of inactivity.",
-                            mouse[0], mouse[1]);
-                })
+                .tooltip("Tracks stats for the current session.\nResets after 5 min of inactivity.")
                 .onMouseEnter(() -> { hoveringSessionOption = true;  updateTrackingSelector(); })
                 .onMouseLeave(() -> { hoveringSessionOption = false; updateTrackingSelector(); })
-                .showWhen(this::isChatSelectionOpen);
+                .showWhen(() -> isTrackingLineActive() && isChatSelectionOpen());
 
         // [Lifetime] button
         lifetimeOption
                 .onClick(() -> selectScope(ProfitScope.LIFETIME))
-                .onHover((context, textRenderer) -> {
-                    double[] mouse = HudRenderer.getScaledMousePosition();
-                    HudRenderer.drawSimpleTooltip(context,
-                            "Tracks cumulative stats across all sessions.",
-                            mouse[0], mouse[1]);
-                })
+                .tooltip("Tracks cumulative stats across all sessions.")
                 .onMouseEnter(() -> { hoveringLifetimeOption = true;  updateTrackingSelector(); })
                 .onMouseLeave(() -> { hoveringLifetimeOption = false; updateTrackingSelector(); })
-                .showWhen(this::isChatSelectionOpen);
+                .showWhen(() -> isTrackingLineActive() && isChatSelectionOpen());
 
         // Reset button
         resetButton
                 .onClick(this::handleResetClick)
-                .onHover((context, textRenderer) -> {
-                    double[] mouse = HudRenderer.getScaledMousePosition();
-                    ProfitScope currentScope = tracker.scope();
-                    String tip;
-                    if (isResetConfirmationPending(currentScope)) {
-                        tip = "Click again to confirm reset.";
-                    } else {
-                        tip = currentScope == ProfitScope.SESSION
-                                ? "Clears all session profit data."
-                                : "Clears all lifetime profit data.\nThis cannot be undone!";
-                    }
-                    HudRenderer.drawSimpleTooltip(context, tip, mouse[0], mouse[1]);
-                })
                 .onMouseEnter(() -> { hoveringResetButton = true;  updateTrackingSelector(); })
                 .onMouseLeave(() -> { hoveringResetButton = false; updateTrackingSelector(); })
-                .showWhen(this::isChatSelectionOpen);
+                .showWhen(() -> isTrackingLineActive() && isChatSelectionOpen());
 
-        trackingChatHeader.showWhen(this::isChatSelectionOpen);
-        trackingSpacer.showWhen(this::isChatSelectionOpen);
-        trackingSummary.showWhen(() -> !isChatSelectionOpen());
+        trackingChatHeader.showWhen(() -> isTrackingLineActive() && isChatSelectionOpen());
+        trackingSpacer.showWhen(() -> isTrackingLineActive() && isChatSelectionOpen());
+        trackingSummary.showWhen(() -> isTrackingLineActive() && !isChatSelectionOpen());
 
         setExampleLines(List.of(
                 HudLine.of("§b§lProfit Tracker"),
                 HudLine.of("§fProfit: §a+12.5m"),
                 HudLine.of("§fRuns: §715 §8(§a14C§8/§c1F§8)"),
-                HudLine.of("§fChests: §f9 §8(§e9P§8/§a0F§8)"),
+                HudLine.of("§fChests: §79 §8(§e9P§8/§a0F§8)"),
                 HudLine.of("§fRerolls: §b4/1 §8(§c-500k§8)"),
                 HudLine.of("§fAvg Time: §a58.33s"),
+                HudLine.of("§fBest Time: §958.42s"),
                 HudLine.of("§fTime: §b14m35s"),
                 HudLine.of("§fRate: §712.8m/h"),
                 HudLine.of("§fTracking: §aSession")
@@ -149,11 +132,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     @Override
     protected void onActivate() {
         clearLines();
-        addLines(title, netProfit, runs, chests, rerolls, avg, totalTime, rate,
-                trackingSummary,
-                trackingChatHeader,
-                sessionOption, trackingSpacer, lifetimeOption,
-                resetButton);
+        rebuildDisplayLines();
 
         subscribe(ClientTickEvent.class, event -> {
             if (event.isNthTick(5)) {
@@ -165,6 +144,8 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     }
 
     private void updateLines() {
+        rebuildDisplayLines();
+
         ProfitScope scope = tracker.scope();
         ProfitData data = scope == ProfitScope.LIFETIME
                 ? tracker.lifetime()
@@ -189,7 +170,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 runsLabelColor,
                 data.runs, data.completionRuns(), data.failedRuns));
 
-        chests.text(String.format("%sChests: §f%s §8(§e%sP§8/§a%sF§8)",
+        chests.text(String.format("%sChests: §7%s §8(§e%sP§8/§a%sF§8)",
                 chestsLabelColor,
                 data.chestsOpened, data.paidChests, data.freeChests));
 
@@ -202,6 +183,14 @@ public class KuudraProfitTrackerWidget extends HudWidget {
                 avgTimeLabelColor,
                 getAverageTimeColor(avgTimeSeconds), TimeUtils.formatTime(avgTimeSeconds)));
 
+        long bestRunMillis = scope == ProfitScope.LIFETIME
+                ? personalBestManager.getBestTimeMillis()
+                : data.bestRunMillis;
+        double bestRunSeconds = bestRunMillis / 1000.0;
+        bestTime.text(String.format("%sBest Time: %s%s",
+                avgTimeLabelColor,
+                getBestTimeColor(bestRunSeconds), TimeUtils.formatTime(bestRunSeconds)));
+
         totalTime.text(timeLabelColor + "Time: §b" + TimeUtils.formatTime(data.totalRunMillis));
         long hourlyRateCoins = Math.max(0, data.hourlyRateCoins());
         rate.text(rateLabelColor + "Rate: " + getRateColor(hourlyRateCoins) + formatCoins(hourlyRateCoins) + "/h");
@@ -209,6 +198,38 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         updateTrackingSelector();
 
         markDimensionsDirty();
+    }
+
+    private void rebuildDisplayLines() {
+        List<HudLine> orderedLines = new java.util.ArrayList<>();
+        orderedLines.add(title);
+
+        for (ProfitTrackerDisplayLine displayLine : displayManager.activeLines()) {
+            switch (displayLine) {
+                case PROFIT -> orderedLines.add(netProfit);
+                case RUNS -> orderedLines.add(runs);
+                case CHESTS -> orderedLines.add(chests);
+                case REROLLS -> orderedLines.add(rerolls);
+                case AVG_TIME -> orderedLines.add(avg);
+                case BEST_TIME -> orderedLines.add(bestTime);
+                case TIME -> orderedLines.add(totalTime);
+                case RATE -> orderedLines.add(rate);
+                case TRACKING -> {
+                    orderedLines.add(trackingSummary);
+                    orderedLines.add(trackingChatHeader);
+                    orderedLines.add(sessionOption);
+                    orderedLines.add(trackingSpacer);
+                    orderedLines.add(lifetimeOption);
+                    orderedLines.add(resetButton);
+                }
+            }
+        }
+
+        setLines(orderedLines);
+    }
+
+    private boolean isTrackingLineActive() {
+        return displayManager.isActive(ProfitTrackerDisplayLine.TRACKING);
     }
 
     private boolean isChatSelectionOpen() {
@@ -281,6 +302,17 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         String resetColor = confirmPending ? "§c" : (hoveringResetButton ? "§6" : "§e");
         String resetEmphasis = hoveringResetButton ? "§n" : "";
         resetButton.text(resetColor + resetEmphasis + resetLabel);
+        resetButton.tooltip(resetTooltip(currentScope, confirmPending));
+    }
+
+    private @NotNull String resetTooltip(@NotNull ProfitScope currentScope, boolean confirmPending) {
+        if (confirmPending) {
+            return "Click again to confirm reset.";
+        }
+
+        return currentScope == ProfitScope.SESSION
+                ? "Clears all session profit data."
+                : "Clears all lifetime profit data.\nThis cannot be undone!";
     }
 
     private @NotNull String formatScopeLabel(@NotNull ProfitScope scope) {
@@ -307,6 +339,7 @@ public class KuudraProfitTrackerWidget extends HudWidget {
     }
 
     public String getAverageTimeColor(double avgTimeSeconds) {
+        if (avgTimeSeconds <= 0.0) return "§7";
         if (avgTimeSeconds <= 50.0) return "§f";
         if (avgTimeSeconds <= 59.9) return "§5";
         if (avgTimeSeconds <= 65.0) return "§9";
@@ -314,6 +347,11 @@ public class KuudraProfitTrackerWidget extends HudWidget {
         if (avgTimeSeconds <= 75.0) return "§6";
         if (avgTimeSeconds <= 80.0) return "§c";
         return "§4";
+    }
+
+    public String getBestTimeColor(double bestTimeSeconds) {
+        if (bestTimeSeconds <= 0.0) return "§7";
+        return CustomSplitsWidget.getOverallTimeColor(bestTimeSeconds);
     }
 
     public String getRateColor(long hourlyRateCoins) {

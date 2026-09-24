@@ -3,6 +3,7 @@ package net.iqaddons.mod.features.generic;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.IQKeyBindings;
 import net.iqaddons.mod.config.Configuration;
+import net.iqaddons.mod.events.impl.ScreenSetEvent;
 import net.iqaddons.mod.events.impl.ScreenKeyPressEvent;
 import net.iqaddons.mod.features.Feature;
 import net.minecraft.client.KeyMapping;
@@ -30,6 +31,10 @@ public class LoadoutsFeature extends Feature {
     private static final int LOADOUTS_NEXT_PAGE_SLOT = 44;
     private static final int LOADOUTS_PREVIOUS_PAGE_SLOT = 17;
     private static final int[] LOADOUTS_SLOT_INDICES = {14, 15, 16, 23, 24, 25, 32, 33, 34, 41, 42, 43};
+    private static final long QUEUED_SLOT_WINDOW_MS = 1500L;
+
+    private static long queuedSlotExpiresAtMs = 0L;
+    private static int queuedLoadoutsSlotIndex = -1;
 
     public LoadoutsFeature() {
         super(
@@ -42,6 +47,24 @@ public class LoadoutsFeature extends Feature {
     @Override
     protected void onActivate() {
         subscribe(ScreenKeyPressEvent.class, this::onScreenKeyPress);
+        subscribe(ScreenSetEvent.class, this::onScreenSet);
+    }
+
+    public static void markManualOpen() {
+        long now = System.currentTimeMillis();
+        queuedSlotExpiresAtMs = now + QUEUED_SLOT_WINDOW_MS;
+        queuedLoadoutsSlotIndex = -1;
+    }
+
+    public static boolean isAwaitingManualOpenSlot() {
+        return System.currentTimeMillis() <= queuedSlotExpiresAtMs;
+    }
+
+    public static void queueLoadoutsSlot(int slotNumber) {
+        if (!isAwaitingManualOpenSlot()) return;
+        if (slotNumber < 1 || slotNumber > LOADOUTS_SLOT_INDICES.length) return;
+
+        queuedLoadoutsSlotIndex = LOADOUTS_SLOT_INDICES[slotNumber - 1];
     }
 
     private void onScreenKeyPress(@NotNull ScreenKeyPressEvent event) {
@@ -107,4 +130,40 @@ public class LoadoutsFeature extends Feature {
                 player
         );
     }
+
+    private void onScreenSet(@NotNull ScreenSetEvent event) {
+        if (event.currentScreen() instanceof AbstractContainerScreen<?> containerScreen
+                && containerScreen.getTitle().getString().contains(LOADOUTS_TITLE)) {
+            applyQueuedSlotIfPresent();
+        }
+    }
+
+    private boolean applyQueuedSlotIfPresent() {
+        if (queuedLoadoutsSlotIndex < 0) return false;
+        if (System.currentTimeMillis() > queuedSlotExpiresAtMs) {
+            clearQueuedSlot();
+            return false;
+        }
+
+        int slotIndex = queuedLoadoutsSlotIndex;
+        clearQueuedSlot();
+        clickLoadoutsSlot(slotIndex);
+
+        if (Configuration.loadoutsSound && mc.level != null && mc.player != null) {
+            mc.level.playSound(
+                    mc.player, mc.player.blockPosition(),
+                    SoundEvents.NOTE_BLOCK_PLING.value(),
+                    SoundSource.PLAYERS, 2.0f, 1.0f
+            );
+        }
+
+        log.debug("Loadouts queued action on slot {}", slotIndex);
+        return true;
+    }
+
+    private void clearQueuedSlot() {
+        queuedLoadoutsSlotIndex = -1;
+        queuedSlotExpiresAtMs = 0L;
+    }
+
 }

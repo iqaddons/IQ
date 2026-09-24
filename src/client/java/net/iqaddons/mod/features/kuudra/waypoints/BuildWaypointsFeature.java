@@ -8,18 +8,19 @@ import net.iqaddons.mod.events.impl.WorldRenderEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.EntityDetectorUtil;
+import net.iqaddons.mod.utils.StringUtils;
 import net.iqaddons.mod.utils.render.RenderColor;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +35,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
     private static final RenderColor COLOR_61_80 = new RenderColor(46, 130, 0, 255);
     private static final RenderColor COLOR_81_100 = new RenderColor(125, 218, 88, 255);
 
-    private final List<BuildPile> buildPiles = new CopyOnWriteArrayList<>();
+    private List<BuildPile> buildPiles = List.of();
 
     public BuildWaypointsFeature() {
         super(
@@ -47,7 +48,7 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraActivate() {
-        buildPiles.clear();
+        buildPiles = List.of();
 
         subscribe(ClientTickEvent.class, this::onTick);
         subscribe(WorldRenderEvent.class, this::onRender);
@@ -56,22 +57,23 @@ public class BuildWaypointsFeature extends KuudraFeature {
 
     @Override
     protected void onKuudraDeactivate() {
-        buildPiles.clear();
+        buildPiles = List.of();
     }
 
     private void onTick(@NotNull ClientTickEvent event) {
         if (!event.isInGame()) return;
         if (!event.isNthTick(2)) return;
 
-        List<BuildPile> newPiles = EntityDetectorUtil.getAllArmorStands()
-                .stream()
-                .filter(this::isProgressStand)
-                .map(this::createBuildPile)
-                .filter(Objects::nonNull)
-                .toList();
+        List<BuildPile> newPiles = new ArrayList<>();
+        for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
+            if (!isProgressStand(stand)) continue;
 
-        buildPiles.clear();
-        buildPiles.addAll(newPiles);
+            BuildPile pile = createBuildPile(stand);
+            if (pile != null) {
+                newPiles.add(pile);
+            }
+        }
+        buildPiles = List.copyOf(newPiles);
     }
 
     private void onArmorStandRender(@NotNull ArmorStandRenderEvent event) {
@@ -81,25 +83,25 @@ public class BuildWaypointsFeature extends KuudraFeature {
         var state = event.getRenderState();
         if (state == null || state.nameTag == null) return;
 
-        String stripped = state.nameTag.getString().replaceAll("§.", "");
-
+        String stripped = StringUtils.stripFormatting(state.nameTag.getString());
+        
         boolean shouldHide = false;
-
-        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.progress &&
-                stripped.contains("PROGRESS:") && stripped.contains("%")) {
+        
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.progress && 
+            stripped.contains("PROGRESS:") && stripped.contains("%")) {
             shouldHide = true;
         }
-
-        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.sneakPunch &&
-                stripped.contains("SNEAK") && stripped.contains("PUNCH")) {
+        
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.sneakPunch && 
+            stripped.contains("SNEAK") && stripped.contains("PUNCH")) {
             shouldHide = true;
         }
-
-        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.supplyPile &&
-                stripped.contains("SUPPLY PILE")) {
+        
+        if (PhaseTwoConfig.hideDefaultBuildPileTextConfig.supplyPile && 
+            stripped.contains("SUPPLY PILE")) {
             shouldHide = true;
         }
-
+        
         if (shouldHide) {
             event.setCancelled(true);
         }
@@ -127,14 +129,14 @@ public class BuildWaypointsFeature extends KuudraFeature {
     }
 
     private int extractProgress(@NotNull String name) {
-        String stripped = name.replaceAll("§.", "");
+        String stripped = StringUtils.stripFormatting(name);
         Matcher matcher = PROGRESS_PATTERN.matcher(stripped);
 
         if (matcher.find()) {
             try {
                 return Integer.parseInt(matcher.group(1));
             } catch (NumberFormatException e) {
-                String numbers = stripped.replaceAll("[^0-9]", "");
+                String numbers = StringUtils.digitsOnly(stripped);
                 if (!numbers.isEmpty()) {
                     try {
                         return Integer.parseInt(numbers);

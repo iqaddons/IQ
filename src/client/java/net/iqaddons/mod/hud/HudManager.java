@@ -7,8 +7,11 @@ import net.iqaddons.mod.events.EventBus;
 import net.iqaddons.mod.events.impl.HudRenderEvent;
 import net.iqaddons.mod.hud.config.HudConfigManager;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.hud.nano.IqHudNanoRenderer;
+import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -98,10 +101,12 @@ public final class HudManager {
 
     @SuppressWarnings("unchecked")
     public <T extends HudWidget> @Nullable T getWidget(@NotNull Class<T> type) {
-        return (T) widgets.stream()
-                .filter(type::isInstance)
-                .findFirst()
-                .orElse(null);
+        for (HudWidget widget : widgets) {
+            if (type.isInstance(widget)) {
+                return (T) widget;
+            }
+        }
+        return null;
     }
 
     @Contract(pure = true)
@@ -110,27 +115,21 @@ public final class HudManager {
     }
 
     private void onHudRender(@NotNull HudRenderEvent event) {
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) return;
         if (mc.screen instanceof AbstractContainerScreen<?>) return;
 
-        double[] mousePos = getScaledMousePosition();
-        renderWidgets(event.drawContext(), mousePos[0], mousePos[1], event.tickDelta());
+        double scaleFactor = mc.getWindow().getGuiScale();
+        renderWidgets(
+                event.drawContext(),
+                mc.mouseHandler.xpos() / scaleFactor,
+                mc.mouseHandler.ypos() / scaleFactor,
+                event.tickDelta()
+        );
     }
 
     public void renderOnHandledScreen(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        if (!(mc.screen instanceof AbstractContainerScreen<?>)) return;
-        if (mc.player == null) return;
-        if (mc.options.hideGui) return;
-        if (mc.options.keyPlayerList.isDown()) return;
-
-        for (HudWidget widget : widgets) {
-            if (!widget.isActive() && widget.shouldRender()) {
-                widget.activate();
-            }
-
-            if (widget.isActive()) {
-                widget.render(context, mouseX, mouseY, delta);
-            }
-        }
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle()) return;
+        renderWidgets(context, mouseX, mouseY, delta);
     }
 
     public void renderAll(@NotNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
@@ -156,6 +155,7 @@ public final class HudManager {
         if (mc.options.hideGui) return;
         if (mc.screen instanceof HudEditScreen) return;
         if (mc.options.keyPlayerList.isDown()) return;
+        if (!IqNanoGlobalConfigScreen.isSharedGlobalHudEnabled()) return;
 
         for (HudWidget widget : widgets) {
             updateWidgetActivation(widget);
@@ -167,10 +167,14 @@ public final class HudManager {
     }
 
     public void openEditor() {
+        openEditor(null);
+    }
+
+    public void openEditor(@Nullable Screen parent) {
         if (mc.screen instanceof HudEditScreen) {
             return;
         }
-        mc.setScreen(new HudEditScreen());
+        mc.setScreen(new HudEditScreen(parent));
     }
 
     public boolean toggleCenterGuides() {
@@ -179,13 +183,39 @@ public final class HudManager {
     }
 
     public void saveConfig() {
+        configManager.saveFromWidgetsSync(widgets);
+    }
+
+    public void resetAllConfigs() {
+        configManager.resetAll();
         for (HudWidget widget : widgets) {
-            configManager.saveFromWidget(widget);
+            configManager.loadIntoWidget(widget);
         }
+    }
+
+    public void reloadCurrentStyleConfigs() {
+        for (HudWidget widget : widgets) {
+            configManager.loadIntoWidget(widget);
+            widget.refreshDimensions();
+        }
+    }
+
+    public void toggleHudStyle() {
+        saveConfig();
+        for (HudWidget widget : widgets) {
+            widget.deactivate();
+            widget.setSelected(false);
+            widget.refreshDimensions();
+        }
+        IqNanoGlobalConfigScreen.toggleSharedHudStyle();
+        reloadCurrentStyleConfigs();
     }
 
     public boolean handleClick(double mouseX, double mouseY, int button) {
         if (editorOpen) return false;
+        if (IqNanoGlobalConfigScreen.isSharedModernHudStyle() && IqHudNanoRenderer.handleClick(this, mouseX, mouseY, button)) {
+            return true;
+        }
 
         for (HudWidget widget : widgets) {
             if (widget.isActive() && widget.shouldRender()) {
@@ -196,14 +226,6 @@ public final class HudManager {
         }
 
         return false;
-    }
-
-    private static double @NotNull [] getScaledMousePosition() {
-        double scaleFactor = mc.getWindow().getGuiScale();
-        return new double[]{
-                mc.mouseHandler.xpos() / scaleFactor,
-                mc.mouseHandler.ypos() / scaleFactor
-        };
     }
 
     public static HudManager get() {

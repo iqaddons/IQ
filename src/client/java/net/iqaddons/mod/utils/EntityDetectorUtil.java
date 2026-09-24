@@ -12,12 +12,11 @@ import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @UtilityClass
 public class EntityDetectorUtil {
@@ -30,19 +29,54 @@ public class EntityDetectorUtil {
             return Collections.emptyList();
         }
 
-        return StreamSupport.stream(world.entitiesForRendering().spliterator(), false)
-                .filter(entityClass::isInstance)
-                .map(entityClass::cast)
-                .collect(Collectors.toList());
+        List<T> entities = new ArrayList<>();
+        for (Entity entity : world.entitiesForRendering()) {
+            if (entityClass.isInstance(entity)) {
+                entities.add(entityClass.cast(entity));
+            }
+        }
+        return entities;
     }
 
     public static <T extends Entity> @NotNull List<T> getEntitiesOfType(
             @NotNull Class<T> entityClass,
             @NotNull Predicate<T> predicate
     ) {
-        return getEntitiesOfType(entityClass).stream()
-                .filter(predicate)
-                .collect(Collectors.toList());
+        ClientLevel world = mc.level;
+        if (world == null) {
+            return Collections.emptyList();
+        }
+
+        List<T> entities = new ArrayList<>();
+        for (Entity entity : world.entitiesForRendering()) {
+            if (!entityClass.isInstance(entity)) continue;
+
+            T typedEntity = entityClass.cast(entity);
+            if (predicate.test(typedEntity)) {
+                entities.add(typedEntity);
+            }
+        }
+        return entities;
+    }
+
+    public static <T extends Entity> @NotNull Optional<T> findEntityOfType(
+            @NotNull Class<T> entityClass,
+            @NotNull Predicate<T> predicate
+    ) {
+        ClientLevel world = mc.level;
+        if (world == null) {
+            return Optional.empty();
+        }
+
+        for (Entity entity : world.entitiesForRendering()) {
+            if (!entityClass.isInstance(entity)) continue;
+
+            T typedEntity = entityClass.cast(entity);
+            if (predicate.test(typedEntity)) {
+                return Optional.of(typedEntity);
+            }
+        }
+        return Optional.empty();
     }
 
     public static @NotNull List<Giant> getSupplyCarriers() {
@@ -53,9 +87,9 @@ public class EntityDetectorUtil {
 
     public static @NotNull List<ArmorStand> getArmorStandsByName(@NotNull String nameContains) {
         return getEntitiesOfType(ArmorStand.class, stand ->
-                stand.hasCustomName() &&
-                        stand.getCustomName() != null &&
-                        stand.getCustomName().getString().contains(nameContains)
+                stand.hasCustomName()
+                        && stand.getCustomName() != null
+                        && stand.getCustomName().getString().contains(nameContains)
         );
     }
 
@@ -64,13 +98,14 @@ public class EntityDetectorUtil {
     }
 
     public static @NotNull Optional<ArmorStand> findElle() {
-        return getEntitiesOfType(ArmorStand.class).stream()
-                .filter(stand ->
-                        stand.hasCustomName() &&
-                                stand.getCustomName() != null &&
-                                stand.getCustomName().getString().toLowerCase().contains("elle")
-                )
-                .findFirst();
+        for (ArmorStand stand : getEntitiesOfType(ArmorStand.class)) {
+            if (stand.hasCustomName()
+                    && stand.getCustomName() != null
+                    && stand.getCustomName().getString().toLowerCase(java.util.Locale.ROOT).contains("elle")) {
+                return Optional.of(stand);
+            }
+        }
+        return Optional.empty();
     }
 
     private static boolean isHoldingSkull(@NotNull Giant giant) {
@@ -90,20 +125,13 @@ public class EntityDetectorUtil {
     public static Optional<AbstractClientPlayer> findPlayerByName(@NotNull String name) {
         if (mc.level == null) return Optional.empty();
 
-        Optional<AbstractClientPlayer> result = mc.level.players().stream()
-                .filter(player -> player.getName().getString().equalsIgnoreCase(name))
-                .findFirst();
-
-        if (result.isEmpty()) {
-            // Log all available players for debugging
-            System.out.println("DEBUG: Could not find player '" + name + "'. Available players:");
-            mc.level.players().forEach(p ->
-                System.out.println("  - '" + p.getName().getString() + "' (matches: " +
-                    p.getName().getString().equalsIgnoreCase(name) + ")")
-            );
+        for (AbstractClientPlayer player : mc.level.players()) {
+            if (player.getName().getString().equalsIgnoreCase(name)) {
+                return Optional.of(player);
+            }
         }
 
-        return result;
+        return Optional.empty();
     }
 
     public static @Nullable AbstractClientPlayer findPlayerById(int entityId) {

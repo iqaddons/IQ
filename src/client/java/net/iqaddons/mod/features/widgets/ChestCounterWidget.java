@@ -48,8 +48,8 @@ public class ChestCounterWidget extends HudWidget {
 
     public ChestCounterWidget() {
         super("chestCounterWidget", "Chest Counter",
-                581.0f, 490.0f,
-                1.0f,
+                584.5f, 520.0017f,
+                1.3000008f,
                 HudAnchor.TOP_LEFT
         );
 

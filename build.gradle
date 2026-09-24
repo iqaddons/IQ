@@ -1,6 +1,7 @@
 plugins {
     id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'maven-publish'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
 }
 
 version = "${project.mod_version}+mc${project.minecraft_version}"
@@ -19,6 +20,29 @@ loom {
             sourceSet sourceSets.client
         }
     }
+}
+
+// Register the Kotlin source directory for the client split-env sourceset.
+sourceSets {
+    client {
+        kotlin {
+            srcDir 'src/client/kotlin'
+        }
+    }
+}
+
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = 'iqaddons-test'
+        enableGameTests = false
+        enableClientGameTests = true
+    }
+}
+
+tasks.named('compileClientJava', JavaCompile).configure {
+    dependsOn tasks.named('compileClientKotlin')
+    classpath += files(layout.buildDirectory.dir('classes/kotlin/client'))
 }
 
 repositories {
@@ -49,6 +73,16 @@ dependencies {
 
     compileOnly "org.projectlombok:lombok:1.18.38"
     annotationProcessor "org.projectlombok:lombok:1.18.38"
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    def lwjglVersion = "3.4.1"
+    implementation "org.lwjgl:lwjgl-nanovg:${lwjglVersion}"
+    include "org.lwjgl:lwjgl-nanovg:${lwjglVersion}"
+    ["natives-windows", "natives-linux", "natives-macos", "natives-macos-arm64"].each { classifier ->
+        runtimeOnly "org.lwjgl:lwjgl-nanovg:${lwjglVersion}:${classifier}"
+        include "org.lwjgl:lwjgl-nanovg:${lwjglVersion}:${classifier}"
+    }
 }
 
 processResources {
@@ -83,4 +117,23 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.name}" }
     }
+}
+
+tasks.register('testPortedFeatureLogic', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.PortedFeatureLogicTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.register('testNanoVgDiagnosticMode', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.NanoVgDiagnosticModeTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('testPortedFeatureLogic')
+    dependsOn tasks.named('testNanoVgDiagnosticMode')
 }

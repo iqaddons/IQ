@@ -7,6 +7,7 @@ import net.iqaddons.mod.events.impl.skyblock.KuudraPhaseChangeEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPickupEvent;
 import net.iqaddons.mod.events.impl.skyblock.supply.SupplyPlaceEvent;
 import net.iqaddons.mod.features.Feature;
+import net.iqaddons.mod.manager.SupplyStateManager;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.NoPreMessageParser;
@@ -23,6 +24,8 @@ import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
 public class KuudraNotificationsFeature extends Feature {
+
+    private final SupplyStateManager supplyState = SupplyStateManager.get();
 
     private static final List<KuudraNotificationRule> NOTIFICATION_RULES = List.of(
             new KuudraNotificationRule(
@@ -73,16 +76,17 @@ public class KuudraNotificationsFeature extends Feature {
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         String message = event.getStrippedMessage();
         if (message.isBlank()) return;
-
+        
         // Parse immediately on chat thread to avoid desync
         if (KuudraGeneralConfig.KuudraNotifications.noPre) {
             NoPreMessageParser.ParsedNoPreCall parsed = NoPreMessageParser.parse(message);
             if (parsed != null) {
+                supplyState.setMissingPre(parsed.missingPreValue());
                 mc.execute(() -> showAlert("§4§lNO " + parsed.canonicalPileName().toUpperCase() + "!", null));
                 return;
             }
         }
-
+        
         mc.execute(() -> handleChatMessage(message));
     }
 

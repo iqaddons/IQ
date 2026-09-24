@@ -1,0 +1,85 @@
+{
+  "_comment": "Editable Kuudra Etherwarp/Custom Waypoints config. Etherwarp supplies defaults are intentionally empty while the feature is being rebuilt; DPS/SKIP custom defaults are kept here.",
+  "_howToUse": [
+    "Use /iq waypoints to create categories, subcategories and waypoints.",
+    "This file is valid JSON. Do not use // or /* */ comments.",
+    "Supported phases: SUPPLIES, BUILD, EATEN, STUN, DPS, SKIP, BOSS, COMPLETED"
+  ],
+  "_fieldGuide": {
+    "categoryFields": {
+      "name": "Category name. Used for organizing groups of waypoints.",
+      "enabled": "Whether this category is active. true or false.",
+      "waypoints": "List of waypoint objects in this category."
+    },
+    "waypointFields": {
+      "name": "Waypoint name.",
+      "position": "Single position in [x, y, z].",
+      "positions": "Multiple positions in [[x, y, z], ...].",
+      "color": "Waypoint color as hex string (#RRGGBB).",
+      "alpha": "Waypoint opacity. 0.0 to 1.0.",
+      "renderStyle": "Render type: OUTLINE or SOLID.",
+      "lineWidth": "Line thickness for OUTLINE style.",
+      "shape": "Shape preset, usually FULL.",
+      "markerStyle": "SOLID or TARGET.",
+      "text": "Optional label rendered above/below the waypoint.",
+      "textScale": "3D label scale.",
+      "textPosition": "ABOVE, BELOW or HIDDEN.",
+      "showInPhases": "Array of phases where this waypoint should appear.",
+      "hideInPhases": "Array of phases where this waypoint should be hidden.",
+      "maxRenderDistance": "Maximum distance to render waypoint (-1 = unlimited)."
+    }
+  },
+  "categories": [
+    {
+      "name": "SKIP",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "Skip Spot",
+          "position": [-174.5, 31.0, -155.5],
+          "color": "#00FFFF",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 2.0,
+          "shape": "FULL",
+          "markerStyle": "SOLID",
+          "showInPhases": ["STUN", "DPS"],
+          "hideInPhases": [],
+          "maxRenderDistance": -1
+        }
+      ]
+    },
+    {
+      "name": "DPS",
+      "enabled": true,
+      "waypoints": [
+        {
+          "name": "DPS Agro",
+          "positions": [[-88.5, 78.0, -78.5], [-84.5, 78.0, -85.5], [-82.5, 78.0, -92.5]],
+          "color": "#00FFFF",
+          "alpha": 0.8,
+          "renderStyle": "OUTLINE",
+          "lineWidth": 1.0,
+          "shape": "FULL",
+          "markerStyle": "SOLID",
+          "showInPhases": ["EATEN"],
+          "hideInPhases": [],
+          "maxRenderDistance": 100
+        },
+        {
+          "name": "DPS Main",
+          "positions": [[-110.5, 78.0, -71.5], [-110.5, 78.0, -72.5], [-113.5, 76.0, -68.5], [-113.5, 76.0, -69.5]],
+          "color": "#00FFFF",
+          "alpha": 0.4,
+          "renderStyle": "SOLID",
+          "lineWidth": 1.0,
+          "shape": "FULL",
+          "markerStyle": "SOLID",
+          "showInPhases": ["EATEN"],
+          "hideInPhases": [],
+          "maxRenderDistance": 100
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,13 @@
 package net.iqaddons.mod.config.categories;
 
 import com.teamresourceful.resourcefulconfig.api.annotations.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.iqaddons.mod.config.screen.EtherwarpCategorySelectorScreen;
+import net.iqaddons.mod.config.screen.KuudraWaypointsScreen;
 import net.iqaddons.mod.model.profit.CrimsonFaction;
 import net.iqaddons.mod.utils.TextColor;
+import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Util;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.awt.*;
 import java.util.Locale;
 
 @Category(
@@ -18,6 +16,15 @@ import java.util.Locale;
 public class KuudraGeneralConfig {
     private static final String PACE_SPLITS_BENCHMARKS_DESCRIPTION =
             "Pace is the run time to beat so just set the best possible times in each phase.";
+
+    @ConfigOption.Separator("KUUDRA WAYPOINTS")
+    @ConfigButton(title = "Kuudra Waypoints", text = "OPEN")
+    @Comment("Open the IQ waypoint editor to customize, create, and edit Kuudra waypoints.")
+    @SuppressWarnings("unused")
+    public static final Runnable openKuudraWaypoints = () -> {
+        Minecraft mc = Minecraft.getInstance();
+        mc.execute(() -> mc.setScreen(new KuudraWaypointsScreen(mc.screen)));
+    };
 
     @ConfigOption.Separator("Kuudra Splits")
 
@@ -91,7 +98,7 @@ public class KuudraGeneralConfig {
             id = "kuudraProfitTracker",
             translation = "Kuudra Profit Tracker"
     )
-    @Comment("Track profit and loss after each Kuudra run and display it on screen")
+    @Comment("Display an overlay that tracks all your kuudra runs and calculates profit when opening chests")
     public static boolean kuudraProfitTracker = true;
 
     @ConfigEntry(
@@ -161,7 +168,7 @@ public class KuudraGeneralConfig {
                 id = "requeueDelay",
                 translation = "Auto Requeue Delay"
         )
-        @Comment("Delay before requeueing (in ticks)")
+        @Comment("Delay before requeueing (in ticks).")
         @ConfigOption.Range(min = 1, max = 50)
         @ConfigOption.Slider
         public static int requeueDelay = 20;
@@ -177,7 +184,7 @@ public class KuudraGeneralConfig {
                 id = "autoStopAutoRequeueOverallSeconds",
                 translation = "Auto Stop Run Time (s)"
         )
-        @Comment("Set the completed run time that will stop Auto Requeue (Current WR: 51s).")
+        @Comment("Set the completed run time that will stop Auto Requeue (Current WR: 51s)")
         @ConfigOption.Range(min = 1, max = 180)
         @ConfigOption.Slider
         public static double autoStopAutoRequeueOverallSeconds = 50.49;
@@ -221,7 +228,7 @@ public class KuudraGeneralConfig {
                 translation = "No Pre Notifications"
         )
         @Comment("Show an alert for 'No Pre' party messages")
-        public static boolean noPre = true;
+        public static boolean noPre = false;
 
         @ConfigEntry(
                 id = "kuudraNotificationSosReminder",
@@ -341,50 +348,15 @@ public class KuudraGeneralConfig {
             id = "personalBestTracker",
             translation = "Personal Best Tracker"
     )
-    @Comment("Track your personal best Kuudra time and notify when beaten")
+    @Comment("Track your personal best Kuudra time and notify when beaten (/iq pb)")
     public static boolean personalBestTracker = true;
 
     @ConfigEntry(
             id = "phaseSplitsPBTracker",
             translation = "Phase Personal Best Tracker"
     )
-    @Comment("Track your personal best time for each individual T5 Kuudra phase")
+    @Comment("Track your personal best time for each individual T5 Kuudra phase (/iq pbs)")
     public static boolean phaseSplitsPBTracker = true;
-
-    @ConfigOption.Separator("ETHERWARP WAYPOINTS")
-
-    @ConfigEntry(
-            id = "etherwarpHelper",
-            translation = "Etherwarp Waypoints Helper"
-    )
-    @Comment("Render Etherwarp helper waypoints by Kuudra phase")
-    public static boolean etherwarpHelper = true;
-
-    @ConfigButton(
-            title = "Etherwarp Categories",
-            text = "SELECT"
-    )
-    @Comment("Choose which Etherwarp categories are active")
-    @SuppressWarnings("unused")
-    public static final Runnable openEtherwarpCategorySelector = () -> {
-        Minecraft mc = Minecraft.getInstance();
-        mc.execute(() -> mc.setScreen(new EtherwarpCategorySelectorScreen(mc.screen)));
-    };
-
-    @ConfigButton(
-            title = "Open Etherwarp Config",
-            text = "OPEN"
-    )
-    @Comment("Open config/iq folder to edit etherwarp_config.json. \nSave and run /iq reload to edit in real-time")
-    @SuppressWarnings("unused")
-    public static final Runnable openEtherwarpConfig = () -> {
-        try {
-            Path configDir = FabricLoader.getInstance().getConfigDir().resolve("iq");
-            Files.createDirectories(configDir);
-            Util.getPlatform().openFile(configDir.toFile());
-        } catch (Exception ignored) {
-        }
-    };
 
     @ConfigOption.Separator("Visuals")
 
@@ -399,7 +371,7 @@ public class KuudraGeneralConfig {
             id = "hideUselessArmorStandsConfig",
             translation = "Hide Useless Armor Stands Config"
     )
-    @Comment("")
+    @Comment("Choose which decorative armor stands should be hidden from the Kuudra arena")
     public static final HideUselessArmorStandsConfig hideUselessArmorStandsConfig = new HideUselessArmorStandsConfig();
 
     @ConfigObject
@@ -513,6 +485,20 @@ public class KuudraGeneralConfig {
 
     @ConfigObject
     public static class ProfitTrackerConfig {
+        @ConfigButton(
+                title = "Display Options",
+                text = "OPEN"
+        )
+        @Comment("Choose which Profit Tracker lines are visible. Drag lines between Active and Inactive, or reorder the Active list.")
+        @SuppressWarnings("unused")
+        public static final Runnable openDisplayOptions = () -> {};
+
+        @ConfigEntry(id = "sessionResetMinutes", translation = "Session Reset Time")
+        @ConfigOption.Range(min = 5, max = 120)
+        @ConfigOption.Slider
+        @Comment("Minutes of inactivity before the Profit Tracker session automatically resets")
+        public static int sessionResetMinutes = 20;
+
         @ConfigEntry(id = "profitTrackerVisibility", translation = "Profit Tracker Visibility")
         @ConfigOption.Select
         @Comment("Control when the profit tracker is visible")
@@ -539,9 +525,15 @@ public class KuudraGeneralConfig {
         @Comment("Apply your Kuudra pet level bonus to profit calculations")
         public static int kuudraPetBonus = 20;
 
+        @ConfigEntry(id = "attributeBonus", translation = "Attribute Bonus")
+        @ConfigOption.Range(min = 0, max = 15.6)
+        @ConfigOption.Slider
+        @Comment("Bonus from Lava Leech, Komodo and Tiamat shards")
+        public static double attributeBonus = 0.0;
+
         @ConfigEntry(id = "hideWidgetDuringRunPhase", translation = "Hide Widget During Run")
-        @Comment("Hide the Profit Tracker widget while a Kuudra run is in progress. Only show at the beginning and end of runs.")
-        public static boolean hideWidgetDuringRunPhase = true;
+        @Comment("Hide the Profit Tracker widget while a Kuudra run is in progress. Only show at the beginning and end of runs")
+        public static boolean hideWidgetDuringRunPhase = false;
     }
 
     @ConfigObject
@@ -609,11 +601,4 @@ public class KuudraGeneralConfig {
         SALVAGE, AUCTION
     }
 
-    @ConfigOption.Separator("Screen Crosshair")
-    @ConfigEntry(
-            id = "screenCrosshair",
-            translation = "Screen Crosshair"
-    )
-    @Comment("Display thin crosshair lines at the center of your screen to help position widgets.")
-    public static boolean screenCrosshair = true;
 }

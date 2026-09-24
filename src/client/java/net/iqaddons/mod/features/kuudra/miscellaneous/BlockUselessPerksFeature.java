@@ -5,6 +5,7 @@ import net.iqaddons.mod.config.categories.PhaseThreeConfig;
 import net.iqaddons.mod.events.impl.ScreenClickEvent;
 import net.iqaddons.mod.features.KuudraFeature;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
+import net.iqaddons.mod.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -50,7 +51,7 @@ public class BlockUselessPerksFeature extends KuudraFeature {
     }
 
     public static boolean shouldBlockPerk(@NotNull String itemName) {
-        String stripped = itemName.replaceAll("§.", "");
+        String stripped = StringUtils.stripFormatting(itemName);
         return BLOCKED_PATTERN.matcher(stripped).find();
     }
 }

@@ -38,6 +38,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private final AtomicReference<KuudraContext> contextRef = new AtomicReference<>(KuudraContext.empty());
     private final KuudraStateValidator validator = new KuudraStateValidator();
+    private final KuudraDebugManager debugManager = KuudraDebugManager.get();
     private final Map<KuudraPhase, Duration> phaseDurations = new EnumMap<>(KuudraPhase.class);
     private long pendingExitSinceMillis = -1L;
 
@@ -71,6 +72,10 @@ public final class KuudraStateManager extends SubscriptionOwner {
                     log.info("Detected Kuudra tier during run: {}", tier.getDisplayName());
                 }
             });
+        }
+
+        if (debugManager.isActive()) {
+            return;
         }
 
         if (current.phase().isCombatPhase() || current.phase() == KuudraPhase.BOSS) {
@@ -198,6 +203,43 @@ public final class KuudraStateManager extends SubscriptionOwner {
         handleRunEnd(current, reason);
     }
 
+    public boolean beginDebugBossPhase(@NotNull net.minecraft.world.phys.Vec3 simulatedKuudraPosition) {
+        KuudraContext current = contextRef.get();
+        if (current.phase().isInRun() && !debugManager.isActive()) {
+            log.warn("Ignoring Kuudra debug start while a real run is active");
+            return false;
+        }
+
+        clearPendingExit();
+        debugManager.start(simulatedKuudraPosition);
+        phaseDurations.clear();
+
+        KuudraContext debugContext = KuudraContext.entering(KuudraTier.UNKNOWN).withPhase(KuudraPhase.BOSS);
+        KuudraContext previous = contextRef.getAndSet(debugContext);
+
+        log.info("Started Kuudra debug boss phase at {}", simulatedKuudraPosition);
+        EventBus.post(new KuudraPhaseChangeEvent(
+                previous.phase(),
+                KuudraPhase.BOSS,
+                0
+        ));
+        return true;
+    }
+
+    public boolean endDebugBossPhase() {
+        if (!debugManager.isActive()) {
+            return false;
+        }
+
+        debugManager.stop();
+        KuudraContext current = contextRef.get();
+        if (current.phase() == KuudraPhase.NONE) {
+            return true;
+        }
+
+        return handleRunEnd(current, KuudraRunEndEvent.EndReason.OTHER);
+    }
+
     public @NotNull Optional<Duration> getPhaseDuration(@NotNull KuudraPhase phase) {
         return Optional.ofNullable(phaseDurations.get(phase));
     }
@@ -247,6 +289,7 @@ public final class KuudraStateManager extends SubscriptionOwner {
 
     private boolean handleRunEnd(@NotNull KuudraContext current, @NotNull KuudraRunEndEvent.EndReason reason) {
         clearPendingExit();
+        debugManager.stop();
 
         if (current.phase().isInRun()) {
             phaseDurations.put(current.phase(), current.phaseDuration());

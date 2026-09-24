@@ -3,10 +3,12 @@ package net.iqaddons.mod.events.dispatcher.detector;
 import lombok.extern.slf4j.Slf4j;
 import net.iqaddons.mod.events.Event;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
+import net.iqaddons.mod.events.impl.EntityTrackingUpdateEvent;
 import net.iqaddons.mod.events.impl.skyblock.KuudraDirectionChangeEvent;
 import net.iqaddons.mod.model.kuudra.KuudraContext;
 import net.iqaddons.mod.model.kuudra.KuudraPhase;
 import net.iqaddons.mod.utils.KuudraLocationUtil;
+import net.minecraft.world.entity.monster.MagmaCube;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -22,16 +24,36 @@ public class DirectionDetector {
 
     public void detect(@NotNull ClientTickEvent event, KuudraContext context, Consumer<Event> postEvent) {
         if (!event.isInGame()) return;
+        detect(context, postEvent);
+    }
 
+    public void detect(@NotNull EntityTrackingUpdateEvent event, KuudraContext context, Consumer<Event> postEvent) {
+        if (!(event.entity() instanceof MagmaCube cube)) return;
+        if (!KuudraLocationUtil.isKuudra(cube)) return;
+        detect(context, cube, postEvent);
+    }
+
+    private void detect(KuudraContext context, Consumer<Event> postEvent) {
         var phase = context.phase();
         if (phase != KuudraPhase.SKIP && phase != KuudraPhase.BOSS) return;
 
         var bossInfo = context.bossInfo();
-        var kuudraEntity = bossInfo.isAlive()
-                ? bossInfo.bossEntity()
-                : KuudraLocationUtil.findKuudra().orElse(null);
+        MagmaCube kuudraEntity = null;
+        if (bossInfo.isAlive() && bossInfo.bossEntity() instanceof MagmaCube cube) {
+            kuudraEntity = cube;
+        }
+        if (kuudraEntity == null) {
+            kuudraEntity = KuudraLocationUtil.findKuudra().orElse(null);
+        }
 
         if (kuudraEntity == null || !kuudraEntity.isAlive()) return;
+
+        detect(context, kuudraEntity, postEvent);
+    }
+
+    private void detect(KuudraContext context, @NotNull MagmaCube kuudraEntity, Consumer<Event> postEvent) {
+        var phase = context.phase();
+        if (phase != KuudraPhase.SKIP && phase != KuudraPhase.BOSS) return;
 
         var direction = KuudraLocationUtil.getDirection(kuudraEntity);
         long currentTime = System.currentTimeMillis();

@@ -71,7 +71,6 @@ public final class BackboneAlertManager {
 
         if (cooldownTicks > 0) cooldownTicks--;
         if (rendTicksRemaining > 0) rendTicksRemaining--;
-
         return new BoneResult(shouldTriggerRend);
     }
 
@@ -86,13 +85,15 @@ public final class BackboneAlertManager {
         }
 
         Vec3 bonePos = boneStand.position();
-        Optional<LivingEntity> hit = EntityDetectorUtil.getEntitiesOfType(LivingEntity.class).stream()
-                .filter(entity -> entity.isAlive() && entity.getId() != player.getId())
-                .filter(entity -> !(entity instanceof ArmorStand))
-                .filter(entity -> entity.distanceToSqr(bonePos) <= getHitDistanceSq(entity))
-                .filter(entity -> isBehindTarget(entity, bonePos))
-                .filter(entity -> hitEntityIds.add(entity.getId()))
-                .findFirst();
+        Optional<LivingEntity> hit = EntityDetectorUtil.findEntityOfType(
+                LivingEntity.class,
+                entity -> entity.isAlive()
+                        && entity.getId() != player.getId()
+                        && !(entity instanceof ArmorStand)
+                        && entity.distanceToSqr(bonePos) <= getHitDistanceSq(entity)
+                        && isBehindTarget(entity, bonePos)
+                        && hitEntityIds.add(entity.getId())
+        );
 
         if (hit.isEmpty()) {
             return false;
@@ -116,6 +117,11 @@ public final class BackboneAlertManager {
 
         int elapsedTicks = startingTicks - ticksRemaining;
         float percent = Math.max(0f, Math.min(1f, elapsedTicks / (float) startingTicks));
+
+        return progressBarFor(percent);
+    }
+
+    private @NotNull String progressBarFor(float percent) {
 
         int filledBars = Math.round(percent * BAR_SIZE);
         int emptyBars = BAR_SIZE - filledBars;

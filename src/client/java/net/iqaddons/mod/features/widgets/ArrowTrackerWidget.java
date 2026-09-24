@@ -1,6 +1,7 @@
 package net.iqaddons.mod.features.widgets;
 
 import lombok.extern.slf4j.Slf4j;
+import net.iqaddons.mod.IQConstants;
 import net.iqaddons.mod.IQModClient;
 import net.iqaddons.mod.config.Configuration;
 import net.iqaddons.mod.events.impl.ClientTickEvent;
@@ -8,6 +9,7 @@ import net.iqaddons.mod.features.generic.ArrowTrackerFeature;
 import net.iqaddons.mod.hud.component.HudLine;
 import net.iqaddons.mod.hud.element.HudAnchor;
 import net.iqaddons.mod.hud.element.HudWidget;
+import net.iqaddons.mod.utils.ScoreboardUtils;
 import org.jetbrains.annotations.NotNull;
 
 @Slf4j
@@ -19,8 +21,8 @@ public class ArrowTrackerWidget extends HudWidget {
         super(
                 "arrowTrackerWidget",
                 "Arrow Tracker",
-                550.0f, 490.0f,
-                1.0f,
+                278.5f, 519.95636f,
+                1.1f,
                 HudAnchor.TOP_LEFT
         );
 
@@ -45,6 +47,10 @@ public class ArrowTrackerWidget extends HudWidget {
     }
 
     private boolean shouldBeVisible() {
+        if (!ScoreboardUtils.hasTitle(IQConstants.SKYBLOCK_AREA_ID)) {
+            return false;
+        }
+
         ArrowTrackerFeature feature = getArrowTrackerFeature();
         if (feature == null || !feature.isActive()) {
             return false;
@@ -60,14 +66,14 @@ public class ArrowTrackerWidget extends HudWidget {
             // Only show when holding bow
             var mc = net.minecraft.client.Minecraft.getInstance();
             if (mc.player == null) return false;
-
+            
             var mainHandItem = mc.player.getMainHandItem();
             var offHandItem = mc.player.getOffhandItem();
-
+            
             boolean holdingBow = isBow(mainHandItem) || isBow(offHandItem);
-
-            return holdingBow && (feature.isOutOfArrows() ||
-                    (!feature.getCurrentArrowType().equals("Unknown") && feature.getCurrentArrowCount() > 0));
+            
+            return holdingBow && (feature.isOutOfArrows() || 
+                   (!feature.getCurrentArrowType().equals("Unknown") && feature.getCurrentArrowCount() > 0));
         }
     }
 
@@ -110,7 +116,7 @@ public class ArrowTrackerWidget extends HudWidget {
         // Tier 3: 720-1439 (25-50%) = Laranja
         // Tier 4: 50-719 (2-25%) = Vermelho
         // Tier 5: <50 = Vermelho escuro
-
+        
         if (count < 50) return "§4"; // Dark red - critical
         if (count < 720) return "§c"; // Red - very low
         if (count < 1440) return "§6"; // Orange - low
@@ -120,7 +126,7 @@ public class ArrowTrackerWidget extends HudWidget {
 
     private ArrowTrackerFeature getArrowTrackerFeature() {
         try {
-            IQModClient client = IQModClient.get();
+            IQModClient client = IQModClient.getInstance();
             if (client == null || client.getFeatureManager() == null) {
                 return null;
             }

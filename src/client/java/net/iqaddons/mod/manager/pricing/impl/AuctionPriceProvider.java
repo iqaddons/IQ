@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class AuctionPriceProvider implements PriceProvider {
@@ -25,6 +26,8 @@ public class AuctionPriceProvider implements PriceProvider {
     private final HttpClient httpClient;
     private final Map<String, Double> prices = new ConcurrentHashMap<>();
     private final AtomicBoolean ready = new AtomicBoolean(false);
+    private final AtomicLong rateLimitedUntil = new AtomicLong(0);
+    private volatile long backoffMs = 10 * 60 * 1000L; // starts at 10 minutes, doubles on each 429
 
     public AuctionPriceProvider(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -37,6 +40,11 @@ public class AuctionPriceProvider implements PriceProvider {
 
     @Override
     public void update() {
+        if (System.currentTimeMillis() < rateLimitedUntil.get()) {
+            log.debug("Skipping BIN price update, still rate limited");
+            return;
+        }
+
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(LOWEST_BIN_ENDPOINT))
@@ -45,6 +53,15 @@ public class AuctionPriceProvider implements PriceProvider {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 429) {
+                long delay = backoffMs;
+                backoffMs = Math.min(backoffMs * 2, 60 * 60 * 1000L); // cap at 1 hour
+                rateLimitedUntil.set(System.currentTimeMillis() + delay);
+                log.warn("Lowest BIN API rate limited (429), backing off for {} minutes", delay / 60000);
+                return;
+            }
+
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new IOException("Lowest BIN API returned status " + response.statusCode());
             }
@@ -56,6 +73,7 @@ public class AuctionPriceProvider implements PriceProvider {
                 prices.put(entry.getKey(), value);
             }
 
+            backoffMs = 10 * 60 * 1000L; // reset backoff on success
             ready.set(true);
         } catch (Exception e) {
             log.warn("Failed refreshing lowest BIN prices", e);

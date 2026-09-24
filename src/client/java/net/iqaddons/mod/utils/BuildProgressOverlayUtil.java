@@ -7,9 +7,8 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,7 +17,7 @@ import java.util.regex.Pattern;
 public final class BuildProgressOverlayUtil {
 
 	private static final Pattern PROGRESS_PATTERN = Pattern.compile("Building Progress:?\\s*(\\d+)%");
-	private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
+    private static final Pattern BUILDERS_PATTERN = Pattern.compile("\\((\\d+)\\s+Players? Helping\\)");
 	private static final Pattern TOWER_PROGRESS_PATTERN = Pattern.compile("PROGRESS:\\s*(\\d+)%|PROGRESS:\\s*COMPLETE");
 	private static final int TOTAL_TOWERS = 6;
 	public static final long BUILD_START_COUNTDOWN_MS = 6200L;
@@ -54,7 +53,7 @@ public final class BuildProgressOverlayUtil {
 		for (ArmorStand stand : EntityDetectorUtil.getAllArmorStands()) {
 			if (!stand.hasCustomName() || stand.getCustomName() == null) continue;
 
-			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");
+			String stripped = StringUtils.stripFormatting(stand.getCustomName().getString());
 			if (!stripped.contains("Building Progress")) continue;
 
 			Matcher progressMatcher = PROGRESS_PATTERN.matcher(stripped);
@@ -75,16 +74,16 @@ public final class BuildProgressOverlayUtil {
 
 	public static @Nullable Integer getBuildProgressFromTowers() {
 		List<ArmorStand> towerStands = EntityDetectorUtil.getEntitiesOfType(
-				ArmorStand.class,
-				stand -> stand.hasCustomName() && stand.getCustomName() != null
+			ArmorStand.class,
+			stand -> stand.hasCustomName() && stand.getCustomName() != null
 		);
 
 		int totalProgress = 0;
 		int completedTowers = 0;
 
 		for (ArmorStand stand : towerStands) {
-			String stripped = Objects.requireNonNull(stand.getCustomName()).getString().replaceAll("§.", "");
-
+			String stripped = StringUtils.stripFormatting(stand.getCustomName().getString());
+			
 			if (stripped.contains("PROGRESS: COMPLETE")) {
 				totalProgress += 100;
 				completedTowers++;
@@ -109,9 +108,9 @@ public final class BuildProgressOverlayUtil {
 		return null;
 	}
 
-	public record BuildProgressData(
-			int progress,
-			int builders
-	) {
-	}
+    public record BuildProgressData(
+            int progress,
+            int builders
+    ) {
+    }
 }

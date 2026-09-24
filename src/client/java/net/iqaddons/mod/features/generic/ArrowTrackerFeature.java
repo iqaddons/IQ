@@ -8,6 +8,7 @@ import net.iqaddons.mod.events.impl.ClientTickEvent;
 import net.iqaddons.mod.features.Feature;
 import net.iqaddons.mod.utils.MessageUtil;
 import net.iqaddons.mod.utils.ScoreboardUtils;
+import net.iqaddons.mod.utils.StringUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
@@ -40,20 +41,20 @@ public class ArrowTrackerFeature extends Feature {
 
     private void onClientTick(@NotNull ClientTickEvent event) {
         if (!isEnabled()) return;
-        if (!isOnSkyblock()) return;
+        if (!isOnSkyblock()) {
+            resetTrackedData();
+            return;
+        }
         if (mc.player == null) return;
 
         var inventory = mc.player.getInventory();
         ItemStack slotItem = inventory.getItem(8);
         if (slotItem.isEmpty()) return;
 
-        // Check if it's a feather (minecraft:feather)
         String itemId = slotItem.getItem().getDescriptionId();
         if (!itemId.contains("feather")) return;
 
-        // It's a feather, extract arrow data.
-        String itemName = slotItem.getHoverName().getString();
-        itemName = itemName.replaceAll("§.", "").trim(); // Remove formatting codes
+        String itemName = StringUtils.stripFormatting(slotItem.getHoverName().getString()).trim();
         if (itemName.isEmpty()) return;
 
         Integer parsedCount = null;
@@ -65,10 +66,7 @@ public class ArrowTrackerFeature extends Feature {
                 try {
                     String[] parts = line.split(":");
                     if (parts.length < 2) break;
-                    String countStr = parts[1]
-                            .replaceAll("§.", "")
-                            .replaceAll("[^0-9]", "")
-                            .trim();
+                    String countStr = StringUtils.digitsOnly(StringUtils.stripFormatting(parts[1]));
                     if (!countStr.isEmpty()) {
                         parsedCount = Integer.parseInt(countStr);
                     }
@@ -100,6 +98,16 @@ public class ArrowTrackerFeature extends Feature {
         return ScoreboardUtils.hasTitle(IQConstants.SKYBLOCK_AREA_ID);
     }
 
+    private void resetTrackedData() {
+        currentArrowType = "Unknown";
+        currentArrowCount = 0;
+        isOutOfArrows = false;
+        hasTrackedData = false;
+        waitingForQuiverRefresh = false;
+        lockedArrowType = "Unknown";
+        lockedArrowCount = 0;
+    }
+
     private void onChatReceived(@NotNull ChatReceivedEvent event) {
         if (!isEnabled()) return;
         if (!isOnSkyblock()) return;
@@ -119,10 +127,9 @@ public class ArrowTrackerFeature extends Feature {
 
     private void extractAndNotifyArrowCount(@NotNull String message, boolean outOfArrows) {
         try {
-            // Remove formatting codes for parsing
-            String cleanMessage = message.replaceAll("§.", "");
+            String cleanMessage = StringUtils.stripFormatting(message);
             String[] parts = cleanMessage.split(" ");
-
+            
             if (outOfArrows) {
                 // "Your quiver is now completely empty!"
                 lockedArrowType = currentArrowType;

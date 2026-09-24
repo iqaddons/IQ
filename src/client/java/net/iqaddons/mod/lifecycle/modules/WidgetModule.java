@@ -19,7 +19,8 @@ public class WidgetModule implements LifecycleComponent {
                 new SupplyProgressWidget(), new ChestCounterWidget(), new KuudraProfitTrackerWidget(),
                 new ChestValueWidget(), new BackboneWidget(), new KuudraNotificationsWidget(),
                 new KuudraDirectionWidget(), new SimpleBuildProgressWidget(), new CratePriorityWidget(),
-                new ArrowTrackerWidget()
+                new ArrowTrackerWidget(), new SupplyTimerCountdownWidget(), new EatenTimerWidget(),
+                new FireVeilOverlayWidget()
         );
     }
 

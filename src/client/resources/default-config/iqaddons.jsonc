@@ -1,0 +1,312 @@
+{
+  "rconfig:version": 0,
+  "partyJoinSound": true,
+  "limboAlert": true,
+  "fixFishingHook": true,
+  "muteFishingCastSound": true,
+  "muteTerminatorCooldownSound": true,
+  "partyCommands": {
+    "partyCommandsEnabled": true,
+    "partyCommandWarp": true,
+    "partyCommandTransfer": true,
+    "partyCommandPing": true,
+    "partyCommandAllInvite": true,
+    "partyCommandTps": true,
+    "partyCommandPromote": true,
+    "partyCommandKick": true,
+    "partyCommandKuudra": true,
+    "partyCommandChests": true,
+    "partyCommandRuns": true,
+    "partyCommandProfit": true,
+    "partyCommandPersonalBest": true
+  },
+  "loadoutsKeybinds": true,
+  "preventClosingLoadoutMenu": true,
+  "loadoutsSound": true,
+  "wardrobeKeybinds": true,
+  "wardrobeSound": true,
+  "arrowTracker": true,
+  "arrowTrackerNotifications": true,
+  "arrowTrackerVisibility": "ALWAYS",
+  "waypointConfig": {
+    "renderWaypoints": true,
+    "waypointsDuration": 7,
+    "waypointOpacity": 0.8,
+    "waypointStyle": "OUTLINE"
+  },
+  "discordRichPresence": true,
+  "Kuudra Utilities": {
+    "customSplits": true,
+    "splitColorConfig": {
+      "title": "AQUA",
+      "supplies": "DARK_AQUA",
+      "build": "DARK_AQUA",
+      "eaten": "DARK_AQUA",
+      "stun": "DARK_AQUA",
+      "dps": "DARK_AQUA",
+      "skip": "DARK_AQUA",
+      "boss": "DARK_AQUA",
+      "overall": "DARK_AQUA",
+      "pace": "DARK_AQUA"
+    },
+    "customSplitsBenchmarks": {
+      "supplies": 22.5,
+      "build": 12.5,
+      "eaten": 4.4,
+      "stun": 0.0,
+      "dps": 3.5,
+      "skip": 4.6,
+      "boss": 2.0
+    },
+    "kuudraProfitTracker": true,
+    "profitTrackerColorConfig": {
+      "titleColor": "AQUA",
+      "profitLabelColor": "WHITE",
+      "runsLabelColor": "WHITE",
+      "chestsLabelColor": "WHITE",
+      "rerollsLabelColor": "WHITE",
+      "avgTimeLabelColor": "WHITE",
+      "timeLabelColor": "WHITE",
+      "rateLabelColor": "WHITE",
+      "trackingLabelColor": "WHITE"
+    },
+    "profitTrackerConfig": {
+      "sessionResetMinutes": 20,
+      "profitTrackerVisibility": "KUUDRA_AREAS",
+      "bazaarPricingMode": "SELL_ORDER",
+      "crimsonIsleFaction": "MAGE",
+      "armorValueType": "SALVAGE",
+      "kuudraPetBonus": 20,
+      "attributeBonus": 0.0,
+      "hideWidgetDuringRunPhase": false
+    },
+    "chestCounterTracker": true,
+    "chestCounterConfig": {
+      "chestCounterVisibility": "KUUDRA_AREAS",
+      "chestCounterPartyAnnouncements": true
+    },
+    "chestValueWidget": true,
+    "croesusHelper": true,
+    "autoRequeue": true,
+    "autoRequeueConfig": {
+      "requeueDelay": 20,
+      "autoStopAutoRequeue": false,
+      "autoStopAutoRequeueOverallSeconds": 50.49
+    },
+    "kuudraNotifications": {
+      "kuudraNotificationsSound": true,
+      "kuudraNotificationBuildStarted": false,
+      "kuudraNotificationIchorUsed": false,
+      "kuudraNotificationNoPre": true,
+      "kuudraNotificationSosReminder": true,
+      "kuudraPhaseAlert": false,
+      "kuudraNotificationBuildDone": false,
+      "kuudraNotificationSuppliesDone": true,
+      "kuudraNotificationCannonball": true,
+      "supplyPickingAlert": true,
+      "supplyDroppedTitle": true,
+      "placedSupplyTitle": true,
+      "supplyPickedUpTitle": true
+    },
+    "abilityAnnounce": {
+      "abilityAnnounceSpiritSpark": true,
+      "abilityAnnounceHollowedRush": true,
+      "abilityAnnounceRagingWind": true,
+      "abilityAnnounceIchorPool": true,
+      "abilityAnnounceManaDrain": true
+    },
+    "personalBestTracker": true,
+    "phaseSplitsPBTracker": true,
+    "hideUselessArmorStands": true,
+    "hideUselessArmorStandsConfig": {
+      "build": true,
+      "rightCannon": false,
+      "leftCannon": false,
+      "shop": true,
+      "others": false
+    },
+    "hideMobNametags": true,
+    "hideKuudraBossBar": false,
+    "etherwarpHelper": true
+  },
+  "Phase 1 - Supplies": {
+    "supplyTimers": true,
+    "supplyTimesConfig": {
+      "supplyTimesTitleColor": "AQUA",
+      "supplyTimerCountdown": true,
+      "supplyTimerCountdownWidget": false
+    },
+    "supplyProgressDisplay": true,
+    "pearlWaypoints": true,
+    "pearlWaypointsConfig": {
+      "pearlWaypointColor": -16711681,
+      "pearlWaypointSize": -2,
+      "pearlWaypointsScale": 0.05,
+      "pearlWaypointPingMs": 100,
+      "pearlWaypointTalismanTier": "TIER_3",
+      "pearlWaypointTimes": "TIMER_SECONDS",
+      "pearlWaypointTextPosition": "BELOW",
+      "pearlWaypointRenderStyle": "SQUARE",
+      "pearlWaypointBlockOutlines": true,
+      "pearlThrowAlert": true,
+      "pearlWaypointAreaDebug": false,
+      "pearlWaypointOffsets": false,
+      "pearlFlatXAreaYOffset": 0,
+      "pearlFlatEqualsAreaYOffset": 0,
+      "pearlFlatSlashAreaYOffset": 0,
+      "pearlFlatTriangleAreaYOffset": 0,
+      "pearlFlatSquareAreaYOffset": 0,
+      "pearlFlatShopAreaYOffset": 0
+    },
+    "cratePriority": true,
+    "cratePriorityConfig": {
+      "cratePriorityColor": "GREEN",
+      "cratePriorityDurationSeconds": 6,
+      "cratePriorityAnimation": "FADE",
+      "cratePrioritySound": true
+    },
+    "supplyWaypoints": true,
+    "supplyWaypointsConfig": {
+      "supplyWaypointColor": -1677659649,
+      "supplyWaypointBoxSize": 1.0,
+      "supplyHitBox": true,
+      "supplyInteractionBoxColor": 1510004735,
+      "supplyInteractionBoxRange": true,
+      "supplyInteractionBoxInRangeColor": -1778319487,
+      "supplyPullCircle": true,
+      "supplyPullCircleColor": 1610547200,
+      "supplyPullCircleBobberRange": true,
+      "supplyPullCircleActiveColor": -1772748971,
+      "supplyArmorStandDebug": true,
+      "supplyArmorStandDebugColor": -1258334721,
+      "supplyWaypointStyle": "HEXAGON"
+    },
+    "pileWaypoints": true,
+    "pileWaypointsConfig": {
+      "pileWaypointNames": true,
+      "pileWaypointNameColor": -1,
+      "normalPileColor": 889192447,
+      "noPrePileColor": 838926224,
+      "placeAreaHitbox": true,
+      "placeAreaHitboxThroughWalls": false,
+      "placeAreaHitboxColor": -1279983787,
+      "placeAreaHitboxActiveColor": -589483
+    },
+    "etherwarpWaypoints": true,
+    "etherwarpWaypointsConfig": {
+      "etherwarpWaypointRenderStyle": "TOP",
+      "etherwarpWaypointColor": -1275002881,
+      "etherwarpWaypointText": true,
+      "etherwarpWaypointTextPosition": "BELOW",
+      "etherwarpWaypointTextScale": 0.06083702,
+      "etherwarpWaypointTextColor": -2304,
+      "etherwarpWaypointDynamicRender": true,
+      "etherwarpWaypointDynamicActiveColor": -598343851,
+      "etherwarpWaypointDynamicInactiveColor": -1761651371,
+      "etherwarpWaypointTracer": true
+    },
+    "supplyPlacementEfficiency": false,
+    "supplyRecoverMessage": true,
+    "noPreAlert": true,
+    "secondSupplyAlert": true,
+    "supplyGiantHitboxAlert": true,
+    "supplyGiantHitboxStyle": "BOTH"
+  },
+  "Phase 2 - Build": {
+    "freshTimers": true,
+    "freshTimesTitleColor": "AQUA",
+    "buildProgressOverlay": true,
+    "simpleBuildProgressOverlay": true,
+    "buildStartCountdownOverlay": true,
+    "fireVeilOverlay": true,
+    "fireVeilOverlayConfig": {
+      "render": "CIRCLE",
+      "renderColor": -922768896,
+      "renderThroughWalls": false,
+      "abilityCountdown": true,
+      "soundWhenRecast": true
+    },
+    "freshCountdown": true,
+    "buildHelper": true,
+    "buildWaypointsOpacity": 0.3,
+    "hideDefaultBuildPileText": true,
+    "hideDefaultBuildPileTextConfig": {
+      "progress": true,
+      "sneakPunch": true,
+      "supplyPile": false
+    },
+    "teamHighlight": true,
+    "teamHighlightColor": -784092387,
+    "freshHighlightIndependent": true,
+    "freshHighlightColor": -16713985,
+    "elleHighlightConfig": {
+      "elleHighlight": true,
+      "elleHighlightColor": -1409330349,
+      "elleHighlightStyle": "OUTLINE"
+    },
+    "freshMessage": true,
+    "cleanBallistaBuildSounds": false,
+    "replaceBallistaBuildSound": false
+  },
+  "Phase 3 - Stun": {
+    "eatenTimer": true,
+    "eatenTimerConfig": {
+      "timerType": "TIMER_SECONDS",
+      "startMode": "COUNTDOWN_START",
+      "hideDefaultCountdown": false
+    },
+    "kuudraHealthDisplay": true,
+    "kuudraHealthWidgetConfig": {
+      "renderHealthOnly": true,
+      "highPercentageColor": -11141291,
+      "midPercentageColor": -171,
+      "lowPercentageColor": -22016,
+      "criticalPercentageColor": -43691
+    },
+    "kuudraHitbox": {
+      "kuudraHitboxColor": -402718206,
+      "kuudraHitboxStyle": "OUTLINE"
+    },
+    "kuudraHealth": true,
+    "kuudraHealthColorConfig": {
+      "high": -11141291,
+      "mid": -171,
+      "low": -22016,
+      "critical": -43691
+    },
+    "stunWaypoints": true,
+    "stunWaypointColor": -939461121,
+    "stunWaypointStyle": "OUTLINE",
+    "stunWaypointBlock": "LEFT_POD",
+    "dpsWaypoint": true,
+    "dpsWaypointConfig": {
+      "dpsWaypointColor": -939458561
+    },
+    "skipWaypoint": true,
+    "skipWaypointConfig": {
+      "skipWaypointColor": -939458561,
+      "skipWaypointTracer": false,
+      "skipWaypointTracerColor": -1275002881
+    },
+    "blockUselessPerks": true,
+    "blockPickobulus": true
+  },
+  "Phase 4 - Boss Fight": {
+    "rendDamageAlert": true,
+    "kuudraDirectionAlert": true,
+    "iceSprayAlert": true,
+    "backboneAlert": true,
+    "backboneAlertSound": true,
+    "backboneAdvanceTicks": 0,
+    "dangerZoneAlert": false,
+    "ichorPoolArea": true,
+    "kuudraDistanceDisplay": true,
+    "kuudraDistanceConfig": {
+      "throwBoneAlert": true,
+      "greenMinDistance": 12.0,
+      "greenMaxDistance": 14.0
+    },
+    "hideDamageTitle": true,
+    "kuudraDistanceThrowBoneTitle": true
+  }
+}

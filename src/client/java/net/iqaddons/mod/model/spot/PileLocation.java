@@ -11,6 +11,18 @@ public record PileLocation(
 
 
     private static final double PILE_RADIUS_SQUARED = 1.5 * 1.5;
+    public static final double PLACE_AREA_RADIUS = 2.0;
+
+    public Vec3 getPlaceAreaCenter() {
+        return new Vec3(position.x + 0.5, 79.1, position.z + 0.5);
+    }
+
+    public boolean isInsidePlaceArea(@NotNull Vec3 playerPosition) {
+        Vec3 center = getPlaceAreaCenter();
+        double dx = playerPosition.x - center.x;
+        double dz = playerPosition.z - center.z;
+        return dx * dx + dz * dz <= PLACE_AREA_RADIUS * PLACE_AREA_RADIUS;
+    }
 
     public boolean isNoPrePile(int missingPre) {
         return noPreValue == missingPre;

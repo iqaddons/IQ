@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class AutoRequeueFeature extends Feature {
 
-    private static final int MIN_SAFE_REQUEUE_DELAY_TICKS = 10;
+    private static final int MIN_SAFE_REQUEUE_DELAY_TICKS = 1;
 
     private static final Pattern PARTY_DT_PATTERN = Pattern.compile(
             "^(?:Party >\\s*)?(?:\\[[^]]+]\\s*)?(?:\\[[^]]+]\\s*)?([A-Za-z0-9_]+):\\s*[!.]dt(?:\\s+(.*))?$",

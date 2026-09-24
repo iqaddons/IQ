@@ -4,18 +4,24 @@
   "package": "net.iqaddons.mod.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "AbstractContainerScreenMixin",
     "ArmorStandRendererMixin",
     "BossHealthOverlayMixin",
+    "ClientLevelMixin",
     "EntityGlowMixin",
+    "EntityTrackingPacketMixin",
     "EntityMixin",
-    "AbstractContainerScreenMixin",
-    "HudClickMixin",
+    "accessor.GuiAccessor",
     "GuiMixin",
+    "HudClickMixin",
     "ItemUseMixin",
     "LevelRendererMixin",
+    "MinecraftScreenMixin",
     "feature.BallistaBuildSoundMixin",
+    "feature.ClientSoundEventMixin",
     "feature.FishingCastSoundMixin",
-    "feature.MuteTerminatorCooldownSoundMixin"
+    "feature.MuteTerminatorCooldownSoundMixin",
+    "feature.RagnarockCastMixin"
   ],
   "injectors": {
     "defaultRequire": 1
@@ -26,6 +32,7 @@
   "mixins": [
     "ConnectionMixin",
     "EntityGlowMixin",
+    "accessor.MinecraftClientAccessor",
     "feature.FishingBooberFixMixin"
   ]
 }

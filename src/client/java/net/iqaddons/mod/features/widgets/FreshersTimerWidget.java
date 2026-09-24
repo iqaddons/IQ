@@ -38,7 +38,7 @@ public class FreshersTimerWidget extends HudWidget {
     public FreshersTimerWidget() {
         super("freshers_timer",
                 "Freshers Timer",
-                6.5f, 200.0f,
+                4.5f, 191.66583f,
                 1.0f,
                 HudAnchor.TOP_LEFT
         );
@@ -231,8 +231,7 @@ public class FreshersTimerWidget extends HudWidget {
     }
 
     @Contract(pure = true)
-    private @NotNull String getTimeColor(double time) {
-        if (time <= 4.2) return "§5";
+    public static @NotNull String getTimeColor(double time) {
         if (time <= 5) return "§9";
         if (time <= 7) return "§a";
         if (time <= 9) return "§6";

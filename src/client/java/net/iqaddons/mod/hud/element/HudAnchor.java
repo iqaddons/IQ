@@ -105,6 +105,10 @@ public enum HudAnchor {
 
     public static int @NotNull [] getScreenDimensions() {
         Minecraft mc = Minecraft.getInstance();
+        if (mc == null || mc.getWindow() == null) {
+            return new int[]{0, 0};
+        }
+
         return new int[]{
                 mc.getWindow().getGuiScaledWidth(),
                 mc.getWindow().getGuiScaledHeight()

@@ -30,12 +30,44 @@ public record WorldRenderEvent(
         WorldRenderUtils.drawOutline(matrices, consumer, cameraState, box, throughWalls, color);
     }
 
+    public void drawOutline(AABB box, boolean throughWalls, RenderColor color, float lineWidth) {
+        WorldRenderUtils.drawOutline(matrices, consumer, cameraState, box, throughWalls, color, lineWidth);
+    }
+
     public void drawFilledCircle(Vec3 center, float radius, int segments, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawFilledCircle(matrices, consumer, cameraState, center, radius, segments, throughWalls, color);
     }
 
     public void drawCircleOutline(Vec3 center, float radius, int segments, boolean throughWalls, RenderColor color) {
         WorldRenderUtils.drawCircleOutline(matrices, consumer, cameraState, center, radius, segments, throughWalls, color);
+    }
+
+    public void drawThickCircleOutline(Vec3 center, float radius, float thickness, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawThickCircleOutline(matrices, consumer, cameraState, center, radius, thickness, segments, throughWalls, color);
+    }
+
+    public void drawThickSquareOutline(Vec3 center, float size, float thickness, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawThickSquareOutline(matrices, consumer, cameraState, center, size, thickness, throughWalls, color);
+    }
+
+    public void drawCircleWall(Vec3 center, float radius, float height, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawCircleWall(matrices, consumer, cameraState, center, radius, height, segments, throughWalls, color);
+    }
+
+    public void drawCircleWireframeWall(Vec3 center, float radius, float height, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawCircleWireframeWall(matrices, consumer, cameraState, center, radius, height, segments, throughWalls, color);
+    }
+
+    public void drawBillboardSquareOutline(Vec3 center, float size, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawBillboardSquareOutline(matrices, consumer, cameraState, center, size, throughWalls, color);
+    }
+
+    public void drawBillboardCircleOutline(Vec3 center, float radius, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawBillboardCircleOutline(matrices, consumer, cameraState, center, radius, segments, throughWalls, color);
+    }
+
+    public void drawThickBillboardCircleOutline(Vec3 center, float radius, float thickness, int segments, boolean throughWalls, RenderColor color) {
+        WorldRenderUtils.drawThickBillboardCircleOutline(matrices, consumer, cameraState, center, radius, thickness, segments, throughWalls, color);
     }
 
     public void drawStyledBox(@NotNull AABB box, boolean throughWalls, @NotNull RenderColor color, WorldRenderUtils.RenderStyle style) {
