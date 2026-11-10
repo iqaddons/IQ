@@ -1,14 +1,14 @@
 package net.iqaddons.mod.utils.render;
 
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.BlendFunction;
+import com.mojang.renderpearl.api.pipeline.ColorTargetState;
+import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.PrimitiveTopology;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -30,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 @UtilityClass
@@ -486,7 +487,7 @@ public class WorldRenderUtils {
                 center.y - camPos.y,
                 center.z - camPos.z
         );
-        matrices.mulPose(camera.orientation);
+        matrices.mulPose(new Matrix4f().rotation(camera.orientation));
     }
 
     private static void lineVertex(
@@ -532,7 +533,7 @@ public class WorldRenderUtils {
                 pos.z - camPos.z
         );
 
-        matrices.mulPose(camera.orientation);
+        matrices.mulPose(new Matrix4f().rotation(camera.orientation));
         matrices.scale(scale, -scale, scale);
 
         Font.DisplayMode displayMode = throughWalls
@@ -846,7 +847,7 @@ public class WorldRenderUtils {
                 "iqaddons_box_filled",
                 RenderSetup.builder(Pipelines.filledCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
+                        .setOitPipelines(WorldOverlayLayerPolicy.filledOitPipelines())
                         .createRenderSetup()
         );
 
@@ -854,7 +855,6 @@ public class WorldRenderUtils {
                 "iqaddons_box_filled_no_cull",
                 RenderSetup.builder(Pipelines.filledNoCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
                         .createRenderSetup()
         );
 
@@ -862,7 +862,7 @@ public class WorldRenderUtils {
                 "iqaddons_box_outline",
                 RenderSetup.builder(Pipelines.outlineCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
+                        .setOitPipelines(WorldOverlayLayerPolicy.lineOitPipelines())
                         .createRenderSetup()
         );
 
@@ -870,7 +870,6 @@ public class WorldRenderUtils {
                 "iqaddons_box_outline_no_cull",
                 RenderSetup.builder(Pipelines.outlineNoCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
                         .createRenderSetup()
         );
 
@@ -878,7 +877,7 @@ public class WorldRenderUtils {
                 "iqaddons_gui_line",
                 RenderSetup.builder(Pipelines.lineNoCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
+                        .setOitPipelines(WorldOverlayLayerPolicy.lineOitPipelines())
                         .createRenderSetup()
         );
 
@@ -886,7 +885,7 @@ public class WorldRenderUtils {
                 "iqaddons_circle_filled",
                 RenderSetup.builder(Pipelines.circleFilledCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
+                        .setOitPipelines(WorldOverlayLayerPolicy.filledOitPipelines())
                         .createRenderSetup()
         );
 
@@ -894,7 +893,6 @@ public class WorldRenderUtils {
                 "iqaddons_circle_filled_no_cull",
                 RenderSetup.builder(Pipelines.circleFilledNoCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
                         .createRenderSetup()
         );
 
@@ -902,7 +900,7 @@ public class WorldRenderUtils {
                 "iqaddons_circle_outline",
                 RenderSetup.builder(Pipelines.circleOutlineCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
+                        .setOitPipelines(WorldOverlayLayerPolicy.lineOitPipelines())
                         .createRenderSetup()
         );
 
@@ -910,7 +908,6 @@ public class WorldRenderUtils {
                 "iqaddons_circle_outline_no_cull",
                 RenderSetup.builder(Pipelines.circleOutlineNoCull)
                         .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(WorldOverlayLayerPolicy.outputTarget())
                         .createRenderSetup()
         );
     }

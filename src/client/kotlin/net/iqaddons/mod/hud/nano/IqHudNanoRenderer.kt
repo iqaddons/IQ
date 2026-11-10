@@ -87,7 +87,7 @@ object IqHudNanoRenderer {
         if (button != 0) return false
 
         manager.widgets.forEach { widget ->
-            if (widget.isNanoActive() && widget.shouldRender() && handleWidgetClick(widget)) {
+            if (widget.isNanoActive() && widget.shouldRender() && handleWidgetClick(widget, mouseX, mouseY)) {
                 return true
             }
         }
@@ -163,6 +163,12 @@ object IqHudNanoRenderer {
                     }
 
                     if (updateHover) {
+                        line.updateNanoHitBounds(
+                            currentX * scale,
+                            currentY * scale,
+                            formattedWidth(renderer, line.getNanoText()) * scale,
+                            textRenderer.lineHeight * scale,
+                        )
                         updateNanoHover(
                             line,
                             currentX * scale,
@@ -194,10 +200,9 @@ object IqHudNanoRenderer {
         renderer.backend.restore()
     }
 
-    private fun handleWidgetClick(widget: HudWidget): Boolean {
+    private fun handleWidgetClick(widget: HudWidget, mouseX: Double, mouseY: Double): Boolean {
         widget.nanoRenderableLines.forEach { line ->
-            if (line.shouldRender() && line.isNanoHovered() && line.hasNanoClickAction()) {
-                line.runNanoClickAction()
+            if (line.shouldRender() && line.runNanoClickActionAt(mouseX, mouseY)) {
                 return true
             }
         }
@@ -414,8 +419,8 @@ object IqHudNanoRenderer {
             val text = segment.toString()
             val font = if (bold) fontBold() else fontRegular()
             if (shadow) {
-                renderer.text(text, cursor + 0.43f, y + 0.43f, FONT_SIZE, Color.of(0f, 0f, 0f, 0.92f * alpha), font)
-                renderer.text(text, cursor + 0.24f, y + 0.24f, FONT_SIZE, Color.of(0f, 0f, 0f, 0.46f * alpha), font)
+                renderer.text(text, cursor + 0.43f, y + 0.43f, FONT_SIZE, Color.of(0f, 0f, 0f, 0.92f * alpha), font, animateBranding = false)
+                renderer.text(text, cursor + 0.24f, y + 0.24f, FONT_SIZE, Color.of(0f, 0f, 0f, 0.46f * alpha), font, animateBranding = false)
             }
             val finalColor = color.withAlpha(color.a * alpha)
             renderer.text(text, cursor, y, FONT_SIZE, finalColor, font)

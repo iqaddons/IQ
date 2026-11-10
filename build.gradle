@@ -1,7 +1,7 @@
 plugins {
     id 'net.fabricmc.fabric-loom' version '1.17.20'
     id 'maven-publish'
-    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.21'
 }
 
 version = "${project.mod_version}+mc${project.minecraft_version}"
@@ -65,7 +65,7 @@ dependencies {
 
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-26.2:${project.resourcefulconfig_version}")
+    implementation include("com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-26.3:${project.resourcefulconfig_version}")
     implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation include('net.hypixel:mod-api:1.0.1')
@@ -75,7 +75,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.38"
 
     // Fabric Language Kotlin supplies this at runtime; do not embed a duplicate 1.6 MB copy in IQ.
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.21"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.4.21"
 
     def lwjglVersion = "3.4.1"
     implementation "org.lwjgl:lwjgl-nanovg:${lwjglVersion}"
@@ -146,9 +146,33 @@ tasks.register('testPublicFeatureLogic', JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
 }
 
+tasks.register('testNanoHudClick', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.NanoHudClickTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.register('testAuctionPriceProvider', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.AuctionPriceProviderTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
+tasks.register('testKuudraHitboxOcclusion', JavaExec) {
+    dependsOn tasks.named('gametestClasses')
+    classpath = sourceSets.gametest.runtimeClasspath
+    mainClass = 'net.iqaddons.mod.gametest.KuudraHitboxOcclusionTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+
 tasks.named('check') {
+    dependsOn tasks.named('testNanoHudClick')
     dependsOn tasks.named('testNanoVgDiagnosticMode')
     dependsOn tasks.named('testPublicFeatureLogic')
+    dependsOn tasks.named('testAuctionPriceProvider')
+    dependsOn tasks.named('testKuudraHitboxOcclusion')
 }
 
 dependencies {

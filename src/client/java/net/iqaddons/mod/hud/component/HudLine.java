@@ -33,6 +33,11 @@ public class HudLine {
     private @Nullable String tooltipText;
 
     private boolean hovered = false;
+    private float nanoHitX;
+    private float nanoHitY;
+    private float nanoHitWidth;
+    private float nanoHitHeight;
+    private boolean nanoHitBoundsValid = false;
     private BooleanSupplier visibilityCondition = () -> true;
 
     private Style minecraftStyle = Style.EMPTY;
@@ -218,6 +223,25 @@ public class HudLine {
         if (clickAction != null) {
             clickAction.run();
         }
+    }
+
+    public void updateNanoHitBounds(float x, float y, float width, float height) {
+        nanoHitX = x;
+        nanoHitY = y;
+        nanoHitWidth = width;
+        nanoHitHeight = height;
+        nanoHitBoundsValid = width > 0.0f && height > 0.0f;
+    }
+
+    public boolean runNanoClickActionAt(double mouseX, double mouseY) {
+        if (clickAction == null || text.isEmpty() || !nanoHitBoundsValid) return false;
+
+        boolean inside = mouseX >= nanoHitX && mouseX <= nanoHitX + nanoHitWidth
+                && mouseY >= nanoHitY && mouseY <= nanoHitY + nanoHitHeight;
+        if (!inside) return false;
+
+        clickAction.run();
+        return true;
     }
 
     public void runNanoMouseEnterAction() {

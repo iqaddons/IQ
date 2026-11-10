@@ -11,6 +11,7 @@
     "EntityGlowMixin",
     "EntityTrackingPacketMixin",
     "EntityMixin",
+    "FontAnimatedBrandingMixin",
     "GuiMixin",
     "accessor.HudAccessor",
     "GuiScreenMixin",

@@ -1,5 +1,7 @@
 package net.iqaddons.mod.screen.nano
 
+import com.mojang.blaze3d.Blaze3D
+import com.mojang.blaze3d.platform.InputConstants
 import net.iqaddons.mod.IQModClient
 import net.iqaddons.mod.config.Configuration
 import net.iqaddons.mod.config.categories.KuudraGeneralConfig
@@ -31,7 +33,7 @@ import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.util.Util
-import org.lwjgl.glfw.GLFW
+import java.net.URI
 import java.lang.reflect.Field
 import java.util.IdentityHashMap
 import java.util.Locale
@@ -106,6 +108,11 @@ open class IqNanoConfigScreen(
     private var colorModalProgress = 0f
     private var hoverTooltip: Pair<Rect, String>? = null
     private var searchFocused = false
+        set(value) {
+            if (field == value) return
+            field = value
+            minecraft?.onTextInputFocusChange(this, value)
+        }
     private var panel = Rect.ZERO
     private var content = Rect.ZERO
     private var mouseXf = 0f
@@ -989,12 +996,20 @@ open class IqNanoConfigScreen(
                 val hasVisibleChildren = collectVisibleEntries(children(e).orEmpty(), queryText, depth + 1, 1f, matchingNested)
                 if (selfMatches || hasVisibleChildren) {
                     out += VisibleEntry(e, depth, parentExpansion * visibility)
-                    val progress = sectionAnim[sectionKey(e)] ?: if (e.isExpanded) 1f else 0f
-                    val expansion = parentExpansion * visibility * progress
-                    if (e.isExpanded || progress > 0.02f) {
+                    if (queryText.isNotBlank()) {
                         val nested = mutableListOf<VisibleEntry>()
-                        collectVisibleEntries(children(e).orEmpty(), "", depth + 1, 1f, nested)
+                        if (selfMatches) collectVisibleEntries(children(e).orEmpty(), "", depth + 1, 1f, nested)
+                        else nested += matchingNested
+                        val expansion = parentExpansion * visibility
                         nested.forEach { out += it.copy(expansion = it.expansion * expansion) }
+                    } else {
+                        val progress = sectionAnim[sectionKey(e)] ?: if (e.isExpanded) 1f else 0f
+                        val expansion = parentExpansion * visibility * progress
+                        if (e.isExpanded || progress > 0.02f) {
+                            val nested = mutableListOf<VisibleEntry>()
+                            collectVisibleEntries(children(e).orEmpty(), "", depth + 1, 1f, nested)
+                            nested.forEach { out += it.copy(expansion = it.expansion * expansion) }
+                        }
                     }
                     anyVisible = true
                 }
@@ -1010,7 +1025,7 @@ open class IqNanoConfigScreen(
         if (closing) return true
         mouseXf = click.x().toFloat()
         mouseYf = click.y().toFloat()
-        if (click.button() == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
             searchFocused = false
             colorEditing = null
             openSelect = null
@@ -1022,7 +1037,7 @@ open class IqNanoConfigScreen(
             contextMenuRect = null
             return true
         }
-        if (click.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
+        if (click.button() != InputConstants.MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
         contextMenuHit?.takeIf { it.rect.contains(mouseXf, mouseYf) }?.let {
             resetEntryToDefault(it.entry)
             contextMenuEntry = null
@@ -1291,23 +1306,23 @@ open class IqNanoConfigScreen(
 
     override fun keyPressed(input: KeyEvent): Boolean {
         if (closing) return true
-        if (input.key() == GLFW.GLFW_KEY_ESCAPE && colorEditing != null) {
+        if (input.key() == InputConstants.KEY_ESCAPE && colorEditing != null) {
             draggingColorTarget = null
             colorEditing = null
             return true
         }
         editingNumber?.let { entry ->
             return when (input.key()) {
-                GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
                     commitNumberEdit(entry)
                     true
                 }
-                GLFW.GLFW_KEY_ESCAPE -> {
+                InputConstants.KEY_ESCAPE -> {
                     editingNumber = null
                     editingNumberText.clear()
                     true
                 }
-                GLFW.GLFW_KEY_BACKSPACE -> {
+                InputConstants.KEY_BACKSPACE -> {
                     if (editingNumberText.isNotEmpty()) editingNumberText.deleteCharAt(editingNumberText.length - 1)
                     true
                 }
@@ -1316,7 +1331,7 @@ open class IqNanoConfigScreen(
         }
         if (!searchFocused) return super.keyPressed(input)
         return when (input.key()) {
-            GLFW.GLFW_KEY_BACKSPACE -> {
+            InputConstants.KEY_BACKSPACE -> {
                 if (query.isNotEmpty()) {
                     query.deleteCharAt(query.length - 1)
                     scroll = 0f
@@ -1325,7 +1340,7 @@ open class IqNanoConfigScreen(
                 openSelect = null
                 true
             }
-            GLFW.GLFW_KEY_ESCAPE -> {
+            InputConstants.KEY_ESCAPE -> {
                 searchFocused = false
                 openSelect = null
                 true
@@ -1501,6 +1516,7 @@ open class IqNanoConfigScreen(
     }
 
     override fun removed() {
+        searchFocused = false
         saveConfig()
         super.removed()
     }
@@ -1510,6 +1526,8 @@ open class IqNanoConfigScreen(
     }
 
     override fun isPauseScreen(): Boolean = false
+
+    override fun isInputCaptured(): Boolean = searchFocused || super.isInputCaptured()
 
     private fun updateAnimations() {
         val enabled = IqNanoGlobalConfigScreen.isSharedAnimationsEnabled()
@@ -2000,7 +2018,7 @@ open class IqNanoConfigScreen(
         }
 
         private fun openUrl(url: String) {
-            Util.getPlatform().openUri(url)
+            Blaze3D.openUri(URI.create(url))
         }
 
         private fun displayLabel(raw: String): String {

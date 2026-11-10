@@ -12,7 +12,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 
@@ -45,77 +45,77 @@ public class IQKeyBindings {
     public static void register() {
         openConfigKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-config",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_K,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_K,
                 IQ_CATEGORY
         ));
 
         advanceCroesusPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.advance-croesus-page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_RIGHT,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_RIGHT,
                 IQ_CATEGORY
         ));
 
         goBackCroesusPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.go-back-croesus-page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_LEFT,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_LEFT,
                 IQ_CATEGORY
         ));
 
         openWardrobeKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-wardrobe",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.UNKNOWN.getValue(),
                 IQ_CATEGORY
         ));
 
         openLoadoutsKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.open-loadouts",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.UNKNOWN.getValue(),
                 IQ_CATEGORY
         ));
 
         wardrobeSlotKeys = List.of(
-                registerWardrobeSlotKey(1, GLFW.GLFW_KEY_1),
-                registerWardrobeSlotKey(2, GLFW.GLFW_KEY_2),
-                registerWardrobeSlotKey(3, GLFW.GLFW_KEY_3),
-                registerWardrobeSlotKey(4, GLFW.GLFW_KEY_4),
-                registerWardrobeSlotKey(5, GLFW.GLFW_KEY_5),
-                registerWardrobeSlotKey(6, GLFW.GLFW_KEY_6),
-                registerWardrobeSlotKey(7, GLFW.GLFW_KEY_7),
-                registerWardrobeSlotKey(8, GLFW.GLFW_KEY_8),
-                registerWardrobeSlotKey(9, GLFW.GLFW_KEY_9)
+                registerWardrobeSlotKey(1, InputConstants.KEY_1),
+                registerWardrobeSlotKey(2, InputConstants.KEY_2),
+                registerWardrobeSlotKey(3, InputConstants.KEY_3),
+                registerWardrobeSlotKey(4, InputConstants.KEY_4),
+                registerWardrobeSlotKey(5, InputConstants.KEY_5),
+                registerWardrobeSlotKey(6, InputConstants.KEY_6),
+                registerWardrobeSlotKey(7, InputConstants.KEY_7),
+                registerWardrobeSlotKey(8, InputConstants.KEY_8),
+                registerWardrobeSlotKey(9, InputConstants.KEY_9)
         );
 
         loadoutsSlotKeys = List.of(
-                registerLoadoutsSlotKey(1, GLFW.GLFW_KEY_1),
-                registerLoadoutsSlotKey(2, GLFW.GLFW_KEY_2),
-                registerLoadoutsSlotKey(3, GLFW.GLFW_KEY_3),
-                registerLoadoutsSlotKey(4, GLFW.GLFW_KEY_4),
-                registerLoadoutsSlotKey(5, GLFW.GLFW_KEY_5),
-                registerLoadoutsSlotKey(6, GLFW.GLFW_KEY_6),
-                registerLoadoutsSlotKey(7, GLFW.GLFW_KEY_7),
-                registerLoadoutsSlotKey(8, GLFW.GLFW_KEY_8),
-                registerLoadoutsSlotKey(9, GLFW.GLFW_KEY_9),
-                registerLoadoutsSlotKey(10, GLFW.GLFW_KEY_0),
-                registerLoadoutsSlotKey(11, GLFW.GLFW_KEY_MINUS),
-                registerLoadoutsSlotKey(12, GLFW.GLFW_KEY_EQUAL)
+                registerLoadoutsSlotKey(1, InputConstants.KEY_1),
+                registerLoadoutsSlotKey(2, InputConstants.KEY_2),
+                registerLoadoutsSlotKey(3, InputConstants.KEY_3),
+                registerLoadoutsSlotKey(4, InputConstants.KEY_4),
+                registerLoadoutsSlotKey(5, InputConstants.KEY_5),
+                registerLoadoutsSlotKey(6, InputConstants.KEY_6),
+                registerLoadoutsSlotKey(7, InputConstants.KEY_7),
+                registerLoadoutsSlotKey(8, InputConstants.KEY_8),
+                registerLoadoutsSlotKey(9, InputConstants.KEY_9),
+                registerLoadoutsSlotKey(10, InputConstants.KEY_0),
+                registerLoadoutsSlotKey(11, InputConstants.KEY_MINUS),
+                registerLoadoutsSlotKey(12, InputConstants.KEY_EQUALS)
         );
 
         loadoutsNextPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.loadouts-next-page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_D,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_D,
                 IQ_CATEGORY
         ));
 
         loadoutsPreviousPageKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.loadouts-previous-page",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_A,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_A,
                 IQ_CATEGORY
         ));
 
@@ -168,7 +168,7 @@ public class IQKeyBindings {
     private static @NotNull KeyMapping registerWardrobeSlotKey(int slotNumber, int defaultKeyCode) {
         return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.wardrobe-slot-" + slotNumber,
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 defaultKeyCode,
                 IQ_CATEGORY
         ));
@@ -177,7 +177,7 @@ public class IQKeyBindings {
     private static @NotNull KeyMapping registerLoadoutsSlotKey(int slotNumber, int defaultKeyCode) {
         return KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.iq.loadouts-slot-" + slotNumber,
-                InputConstants.Type.KEYSYM,
+                InputConstants.Type.KEYBOARD,
                 defaultKeyCode,
                 IQ_CATEGORY
         ));

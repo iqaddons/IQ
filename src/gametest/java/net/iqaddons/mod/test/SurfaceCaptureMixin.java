@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Minecraft.class, priority = 900)
 public class SurfaceCaptureMixin {
     @Inject(method = "renderFrame", at = @At(value = "INVOKE",
-            target = "Lcom/mojang/blaze3d/systems/GpuSurface;present()V"))
+            target = "Lcom/mojang/renderpearl/api/device/GpuSurface;present()V"))
     private void iqtest$captureSurface(boolean tick, CallbackInfo ci) {
         if (MigrationSmokeTest.surfaceCapture == null) return;
         Minecraft client = (Minecraft) (Object) this;

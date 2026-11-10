@@ -86,4 +86,5 @@ public class WardrobeFeature extends Feature {
                 player
         );
     }
+
 }

@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.CustomFeatureRenderer;
 import net.minecraft.client.renderer.feature.TextFeatureRenderer;
-import net.minecraft.client.renderer.feature.phase.SimpleFeatureRenderPhase;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,8 @@ public abstract class SubmitNodeCollectionMixin implements WorldOverlayPhaseSubm
             @NotNull WorldOverlayLayerPolicy.RenderPhase phase
     ) {
         var submit = new CustomFeatureRenderer.Submit(matrices.last().copy(), renderType, renderer);
-        iq$phase(phase).submit(submit);
+        SubmitNodeCollection self = (SubmitNodeCollection) (Object) this;
+        self.afterTerrain.submit(submit);
     }
 
     @Override
@@ -43,18 +43,16 @@ public abstract class SubmitNodeCollectionMixin implements WorldOverlayPhaseSubm
             int outlineColor,
             @NotNull WorldOverlayLayerPolicy.RenderPhase phase
     ) {
-        var submit = new TextFeatureRenderer.Submit(
-                new Matrix4f(matrices.last().pose()), x, y, text, dropShadow,
-                displayMode, lightCoords, color, backgroundColor, outlineColor
+        var content = new TextFeatureRenderer.Content.Text(
+                x, y, text, dropShadow, color, backgroundColor, outlineColor
         );
-        iq$phase(phase).submit(submit);
-    }
-
-    private @NotNull SimpleFeatureRenderPhase iq$phase(@NotNull WorldOverlayLayerPolicy.RenderPhase phase) {
+        var submit = new TextFeatureRenderer.Submit(
+                new Matrix4f(matrices.last().pose()), displayMode, lightCoords, content
+        );
         SubmitNodeCollection self = (SubmitNodeCollection) (Object) this;
-        return switch (phase) {
-            case AFTER_TRANSLUCENT_TERRAIN -> self.afterTerrain;
-            case ALWAYS_ON_TOP -> self.alwaysOnTop;
-        };
+        switch (phase) {
+            case AFTER_TRANSLUCENT_TERRAIN -> self.afterTerrain.submit(submit);
+            case ALWAYS_ON_TOP -> self.seeThrough.submit(submit);
+        }
     }
 }

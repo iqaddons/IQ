@@ -1,5 +1,6 @@
 package net.iqaddons.mod.screen.nano
 
+import com.mojang.blaze3d.platform.InputConstants
 import net.iqaddons.mod.config.screen.KuudraWaypointEditorStore
 import net.iqaddons.mod.manager.IQPersistentDataStore
 import net.iqaddons.mod.nanovg.IqNanoVg
@@ -20,7 +21,6 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.util.Util
-import org.lwjgl.glfw.GLFW
 import kotlin.math.PI
 import kotlin.math.ceil
 import kotlin.math.cos
@@ -754,7 +754,7 @@ open class IqNanoKuudraWaypointsScreen(
     override fun mouseClicked(click: MouseButtonEvent, doubled: Boolean): Boolean {
         mouseXf = click.x().toFloat()
         mouseYf = click.y().toFloat()
-        if (click.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
+        if (click.button() != InputConstants.MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
         delaySliderHits.lastOrNull { it.rect.contains(mouseXf, mouseYf) }?.let {
             draggingDelaySlider = it
             updateDelaySlider(it, mouseXf)
@@ -779,16 +779,16 @@ open class IqNanoKuudraWaypointsScreen(
     override fun keyPressed(input: KeyEvent): Boolean {
         editingRename?.let { edit ->
             return when (input.key()) {
-                GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
                     commitRenameEdit(edit)
                     true
                 }
-                GLFW.GLFW_KEY_ESCAPE -> {
+                InputConstants.KEY_ESCAPE -> {
                     editingRename = null
                     renameText.clear()
                     true
                 }
-                GLFW.GLFW_KEY_BACKSPACE -> {
+                InputConstants.KEY_BACKSPACE -> {
                     if (renameText.isNotEmpty()) renameText.deleteCharAt(renameText.length - 1)
                     true
                 }
@@ -797,16 +797,16 @@ open class IqNanoKuudraWaypointsScreen(
         }
         editingValue?.let { edit ->
             return when (input.key()) {
-                GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
                     commitValueEdit(edit)
                     true
                 }
-                GLFW.GLFW_KEY_ESCAPE -> {
+                InputConstants.KEY_ESCAPE -> {
                     editingValue = null
                     valueText.clear()
                     true
                 }
-                GLFW.GLFW_KEY_BACKSPACE -> {
+                InputConstants.KEY_BACKSPACE -> {
                     if (valueText.isNotEmpty()) valueText.deleteCharAt(valueText.length - 1)
                     true
                 }
@@ -815,16 +815,16 @@ open class IqNanoKuudraWaypointsScreen(
         }
         editingCoordinate?.let { edit ->
             return when (input.key()) {
-                GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+                InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
                     commitCoordinateEdit(edit)
                     true
                 }
-                GLFW.GLFW_KEY_ESCAPE -> {
+                InputConstants.KEY_ESCAPE -> {
                     editingCoordinate = null
                     coordinateText.clear()
                     true
                 }
-                GLFW.GLFW_KEY_BACKSPACE -> {
+                InputConstants.KEY_BACKSPACE -> {
                     if (coordinateText.isNotEmpty()) coordinateText.deleteCharAt(coordinateText.length - 1)
                     true
                 }

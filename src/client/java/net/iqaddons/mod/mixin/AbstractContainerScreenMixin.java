@@ -50,7 +50,7 @@ public class AbstractContainerScreenMixin {
     }
 
     @Inject(
-            method = "slotClicked",
+            method = "slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -77,7 +77,7 @@ public class AbstractContainerScreenMixin {
     )
     private void iq$onKeyPressed(@NotNull KeyEvent input, CallbackInfoReturnable<Boolean> cir) {
         ScreenKeyPressEvent event = EventBus.post(
-                new ScreenKeyPressEvent((AbstractContainerScreen<?>) (Object) this, input.key(), input.scancode(), input.modifiers())
+                new ScreenKeyPressEvent((AbstractContainerScreen<?>) (Object) this, input.key(), input.keycode(), input.modifiers())
         );
 
         if (event.isCancelled()) {

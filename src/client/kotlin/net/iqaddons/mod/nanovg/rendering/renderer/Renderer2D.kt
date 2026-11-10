@@ -6,6 +6,7 @@ import net.iqaddons.mod.nanovg.rendering.backend.*
 import net.iqaddons.mod.nanovg.ui.theme.Theme
 import net.iqaddons.mod.nanovg.util.CornerRadius
 import net.iqaddons.mod.nanovg.util.Rect
+import net.iqaddons.mod.render.text.AnimatedBrandingText
 
 /**
  * The object widgets actually hold a reference to during `draw()`.
@@ -35,8 +36,37 @@ class Renderer2D(
         backend.strokeRect(rect, Paint.solid(theme.colors.border), theme.metrics.borderThickness, radius)
     }
 
-    fun text(text: String, x: Float, y: Float, size: Float, color: Color, fontFamily: String, align: TextAlign = TextAlign.LEFT) =
-        backend.drawText(text, net.iqaddons.mod.nanovg.util.Point(x, y), fontFamily, size, color, align)
+    fun text(
+        text: String,
+        x: Float,
+        y: Float,
+        size: Float,
+        color: Color,
+        fontFamily: String,
+        align: TextAlign = TextAlign.LEFT,
+        animateBranding: Boolean = true,
+    ) {
+        val runs = if (animateBranding) AnimatedBrandingText.nickRuns(text, System.currentTimeMillis()) else emptyList()
+        if (!animateBranding || runs.size == 1 && runs[0].color() == null) {
+            backend.drawText(text, net.iqaddons.mod.nanovg.util.Point(x, y), fontFamily, size, color, align)
+            return
+        }
+
+        val totalWidth = backend.measureText(text, fontFamily, size).width
+        var cursor = when (align) {
+            TextAlign.LEFT -> x
+            TextAlign.CENTER -> x - totalWidth / 2f
+            TextAlign.RIGHT -> x - totalWidth
+        }
+        for (run in runs) {
+            if (run.text().isEmpty()) continue
+            val runColor = run.color()?.let { rgb ->
+                Color.of((rgb shr 16 and 0xFF) / 255f, (rgb shr 8 and 0xFF) / 255f, (rgb and 0xFF) / 255f, color.a)
+            } ?: color
+            backend.drawText(run.text(), net.iqaddons.mod.nanovg.util.Point(cursor, y), fontFamily, size, runColor, TextAlign.LEFT)
+            cursor += backend.measureText(run.text(), fontFamily, size).width
+        }
+    }
 
     fun textWidth(text: String, size: Float, fontFamily: String): Float =
         backend.measureText(text, fontFamily, size).width

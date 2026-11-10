@@ -6,6 +6,6 @@
   "environment": "client",
   "mixins": ["iq.test.mixins.json"],
   "entrypoints": {
-    "fabric-client-gametest": ["net.iqaddons.mod.gametest.MigrationSmokeTest", "net.iqaddons.mod.gametest.PearlFlatWorldTest", "net.iqaddons.mod.gametest.SupplyHitboxTest", "net.iqaddons.mod.gametest.WorldOverlayLayerPolicyTest"]
+    "fabric-client-gametest": ["net.iqaddons.mod.gametest.NanoConfigSearchTest", "net.iqaddons.mod.gametest.AnimatedBrandingTextTest", "net.iqaddons.mod.gametest.HudEditScreenInputTest", "net.iqaddons.mod.gametest.MigrationSmokeTest", "net.iqaddons.mod.gametest.PearlFlatWorldTest", "net.iqaddons.mod.gametest.SupplyHitboxTest", "net.iqaddons.mod.gametest.WorldOverlayLayerPolicyTest", "net.iqaddons.mod.gametest.WorldOverlayRegressionTest", "net.iqaddons.mod.nanovg.NanoVgFramebufferRestoreTest"]
   }
 }

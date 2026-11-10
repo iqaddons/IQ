@@ -50,8 +50,8 @@ internal class GlStateSnapshot private constructor(
     private val stencilEnabled: Boolean,
 ) {
     internal fun restore() {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, readFramebuffer)
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFramebuffer)
+        // Presentation expects one framebuffer bound for both reads and draws.
+        glBindFramebuffer(GL_FRAMEBUFFER, drawFramebuffer)
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3])
         glScissor(scissorBox[0], scissorBox[1], scissorBox[2], scissorBox[3])
 

@@ -1,7 +1,7 @@
 package net.iqaddons.mod.gametest;
 
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.renderpearl.api.pipeline.CompareOp;
+import com.mojang.renderpearl.api.pipeline.DepthStencilState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -10,7 +10,8 @@ import net.iqaddons.mod.utils.render.WorldOverlayLayerPolicy;
 import net.iqaddons.mod.utils.render.WorldRenderUtils;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.SubmitNodeCollection;
-import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
 import net.minecraft.network.chat.Component;
 
 /** Guards the depth contract used by supplies, beacons and waypoint overlays. */
@@ -22,8 +23,9 @@ public final class WorldOverlayLayerPolicyTest implements FabricClientGameTest {
         assertMode(true, WorldOverlayLayerPolicy.DepthMode.ALWAYS_VISIBLE);
         assertPhase(false, WorldOverlayLayerPolicy.RenderPhase.AFTER_TRANSLUCENT_TERRAIN);
         assertPhase(true, WorldOverlayLayerPolicy.RenderPhase.ALWAYS_ON_TOP);
-        if (WorldOverlayLayerPolicy.outputTarget() != OutputTarget.ITEM_ENTITY_TARGET) {
-            throw new AssertionError("World overlays must use the item/entity target used by always-visible geometry");
+        if (WorldOverlayLayerPolicy.filledOitPipelines() != RenderPipelines.OIT_DEBUG_FILLED_BOX
+                || WorldOverlayLayerPolicy.lineOitPipelines() != RenderPipelines.OIT_LINES_TRANSLUCENT) {
+            throw new AssertionError("World overlays must use the matching vanilla RenderPearl OIT pipelines");
         }
         assertOverlayPipeline("filled", WorldRenderUtils.Pipelines.filledCull, DepthStencilState.DEFAULT.depthTest());
         assertOverlayPipeline("filled see-through", WorldRenderUtils.Pipelines.filledNoCull, CompareOp.ALWAYS_PASS);
@@ -52,13 +54,14 @@ public final class WorldOverlayLayerPolicyTest implements FabricClientGameTest {
 
     private static void assertOverlayPipeline(
             String name,
-            com.mojang.blaze3d.pipeline.RenderPipeline pipeline,
+            com.mojang.renderpearl.api.pipeline.RenderPipeline pipeline,
             CompareOp expectedDepthTest
     ) {
         if (pipeline.isCull()) {
             throw new AssertionError(name + " overlay must render both faces");
         }
-        if (pipeline.getColorTargetState().blendFunction().isEmpty()) {
+        if (pipeline.getColorTargetStates().isEmpty()
+                || pipeline.getColorTargetStates().getFirst().blendFunction().isEmpty()) {
             throw new AssertionError(name + " overlay must use alpha blending");
         }
         var depthState = pipeline.getDepthStencilState();
@@ -74,7 +77,7 @@ public final class WorldOverlayLayerPolicyTest implements FabricClientGameTest {
     private static void assertPhaseRouting() {
         PoseStack matrices = new PoseStack();
 
-        SubmitNodeCollection normalGeometry = new SubmitNodeCollection();
+        SubmitNodeCollection normalGeometry = new SubmitNodeCollection(false, new TranslucentFeatureRenderPhase());
         ((WorldOverlayPhaseSubmitter) (Object) normalGeometry).iq$submitCustomGeometry(
                 matrices,
                 WorldRenderUtils.Layers.BoxFilled,
@@ -83,17 +86,17 @@ public final class WorldOverlayLayerPolicyTest implements FabricClientGameTest {
         );
         assertOnlyAfterTerrain(normalGeometry, "normal overlay geometry");
 
-        SubmitNodeCollection throughWallGeometry = new SubmitNodeCollection();
+        SubmitNodeCollection throughWallGeometry = new SubmitNodeCollection(false, new TranslucentFeatureRenderPhase());
         ((WorldOverlayPhaseSubmitter) (Object) throughWallGeometry).iq$submitCustomGeometry(
                 matrices,
                 WorldRenderUtils.Layers.BoxFilledNoCull,
                 (pose, vertices) -> { },
                 WorldOverlayLayerPolicy.RenderPhase.ALWAYS_ON_TOP
         );
-        assertOnlyAlwaysOnTop(throughWallGeometry, "through-wall overlay geometry");
+        assertOnlyAfterTerrain(throughWallGeometry, "through-wall overlay geometry");
 
         var text = Component.literal("IQ overlay phase test").getVisualOrderText();
-        SubmitNodeCollection normalText = new SubmitNodeCollection();
+        SubmitNodeCollection normalText = new SubmitNodeCollection(false, new TranslucentFeatureRenderPhase());
         ((WorldOverlayPhaseSubmitter) (Object) normalText).iq$submitText(
                 matrices, 0, 0, text, true, Font.DisplayMode.NORMAL,
                 0, 0xFFFFFFFF, 0, 0,
@@ -101,24 +104,24 @@ public final class WorldOverlayLayerPolicyTest implements FabricClientGameTest {
         );
         assertOnlyAfterTerrain(normalText, "normal overlay text");
 
-        SubmitNodeCollection throughWallText = new SubmitNodeCollection();
+        SubmitNodeCollection throughWallText = new SubmitNodeCollection(false, new TranslucentFeatureRenderPhase());
         ((WorldOverlayPhaseSubmitter) (Object) throughWallText).iq$submitText(
                 matrices, 0, 0, text, true, Font.DisplayMode.SEE_THROUGH,
                 0, 0xFFFFFFFF, 0, 0,
                 WorldOverlayLayerPolicy.RenderPhase.ALWAYS_ON_TOP
         );
-        assertOnlyAlwaysOnTop(throughWallText, "through-wall overlay text");
+        assertOnlySeeThrough(throughWallText, "through-wall overlay text");
     }
 
     private static void assertOnlyAfterTerrain(SubmitNodeCollection nodes, String name) {
-        if (nodes.afterTerrain.isEmpty() || !nodes.alwaysOnTop.isEmpty()) {
+        if (nodes.afterTerrain.isEmpty() || !nodes.seeThrough.isEmpty() || !nodes.alwaysOnTopGizmos.isEmpty()) {
             throw new AssertionError(name + " must enter only the after-terrain phase");
         }
     }
 
-    private static void assertOnlyAlwaysOnTop(SubmitNodeCollection nodes, String name) {
-        if (!nodes.afterTerrain.isEmpty() || nodes.alwaysOnTop.isEmpty()) {
-            throw new AssertionError(name + " must enter only the always-on-top phase");
+    private static void assertOnlySeeThrough(SubmitNodeCollection nodes, String name) {
+        if (!nodes.afterTerrain.isEmpty() || nodes.seeThrough.isEmpty() || !nodes.alwaysOnTopGizmos.isEmpty()) {
+            throw new AssertionError(name + " must enter only the shared see-through phase");
         }
     }
 }

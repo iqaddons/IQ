@@ -29,7 +29,7 @@ public class KuudraHitboxFeature extends KuudraFeature {
         var bossInfo = currentContext().bossInfo();
         if (!bossInfo.isAlive()) return;
         
-        event.drawStyledHitbox(bossInfo.bossEntity(), true,
+        event.drawStyledHitbox(bossInfo.bossEntity(), false,
                 RenderColor.fromArgb(PhaseThreeConfig.KuudraHitbox.color),
                 PhaseThreeConfig.KuudraHitbox.style
         );

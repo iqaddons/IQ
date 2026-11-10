@@ -1,5 +1,6 @@
 package net.iqaddons.mod.screen.nano
 
+import com.mojang.blaze3d.platform.InputConstants
 import net.iqaddons.mod.IQModClient
 import net.iqaddons.mod.config.Configuration
 import net.iqaddons.mod.manager.IQPersistentDataStore
@@ -23,7 +24,6 @@ import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.util.Util
-import org.lwjgl.glfw.GLFW
 import java.lang.reflect.Field
 import java.util.Locale
 import kotlin.math.PI
@@ -523,7 +523,7 @@ open class IqNanoGlobalConfigScreen(
 
     override fun mouseClicked(click: MouseButtonEvent, doubled: Boolean): Boolean {
         if (closing) return true
-        if (click.button() != GLFW.GLFW_MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
+        if (click.button() != InputConstants.MOUSE_BUTTON_LEFT) return super.mouseClicked(click, doubled)
         mouseXf = click.x().toFloat()
         mouseYf = click.y().toFloat()
         choiceOptionHits.lastOrNull { it.rect.contains(mouseXf, mouseYf) }?.let {
@@ -613,7 +613,7 @@ open class IqNanoGlobalConfigScreen(
 
     override fun keyPressed(input: KeyEvent): Boolean {
         if (closing) return true
-        if (input.key() == GLFW.GLFW_KEY_ESCAPE) {
+        if (input.key() == InputConstants.KEY_ESCAPE) {
             if (openChoice != null) {
                 openChoice = null
                 return true

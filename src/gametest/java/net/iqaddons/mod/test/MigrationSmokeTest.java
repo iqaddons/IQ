@@ -47,16 +47,23 @@ public class MigrationSmokeTest implements FabricClientGameTest {
             try {
                 Vec3 center = event.cameraState().pos.add(0, 0, 4);
                 for (boolean throughWalls : new boolean[]{false, true}) {
-                    event.drawFilled(AABB.ofSize(center, 1, 1, 1), throughWalls, RenderColor.green);
-                    event.drawOutline(AABB.ofSize(center, 2, 2, 2), throughWalls, RenderColor.red, 2);
-                    event.drawFilledCircle(center, 2, 16, throughWalls, RenderColor.green);
-                    event.drawCircleOutline(center, 2, 16, throughWalls, RenderColor.white);
-                    event.drawThickCircleOutline(center, 2, 0.1f, 16, throughWalls, RenderColor.green);
-                    event.drawCircleWall(center, 2, 1, 16, throughWalls, RenderColor.green);
-                    event.drawBillboardSquareOutline(center, 1, throughWalls, RenderColor.white);
-                    event.drawBillboardCircleOutline(center, 1, 16, throughWalls, RenderColor.white);
-                    event.drawThickBillboardCircleOutline(center, 1, 0.1f, 16, throughWalls, RenderColor.green);
-                    event.drawText(center, Component.literal("IQ 26.2"), 0.05f, throughWalls, RenderColor.white);
+                    Vec3 overlayCenter = center.add(throughWalls ? 3 : -3, 0, 0);
+                    event.drawFilled(AABB.ofSize(overlayCenter, 1, 1, 1), throughWalls, RenderColor.green);
+                    event.drawOutline(AABB.ofSize(overlayCenter, 2, 2, 2), throughWalls, RenderColor.red, 2);
+                    event.drawFilledCircle(overlayCenter, 2, 16, throughWalls, RenderColor.green);
+                    event.drawCircleOutline(overlayCenter, 2, 16, throughWalls, RenderColor.white);
+                    event.drawThickCircleOutline(overlayCenter, 2, 0.1f, 16, throughWalls, RenderColor.green);
+                    event.drawCircleWall(overlayCenter, 2, 1, 16, throughWalls, RenderColor.green);
+                    event.drawBillboardSquareOutline(overlayCenter, 1, throughWalls, RenderColor.white);
+                    event.drawBillboardCircleOutline(overlayCenter, 1, 16, throughWalls, RenderColor.white);
+                    event.drawThickBillboardCircleOutline(overlayCenter, 1, 0.1f, 16, throughWalls, RenderColor.green);
+                    event.drawText(
+                            overlayCenter,
+                            Component.literal(throughWalls ? "IQ 26.3 THROUGH" : "IQ 26.3 DEPTH"),
+                            0.05f,
+                            throughWalls,
+                            RenderColor.white
+                    );
                 }
                 event.drawTracer(center, RenderColor.white);
                 frames.incrementAndGet();
@@ -67,11 +74,11 @@ public class MigrationSmokeTest implements FabricClientGameTest {
         try (var world = context.worldBuilder().create()) {
             context.waitFor(client -> frames.get() >= 20 || failure.get() != null);
             if (failure.get() != null) throw new AssertionError("World overlays failed", failure.get());
-            context.takeScreenshot("iq-26.2-world");
+            context.takeScreenshot("iq-26.3-world");
             context.setScreen(() -> new ModMenuIntegration().getModConfigScreenFactory().create(null));
             context.waitTicks(30);
             captureConfig(context);
-            context.takeScreenshot("iq-26.2-config");
+            context.takeScreenshot("iq-26.3-config");
             context.setScreen(() -> null);
         } finally {
             subscription.unsubscribe();

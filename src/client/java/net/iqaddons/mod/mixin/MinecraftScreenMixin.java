@@ -16,7 +16,7 @@ public class MinecraftScreenMixin {
             method = "renderFrame",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/systems/GpuSurface;present()V",
+                    target = "Lcom/mojang/renderpearl/api/device/GpuSurface;present()V",
                     shift = At.Shift.BEFORE
             )
     )
@@ -38,7 +38,7 @@ public class MinecraftScreenMixin {
             method = "renderFrame",
             at = @At(
                     value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/systems/GpuSurface;present()V",
+                    target = "Lcom/mojang/renderpearl/api/device/GpuSurface;present()V",
                     shift = At.Shift.AFTER
             )
     )

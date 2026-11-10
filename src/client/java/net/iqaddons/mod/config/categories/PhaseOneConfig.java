@@ -318,7 +318,7 @@ public class PhaseOneConfig {
             id = "supplyGiantHitboxAlert",
             translation = "Supply Giant Hitbox Alert"
     )
-    @Comment("Highlight the Giants Hitbox when you are picking up supplies")
+    @Comment("Highlight supply giants on contact; while collecting, keep Possible Double Pearl for body overlap or Need Double Pearl for eyes inside until you leave")
     public static boolean supplyGiantHitboxAlert = true;
 
     @ConfigEntry(
@@ -440,9 +440,9 @@ public class PhaseOneConfig {
         @Comment("Change the color of no-pre supply pile waypoints")
         public static int noPrePileColor = new Color(0, 255, 144, 50).getRGB();
 
-        @ConfigEntry(id = "placeAreaHitbox", translation = "Place Area Hitbox")
+        @ConfigEntry(id = "placeAreaHitbox", translation = "Place Area Hitbox (Experimental)")
         @Comment("Render the server supply placement area on the floor around each pile")
-        public static boolean placeAreaHitbox = true;
+        public static boolean placeAreaHitbox = false;
 
         @ConfigEntry(id = "placeAreaHitboxThroughWalls", translation = "Place Area Hitbox Through Walls")
         @Comment("Render the supply placement area through blocks")

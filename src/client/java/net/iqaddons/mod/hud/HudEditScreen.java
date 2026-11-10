@@ -19,7 +19,7 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -229,7 +229,7 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
         if (closing) return true;
         if (isHudStyleSwapPending()) return true;
 
-        if (click.button() == 0) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             if (isMouseOverHudStyleButton(click.x(), click.y())) {
                 requestHudStyleToggle();
                 return true;
@@ -340,7 +340,7 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
         if (closing) return true;
         if (isHudStyleSwapPending()) return true;
 
-        if (isDragging() && selectedElement != null && click.button() == 0) {
+        if (isDragging() && selectedElement != null && click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             int[] screen = HudAnchor.getScreenDimensions();
             float dx = HudAnchor.scaleDeltaX((float) offsetX, screen[0]);
             float dy = HudAnchor.scaleDeltaY((float) offsetY, screen[1]);
@@ -402,7 +402,7 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
     public boolean mouseReleased(MouseButtonEvent click) {
         if (closing) return true;
 
-        if (click.button() == 0 && isDragging()) {
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT && isDragging()) {
             setDragging(false);
             activeAlignmentGuides.clear();
             if (selectedElement instanceof HudWidget widget) {
@@ -434,7 +434,7 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
         if (isHudStyleSwapPending()) return true;
 
         int keyCode = input.key();
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+        if (keyCode == InputConstants.KEY_ESCAPE) {
             onClose();
             return true;
         }
@@ -442,42 +442,42 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
         boolean shift = input.hasShiftDown();
         float step = shift ? POSITION_STEP_FAST : POSITION_STEP;
 
-        if (input.hasControlDown() && keyCode == GLFW.GLFW_KEY_R) {
+        if (input.hasControlDown() && keyCode == InputConstants.KEY_R) {
             resetAllElementsToDefaults();
             return true;
         }
 
         if (selectedElement != null) {
             switch (keyCode) {
-                case GLFW.GLFW_KEY_UP -> {
+                case InputConstants.KEY_UP -> {
                     moveElement(0, -step);
                     return true;
                 }
-                case GLFW.GLFW_KEY_DOWN -> {
+                case InputConstants.KEY_DOWN -> {
                     moveElement(0, step);
                     return true;
                 }
-                case GLFW.GLFW_KEY_LEFT -> {
+                case InputConstants.KEY_LEFT -> {
                     moveElement(-step, 0);
                     return true;
                 }
-                case GLFW.GLFW_KEY_RIGHT -> {
+                case InputConstants.KEY_RIGHT -> {
                     moveElement(step, 0);
                     return true;
                 }
-                case GLFW.GLFW_KEY_R -> {
+                case InputConstants.KEY_R -> {
                     resetSelectedElement();
                     return true;
                 }
-                case GLFW.GLFW_KEY_C -> {
+                case InputConstants.KEY_C -> {
                     centerSelectedElement();
                     return true;
                 }
-                case GLFW.GLFW_KEY_KP_ADD, GLFW.GLFW_KEY_EQUAL -> {
+                case InputConstants.KEY_ADD, InputConstants.KEY_EQUALS -> {
                     adjustSelectedScale(SCALE_STEP);
                     return true;
                 }
-                case GLFW.GLFW_KEY_KP_SUBTRACT, GLFW.GLFW_KEY_MINUS -> {
+                case InputConstants.KEY_MINUS -> {
                     adjustSelectedScale(-SCALE_STEP);
                     return true;
                 }
@@ -485,26 +485,26 @@ public class HudEditScreen extends Screen implements IqNanoVgRenderable {
         }
 
         switch (keyCode) {
-            case GLFW.GLFW_KEY_G -> {
+            case InputConstants.KEY_G -> {
                 showGrid = !showGrid;
                 return true;
             }
-            case GLFW.GLFW_KEY_S -> {
+            case InputConstants.KEY_S -> {
                 snapToGrid = !snapToGrid;
                 return true;
             }
-            case GLFW.GLFW_KEY_Y -> {
+            case InputConstants.KEY_Y -> {
                 HudManager.get().toggleCenterGuides();
                 return true;
             }
-            case GLFW.GLFW_KEY_A -> {
+            case InputConstants.KEY_A -> {
                 alignmentHelperEnabled = !alignmentHelperEnabled;
                 if (!alignmentHelperEnabled) {
                     activeAlignmentGuides.clear();
                 }
                 return true;
             }
-            case GLFW.GLFW_KEY_T -> {
+            case InputConstants.KEY_T -> {
                 resetAllElementsToTopLeft();
                 return true;
             }

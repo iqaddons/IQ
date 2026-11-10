@@ -29,14 +29,15 @@ public final class ItemPriceManager {
     });
 
     private final List<PriceProvider> providers;
+    private final BazaarPriceProvider bazaarProvider;
+    private final AuctionPriceProvider auctionProvider;
 
     public ItemPriceManager() {
         HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(6)).build();
 
-        this.providers = List.of(
-                new BazaarPriceProvider(httpClient),
-                new AuctionPriceProvider(httpClient)
-        );
+        this.bazaarProvider = new BazaarPriceProvider(httpClient);
+        this.auctionProvider = new AuctionPriceProvider(httpClient);
+        this.providers = List.of(bazaarProvider, auctionProvider);
 
         scheduler.scheduleAtFixedRate(() -> {
             try {
@@ -44,11 +45,19 @@ public final class ItemPriceManager {
             } catch (Exception e) {
                 log.warn("Failed to update prices", e);
             }
-        }, 0, 5, TimeUnit.MINUTES);
+        }, 0, 3, TimeUnit.MINUTES);
     }
 
     public long getItemPrice(@NotNull String itemId) {
         return Math.max(0L, Math.round(getPrice(itemId).orElse(0D)));
+    }
+
+    public void refreshAuctionPriceIfNeeded(@NotNull String itemId) {
+        if (!bazaarProvider.isReady() || bazaarProvider.getPrice(itemId).isPresent()) {
+            return;
+        }
+
+        auctionProvider.refreshItem(itemId, scheduler);
     }
 
     public long getKeyPrice(@NotNull String keyTier) {

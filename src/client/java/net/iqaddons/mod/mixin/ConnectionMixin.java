@@ -58,9 +58,8 @@ public class ConnectionMixin {
         }
 
         if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
-            Component content = chatPacket.unsignedContent() != null
-                    ? chatPacket.unsignedContent()
-                    : Component.literal(chatPacket.body().content());
+            Component content = chatPacket.unsignedContent()
+                    .orElseGet(() -> Component.literal(chatPacket.body().content()));
             if (iq$postChatEvent(chatPacket.chatType().decorate(content), ci)) {
                 return;
             }

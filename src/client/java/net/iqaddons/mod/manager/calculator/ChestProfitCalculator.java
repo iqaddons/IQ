@@ -44,6 +44,8 @@ public class ChestProfitCalculator {
             return 0D;
         }
 
+        priceManager.refreshAuctionPriceIfNeeded(itemId);
+
         int quantity = ChestProfitUtil.resolveItemQuantity(stack);
         if (quantity <= 0) quantity = stack.getCount();
 

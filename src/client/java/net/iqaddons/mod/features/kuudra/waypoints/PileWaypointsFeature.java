@@ -83,7 +83,7 @@ public class PileWaypointsFeature extends KuudraFeature {
                     : RenderColor.fromArgb(PhaseOneConfig.PileWaypointsConfig.normalPileColor);
 
             event.drawStyledWithBeam(AABB.unitCubeFromLowerCorner(pile.position()), BEACON_HEIGHT,
-                    false, color, WorldRenderUtils.RenderStyle.BOTH
+                    true, color, WorldRenderUtils.RenderStyle.BOTH
             );
 
             if (PhaseOneConfig.PileWaypointsConfig.placeAreaHitbox) {

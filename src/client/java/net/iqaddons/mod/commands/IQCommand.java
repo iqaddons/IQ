@@ -33,7 +33,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.util.Util;
+import com.mojang.blaze3d.Blaze3D;
+import java.net.URI;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,7 +100,7 @@ public class IQCommand {
                             return 1;
                         }))
                         .then(literal("discord").executes(ctx -> {
-                            Util.getPlatform().openUri("https://discord.gg/HdhXhCWcW9");
+                            Blaze3D.openUri(URI.create("https://discord.gg/HdhXhCWcW9"));
                             ctx.getSource().sendFeedback(Component.literal("§d§l[IQ] §r§fOpening IQ Discord invite..."));
                             return 1;
                         }))
