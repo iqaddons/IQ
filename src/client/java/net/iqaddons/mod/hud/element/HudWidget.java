@@ -1,5 +1,6 @@
 package net.iqaddons.mod.hud.element;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -480,7 +481,7 @@ public abstract class HudWidget extends SubscriptionOwner implements HudElement 
 
     @Override
     public boolean onClick(double mouseX, double mouseY, int button) {
-        if (button != 0) return false;
+        if (button != InputConstants.MOUSE_BUTTON_LEFT) return false;
         if (!isMouseOver(mouseX, mouseY)) return false;
 
         Font textRenderer = mc.font;

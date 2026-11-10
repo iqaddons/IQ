@@ -1,6 +1,7 @@
 package net.iqaddons.mod.hud.component;
 
 import lombok.Data;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.iqaddons.mod.screen.nano.IqNanoGlobalConfigScreen;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -233,8 +234,9 @@ public class HudLine {
         nanoHitBoundsValid = width > 0.0f && height > 0.0f;
     }
 
-    public boolean runNanoClickActionAt(double mouseX, double mouseY) {
-        if (clickAction == null || text.isEmpty() || !nanoHitBoundsValid) return false;
+    public boolean runNanoClickActionAt(double mouseX, double mouseY, int button) {
+        if (button != InputConstants.MOUSE_BUTTON_LEFT
+                || clickAction == null || text.isEmpty() || !nanoHitBoundsValid) return false;
 
         boolean inside = mouseX >= nanoHitX && mouseX <= nanoHitX + nanoHitWidth
                 && mouseY >= nanoHitY && mouseY <= nanoHitY + nanoHitHeight;

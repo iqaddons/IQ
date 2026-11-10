@@ -84,10 +84,9 @@ object IqHudNanoRenderer {
     @JvmStatic
     fun handleClick(manager: HudManager, mouseX: Double, mouseY: Double, button: Int): Boolean {
         if (!IqNanoGlobalConfigScreen.isSharedModernHudStyle()) return false
-        if (button != 0) return false
 
         manager.widgets.forEach { widget ->
-            if (widget.isNanoActive() && widget.shouldRender() && handleWidgetClick(widget, mouseX, mouseY)) {
+            if (widget.isNanoActive() && widget.shouldRender() && handleWidgetClick(widget, mouseX, mouseY, button)) {
                 return true
             }
         }
@@ -200,9 +199,9 @@ object IqHudNanoRenderer {
         renderer.backend.restore()
     }
 
-    private fun handleWidgetClick(widget: HudWidget, mouseX: Double, mouseY: Double): Boolean {
+    private fun handleWidgetClick(widget: HudWidget, mouseX: Double, mouseY: Double, button: Int): Boolean {
         widget.nanoRenderableLines.forEach { line ->
-            if (line.shouldRender() && line.runNanoClickActionAt(mouseX, mouseY)) {
+            if (line.shouldRender() && line.runNanoClickActionAt(mouseX, mouseY, button)) {
                 return true
             }
         }
